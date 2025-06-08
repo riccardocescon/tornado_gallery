@@ -6,9 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img/app_style.dart';
 import 'package:tornado_img/extentions.dart';
-import 'package:tornado_img/models/app_image.dart';
-import 'package:tornado_img/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
-import 'package:tornado_img/viewmodels/homepage_viewmodel.dart';
+import 'package:tornado_img/features/models/app_image.dart';
+import 'package:tornado_img/features/viewmodels/homepage_viewmodel.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});

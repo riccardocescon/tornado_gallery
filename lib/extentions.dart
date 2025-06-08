@@ -12,4 +12,22 @@ extension BuildContextX on BuildContext {
 
   /// Returns the current [ColorScheme] of the context.
   ColorScheme get colorScheme => theme.colorScheme;
+
+  void showSuccessSnackbar(String text) {
+    ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  void showErrorSnackbar(String text) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(
+          text,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onErrorContainer,
+          ),
+        ),
+        backgroundColor: colorScheme.errorContainer,
+      ),
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:pointycastle/pointycastle.dart';
@@ -49,9 +50,14 @@ class _TestPageState extends State<TestPage> {
               child: const Text('Generate'),
             ),
             FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 if (currentImage == null) return;
-                final scrambled = scrambleImage(currentImage!, 'ciao');
+                final scrambled = await compute(scrambleImageIsolateV2, {
+                  'imageBytes': currentImage!.toUint8List(),
+                  'width': currentImage!.width,
+                  'height': currentImage!.height,
+                  'password': 'test_password',
+                });
                 setState(() {
                   currentImage = scrambled;
                 });
@@ -124,4 +130,27 @@ class _TestPageState extends State<TestPage> {
 
     return scrambledImage;
   }
+}
+
+Future<img.Image> scrambleImageIsolateV2(Map<String, dynamic> args) async {
+  final originalBytes = args['imageBytes'] as Uint8List;
+  final width = args['width'] as int;
+  final height = args['height'] as int;
+  final password = args['password'] as String;
+
+  final key = sha256.convert(utf8.encode(password)).bytes;
+  final iv = Uint8List.fromList(List.generate(16, (i) => i));
+
+  final pixels = originalBytes;
+
+  final cipher = StreamCipher('AES/CTR')
+    ..init(true, ParametersWithIV(KeyParameter(Uint8List.fromList(key)), iv));
+
+  final scrambled = cipher.process(pixels);
+
+  return img.Image.fromBytes(
+    width: width,
+    height: height,
+    bytes: scrambled.buffer,
+  );
 }

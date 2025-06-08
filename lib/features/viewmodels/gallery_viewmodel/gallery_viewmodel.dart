@@ -1,11 +1,20 @@
+import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:saver_gallery/saver_gallery.dart';
-import 'package:tornado_img/models/gallery_image.dart';
+import 'package:tornado_img/features/models/gallery_image.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img;
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:pointycastle/pointycastle.dart';
 
 part 'gallery_viewmodel_utils.dart';
 
@@ -114,7 +123,11 @@ class GalleryViewModel extends ChangeNotifier {
     for (final asset in assetList) {
       final file = await asset.file;
       if (file != null) {
-        final newImage = GalleryImage(file: file, date: asset.createDateTime);
+        final newImage = GalleryImage(
+          id: asset.id,
+          file: file,
+          date: asset.createDateTime,
+        );
 
         final insertIndex = _findInsertIndexDescending(images, newImage.date);
         _images.insert(insertIndex, newImage);
@@ -131,7 +144,7 @@ class GalleryViewModel extends ChangeNotifier {
   Future<void> pickFiles() async {
     final hasPermissions = await _requestPermission();
     if (!hasPermissions) {
-      print('Permission denied');
+      log('Permission denied');
       return;
     }
 
@@ -159,6 +172,7 @@ class GalleryViewModel extends ChangeNotifier {
             final savedFile = await savedAsset.file;
             if (savedFile != null) {
               final newImage = GalleryImage(
+                id: savedAsset.id,
                 file: savedFile,
                 date: savedAsset.createDateTime,
               );
@@ -171,10 +185,100 @@ class GalleryViewModel extends ChangeNotifier {
           }
           notifyListeners();
         } else {
-          print('Failed to save image: ${result.errorMessage}');
+          log('Failed to save image: ${result.errorMessage}');
         }
       }
       notifyListeners();
     }
   }
+
+  Future<void> deleteImage(GalleryImage image) async {
+    final deletedIds = await PhotoManager.editor.deleteWithIds([image.id]);
+    for (final id in deletedIds) {
+      _images.removeWhere((img) => img.id == id);
+    }
+    notifyListeners();
+  }
+
+  Future<String?> encryptImage({
+    required GalleryImage image,
+    required String password,
+  }) async {
+    final decoders = {
+      'png': img.decodePng,
+      'jpg': img.decodeJpg,
+      'jpeg': img.decodeJpg,
+    };
+    final ext = image.file.path.split('.').last.toLowerCase();
+    final decodeFunction = decoders[ext];
+    if (decodeFunction == null) {
+      log('Unsupported image format: $ext');
+      return 'Unsupported image format: $ext';
+    }
+
+    final fileBytes = await image.file.readAsBytes();
+    final initDecodeTime = DateTime.now();
+    final decodedImage = await compute(_decodeImage, {
+      'bytes': fileBytes,
+      'ext': ext,
+    });
+    final decodeDuration = DateTime.now().difference(initDecodeTime);
+    log('Image decoded in ${decodeDuration.inMilliseconds} ms');
+    if (decodedImage == null) {
+      log('Failed to decode image');
+      return 'Failed to decode image';
+    }
+
+    final imageBytes = decodedImage.toUint8List();
+    final initScrambleTime = DateTime.now();
+    final encryptedImage = await compute(scrambleImageIsolateV2, {
+      'imageBytes': imageBytes,
+      'width': decodedImage.width,
+      'height': decodedImage.height,
+      'password': password,
+    });
+    final scrambleDuration = DateTime.now().difference(initScrambleTime);
+    log('Image scrambled in ${scrambleDuration.inMilliseconds} ms');
+
+    Uint8List encodedBytes;
+
+    switch (ext) {
+      case 'png':
+        encodedBytes = Uint8List.fromList(img.encodePng(encryptedImage));
+        break;
+      case 'jpg':
+      case 'jpeg':
+        encodedBytes = Uint8List.fromList(img.encodeJpg(encryptedImage));
+        break;
+      default:
+        return 'Unsupported image format: $ext';
+    }
+
+    // store the encrypted image into appDocumentsFOlder
+    final docDir = await getApplicationDocumentsDirectory();
+
+    final encryptedFile = File('${docDir.path}/encrypted/${image.id}.$ext');
+    await encryptedFile.create(recursive: true);
+
+    encryptedFile.writeAsBytesSync(encodedBytes);
+    log('Image saved: ${encryptedFile.path}');
+    return null;
+  }
+}
+
+img.Image? _decodeImage(Map<String, dynamic> args) {
+  final bytes = args['bytes'] as Uint8List;
+  final ext = args['ext'] as String;
+
+  final decoders = {
+    'png': img.decodePng,
+    'jpg': img.decodeJpg,
+    'jpeg': img.decodeJpg,
+    'webp': img.decodeWebP,
+  };
+
+  final decodeFunction = decoders[ext];
+  if (decodeFunction == null) return null;
+
+  return decodeFunction(bytes);
 }

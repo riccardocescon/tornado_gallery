@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tornado_img/viewmodels/encrypted_gallery_viewmodel.dart';
-import 'package:tornado_img/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img/features/viewmodels/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
 
 class HomepageViewmodel extends ChangeNotifier {
   final _galleryViewModel = GalleryViewModel();

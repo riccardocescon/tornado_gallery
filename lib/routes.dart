@@ -1,11 +1,19 @@
 import 'package:go_router/go_router.dart';
-import 'package:tornado_img/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
-import 'package:tornado_img/views/gallery_page.dart';
-import 'package:tornado_img/views/homepage.dart';
+import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img/features/views/gallery_page/gallery_page.dart';
+import 'package:tornado_img/features/views/homepage.dart';
+import 'package:tornado_img/features/views/test_page.dart';
 
 GoRouter routes = GoRouter(
   initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/test',
+      name: 'test',
+      builder: (context, state) {
+        return const TestPage();
+      },
+    ),
     GoRoute(
       path: '/',
       name: 'home',

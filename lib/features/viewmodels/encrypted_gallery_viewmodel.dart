@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:tornado_img/models/encrypted_image.dart';
+import 'package:tornado_img/features/models/encrypted_image.dart';
 
 class EncryptedGalleryViewModel extends ChangeNotifier {
   final int _pageSize = 50;
@@ -15,19 +16,20 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
   bool get hasMore => _hasMore;
 
   // Cache album to reuse on pagination
-  late AssetPathEntity _album;
+  late FileSystemEntity _album;
 
   Future<void> init() async {
     _isLoading = true;
     notifyListeners();
 
     final appDir = await getApplicationDocumentsDirectory();
+    final encryptedDir = Directory('${appDir.path}/encrypted');
 
-    if (!appDir.existsSync()) {
-      await appDir.create(recursive: true);
+    if (!encryptedDir.existsSync()) {
+      await encryptedDir.create(recursive: true);
     }
 
-    final albums = appDir.listSync().whereType<AssetPathEntity>().toList();
+    final albums = encryptedDir.listSync().toList();
 
     if (albums.isEmpty) {
       _isLoading = false;
@@ -35,7 +37,7 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
       return;
     }
 
-    _album = albums.first;
+    _album = encryptedDir;
     _images.clear();
     _currentPage = 0;
     _hasMore = true;
@@ -52,24 +54,32 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final assetList = await _album.getAssetListPaged(
-      page: _currentPage,
-      size: _pageSize,
+    final files =
+        (_album as Directory).listSync().toList()..sort(
+          (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+        ); // optional sort
+
+    final start = _currentPage * _pageSize;
+    final end = (_currentPage + 1) * _pageSize;
+    final pageFiles = files.sublist(
+      start,
+      end > files.length ? files.length : end,
     );
 
-    if (assetList.isEmpty) {
+    if (pageFiles.isEmpty) {
       _hasMore = false;
       _isLoading = false;
       notifyListeners();
       return;
     }
 
-    for (final asset in assetList) {
-      final file = await asset.file;
-      if (file != null) {
-        _images.add(EncryptedImage(file: file, date: asset.createDateTime));
-        notifyListeners();
-      }
+    for (final fileSystem in pageFiles) {
+      final fileName = fileSystem.path.split('/').last;
+      final date = fileSystem.statSync().modified;
+      final file = File(fileSystem.path);
+      _images.add(EncryptedImage(id: fileName, file: file, date: date));
+      // file.deleteSync(); // Delete original file after adding to gallery
+      notifyListeners();
     }
 
     _currentPage++;
