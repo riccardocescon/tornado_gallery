@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img/core/dialogs/decrypt_dialog.dart';
+import 'package:tornado_img/extentions.dart';
 import 'package:tornado_img/features/models/encrypted_image.dart';
 
-class EncryptedOpenedImage extends StatelessWidget {
+class EncryptedOpenedImage extends StatefulWidget {
   const EncryptedOpenedImage({
     super.key,
     required this.image,
@@ -16,21 +17,29 @@ class EncryptedOpenedImage extends StatelessWidget {
   final void Function(String password) onDecrypt;
 
   @override
+  State<EncryptedOpenedImage> createState() => _EncryptedOpenedImageState();
+}
+
+class _EncryptedOpenedImageState extends State<EncryptedOpenedImage> {
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: true,
       child: Container(
-        color: Colors.black87,
+        color: context.colorScheme.surface,
         child: Column(
           children: [
             Expanded(
               child:
-                  image.decryptedBytes != null
-                      ? Image.memory(image.decryptedBytes!, fit: BoxFit.contain)
-                      : Image.file(image.file, fit: BoxFit.contain),
+                  widget.image.decryptedBytes != null
+                      ? Image.memory(
+                        widget.image.decryptedBytes!,
+                        fit: BoxFit.contain,
+                      )
+                      : Image.file(widget.image.file, fit: BoxFit.contain),
             ),
             Container(
-              color: Colors.black87,
+              color: context.colorScheme.surface,
               height: 64,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -44,15 +53,49 @@ class EncryptedOpenedImage extends StatelessWidget {
   }
 
   Widget _encryptButton(BuildContext context) {
+    final isDecrypted = widget.image.decryptedBytes != null;
+
     return IconButton(
-      icon: const Icon(Icons.remove_red_eye_rounded, color: Colors.white),
+      icon: Icon(
+        isDecrypted ? Icons.restore : Icons.remove_red_eye_rounded,
+        color: Colors.white,
+      ),
       onPressed: () {
-        showGeneralDialog(
-          context: context,
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return DecryptDialog(onDecrypt: onDecrypt);
-          },
-        );
+        if (isDecrypted) {
+          showGeneralDialog(
+            context: context,
+            pageBuilder: (context, _, __) {
+              return AlertDialog(
+                title: const Text('Rollback Decryption'),
+                content: const Text(
+                  'Are you sure you want to rollback the decryption? This will cancel any decryption made.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      context.pop();
+                      setState(() {
+                        widget.image.decryptedBytes = null;
+                      });
+                    },
+                    child: const Text('Rollback'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          showGeneralDialog(
+            context: context,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return DecryptDialog(onDecrypt: widget.onDecrypt);
+            },
+          );
+        }
       },
     );
   }
@@ -74,7 +117,10 @@ class EncryptedOpenedImage extends StatelessWidget {
                   onPressed: () => context.pop(),
                   child: const Text('Cancel'),
                 ),
-                TextButton(onPressed: onDelete, child: const Text('Delete')),
+                TextButton(
+                  onPressed: widget.onDelete,
+                  child: const Text('Delete'),
+                ),
               ],
             );
           },

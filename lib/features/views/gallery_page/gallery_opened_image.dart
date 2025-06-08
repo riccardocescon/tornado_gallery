@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img/core/dialogs/encrypt_dialog.dart';
+import 'package:tornado_img/extentions.dart';
 import 'package:tornado_img/features/models/gallery_image.dart';
 
 class GalleryOpenedImage extends StatelessWidget {
@@ -20,12 +21,12 @@ class GalleryOpenedImage extends StatelessWidget {
     return SafeArea(
       bottom: true,
       child: Container(
-        color: Colors.black87,
+        color: context.colorScheme.surface,
         child: Column(
           children: [
             Expanded(child: Image.file(image.file, fit: BoxFit.contain)),
             Container(
-              color: Colors.black87,
+              color: context.colorScheme.surface,
               height: 64,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
