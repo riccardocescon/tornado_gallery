@@ -3,22 +3,22 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img/app_style.dart';
 import 'package:tornado_img/extentions.dart';
-import 'package:tornado_img/features/models/gallery_image.dart';
-import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
-import 'package:tornado_img/features/views/gallery_page/gallery_opened_image.dart';
+import 'package:tornado_img/features/models/encrypted_image.dart';
+import 'package:tornado_img/features/viewmodels/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img/features/views/encrypted_page/encrypted_opened_image.dart';
 
-class GalleryPage extends StatefulWidget {
-  const GalleryPage({super.key});
+class EncryptedGalleryPage extends StatefulWidget {
+  const EncryptedGalleryPage({super.key});
 
   @override
-  State<GalleryPage> createState() => _GalleryPageState();
+  State<EncryptedGalleryPage> createState() => _EncryptedGalleryPageState();
 }
 
-class _GalleryPageState extends State<GalleryPage> {
-  GalleryImage? _selectedImage;
+class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
+  EncryptedImage? _selectedImage;
 
-  GalleryViewModel get galleryViewModel =>
-      Provider.of<GalleryViewModel>(context, listen: false);
+  EncryptedGalleryViewModel get encryptedGalleryViewModel =>
+      Provider.of<EncryptedGalleryViewModel>(context, listen: false);
 
   @override
   Widget build(BuildContext context) {
@@ -33,37 +33,29 @@ class _GalleryPageState extends State<GalleryPage> {
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Local Gallery')),
-        floatingActionButton:
-            _selectedImage != null
-                ? null
-                : FloatingActionButton(
-                  onPressed: () {
-                    galleryViewModel.pickFiles();
-                  },
-                  child: const Icon(Icons.download_rounded),
-                ),
+
         body: Stack(
           children: [
             _gallery(),
             if (_selectedImage != null)
-              GalleryOpenedImage(
+              EncryptedOpenedImage(
                 image: _selectedImage!,
-                onEncrypt: (password) {
-                  galleryViewModel
-                      .encryptImage(image: _selectedImage!, password: password)
-                      .then((error) {
-                        if (error == null) {
-                          context.pop();
-                          context.showSuccessSnackbar(
-                            'Image encrypted successfully!',
-                          );
+                onDecrypt: (password) {
+                  encryptedGalleryViewModel
+                      .decryptImage(image: _selectedImage!, password: password)
+                      .then((decryptedBytes) {
+                        if (decryptedBytes == null) {
+                          context.showErrorSnackbar('Failed to decrypt image');
                         } else {
-                          context.showErrorSnackbar(error);
+                          context.pop();
+                          setState(() {
+                            _selectedImage?.decryptedBytes = decryptedBytes;
+                          });
                         }
                       });
                 },
                 onDelete: () {
-                  galleryViewModel.deleteImage(_selectedImage!);
+                  encryptedGalleryViewModel.deleteImage(_selectedImage!);
                   context.pop();
                   setState(() {
                     _selectedImage = null;
@@ -77,7 +69,7 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   Widget _gallery() {
-    return Consumer<GalleryViewModel>(
+    return Consumer<EncryptedGalleryViewModel>(
       builder: (context, gallery, _) {
         return GridView.builder(
           padding: EdgeInsets.all(8),
@@ -100,7 +92,8 @@ class _GalleryPageState extends State<GalleryPage> {
     );
   }
 
-  Widget _image(GalleryImage image) {
+  Widget _image(EncryptedImage image) {
+    final bytes = image.decryptedBytes;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -109,7 +102,10 @@ class _GalleryPageState extends State<GalleryPage> {
       },
       child: ClipRRect(
         borderRadius: AppStyle.borderRadius,
-        child: Image.file(image.file, fit: BoxFit.cover),
+        child:
+            bytes != null
+                ? Image.memory(bytes, fit: BoxFit.cover)
+                : Image.file(image.file, fit: BoxFit.cover),
       ),
     );
   }

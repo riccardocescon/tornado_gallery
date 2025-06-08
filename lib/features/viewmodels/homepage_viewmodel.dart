@@ -15,4 +15,11 @@ class HomepageViewmodel extends ChangeNotifier {
     await _encryptedGalleryViewModel.init();
     notifyListeners();
   }
+
+  @override
+  void dispose() {
+    _galleryViewModel.dispose();
+    _encryptedGalleryViewModel.dispose();
+    super.dispose();
+  }
 }

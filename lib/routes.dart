@@ -1,5 +1,9 @@
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:tornado_img/features/viewmodels/encrypted_gallery_viewmodel.dart';
 import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img/features/viewmodels/homepage_viewmodel.dart';
+import 'package:tornado_img/features/views/encrypted_page/encrypted_gallery_page.dart';
 import 'package:tornado_img/features/views/gallery_page/gallery_page.dart';
 import 'package:tornado_img/features/views/homepage.dart';
 import 'package:tornado_img/features/views/test_page.dart';
@@ -26,7 +30,21 @@ GoRouter routes = GoRouter(
           name: 'gallery',
           builder: (context, state) {
             final galleryViewModel = state.extra as GalleryViewModel;
-            return GalleryPage(galleryViewModel: galleryViewModel.copyWith());
+            return ChangeNotifierProvider.value(
+              value: galleryViewModel,
+              child: GalleryPage(),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'encrypted_gallery',
+          name: 'encrypted_gallery',
+          builder: (context, state) {
+            final encryptedGallery = state.extra as EncryptedGalleryViewModel;
+            return ChangeNotifierProvider.value(
+              value: encryptedGallery,
+              child: EncryptedGalleryPage(),
+            );
           },
         ),
       ],

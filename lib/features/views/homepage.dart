@@ -16,56 +16,51 @@ class Homepage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Tornado Image')),
-      body: ChangeNotifierProvider(
-        create: (context) => HomepageViewmodel()..init(),
-        child: Consumer<HomepageViewmodel>(
-          builder: (context, vm, _) {
-            return GridView.builder(
-              itemCount: 2,
-              padding: EdgeInsets.all(8),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-              ),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  if (vm.galleryViewModel.isLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
-                  return _folder(
-                    context,
-                    'Local Gallery',
-                    vm.galleryViewModel.images,
-                    () => context.pushNamed(
-                      'gallery',
-                      extra: vm.galleryViewModel,
-                    ),
-                  );
+      body: Consumer<HomepageViewmodel>(
+        builder: (context, vm, _) {
+          return GridView.builder(
+            itemCount: 2,
+            padding: EdgeInsets.all(8),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                if (vm.galleryViewModel.isLoading) {
+                  return Center(child: CircularProgressIndicator());
                 }
 
-                if (index == 1) {
-                  if (vm.encryptedGalleryViewModel.isLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+                return _folder(
+                  context,
+                  'Local Gallery',
+                  vm.galleryViewModel.images,
+                  () =>
+                      context.pushNamed('gallery', extra: vm.galleryViewModel),
+                );
+              }
 
-                  return _folder(
-                    context,
-                    'Encrypted Gallery',
-                    vm.encryptedGalleryViewModel.images,
-                    () => context.pushNamed(
-                      'gallery',
-                      extra: vm.encryptedGalleryViewModel,
-                    ),
-                  );
+              if (index == 1) {
+                if (vm.encryptedGalleryViewModel.isLoading) {
+                  return Center(child: CircularProgressIndicator());
                 }
 
-                return SizedBox.shrink(); // Fallback for unexpected index
-              },
-            );
-          },
-        ),
+                return _folder(
+                  context,
+                  'Encrypted Gallery',
+                  vm.encryptedGalleryViewModel.images,
+                  () => context.pushNamed(
+                    'encrypted_gallery',
+                    extra: vm.encryptedGalleryViewModel,
+                  ),
+                );
+              }
+
+              return SizedBox.shrink(); // Fallback for unexpected index
+            },
+          );
+        },
       ),
     );
   }
@@ -92,7 +87,7 @@ class Homepage extends StatelessWidget {
     });
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: images.isEmpty ? null : onTap,
       child: Container(
         padding: EdgeInsets.all(16).copyWith(bottom: 8),
         decoration: BoxDecoration(

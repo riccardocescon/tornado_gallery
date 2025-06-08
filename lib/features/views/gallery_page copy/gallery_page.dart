@@ -8,7 +8,9 @@ import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmo
 import 'package:tornado_img/features/views/gallery_page/gallery_opened_image.dart';
 
 class GalleryPage extends StatefulWidget {
-  const GalleryPage({super.key});
+  const GalleryPage({super.key, required this.galleryViewModel});
+
+  final GalleryViewModel galleryViewModel;
 
   @override
   State<GalleryPage> createState() => _GalleryPageState();
@@ -16,9 +18,6 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   GalleryImage? _selectedImage;
-
-  GalleryViewModel get galleryViewModel =>
-      Provider.of<GalleryViewModel>(context, listen: false);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 ? null
                 : FloatingActionButton(
                   onPressed: () {
-                    galleryViewModel.pickFiles();
+                    widget.galleryViewModel.pickFiles();
                   },
                   child: const Icon(Icons.download_rounded),
                 ),
@@ -49,7 +48,7 @@ class _GalleryPageState extends State<GalleryPage> {
               GalleryOpenedImage(
                 image: _selectedImage!,
                 onEncrypt: (password) {
-                  galleryViewModel
+                  widget.galleryViewModel
                       .encryptImage(image: _selectedImage!, password: password)
                       .then((error) {
                         if (error == null) {
@@ -63,7 +62,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       });
                 },
                 onDelete: () {
-                  galleryViewModel.deleteImage(_selectedImage!);
+                  widget.galleryViewModel.deleteImage(_selectedImage!);
                   context.pop();
                   setState(() {
                     _selectedImage = null;
@@ -86,7 +85,7 @@ class _GalleryPageState extends State<GalleryPage> {
             mainAxisSpacing: 4,
             crossAxisSpacing: 4,
           ),
-          itemCount: gallery.images.length,
+          itemCount: gallery.images.length + (gallery.hasMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= gallery.images.length) {
               return Center(child: CircularProgressIndicator(strokeWidth: 2));

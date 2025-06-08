@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:tornado_img/core/dialogs/encrypt_dialog.dart';
 import 'package:tornado_img/features/models/gallery_image.dart';
 
-class OpenedImage extends StatelessWidget {
-  const OpenedImage({
+class GalleryOpenedImage extends StatelessWidget {
+  const GalleryOpenedImage({
     super.key,
     required this.image,
     required this.onDelete,

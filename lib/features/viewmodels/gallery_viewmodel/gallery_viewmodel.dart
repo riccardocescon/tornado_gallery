@@ -1,13 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:saver_gallery/saver_gallery.dart';
+import 'package:tornado_img/core/image/image_modeling.dart';
 import 'package:tornado_img/features/models/gallery_image.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image/image.dart' as img;
@@ -218,7 +217,7 @@ class GalleryViewModel extends ChangeNotifier {
 
     final fileBytes = await image.file.readAsBytes();
     final initDecodeTime = DateTime.now();
-    final decodedImage = await compute(_decodeImage, {
+    final decodedImage = await compute(decodeImage, {
       'bytes': fileBytes,
       'ext': ext,
     });
@@ -264,21 +263,4 @@ class GalleryViewModel extends ChangeNotifier {
     log('Image saved: ${encryptedFile.path}');
     return null;
   }
-}
-
-img.Image? _decodeImage(Map<String, dynamic> args) {
-  final bytes = args['bytes'] as Uint8List;
-  final ext = args['ext'] as String;
-
-  final decoders = {
-    'png': img.decodePng,
-    'jpg': img.decodeJpg,
-    'jpeg': img.decodeJpg,
-    'webp': img.decodeWebP,
-  };
-
-  final decodeFunction = decoders[ext];
-  if (decodeFunction == null) return null;
-
-  return decodeFunction(bytes);
 }
