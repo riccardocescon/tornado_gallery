@@ -44,6 +44,8 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
                   encryptedGalleryViewModel
                       .decryptImage(image: _selectedImage!, password: password)
                       .then((decryptedBytes) {
+                        if (!context.mounted) return;
+
                         if (decryptedBytes == null) {
                           context.showErrorSnackbar('Failed to decrypt image');
                         } else {

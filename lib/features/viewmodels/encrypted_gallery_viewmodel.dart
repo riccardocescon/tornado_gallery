@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:tornado_img/core/image/image_modeling.dart';
+import 'package:tornado_img/core/managers/stream_manager.dart';
 import 'package:tornado_img/features/models/encrypted_image.dart';
 
 class EncryptedGalleryViewModel extends ChangeNotifier {
@@ -12,6 +14,8 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasMore = true;
   final _images = <EncryptedImage>[];
+
+  StreamSubscription<FileSystemEvent>? _streamSubscription;
 
   List<EncryptedImage> get images => _images;
   bool get isLoading => _isLoading;
@@ -65,6 +69,29 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
     }
 
     final albums = encryptedDir.listSync().toList();
+
+    _streamSubscription?.cancel();
+    _streamSubscription = encryptedDir.watch().listen((stream) {
+      if (stream is FileSystemCreateEvent || stream is FileSystemModifyEvent) {
+        final fileName = stream.path.split('/').last;
+        final date = DateTime.now();
+        final file = File(stream.path);
+        final imageIndex = _images.indexWhere((image) => image.id == fileName);
+        if (imageIndex != -1) {
+          _images[imageIndex] = EncryptedImage(
+            id: fileName,
+            file: file,
+            date: date,
+          );
+        } else {
+          _images.add(EncryptedImage(id: fileName, file: file, date: date));
+        }
+        notifyListeners();
+      } else if (stream is FileSystemDeleteEvent) {
+        _images.removeWhere((image) => image.file.path == stream.path);
+        notifyListeners();
+      }
+    });
 
     if (albums.isEmpty) {
       _isLoading = false;

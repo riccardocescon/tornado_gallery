@@ -52,6 +52,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   galleryViewModel
                       .encryptImage(image: _selectedImage!, password: password)
                       .then((error) {
+                        if (!context.mounted) return;
+
                         if (error == null) {
                           context.pop();
                           context.showSuccessSnackbar(
