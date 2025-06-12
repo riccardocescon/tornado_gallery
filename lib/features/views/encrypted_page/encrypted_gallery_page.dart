@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -106,9 +108,43 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
         borderRadius: AppStyle.borderRadius,
         child:
             bytes != null
-                ? Image.memory(bytes, fit: BoxFit.cover)
+                ? _decodedImage(bytes)
                 : Image.file(image.file, fit: BoxFit.cover),
       ),
+    );
+  }
+
+  Widget _decodedImage(Uint8List bytes) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.memory(bytes, fit: BoxFit.cover),
+
+        Align(
+          alignment: Alignment.topRight,
+          child: Transform.rotate(
+            angle: 3.14 / 4,
+            child: Transform.translate(
+              offset: const Offset(40, -30),
+              child: Container(
+                width: double.maxFinite,
+                height: 24,
+                color: context.colorScheme.primaryContainer.withValues(
+                  alpha: 0.6,
+                ),
+                child: Transform.rotate(
+                  angle: -3.14 / 4,
+                  child: Icon(
+                    Icons.lock_open_rounded,
+                    color: context.colorScheme.onPrimaryContainer,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
