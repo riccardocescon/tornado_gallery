@@ -208,7 +208,7 @@ class GalleryViewModel extends ChangeNotifier {
       'jpg': img.decodeJpg,
       'jpeg': img.decodeJpg,
     };
-    final ext = image.file.path.split('.').last.toLowerCase();
+    String ext = image.file.path.split('.').last.toLowerCase();
     final decodeFunction = decoders[ext];
     if (decodeFunction == null) {
       log('Unsupported image format: $ext');
@@ -235,23 +235,14 @@ class GalleryViewModel extends ChangeNotifier {
       'width': decodedImage.width,
       'height': decodedImage.height,
       'password': password,
+      'encrypt': true,
     });
     final scrambleDuration = DateTime.now().difference(initScrambleTime);
     log('Image scrambled in ${scrambleDuration.inMilliseconds} ms');
 
-    Uint8List encodedBytes;
-
-    switch (ext) {
-      case 'png':
-        encodedBytes = Uint8List.fromList(img.encodePng(encryptedImage));
-        break;
-      case 'jpg':
-      case 'jpeg':
-        encodedBytes = Uint8List.fromList(img.encodeJpg(encryptedImage));
-        break;
-      default:
-        return 'Unsupported image format: $ext';
-    }
+    // Enforce save as PNG after encryption
+    ext = 'png';
+    Uint8List encodedBytes = Uint8List.fromList(img.encodePng(encryptedImage));
 
     // store the encrypted image into appDocumentsFOlder
     final docDir = await getApplicationDocumentsDirectory();

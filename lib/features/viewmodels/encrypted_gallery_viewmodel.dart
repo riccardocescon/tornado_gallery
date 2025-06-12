@@ -202,6 +202,7 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
       'width': decodedImage.width,
       'height': decodedImage.height,
       'password': password,
+      'encrypt': false,
     });
     final scrambleDuration = DateTime.now().difference(initScrambleTime);
     log('Image scrambled in ${scrambleDuration.inMilliseconds} ms');

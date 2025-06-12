@@ -28,14 +28,16 @@ Future<img.Image> scrambleImageIsolateV2(Map<String, dynamic> args) async {
   final width = args['width'] as int;
   final height = args['height'] as int;
   final password = args['password'] as String;
+  final encrypt = args['encrypt'] as bool;
 
   final key = sha256.convert(utf8.encode(password)).bytes;
   final iv = Uint8List.fromList(List.generate(16, (i) => i));
 
   final pixels = originalBytes;
 
-  final cipher = StreamCipher('AES/CTR')
-    ..init(true, ParametersWithIV(KeyParameter(Uint8List.fromList(key)), iv));
+  final cipher = StreamCipher(
+    'AES/CTR',
+  )..init(encrypt, ParametersWithIV(KeyParameter(Uint8List.fromList(key)), iv));
 
   final scrambled = cipher.process(pixels);
 
