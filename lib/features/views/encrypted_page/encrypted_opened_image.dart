@@ -21,6 +21,41 @@ class EncryptedOpenedImage extends StatefulWidget {
 }
 
 class _EncryptedOpenedImageState extends State<EncryptedOpenedImage> {
+
+  final TransformationController _transformationController =
+      TransformationController();
+  bool _isZoomedIn = false;
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTap(TapDownDetails details) {
+    if (_isZoomedIn) {
+      // Zoom out to original scale
+      _transformationController.value = Matrix4.identity();
+      _isZoomedIn = false;
+    } else {
+      // Zoom in by 2x at the tap location
+      final Offset tapPosition = details.localPosition;
+      final double scale = 3.0;
+
+      // Calculate the translation to center the zoom on the tap point
+      final Matrix4 matrix =
+          Matrix4.identity()
+            ..translate(
+              -tapPosition.dx * (scale - 1),
+              -tapPosition.dy * (scale - 1),
+            )
+            ..scale(scale);
+
+      _transformationController.value = matrix;
+      _isZoomedIn = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,9 +67,21 @@ class _EncryptedOpenedImageState extends State<EncryptedOpenedImage> {
             Expanded(
               child:
                   widget.image.decryptedBytes != null
-                      ? Image.memory(
-                        widget.image.decryptedBytes!,
-                        fit: BoxFit.contain,
+                      ? GestureDetector(
+                        onDoubleTapDown: _handleDoubleTap,
+                        child: InteractiveViewer(
+                          minScale: 0.1,
+                          maxScale: 10.0,
+                          panEnabled: true,
+                          scaleEnabled: true,
+                          boundaryMargin: const EdgeInsets.all(20),
+                          transformationController: _transformationController,
+
+                          child: Image.memory(
+                            widget.image.decryptedBytes!,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       )
                       : Image.file(widget.image.file, fit: BoxFit.contain),
             ),
