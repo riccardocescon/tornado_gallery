@@ -14,7 +14,7 @@ class GalleryOpenedImage extends StatelessWidget {
 
   final GalleryImage image;
   final VoidCallback onDelete;
-  final void Function(String password) onEncrypt;
+  final void Function(String password, String? path) onEncrypt;
 
   @override
   Widget build(BuildContext context) {

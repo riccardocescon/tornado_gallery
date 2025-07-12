@@ -202,17 +202,16 @@ class GalleryViewModel extends ChangeNotifier {
   Future<String?> encryptImage({
     required GalleryImage image,
     required String password,
+    required String? path,
   }) async {
-    final decoders = {
-      'png': img.decodePng,
-      'jpg': img.decodeJpg,
-      'jpeg': img.decodeJpg,
-    };
     String ext = image.file.path.split('.').last.toLowerCase();
-    final decodeFunction = decoders[ext];
+    final decodeFunction = await compute(decodeImage, {
+      'bytes': await image.file.readAsBytes(),
+      'ext': ext,
+    });
     if (decodeFunction == null) {
       log('Unsupported image format: $ext');
-      return 'Unsupported image format: $ext';
+      return null;
     }
 
     final fileBytes = await image.file.readAsBytes();
@@ -247,7 +246,9 @@ class GalleryViewModel extends ChangeNotifier {
     // store the encrypted image into appDocumentsFOlder
     final docDir = await getApplicationDocumentsDirectory();
 
-    final encryptedFile = File('${docDir.path}/encrypted/${image.id}.$ext');
+    final destFolder = path ?? '${docDir.path}/encrypted';
+
+    final encryptedFile = File('$destFolder/${image.id}.$ext');
     await encryptedFile.create(recursive: true);
 
     encryptedFile.writeAsBytesSync(encodedBytes);

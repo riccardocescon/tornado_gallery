@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:tornado_img/app_style.dart';
 import 'package:tornado_img/core/animations/glitch_loader.dart';
 import 'package:tornado_img/extentions.dart';
 import 'package:tornado_img/features/models/gallery_image.dart';
+import 'package:tornado_img/features/viewmodels/encrypted_gallery_viewmodel.dart';
 
 class EncryptDialog extends StatefulWidget {
   const EncryptDialog({
@@ -13,7 +15,7 @@ class EncryptDialog extends StatefulWidget {
   });
 
   final GalleryImage image;
-  final void Function(String password) onEncrypt;
+  final void Function(String password, String? path) onEncrypt;
 
   @override
   State<EncryptDialog> createState() => _EncryptDialogState();
@@ -23,6 +25,12 @@ class _EncryptDialogState extends State<EncryptDialog> {
   final _passwordController = TextEditingController();
 
   bool isLoading = false;
+  String? selectedFolder;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -60,12 +68,18 @@ class _EncryptDialogState extends State<EncryptDialog> {
               textAlign: TextAlign.center,
             )
           else
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(hintText: 'Password'),
-              minLines: 1,
-              maxLines: 3,
-              onChanged: (value) => setState(() {}),
+            Column(
+              children: [
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(hintText: 'Password'),
+                  minLines: 1,
+                  maxLines: 3,
+                  onChanged: (value) => setState(() {}),
+                ),
+                const SizedBox(height: 24),
+                _folderSection(),
+              ],
             ),
         ],
       ),
@@ -85,7 +99,10 @@ class _EncryptDialogState extends State<EncryptDialog> {
                             setState(() {
                               isLoading = true;
                             });
-                            widget.onEncrypt(_passwordController.text);
+                            widget.onEncrypt(
+                              _passwordController.text,
+                              selectedFolder,
+                            );
                           },
                   child: Text(
                     'Encrypt',
@@ -129,6 +146,61 @@ class _EncryptDialogState extends State<EncryptDialog> {
           child: image,
         ),
       ),
+    );
+  }
+
+  Widget _folderSection() {
+    return FutureBuilder(
+      future: EncryptedGalleryViewModel.getFolderPaths(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        if (snapshot.hasError) {
+          return Text(
+            'Error loading folders: ${snapshot.error}',
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.error,
+            ),
+          );
+        }
+
+        final List<String> folderData = snapshot.data ?? [];
+        if (folderData.isEmpty) {
+          return Text(
+            'No folders available for encryption.',
+            style: context.textTheme.bodySmall,
+          );
+        }
+
+        final List<String?> folderPaths = <String?>[null, ...folderData];
+        return DropdownButtonFormField<String?>(
+          decoration: InputDecoration(
+            hintText: 'Select Folder',
+            border: OutlineInputBorder(
+              borderRadius: AppStyle.borderRadius,
+              borderSide: BorderSide(color: context.colorScheme.outline),
+            ),
+            icon: const Icon(Icons.folder_open_rounded, size: 20),
+            iconColor: context.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          borderRadius: AppStyle.borderRadius,
+          isExpanded: true,
+          items:
+              folderPaths.map((path) {
+                return DropdownMenuItem<String?>(
+                  value: path,
+                  child: Text(
+                    path == null ? 'root' : path.split('/').skip(7).join('/'),
+                  ),
+                );
+              }).toList(),
+          onChanged: (value) {
+            selectedFolder = value;
+          },
+        );
+      },
     );
   }
 }

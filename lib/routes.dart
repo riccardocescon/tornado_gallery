@@ -49,5 +49,15 @@ GoRouter routes = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/encrypted_gallery/:relativePath',
+      builder: (context, state) {
+        final root = state.pathParameters['relativePath']!;
+        return ChangeNotifierProvider(
+          create: (_) => EncryptedGalleryViewModel(root: root)..init(),
+          child: EncryptedGalleryPage(),
+        );
+      },
+    ),
   ],
 );

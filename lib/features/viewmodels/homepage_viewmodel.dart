@@ -4,7 +4,7 @@ import 'package:tornado_img/features/viewmodels/gallery_viewmodel/gallery_viewmo
 
 class HomepageViewmodel extends ChangeNotifier {
   final _galleryViewModel = GalleryViewModel();
-  final _encryptedGalleryViewModel = EncryptedGalleryViewModel();
+  final _encryptedGalleryViewModel = EncryptedGalleryViewModel(root: null);
 
   GalleryViewModel get galleryViewModel => _galleryViewModel;
   EncryptedGalleryViewModel get encryptedGalleryViewModel =>

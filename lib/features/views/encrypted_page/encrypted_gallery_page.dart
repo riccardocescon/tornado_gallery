@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img/app_style.dart';
+import 'package:tornado_img/core/dialogs/create_folder_dialog.dart';
 import 'package:tornado_img/extentions.dart';
-import 'package:tornado_img/features/models/encrypted_image.dart';
+import 'package:tornado_img/features/models/encrypted/encrypted_folder.dart';
+import 'package:tornado_img/features/models/encrypted/encrypted_image.dart';
 import 'package:tornado_img/features/viewmodels/encrypted_gallery_viewmodel.dart';
 import 'package:tornado_img/features/views/encrypted_page/encrypted_opened_image.dart';
+
+part 'gallery_fab.dart';
 
 class EncryptedGalleryPage extends StatefulWidget {
   const EncryptedGalleryPage({super.key});
@@ -34,8 +38,36 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Local Gallery')),
-
+        appBar: AppBar(
+          title: Text(
+            encryptedGalleryViewModel.root == null
+                ? 'Local Gallery'
+                : encryptedGalleryViewModel.root!
+                    .split('/')
+                    .reversed
+                    .take(3)
+                    .toList()
+                    .reversed
+                    .join('/'),
+          ),
+          actions: [
+            if (encryptedGalleryViewModel.root != null)
+              IconButton(
+                onPressed: () {
+                  encryptedGalleryViewModel.deleteFolder();
+                  context.pop();
+                },
+                icon: Icon(
+                  Icons.delete_rounded,
+                  color: context.colorScheme.error,
+                  size: 20,
+                ),
+              ),
+          ],
+        ),
+        floatingActionButton: _GalleryFAB(
+          encryptedGalleryViewModel: encryptedGalleryViewModel,
+        ),
         body: Stack(
           children: [
             _gallery(),
@@ -82,17 +114,55 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
             mainAxisSpacing: 4,
             crossAxisSpacing: 4,
           ),
-          itemCount: gallery.images.length,
+          itemCount: gallery.entities.length,
           itemBuilder: (context, index) {
-            if (index >= gallery.images.length) {
+            if (index >= gallery.entities.length) {
               return Center(child: CircularProgressIndicator(strokeWidth: 2));
             }
 
-            final image = gallery.images[index];
-            return _image(image);
+            final entity = gallery.entities[index];
+            if (entity.isImage) return _image(entity.asImage);
+            return _folder(entity.asFolder);
           },
         );
       },
+    );
+  }
+
+  Widget _folder(EncryptedFolder folder) {
+    return FilledButton(
+      onPressed: () {
+        // setState(() {
+        //   _selectedImage = image;
+        // });
+        context.push('/encrypted_gallery/${folder.encryptedRelativePath}');
+      },
+      style: FilledButton.styleFrom(
+        backgroundColor: context.colorScheme.primary.withValues(alpha: 0.2),
+        shape: RoundedRectangleBorder(borderRadius: AppStyle.borderRadius),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(
+            Icons.folder_rounded,
+            color: context.colorScheme.primary,
+            size: 48,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                folder.name,
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: context.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

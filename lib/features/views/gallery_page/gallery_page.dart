@@ -48,9 +48,13 @@ class _GalleryPageState extends State<GalleryPage> {
             if (_selectedImage != null)
               GalleryOpenedImage(
                 image: _selectedImage!,
-                onEncrypt: (password) {
+                onEncrypt: (password, path) {
                   galleryViewModel
-                      .encryptImage(image: _selectedImage!, password: password)
+                      .encryptImage(
+                        image: _selectedImage!,
+                        password: password,
+                        path: path,
+                      )
                       .then((error) {
                         if (!context.mounted) return;
 
