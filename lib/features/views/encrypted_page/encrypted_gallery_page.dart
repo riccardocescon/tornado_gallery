@@ -54,8 +54,60 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
             if (encryptedGalleryViewModel.root != null)
               IconButton(
                 onPressed: () {
-                  encryptedGalleryViewModel.deleteFolder();
-                  context.pop();
+                  showGeneralDialog(
+                    context: context,
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return AlertDialog(
+                        title: Text(
+                          'Delete Folder',
+                          style: context.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: context.colorScheme.error,
+                          ),
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Are you sure you want to delete this folder and all its files and subfolders? This action cannot be undone.',
+                              style: context.textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Folder: ${encryptedGalleryViewModel.root}',
+                              style: context.textTheme.bodyLarge?.copyWith(
+                                color: context.colorScheme.primary.withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => context.pop(),
+                            child: Text(
+                              'Cancel',
+                              style: context.textTheme.bodySmall,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              encryptedGalleryViewModel.deleteFolder();
+                              context.pop();
+                              context.pop();
+                            },
+                            child: Text(
+                              'Delete',
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 icon: Icon(
                   Icons.delete_rounded,
