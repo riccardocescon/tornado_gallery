@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img/app_style.dart';
 import 'package:tornado_img/core/dialogs/create_folder_dialog.dart';
+import 'package:tornado_img/core/dialogs/decrypt_dialog.dart';
 import 'package:tornado_img/extentions.dart';
 import 'package:tornado_img/features/models/encrypted/encrypted_folder.dart';
 import 'package:tornado_img/features/models/encrypted/encrypted_image.dart';
@@ -51,6 +52,24 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
                     .join('/'),
           ),
           actions: [
+            IconButton(
+              onPressed: () {
+                showGeneralDialog(
+                  context: context,
+                  pageBuilder: (context, _, __) {
+                    return DecryptDialog(
+                      onDecrypt: (password) {
+                        encryptedGalleryViewModel.decryptEntireFolder(
+                          password: password,
+                        );
+                        context.pop();
+                      },
+                    );
+                  },
+                );
+              },
+              icon: Icon(Icons.lock_open_rounded, size: 20),
+            ),
             if (encryptedGalleryViewModel.root != null)
               IconButton(
                 onPressed: () {
@@ -220,19 +239,34 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   Widget _image(EncryptedImage image) {
     final bytes = image.decryptedBytes;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedImage = image;
-        });
-      },
-      child: ClipRRect(
-        borderRadius: AppStyle.borderRadius,
-        child:
-            bytes != null
-                ? _decodedImage(bytes)
-                : Image.file(image.file, fit: BoxFit.cover),
-      ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedImage = image;
+            });
+          },
+          child: ClipRRect(
+            borderRadius: AppStyle.borderRadius,
+            child:
+                bytes != null
+                    ? _decodedImage(bytes)
+                    : Image.file(image.file, fit: BoxFit.cover),
+          ),
+        ),
+        if (image.isDecrypting)
+          Positioned.fill(
+            child: Container(
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: context.colorScheme.primary,
+              ),
+            ),
+          ),
+      ],
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:tornado_img/features/models/encrypted/encrypted_entity.dart';
 
 class EncryptedImage extends AppImage with EncryptedEntity {
   Uint8List? decryptedBytes;
+  bool isDecrypting = false;
 
   EncryptedImage({
     required super.id,

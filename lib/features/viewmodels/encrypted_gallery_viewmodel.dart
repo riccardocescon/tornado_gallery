@@ -271,6 +271,30 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
     return encodedBytes;
   }
 
+  void decryptEntireFolder({required String password}) async {
+    final images = _entities.whereType<EncryptedImage>().toList();
+    for (final image in images) {
+      image.isDecrypting = true;
+    }
+    notifyListeners();
+
+    log('Starting decryption of entire folder with ${images.length} images');
+    for (final entity in images) {
+      final image = entity.asImage;
+      final decryptedBytes = await decryptImage(
+        image: image,
+        password: password,
+      );
+
+      image.isDecrypting = false;
+      image.decryptedBytes = decryptedBytes;
+
+      notifyListeners();
+    }
+
+    log('Decryption of entire folder completed');
+  }
+
   Future<void> createFolder(String name) async {
     final encryptedDir = await encryptedFolder;
     Directory folderPath = Directory('${encryptedDir.path}/$name');
