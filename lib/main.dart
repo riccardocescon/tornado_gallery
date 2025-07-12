@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img/features/viewmodels/homepage_viewmodel.dart';
 import 'package:tornado_img/routes.dart';
 
-void main() {
+late PackageInfo packageInfo;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  packageInfo = await PackageInfo.fromPlatform();
   runApp(const MyApp());
 }
 

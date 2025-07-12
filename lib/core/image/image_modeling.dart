@@ -29,6 +29,7 @@ Future<img.Image> scrambleImageIsolateV2(Map<String, dynamic> args) async {
   final height = args['height'] as int;
   final password = args['password'] as String;
   final encrypt = args['encrypt'] as bool;
+  final numChannels = args['numChannels'] as int?;
 
   final key = sha256.convert(utf8.encode(password)).bytes;
   final iv = Uint8List.fromList(List.generate(16, (i) => i));
@@ -45,5 +46,6 @@ Future<img.Image> scrambleImageIsolateV2(Map<String, dynamic> args) async {
     width: width,
     height: height,
     bytes: scrambled.buffer,
+    numChannels: numChannels,
   );
 }

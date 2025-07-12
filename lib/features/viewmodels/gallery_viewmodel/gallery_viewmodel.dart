@@ -235,12 +235,13 @@ class GalleryViewModel extends ChangeNotifier {
       'height': decodedImage.height,
       'password': password,
       'encrypt': true,
+      'numChannels': ext == 'png' ? 4 : null,
     });
     final scrambleDuration = DateTime.now().difference(initScrambleTime);
     log('Image scrambled in ${scrambleDuration.inMilliseconds} ms');
 
     // Enforce save as PNG after encryption
-    ext = 'png';
+    // ext = 'png';
     Uint8List encodedBytes = Uint8List.fromList(img.encodePng(encryptedImage));
 
     // store the encrypted image into appDocumentsFOlder
@@ -248,7 +249,7 @@ class GalleryViewModel extends ChangeNotifier {
 
     final destFolder = path ?? '${docDir.path}/encrypted';
 
-    final encryptedFile = File('$destFolder/${image.id}.$ext');
+    final encryptedFile = File('$destFolder/${image.id}.$ext.png');
     await encryptedFile.create(recursive: true);
 
     encryptedFile.writeAsBytesSync(encodedBytes);

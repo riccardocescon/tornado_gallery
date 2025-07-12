@@ -242,6 +242,9 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
       return null;
     }
 
+    final fileParts = image.file.path.split('.');
+    final originalExt = fileParts[fileParts.length - 2].toLowerCase();
+
     final imageBytes = decodedImage.toUint8List();
     final initScrambleTime = DateTime.now();
     final encryptedImage = await compute(scrambleImageIsolateV2, {
@@ -250,6 +253,7 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
       'height': decodedImage.height,
       'password': password,
       'encrypt': false,
+      'numChannels': originalExt == 'png' ? 4 : null,
     });
     final scrambleDuration = DateTime.now().difference(initScrambleTime);
     log('Image scrambled in ${scrambleDuration.inMilliseconds} ms');

@@ -8,6 +8,7 @@ import 'package:tornado_img/app_style.dart';
 import 'package:tornado_img/extentions.dart';
 import 'package:tornado_img/features/models/app_image.dart';
 import 'package:tornado_img/features/viewmodels/homepage_viewmodel.dart';
+import 'package:tornado_img/main.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});
@@ -15,7 +16,18 @@ class Homepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tornado Image')),
+      appBar: AppBar(
+        title: const Text('Tornado Image'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Text(
+              packageInfo.version,
+              style: context.textTheme.labelLarge,
+            ),
+          ),
+        ],
+      ),
       body: Consumer<HomepageViewmodel>(
         builder: (context, vm, _) {
           return GridView.builder(
