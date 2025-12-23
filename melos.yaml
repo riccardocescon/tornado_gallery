@@ -1,0 +1,57 @@
+name: tornado_img
+repository: https://github.com/your-username/tornado_img
+
+packages:
+  - packages/**
+
+command:
+  version:
+    # Generate commit links in package changelogs.
+    linkToCommits: true
+    # Only allow versioning to happen on main branch.
+    branch: main
+    # Additionally build a changelog at the root of the workspace.
+    workspaceChangelog: true
+
+  bootstrap:
+    # It seems so that running "pub get" in parallel has some issues (like
+    # https://github.com/dart-lang/pub/issues/3404). Disabling this feature
+    # makes the CI much more stable.
+    runPubGetInParallel: false
+
+scripts:
+  analyze: >
+    melos exec -- dart analyze --fatal-infos .
+  format: >
+    melos exec -- dart format --set-exit-if-changed .
+  format:fix: >
+    melos exec -- dart format .
+  test: >
+    melos exec --fail-fast -- \
+      dart test --reporter=expanded
+  test:unit: >
+    melos exec --fail-fast --dir-exists=test -- \
+      dart test --reporter=expanded
+  build:android: >
+    melos exec --flutter --no-private --ignore="*crypto*" -- \
+      flutter build apk
+  build:ios: >
+    melos exec --flutter --no-private --ignore="*crypto*" -- \
+      flutter build ios
+  clean: >
+    melos exec -- flutter clean
+  get: >
+    melos exec -- flutter pub get
+  upgrade: >
+    melos exec -- flutter pub upgrade
+  
+  # Custom scripts for your workflow
+  crypto:test: >
+    melos exec --scope="tornado_img_crypto" -- \
+      dart test --reporter=expanded
+  app:run: >
+    melos exec --scope="tornado_img_app" -- \
+      flutter run
+  app:build:android: >
+    melos exec --scope="tornado_img_app" -- \
+      flutter build apk --debug

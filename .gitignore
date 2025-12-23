@@ -43,5 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/lib/app/tornado_img/android/app/debug
+/lib/app/tornado_img/android/app/profile
+/lib/app/tornado_img/android/app/release
+/lib/app/tornado_img/build/
 
-keystore/
+# App specific
+/lib/app/tornado_img/keystore/
