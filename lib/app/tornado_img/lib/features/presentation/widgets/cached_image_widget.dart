@@ -22,8 +22,7 @@ class CachedImageWidget extends StatefulWidget {
 
 class _CachedImageWidgetState extends State<CachedImageWidget>
     with AutomaticKeepAliveClientMixin {
-  static const int maxKeepAliveDistance =
-      15; // Mantieni solo 30 widget (15 prima + 15 dopo)
+  static const int maxKeepAliveDistance = 8; // Ridotto da 15 a 8 per batteria
 
   @override
   bool get wantKeepAlive {
@@ -36,7 +35,7 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
             : (widget.index > end)
             ? widget.index - end
             : 0; // widget visibile
-
+            
     return distance <= maxKeepAliveDistance;
   }
 
@@ -69,15 +68,12 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
         child: Image.file(
           widget.image.file,
           fit: BoxFit.cover,
-          // Riduce qualità per thumbnails
           filterQuality: FilterQuality.low,
-          // Attiva cache automatico di Flutter (solo per memory optimization)
           cacheWidth: 150,
           cacheHeight: 150,
-          // Placeholder durante il caricamento
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
             if (wasSynchronouslyLoaded) return child;
-
+            
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
@@ -65,7 +66,10 @@ class _GalleryPageState extends State<GalleryPage> {
             .clamp(0, double.infinity)
             .toInt();
 
-    _visibleRange.value = (startIndex, endIndex + 10); // +10 per buffer
+    _visibleRange.value = (
+      startIndex,
+      endIndex + 6,
+    ); // Buffer ridotto per batteria
   }
 
   @override
@@ -164,8 +168,9 @@ class _GalleryPageState extends State<GalleryPage> {
             return GridView.builder(
               controller: _scrollController,
               padding: EdgeInsets.all(8),
-              cacheExtent: 1000, // Limita il cache per ridurre memory usage
-              addRepaintBoundaries: false, // Riduce overhead di repaint
+              // Ottimizzazioni conservative per batteria
+              cacheExtent: 400, // Bilanciato per batteria vs performance
+              addRepaintBoundaries: true, // Isola repaint per widget
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 mainAxisSpacing: 4,
