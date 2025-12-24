@@ -35,7 +35,9 @@ class _GalleryPageState extends State<GalleryPage> {
       final bloc = context.read<GalleryPageBloc>();
       bloc.state.maybeMap(
         loaded: (value) {
-          print('📱 InitState: Trovate ${value.images.length} immagini già caricate');
+          print(
+            '📱 InitState: Trovate ${value.images.length} immagini già caricate',
+          );
           if (!_hasRestoredPosition) {
             _hasRestoredPosition = true;
             Future.delayed(const Duration(milliseconds: 200), () {
@@ -111,14 +113,14 @@ class _GalleryPageState extends State<GalleryPage> {
 
   void _restoreScrollPosition() {
     if (!mounted) return;
-    
+
     final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
     final savedPosition = galleryBloc.savedScrollPosition;
-    
+
     if (savedPosition != null && _scrollController.hasClients) {
       // Controlla che la posizione sia valida per il contenuto attuale
       final maxScroll = _scrollController.position.maxScrollExtent;
-      
+
       // Se maxScroll è 0, aspetta un po' di più che il contenuto si carichi
       if (maxScroll == 0.0) {
         Future.delayed(const Duration(milliseconds: 200), () {
@@ -126,16 +128,15 @@ class _GalleryPageState extends State<GalleryPage> {
         });
         return;
       }
-      
+
       final targetPosition = savedPosition.clamp(0.0, maxScroll);
-      
-      print('🔄 Ripristino scroll: saved=$savedPosition, max=$maxScroll, target=$targetPosition');
-      
-      _scrollController.animateTo(
-        targetPosition,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+
+      print(
+        '🔄 Ripristino scroll: saved=$savedPosition, max=$maxScroll, target=$targetPosition',
       );
+
+      // Jump diretto senza animazione - istantaneo e più efficiente
+      _scrollController.jumpTo(targetPosition);
     }
   }
 
@@ -165,7 +166,9 @@ class _GalleryPageState extends State<GalleryPage> {
         listener: (context, state) {
           state.maybeMap(
             loaded: (value) {
-              print('🔥 BlocListener: loaded state con ${value.images.length} immagini');
+              print(
+                '🔥 BlocListener: loaded state con ${value.images.length} immagini',
+              );
               _isLoadingMore = false;
               // Ripristina posizione scroll solo una volta quando le immagini sono caricate
               if (!_hasRestoredPosition) {
