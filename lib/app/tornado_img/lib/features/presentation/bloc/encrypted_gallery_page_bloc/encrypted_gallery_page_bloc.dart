@@ -15,6 +15,7 @@ import 'package:tornado_img_app/injection_container.dart';
 part 'encrypted_gallery_page_event.dart';
 part 'encrypted_gallery_page_state.dart';
 part 'encrypted_gallery_page_bloc.freezed.dart';
+part 'encrypted_gallery_page_bloc_utils.dart';
 
 class EncrpytedGalleryPageBloc
     extends Bloc<EncrpytedGalleryPageEvent, EncrpytedGalleryPageState> {
@@ -26,6 +27,9 @@ class EncrpytedGalleryPageBloc
   final List<EncryptedEntity> _entities = [];
   Directory? _album;
   String? _root;
+
+  final _EncryptedGalleryPageBlocUtils _utils =
+      _EncryptedGalleryPageBlocUtils();
 
   // Delegate to core bloc for operations
   final encryptedGalleryBloc = getIt<EncryptedGalleryBloc>();
@@ -108,9 +112,15 @@ class EncrpytedGalleryPageBloc
         final date = fileSystem.statSync().modified;
         final file = File(fileSystem.path);
         if (fileName.contains('.')) {
-          _entities.add(EncryptedImage(id: fileName, file: file, date: date));
+          _utils.insertImageSorted(
+            _entities,
+            EncryptedImage(id: fileName, file: file, date: date),
+          );
         } else {
-          _entities.add(EncryptedFolder.empty(fileSystem.path));
+          _utils.insertFolderSorted(
+            _entities,
+            EncryptedFolder.empty(fileSystem.path),
+          );
         }
       }
 
@@ -182,8 +192,8 @@ class EncrpytedGalleryPageBloc
         // Create the EncryptedFolder entity and add it to the list
         final newFolder = EncryptedFolder.empty(folderPath.path);
         
-        // Add to the beginning of the list (newest first)
-        _entities.insert(0, newFolder);
+        // Insert in correct alphabetical position among folders
+        _utils.insertFolderSorted(_entities, newFolder);
         
         _emit(emit);
       } catch (e) {
@@ -267,6 +277,7 @@ class EncrpytedGalleryPageBloc
       Timer(const Duration(minutes: 5), () => subscription.cancel());
     });
   }
+
 
   void _emit(Emitter<EncrpytedGalleryPageState> emit) {
     emit(
