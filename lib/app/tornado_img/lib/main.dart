@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/routes.dart';
-import 'package:tornado_img_app/features/presentation/bloc/homepage_viewmodel.dart';
 
 late PackageInfo packageInfo;
 
@@ -20,14 +18,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HomepageViewmodel()..init(),
-      child: MaterialApp.router(
-        title: 'Tornado Image',
-        theme: ThemeData.dark(),
-        themeMode: ThemeMode.dark,
-        routerConfig: routes,
-      ),
+    return MaterialApp.router(
+      title: 'Tornado Image',
+      theme: ThemeData.dark(),
+      themeMode: ThemeMode.dark,
+      routerConfig: routes,
     );
   }
 }
