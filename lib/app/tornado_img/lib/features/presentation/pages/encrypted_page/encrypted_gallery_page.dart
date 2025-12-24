@@ -7,12 +7,17 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/dialogs/create_folder_dialog.dart';
 import 'package:tornado_img_app/core/dialogs/decrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_opened_image.dart';
 
-part 'gallery_fab.dart';
+part 'utils/constants.dart';
+part 'widgets/gallery_fab.dart';
+part 'widgets/encrypted_gallery.dart';
+part 'widgets/encrypted_folder_tile.dart';
+part 'widgets/encrypted_image_tile.dart';
+part 'widgets/encrypted_opened_image.dart';
 
 class EncryptedGalleryPage extends StatefulWidget {
   const EncryptedGalleryPage({super.key});
@@ -26,316 +31,250 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   @override
   void initState() {
+    super.initState();
+    _setupGallery();
+  }
+
+  void _setupGallery() {
     context.read<EncrpytedGalleryPageBloc>().add(
       const EncrpytedGalleryPageEvent.setup(),
     );
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final root = context.read<EncrpytedGalleryPageBloc>().root;
-
     return PopScope(
       canPop: _selectedImage == null,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          setState(() {
-            _selectedImage = null;
-          });
-        }
+        if (!didPop) _updateSelectedImage(null);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            root == null
-                ? 'Local Gallery'
-                : root.split('/').reversed.take(3).toList().reversed.join('/'),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                showGeneralDialog(
-                  context: context,
-                  pageBuilder: (dialogContext, _, __) {
-                    return DecryptDialog(
-                      onDecrypt: (password) {
-                        context.read<EncrpytedGalleryPageBloc>().add(
-                          EncrpytedGalleryPageEvent.decryptFolder(
-                            password: password,
-                          ),
-                        );
-                            
-                        dialogContext.pop();
-                      },
-                    );
-                  },
-                );
-              },
-              icon: Icon(Icons.lock_open_rounded, size: 20),
-            ),
-            if (root != null)
-              IconButton(
-                onPressed: () {
-                  showGeneralDialog(
-                    context: context,
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return AlertDialog(
-                        title: Text(
-                          'Delete Folder',
-                          style: context.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: context.colorScheme.error,
-                          ),
-                        ),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Are you sure you want to delete this folder and all its files and subfolders? This action cannot be undone.',
-                              style: context.textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Folder: $root',
-                              style: context.textTheme.bodyLarge?.copyWith(
-                                color: context.colorScheme.primary.withValues(
-                                  alpha: 0.8,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => context.pop(),
-                            child: Text(
-                              'Cancel',
-                              style: context.textTheme.bodySmall,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              context.read<EncrpytedGalleryPageBloc>().add(
-                                EncrpytedGalleryPageEvent.deleteFolder(),
-                              );
-                              context.pop();
-                            },
-                            child: Text(
-                              'Delete',
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.colorScheme.error,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                icon: Icon(
-                  Icons.delete_rounded,
-                  color: context.colorScheme.error,
-                  size: 20,
-                ),
-              ),
-          ],
-        ),
-        floatingActionButton: _GalleryFAB(),
-        body: BlocListener<EncrpytedGalleryPageBloc, EncrpytedGalleryPageState>(
-          listenWhen:
-              (previous, current) => current.maybeMap(
-                decrypted:
-                    (_) => previous.maybeMap(
-                      loading: (_) => true,
-                      orElse: () => false,
-                    ),
-                failure: (_) => true,
-                orElse: () => false,
-              ),
-          listener: (context, state) {
-            state.maybeMap(
-              decrypted: (value) {
-                context.pop();
-                setState(() {
-                  _selectedImage?.decryptedBytes = value.data;
-                });
-              },
-              failure: (value) {
-                context.showErrorSnackbar(value.message);
-              },
-              orElse: () {},
+      child: _buildScaffoldWithListener(),
+    );
+  }
+
+  Widget _buildScaffoldWithListener() {
+    return BlocListener<EncrpytedGalleryPageBloc, EncrpytedGalleryPageState>(
+      listenWhen: _shouldListen,
+      listener: _handleBlocState,
+      child: _buildScaffold(),
+    );
+  }
+
+  Widget _buildScaffold() {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      floatingActionButton: _GalleryFAB(),
+      body: _buildBody(),
+    );
+  }
+
+  // UI event handlers
+  void _updateSelectedImage(EncryptedImage? image) {
+    setState(() => _selectedImage = image);
+  }
+
+  void _onImageDecrypt(String password) {
+    if (_selectedImage == null) return;
+
+    context.read<EncrpytedGalleryPageBloc>().add(
+      EncrpytedGalleryPageEvent.decryptImage(
+        image: _selectedImage!,
+        password: password,
+        path: null,
+      ),
+    );
+  }
+
+  void _onImageDelete() {
+    if (_selectedImage == null) return;
+
+    context.read<EncrpytedGalleryPageBloc>().add(
+      EncrpytedGalleryPageEvent.deleteImage(image: _selectedImage!),
+    );
+    context.pop();
+    setState(() => _selectedImage = null);
+  }
+
+  // AppBar methods
+  AppBar _buildAppBar() {
+    final root = context.read<EncrpytedGalleryPageBloc>().root;
+
+    return AppBar(
+      title: Text(_buildTitle(root)),
+      actions: _buildAppBarActions(root),
+    );
+  }
+
+  String _buildTitle(String? root) {
+    if (root == null) return EncryptedGalleryPageConstants.defaultTitle;
+
+    return root
+        .split('/')
+        .reversed
+        .take(EncryptedGalleryPageConstants.pathSegmentsToShow)
+        .toList()
+        .reversed
+        .join('/');
+  }
+
+  List<Widget> _buildAppBarActions(String? root) {
+    return [
+      _buildDecryptFolderButton(),
+      if (root != null) _buildDeleteFolderButton(root),
+    ];
+  }
+
+  Widget _buildDecryptFolderButton() {
+    return IconButton(
+      onPressed: _showDecryptDialog,
+      icon: const Icon(
+        Icons.lock_open_rounded,
+        size: EncryptedGalleryPageConstants.appBarIconSize,
+      ),
+    );
+  }
+
+  Widget _buildDeleteFolderButton(String root) {
+    return IconButton(
+      onPressed: () => _showDeleteFolderDialog(root),
+      icon: Icon(
+        Icons.delete_rounded,
+        color: context.colorScheme.error,
+        size: EncryptedGalleryPageConstants.appBarIconSize,
+      ),
+    );
+  }
+
+  // Body methods
+  Widget _buildBody() {
+    return Stack(
+      children: [
+        _EncryptedGallery(onImageSelected: _updateSelectedImage),
+        if (_selectedImage != null) _buildOpenedImage(),
+      ],
+    );
+  }
+
+  Widget _buildOpenedImage() {
+    return EncryptedOpenedImage(
+      image: _selectedImage!,
+      onDecrypt: _onImageDecrypt,
+      onDelete: _onImageDelete,
+    );
+  }
+
+  // Dialog methods
+  void _showDecryptDialog() {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (dialogContext, _, __) {
+        return DecryptDialog(
+          onDecrypt: (password) {
+            context.read<EncrpytedGalleryPageBloc>().add(
+              EncrpytedGalleryPageEvent.decryptFolder(password: password),
             );
-          },
-          child: Stack(
-            children: [
-              _gallery(),
-              if (_selectedImage != null)
-                EncryptedOpenedImage(
-                  image: _selectedImage!,
-                  onDecrypt: (password) {
-                    context.read<EncrpytedGalleryPageBloc>().add(
-                      EncrpytedGalleryPageEvent.decryptImage(
-                        image: _selectedImage!,
-                        password: password,
-                        path: null,
-                      ),
-                    );
-                  },
-                  onDelete: () {
-                    context.read<EncrpytedGalleryPageBloc>().add(
-                      EncrpytedGalleryPageEvent.deleteImage(
-                        image: _selectedImage!,
-                      ),
-                    );
-                    context.pop();
-                    setState(() {
-                      _selectedImage = null;
-                    });
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _gallery() {
-    return BlocBuilder<EncrpytedGalleryPageBloc, EncrpytedGalleryPageState>(
-      buildWhen:
-          (previous, current) =>
-              current.maybeMap(loaded: (_) => true, orElse: () => false),
-      builder: (context, state) {
-        return state.maybeMap(
-          loaded: (value) {
-            return GridView.builder(
-          padding: EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-          ),
-              itemCount: value.images.length,
-          itemBuilder: (context, index) {
-                if (index >= value.images.length) {
-              return Center(child: CircularProgressIndicator(strokeWidth: 2));
-            }
-
-                final entity = value.images[index];
-            if (entity.isImage) return _image(entity.asImage);
-            return _folder(entity.asFolder);
+            dialogContext.pop();
           },
         );
-          },
-          orElse: () => const SizedBox(),
-        );
-       
       },
     );
   }
 
-  Widget _folder(EncryptedFolder folder) {
-    return FilledButton(
-      onPressed: () {
-        // setState(() {
-        //   _selectedImage = image;
-        // });
-        context.push('/encrypted_gallery/${folder.encryptedRelativePath}');
+  void _showDeleteFolderDialog(String root) {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return AlertDialog(
+          title: Text(
+            EncryptedGalleryPageConstants.deleteDialogTitle,
+            style: context.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.colorScheme.error,
+            ),
+          ),
+          content: _buildDeleteDialogContent(context, root),
+          actions: _buildDeleteDialogActions(),
+        );
       },
-      style: FilledButton.styleFrom(
-        backgroundColor: context.colorScheme.primary.withValues(alpha: 0.2),
-        shape: RoundedRectangleBorder(borderRadius: AppStyle.borderRadius),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Icon(
-            Icons.folder_rounded,
-            color: context.colorScheme.primary,
-            size: 48,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                folder.name,
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: context.colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _image(EncryptedImage image) {
-    final bytes = image.decryptedBytes;
-    return Stack(
-      fit: StackFit.expand,
+  Widget _buildDeleteDialogContent(BuildContext context, String root) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedImage = image;
-            });
-          },
-          child: ClipRRect(
-            borderRadius: AppStyle.borderRadius,
-            child:
-                bytes != null
-                    ? _decodedImage(bytes)
-                    : Image.file(image.file, fit: BoxFit.cover),
-          ),
+        Text(
+          EncryptedGalleryPageConstants.deleteDialogContent,
+          style: context.textTheme.bodyMedium,
         ),
-        if (image.isDecrypting)
-          Positioned.fill(
-            child: Container(
-              alignment: Alignment.center,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: context.colorScheme.primary,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _decodedImage(Uint8List bytes) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.memory(bytes, fit: BoxFit.cover),
-
-        Align(
-          alignment: Alignment.topRight,
-          child: Transform.rotate(
-            angle: 3.14 / 4,
-            child: Transform.translate(
-              offset: const Offset(40, -30),
-              child: Container(
-                width: double.maxFinite,
-                height: 24,
-                color: context.colorScheme.primaryContainer.withValues(
-                  alpha: 0.6,
-                ),
-                child: Transform.rotate(
-                  angle: -3.14 / 4,
-                  child: Icon(
-                    Icons.lock_open_rounded,
-                    color: context.colorScheme.onPrimaryContainer,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ),
+        const SizedBox(height: 16),
+        Text(
+          '${EncryptedGalleryPageConstants.folderPrefix}$root',
+          style: context.textTheme.bodyLarge?.copyWith(
+            color: context.colorScheme.primary.withValues(alpha: 0.8),
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildDeleteDialogActions() {
+    return [
+      TextButton(
+        onPressed: () => context.pop(),
+        child: Text(
+          EncryptedGalleryPageConstants.cancelButton,
+          style: context.textTheme.bodySmall,
+        ),
+      ),
+      TextButton(
+        onPressed: _onDeleteFolder,
+        child: Text(
+          EncryptedGalleryPageConstants.deleteButton,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: context.colorScheme.error,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  void _onDeleteFolder() {
+    context.read<EncrpytedGalleryPageBloc>().add(
+      const EncrpytedGalleryPageEvent.deleteFolder(),
+    );
+    context.pop(); // Close dialog
+  }
+
+  // BlocListener methods
+  bool _shouldListen(
+    EncrpytedGalleryPageState previous,
+    EncrpytedGalleryPageState current,
+  ) {
+    return current.maybeMap(
+      decrypted:
+          (_) => previous.maybeMap(loading: (_) => true, orElse: () => false),
+      failure: (_) => true,
+      orElse: () => false,
+    );
+  }
+
+  void _handleBlocState(BuildContext context, EncrpytedGalleryPageState state) {
+    state.maybeMap(
+      decrypted: _onDecryptedState,
+      failure: _onFailureState,
+      orElse: () {},
+    );
+  }
+
+  void _onDecryptedState(dynamic value) {
+    context.pop(); // Closes loading dialog
+    setState(() {
+      _selectedImage?.decryptedBytes = value.data;
+    });
+  }
+
+  void _onFailureState(dynamic value) {
+    context.showErrorSnackbar(value.message);
   }
 }

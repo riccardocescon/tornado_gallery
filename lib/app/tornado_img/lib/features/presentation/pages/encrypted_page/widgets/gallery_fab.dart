@@ -1,4 +1,4 @@
-part of 'encrypted_gallery_page.dart';
+part of '../encrypted_gallery_page.dart';
 
 class _GalleryFAB extends StatelessWidget {
   const _GalleryFAB();
