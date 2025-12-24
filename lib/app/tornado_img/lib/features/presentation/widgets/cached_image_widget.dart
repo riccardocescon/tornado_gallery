@@ -7,10 +7,14 @@ class CachedImageWidget extends StatefulWidget {
     super.key,
     required this.image,
     required this.onTap,
+    required this.index,
+    this.currentVisibleRange,
   });
 
   final GalleryImage image;
   final VoidCallback onTap;
+  final int index;
+  final ValueNotifier<(int, int)>? currentVisibleRange;
 
   @override
   State<CachedImageWidget> createState() => _CachedImageWidgetState();
@@ -18,8 +22,41 @@ class CachedImageWidget extends StatefulWidget {
 
 class _CachedImageWidgetState extends State<CachedImageWidget>
     with AutomaticKeepAliveClientMixin {
+  static const int maxKeepAliveDistance =
+      15; // Mantieni solo 30 widget (15 prima + 15 dopo)
+
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive {
+    if (widget.currentVisibleRange == null) return true;
+
+    final (start, end) = widget.currentVisibleRange!.value;
+    final distance =
+        (widget.index < start)
+            ? start - widget.index
+            : (widget.index > end)
+            ? widget.index - end
+            : 0; // widget visibile
+
+    return distance <= maxKeepAliveDistance;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.currentVisibleRange?.addListener(_updateKeepAlive);
+  }
+
+  @override
+  void dispose() {
+    widget.currentVisibleRange?.removeListener(_updateKeepAlive);
+    super.dispose();
+  }
+
+  void _updateKeepAlive() {
+    if (mounted) {
+      updateKeepAlive();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,21 +77,22 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
           // Placeholder durante il caricamento
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
             if (wasSynchronouslyLoaded) return child;
-            
+
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: frame != null 
-                ? child
-                : Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(
-                        Icons.image, 
-                        color: Colors.grey,
-                        size: 30,
+              child:
+                  frame != null
+                      ? child
+                      : Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
             );
           },
         ),
