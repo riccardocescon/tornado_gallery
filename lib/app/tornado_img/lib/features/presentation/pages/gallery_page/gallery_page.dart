@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/models/gallery_image.dart';
-import 'package:tornado_img_app/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
-import 'package:tornado_img_app/features/views/gallery_page/gallery_opened_image.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/presentation/bloc/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_opened_image.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});

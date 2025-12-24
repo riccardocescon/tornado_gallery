@@ -1,4 +1,4 @@
-import 'package:tornado_img_app/features/models/app_image.dart';
+import 'package:tornado_img_app/features/domain/entities/app_image.dart';
 
 class GalleryImage extends AppImage {
   const GalleryImage({

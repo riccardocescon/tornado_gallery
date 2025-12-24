@@ -2,16 +2,27 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/app_image.dart';
-import 'package:tornado_img_app/features/presentation/bloc/homepage_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/main.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   const Homepage({super.key});
+
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
+  @override
+  void initState() {
+    context.read<HomepageBloc>().add(const HomepageEvent.setup());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +39,8 @@ class Homepage extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<HomepageViewmodel>(
-        builder: (context, vm, _) {
+      body: BlocBuilder<HomepageBloc, HomepageState>(
+        builder: (context, state) {
           return GridView.builder(
             itemCount: 2,
             padding: EdgeInsets.all(8),
@@ -39,37 +50,38 @@ class Homepage extends StatelessWidget {
               crossAxisSpacing: 4,
             ),
             itemBuilder: (context, index) {
-              if (index == 0) {
-                if (vm.galleryViewModel.isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                }
+              return state.maybeMap(
+                loaded: (value) {
+                  if (index == 0) {
+                    final images = value.images;
+                    if (images == null) {
+                      return Center(child: CircularProgressIndicator());
+                    }
 
-                return _folder(
-                  context,
-                  'Local Gallery',
-                  vm.galleryViewModel.images,
-                  () =>
-                      context.pushNamed('gallery', extra: vm.galleryViewModel),
-                );
-              }
+                    return _folder(
+                      'Local Gallery',
+                      images,
+                      () => context.pushNamed('gallery'),
+                    );
+                  }
 
-              if (index == 1) {
-                if (vm.encryptedGalleryViewModel.isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                }
+                  if (index == 1) {
+                    final encryptedImages = value.encryptedImages;
+                    if (encryptedImages == null) {
+                      return Center(child: CircularProgressIndicator());
+                    }
 
-                return _folder(
-                  context,
-                  'Encrypted Gallery',
-                  vm.encryptedGalleryViewModel.images,
-                  () => context.pushNamed(
-                    'encrypted_gallery',
-                    extra: vm.encryptedGalleryViewModel,
-                  ),
-                );
-              }
+                    return _folder(
+                      'Encrypted Gallery',
+                      encryptedImages,
+                      () => context.pushNamed('encrypted_gallery'),
+                    );
+                  }
 
-              return SizedBox.shrink(); // Fallback for unexpected index
+                  return SizedBox.shrink(); // Fallback for unexpected index
+                },
+                orElse: () => SizedBox.shrink(),
+              );
             },
           );
         },
@@ -77,12 +89,7 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  Widget _folder(
-    BuildContext context,
-    String title,
-    List<AppImage> images,
-    VoidCallback onTap,
-  ) {
+  Widget _folder(String title, List<AppImage> images, VoidCallback onTap) {
     final previewImages = math.min(images.length, 3);
 
     final imagesPreview = List.generate(previewImages, (index) {

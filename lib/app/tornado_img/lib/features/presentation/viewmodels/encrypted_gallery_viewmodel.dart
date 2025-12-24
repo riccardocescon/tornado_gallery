@@ -3,9 +3,9 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_entity.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
 
 class EncryptedGalleryViewModel extends ChangeNotifier {

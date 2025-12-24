@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/core/dialogs/encrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/models/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 class GalleryOpenedImage extends StatelessWidget {
   const GalleryOpenedImage({

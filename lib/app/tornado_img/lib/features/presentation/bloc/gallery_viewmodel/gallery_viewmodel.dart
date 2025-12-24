@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:saver_gallery/saver_gallery.dart';
-import 'package:tornado_img_app/features/models/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
 import 'package:permission_handler/permission_handler.dart';
 

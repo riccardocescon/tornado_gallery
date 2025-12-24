@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/core/dialogs/decrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 class EncryptedOpenedImage extends StatefulWidget {
   const EncryptedOpenedImage({

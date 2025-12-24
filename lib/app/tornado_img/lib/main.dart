@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/routes.dart';
-import 'package:tornado_img_app/features/viewmodels/homepage_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/homepage_viewmodel.dart';
 
 late PackageInfo packageInfo;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   packageInfo = await PackageInfo.fromPlatform();
+  setupInjectionContainer();
   runApp(const MyApp());
 }
 

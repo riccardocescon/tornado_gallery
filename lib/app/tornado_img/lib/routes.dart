@@ -1,11 +1,14 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:tornado_img_app/features/viewmodels/encrypted_gallery_viewmodel.dart';
-import 'package:tornado_img_app/features/viewmodels/gallery_viewmodel/gallery_viewmodel.dart';
-import 'package:tornado_img_app/features/views/encrypted_page/encrypted_gallery_page.dart';
-import 'package:tornado_img_app/features/views/gallery_page/gallery_page.dart';
-import 'package:tornado_img_app/features/views/homepage.dart';
-import 'package:tornado_img_app/features/views/test_page.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
+import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
+import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_page.dart';
+import 'package:tornado_img_app/features/presentation/pages/homepage.dart';
+import 'package:tornado_img_app/features/presentation/pages/test_page.dart';
+import 'package:tornado_img_app/injection_container.dart';
 
 GoRouter routes = GoRouter(
   initialLocation: '/',
@@ -21,7 +24,10 @@ GoRouter routes = GoRouter(
       path: '/',
       name: 'home',
       builder: (context, state) {
-        return const Homepage();
+        return BlocProvider(
+          create: (context) => getIt<HomepageBloc>(),
+          child: const Homepage(),
+        );
       },
       routes: [
         GoRoute(

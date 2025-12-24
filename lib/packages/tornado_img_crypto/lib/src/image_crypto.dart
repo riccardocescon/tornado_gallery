@@ -4,8 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
 import 'package:pointycastle/api.dart';
 
-import 'crypto_config.dart';
-import 'crypto_result.dart';
+import 'entities/crypto_config.dart';
+import 'entities/crypto_result.dart';
 
 /// Main class for image encryption and decryption operations
 class ImageCrypto {

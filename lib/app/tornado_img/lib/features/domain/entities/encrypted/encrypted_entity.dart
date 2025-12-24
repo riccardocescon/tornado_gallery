@@ -1,5 +1,5 @@
-import 'package:tornado_img_app/features/models/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 mixin class EncryptedEntity {
   bool get isImage => this is EncryptedImage;

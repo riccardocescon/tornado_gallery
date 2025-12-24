@@ -7,10 +7,10 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/dialogs/create_folder_dialog.dart';
 import 'package:tornado_img_app/core/dialogs/decrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/viewmodels/encrypted_gallery_viewmodel.dart';
-import 'package:tornado_img_app/features/views/encrypted_page/encrypted_opened_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_opened_image.dart';
 
 part 'gallery_fab.dart';
 

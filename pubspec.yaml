@@ -9,3 +9,4 @@ environment:
 # Workspace dependencies for Melos
 dev_dependencies:
   melos: ^6.1.0
+

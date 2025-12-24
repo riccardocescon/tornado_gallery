@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/animations/glitch_loader.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/models/gallery_image.dart';
-import 'package:tornado_img_app/features/viewmodels/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
 
 class EncryptDialog extends StatefulWidget {
   const EncryptDialog({

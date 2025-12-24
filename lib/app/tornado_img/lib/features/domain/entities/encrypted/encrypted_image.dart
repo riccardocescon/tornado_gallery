@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:tornado_img_app/features/models/app_image.dart';
-import 'package:tornado_img_app/features/models/encrypted/encrypted_entity.dart';
+import 'package:tornado_img_app/features/domain/entities/app_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 
 class EncryptedImage extends AppImage with EncryptedEntity {
   Uint8List? decryptedBytes;
