@@ -37,6 +37,26 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
           // Attiva cache automatico di Flutter (solo per memory optimization)
           cacheWidth: 150,
           cacheHeight: 150,
+          // Placeholder durante il caricamento
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded) return child;
+            
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: frame != null 
+                ? child
+                : Container(
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(
+                        Icons.image, 
+                        color: Colors.grey,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+            );
+          },
         ),
       ),
     );
