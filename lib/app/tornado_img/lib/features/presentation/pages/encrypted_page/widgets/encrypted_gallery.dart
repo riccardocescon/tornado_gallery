@@ -13,7 +13,7 @@ class _EncryptedGallery extends StatelessWidget {
               current.maybeMap(loaded: (_) => true, orElse: () => false),
       builder: (context, state) {
         return state.maybeMap(
-          loaded: (value) => _buildGrid(context, value.images),
+          loaded: (value) => _buildGrid(context, value.entities),
           orElse: () => const SizedBox(),
         );
       },

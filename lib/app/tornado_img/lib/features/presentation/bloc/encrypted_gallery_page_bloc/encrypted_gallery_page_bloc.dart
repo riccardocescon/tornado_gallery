@@ -261,7 +261,7 @@ class EncrpytedGalleryPageBloc
   void _emit(Emitter<EncrpytedGalleryPageState> emit) {
     emit(
       EncrpytedGalleryPageState.loaded(
-        images: List<EncryptedImage>.from(images),
+        entities: List<EncryptedEntity>.from(_entities),
         isLoading: _isLoading,
         hasMore: _hasMore,
       ),

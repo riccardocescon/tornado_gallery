@@ -8,7 +8,7 @@ abstract class EncrpytedGalleryPageState
   const factory EncrpytedGalleryPageState.initial() = _Initial;
   const factory EncrpytedGalleryPageState.loading() = _Loading;
   const factory EncrpytedGalleryPageState.loaded({
-    required List<EncryptedImage> images,
+    required List<EncryptedEntity> entities,
     required bool isLoading,
     required bool hasMore,
   }) = _Loaded;
@@ -21,7 +21,7 @@ abstract class EncrpytedGalleryPageState
   List<Object?> get props => map(
     initial: (_) => [],
     loading: (_) => [],
-    loaded: (value) => [value.images, value.isLoading, value.hasMore],
+    loaded: (value) => [value.entities, value.isLoading, value.hasMore],
     decrypted: (value) => [value.data],
     failure: (value) => [value.message],
   );
