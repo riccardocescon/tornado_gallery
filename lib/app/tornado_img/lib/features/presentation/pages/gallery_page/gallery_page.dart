@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -20,17 +21,38 @@ class _GalleryPageState extends State<GalleryPage> {
   late ScrollController _scrollController;
   bool _isLoadingMore = false;
   final ValueNotifier<(int, int)> _visibleRange = ValueNotifier((0, 20));
+  bool _hasRestoredPosition = false; // Track se abbiamo già ripristinato
+  Timer? _savePositionTimer; // Debounce timer per salvataggio posizione
 
   @override
   void initState() {
     context.read<GalleryPageBloc>().add(const GalleryPageEvent.setup());
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    
+    // Trigger ripristino posizione se le immagini sono già caricate
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final bloc = context.read<GalleryPageBloc>();
+      bloc.state.maybeMap(
+        loaded: (value) {
+          print('📱 InitState: Trovate ${value.images.length} immagini già caricate');
+          if (!_hasRestoredPosition) {
+            _hasRestoredPosition = true;
+            Future.delayed(const Duration(milliseconds: 200), () {
+              _restoreScrollPosition();
+            });
+          }
+        },
+        orElse: () => print('📱 InitState: Nessuna immagine caricata ancora'),
+      );
+    });
+    
     super.initState();
   }
 
   @override
   void dispose() {
+    _savePositionTimer?.cancel();
     _scrollController.dispose();
     _visibleRange.dispose();
     super.dispose();
@@ -38,6 +60,12 @@ class _GalleryPageState extends State<GalleryPage> {
 
   void _onScroll() {
     if (_isLoadingMore) return;
+
+    // Debounce: salva posizione solo quando smette di scrollare per 500ms
+    _savePositionTimer?.cancel();
+    _savePositionTimer = Timer(const Duration(milliseconds: 500), () {
+      _saveScrollPosition();
+    });
 
     // Aggiorna range visibile per memory management
     _updateVisibleRange();
@@ -72,12 +100,53 @@ class _GalleryPageState extends State<GalleryPage> {
     ); // Buffer ridotto per batteria
   }
 
+  void _saveScrollPosition() {
+    if (_scrollController.hasClients) {
+      final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
+      final currentPosition = _scrollController.position.pixels;
+      galleryBloc.savedScrollPosition = currentPosition;
+      print('💾 Salvata posizione scroll: $currentPosition');
+    }
+  }
+
+  void _restoreScrollPosition() {
+    if (!mounted) return;
+    
+    final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
+    final savedPosition = galleryBloc.savedScrollPosition;
+    
+    if (savedPosition != null && _scrollController.hasClients) {
+      // Controlla che la posizione sia valida per il contenuto attuale
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      
+      // Se maxScroll è 0, aspetta un po' di più che il contenuto si carichi
+      if (maxScroll == 0.0) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          _restoreScrollPosition();
+        });
+        return;
+      }
+      
+      final targetPosition = savedPosition.clamp(0.0, maxScroll);
+      
+      print('🔄 Ripristino scroll: saved=$savedPosition, max=$maxScroll, target=$targetPosition');
+      
+      _scrollController.animateTo(
+        targetPosition,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _selectedImage == null,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
+          // Salva posizione quando si chiude l'immagine aperta
+          _saveScrollPosition();
           setState(() {
             _selectedImage = null;
           });
@@ -85,13 +154,9 @@ class _GalleryPageState extends State<GalleryPage> {
       },
       child: BlocListener<GalleryPageBloc, GalleryPageState>(
         listenWhen: (previous, current) {
+          // Sempre ascolta i loaded state per ripristinare posizione
           return current.maybeMap(
-            loaded: (value) {
-              return previous.maybeMap(
-                loaded: (prev) => prev.images.length != value.images.length,
-                orElse: () => true,
-              );
-            },
+            loaded: (value) => true, // Sempre true per loaded
             encrypted: (value) => true,
             failure: (value) => true,
             orElse: () => false,
@@ -100,7 +165,19 @@ class _GalleryPageState extends State<GalleryPage> {
         listener: (context, state) {
           state.maybeMap(
             loaded: (value) {
+              print('🔥 BlocListener: loaded state con ${value.images.length} immagini');
               _isLoadingMore = false;
+              // Ripristina posizione scroll solo una volta quando le immagini sono caricate
+              if (!_hasRestoredPosition) {
+                print('✅ Primo caricamento, ripristino posizione...');
+                _hasRestoredPosition = true;
+                // Ritardo più lungo per assicurarsi che il GridView sia completamente renderizzato
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  _restoreScrollPosition();
+                });
+              } else {
+                print('⏭️ Posizione già ripristinata, skip');
+              }
             },
             encrypted: (value) {
               context.pop();
@@ -185,6 +262,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   index: index,
                   currentVisibleRange: _visibleRange,
                   onTap: () {
+                    // Salva posizione prima di aprire l'immagine
+                    _saveScrollPosition();
                     setState(() {
                       _selectedImage = image;
                     });

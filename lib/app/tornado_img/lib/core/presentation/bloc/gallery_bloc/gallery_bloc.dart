@@ -24,6 +24,9 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   bool _isLoading = false;
   bool _hasMore = true;
   final _images = <GalleryImage>[];
+  
+  // Mantieni posizione scroll tra navigazioni
+  double? savedScrollPosition;
 
   // Cache album to reuse on pagination
   late AssetPathEntity _album;
