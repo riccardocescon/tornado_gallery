@@ -29,7 +29,15 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
       onTap: widget.onTap,
       child: ClipRRect(
         borderRadius: AppStyle.borderRadius,
-        child: Image.file(widget.image.file, fit: BoxFit.cover),
+        child: Image.file(
+          widget.image.file,
+          fit: BoxFit.cover,
+          // Riduce qualità per thumbnails
+          filterQuality: FilterQuality.low,
+          // Attiva cache automatico di Flutter (solo per memory optimization)
+          cacheWidth: 150,
+          cacheHeight: 150,
+        ),
       ),
     );
   }
