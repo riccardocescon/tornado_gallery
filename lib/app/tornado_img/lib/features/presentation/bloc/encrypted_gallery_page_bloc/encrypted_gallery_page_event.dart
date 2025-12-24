@@ -5,7 +5,9 @@ abstract class EncrpytedGalleryPageEvent
     with _$EncrpytedGalleryPageEvent, EquatableMixin {
   const EncrpytedGalleryPageEvent._();
 
-  const factory EncrpytedGalleryPageEvent.setup() = _Setup;
+  const factory EncrpytedGalleryPageEvent.setup({
+    required String? currentRoute,
+  }) = _Setup;
   const factory EncrpytedGalleryPageEvent.pickFiles() = _PickFiles;
   const factory EncrpytedGalleryPageEvent.decryptImage({
     required EncryptedImage image,

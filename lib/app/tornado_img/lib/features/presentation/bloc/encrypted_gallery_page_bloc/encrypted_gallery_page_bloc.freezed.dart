@@ -129,10 +129,10 @@ return deleteImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  pickFiles,TResult Function( EncryptedImage image,  String password,  String? path)?  decryptImage,TResult Function( String password)?  decryptFolder,TResult Function()?  deleteFolder,TResult Function( String folderName)?  createFolder,TResult Function()?  loadNextPage,TResult Function( EncryptedImage image)?  deleteImage,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? currentRoute)?  setup,TResult Function()?  pickFiles,TResult Function( EncryptedImage image,  String password,  String? path)?  decryptImage,TResult Function( String password)?  decryptFolder,TResult Function()?  deleteFolder,TResult Function( String folderName)?  createFolder,TResult Function()?  loadNextPage,TResult Function( EncryptedImage image)?  deleteImage,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _PickFiles() when pickFiles != null:
+return setup(_that.currentRoute);case _PickFiles() when pickFiles != null:
 return pickFiles();case _DecryptImage() when decryptImage != null:
 return decryptImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decryptFolder != null:
 return decryptFolder(_that.password);case _DeleteFolder() when deleteFolder != null:
@@ -157,10 +157,10 @@ return deleteImage(_that.image);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  pickFiles,required TResult Function( EncryptedImage image,  String password,  String? path)  decryptImage,required TResult Function( String password)  decryptFolder,required TResult Function()  deleteFolder,required TResult Function( String folderName)  createFolder,required TResult Function()  loadNextPage,required TResult Function( EncryptedImage image)  deleteImage,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? currentRoute)  setup,required TResult Function()  pickFiles,required TResult Function( EncryptedImage image,  String password,  String? path)  decryptImage,required TResult Function( String password)  decryptFolder,required TResult Function()  deleteFolder,required TResult Function( String folderName)  createFolder,required TResult Function()  loadNextPage,required TResult Function( EncryptedImage image)  deleteImage,}) {final _that = this;
 switch (_that) {
 case _Setup():
-return setup();case _PickFiles():
+return setup(_that.currentRoute);case _PickFiles():
 return pickFiles();case _DecryptImage():
 return decryptImage(_that.image,_that.password,_that.path);case _DecryptFolder():
 return decryptFolder(_that.password);case _DeleteFolder():
@@ -184,10 +184,10 @@ return deleteImage(_that.image);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  pickFiles,TResult? Function( EncryptedImage image,  String password,  String? path)?  decryptImage,TResult? Function( String password)?  decryptFolder,TResult? Function()?  deleteFolder,TResult? Function( String folderName)?  createFolder,TResult? Function()?  loadNextPage,TResult? Function( EncryptedImage image)?  deleteImage,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? currentRoute)?  setup,TResult? Function()?  pickFiles,TResult? Function( EncryptedImage image,  String password,  String? path)?  decryptImage,TResult? Function( String password)?  decryptFolder,TResult? Function()?  deleteFolder,TResult? Function( String folderName)?  createFolder,TResult? Function()?  loadNextPage,TResult? Function( EncryptedImage image)?  deleteImage,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _PickFiles() when pickFiles != null:
+return setup(_that.currentRoute);case _PickFiles() when pickFiles != null:
 return pickFiles();case _DecryptImage() when decryptImage != null:
 return decryptImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decryptFolder != null:
 return decryptFolder(_that.password);case _DeleteFolder() when deleteFolder != null:
@@ -206,11 +206,16 @@ return deleteImage(_that.image);case _:
 
 
 class _Setup extends EncrpytedGalleryPageEvent {
-  const _Setup(): super._();
+  const _Setup({required this.currentRoute}): super._();
   
 
+ final  String? currentRoute;
 
-
+/// Create a copy of EncrpytedGalleryPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetupCopyWith<_Setup> get copyWith => __$SetupCopyWithImpl<_Setup>(this, _$identity);
 
 
 
@@ -220,8 +225,37 @@ class _Setup extends EncrpytedGalleryPageEvent {
 
 }
 
+/// @nodoc
+abstract mixin class _$SetupCopyWith<$Res> implements $EncrpytedGalleryPageEventCopyWith<$Res> {
+  factory _$SetupCopyWith(_Setup value, $Res Function(_Setup) _then) = __$SetupCopyWithImpl;
+@useResult
+$Res call({
+ String? currentRoute
+});
 
 
+
+
+}
+/// @nodoc
+class __$SetupCopyWithImpl<$Res>
+    implements _$SetupCopyWith<$Res> {
+  __$SetupCopyWithImpl(this._self, this._then);
+
+  final _Setup _self;
+  final $Res Function(_Setup) _then;
+
+/// Create a copy of EncrpytedGalleryPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? currentRoute = freezed,}) {
+  return _then(_Setup(
+currentRoute: freezed == currentRoute ? _self.currentRoute : currentRoute // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

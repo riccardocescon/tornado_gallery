@@ -18,7 +18,6 @@ part 'encrypted_gallery_page_bloc.freezed.dart';
 
 class EncrpytedGalleryPageBloc
     extends Bloc<EncrpytedGalleryPageEvent, EncrpytedGalleryPageState> {
-  
   // Page-specific state
   final int _pageSize = 10;
   int _currentPage = 0;
@@ -30,7 +29,7 @@ class EncrpytedGalleryPageBloc
 
   // Delegate to core bloc for operations
   final encryptedGalleryBloc = getIt<EncryptedGalleryBloc>();
-  
+
   // Getters
   String? get root => _root;
   List<EncryptedImage> get images =>
@@ -39,15 +38,20 @@ class EncrpytedGalleryPageBloc
   bool get hasMore => _hasMore;
 
   Future<Directory> get encryptedFolder async {
-    if (_root != null) return Directory(_root!);
-    return await encryptedGalleryBloc.encryptedFolder;
+    final baseDir = await encryptedGalleryBloc.encryptedFolder;
+    if (_root != null) {
+      return Directory('${baseDir.path}/$_root');
+    }
+    return baseDir;
   }
 
   EncrpytedGalleryPageBloc()
     : super(const EncrpytedGalleryPageState.initial()) {
-    
     on<_Setup>((event, emit) async {
       emit(const EncrpytedGalleryPageState.loading());
+
+      // Set the current route
+      _root = event.currentRoute;
 
       final encryptedDir = await encryptedFolder;
 
@@ -220,7 +224,7 @@ class EncrpytedGalleryPageBloc
     on<_DecryptFolder>((event, emit) async {
       emit(const EncrpytedGalleryPageState.loading());
       final imagesToDecrypt = images;
-      
+
       if (imagesToDecrypt.isEmpty) {
         emit(
           const EncrpytedGalleryPageState.failure(

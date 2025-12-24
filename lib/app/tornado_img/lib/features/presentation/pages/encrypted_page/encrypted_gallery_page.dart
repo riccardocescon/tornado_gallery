@@ -20,7 +20,9 @@ part 'widgets/encrypted_image_tile.dart';
 part 'widgets/encrypted_opened_image.dart';
 
 class EncryptedGalleryPage extends StatefulWidget {
-  const EncryptedGalleryPage({super.key});
+  final String? currentRoute;
+
+  const EncryptedGalleryPage({super.key, this.currentRoute});
 
   @override
   State<EncryptedGalleryPage> createState() => _EncryptedGalleryPageState();
@@ -28,6 +30,8 @@ class EncryptedGalleryPage extends StatefulWidget {
 
 class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
   EncryptedImage? _selectedImage;
+
+  String? get root => widget.currentRoute;
 
   @override
   void initState() {
@@ -37,7 +41,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   void _setupGallery() {
     context.read<EncrpytedGalleryPageBloc>().add(
-      const EncrpytedGalleryPageEvent.setup(),
+      EncrpytedGalleryPageEvent.setup(currentRoute: widget.currentRoute),
     );
   }
 
@@ -97,18 +101,17 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   // AppBar methods
   AppBar _buildAppBar() {
-    final root = context.read<EncrpytedGalleryPageBloc>().root;
 
     return AppBar(
-      title: Text(_buildTitle(root)),
+      title: Text(_buildTitle()),
       actions: _buildAppBarActions(root),
     );
   }
 
-  String _buildTitle(String? root) {
+  String _buildTitle() {
     if (root == null) return EncryptedGalleryPageConstants.defaultTitle;
 
-    return root
+    return root!
         .split('/')
         .reversed
         .take(EncryptedGalleryPageConstants.pathSegmentsToShow)

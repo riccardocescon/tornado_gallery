@@ -45,7 +45,7 @@ GoRouter routes = GoRouter(
           builder: (context, state) {
             return BlocProvider(
               create: (context) => getIt<EncrpytedGalleryPageBloc>(),
-              child: EncryptedGalleryPage(),
+              child: const EncryptedGalleryPage(currentRoute: null),
             );
           },
         ),
@@ -54,9 +54,10 @@ GoRouter routes = GoRouter(
     GoRoute(
       path: '/encrypted_gallery/:relativePath',
       builder: (context, state) {
+        final currentRoute = state.pathParameters['relativePath'];
         return BlocProvider(
           create: (context) => getIt<EncrpytedGalleryPageBloc>(),
-          child: EncryptedGalleryPage(),
+          child: EncryptedGalleryPage(currentRoute: currentRoute),
         );
       },
     ),
