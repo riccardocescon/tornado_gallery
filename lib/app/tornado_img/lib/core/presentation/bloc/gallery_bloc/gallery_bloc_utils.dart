@@ -1,18 +1,18 @@
 part of 'gallery_bloc.dart';
 
 class _GlobalBlocUtils {
-  int findInsertIndexDescending(List<GalleryImage> images, DateTime newDate) {
+  int findInsertIndexAscending(List<GalleryImage> images, DateTime newDate) {
     int low = 0;
     int high = images.length;
 
     while (low < high) {
       final mid = (low + high) ~/ 2;
 
-      if (images[mid].date.isAfter(newDate)) {
-        // mid is newer => go right
+      if (images[mid].date.isBefore(newDate)) {
+        // mid is older => go right
         low = mid + 1;
       } else {
-        // mid is older or equal => go left
+        // mid is newer or equal => go left
         high = mid;
       }
     }

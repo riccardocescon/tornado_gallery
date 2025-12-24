@@ -89,7 +89,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
           date: asset.createDateTime,
         );
 
-        final insertIndex = _utils.findInsertIndexDescending(
+        final insertIndex = _utils.findInsertIndexAscending(
           _images,
           newImage.date,
         );
@@ -138,7 +138,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
                   file: savedFile,
                   date: savedAsset.createDateTime,
                 );
-                final insertIndex = _utils.findInsertIndexDescending(
+                final insertIndex = _utils.findInsertIndexAscending(
                   _images,
                   newImage.date,
                 );

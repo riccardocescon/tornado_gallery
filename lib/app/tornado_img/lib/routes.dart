@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
-import 'package:tornado_img_app/features/presentation/bloc/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_page.dart';
@@ -34,9 +34,8 @@ GoRouter routes = GoRouter(
           path: 'gallery',
           name: 'gallery',
           builder: (context, state) {
-            final galleryViewModel = state.extra as GalleryViewModel;
-            return ChangeNotifierProvider.value(
-              value: galleryViewModel,
+            return BlocProvider(
+              create: (context) => getIt<GalleryPageBloc>(),
               child: GalleryPage(),
             );
           },

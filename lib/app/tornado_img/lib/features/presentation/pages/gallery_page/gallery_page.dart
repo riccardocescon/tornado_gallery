@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
-import 'package:tornado_img_app/features/presentation/bloc/gallery_viewmodel/gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_opened_image.dart';
+import 'package:tornado_img_app/features/presentation/widgets/cached_image_widget.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -16,9 +16,34 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   GalleryImage? _selectedImage;
+  late ScrollController _scrollController;
+  bool _isLoadingMore = false;
 
-  GalleryViewModel get galleryViewModel =>
-      Provider.of<GalleryViewModel>(context, listen: false);
+  @override
+  void initState() {
+    context.read<GalleryPageBloc>().add(const GalleryPageEvent.setup());
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isLoadingMore) return;
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      _isLoadingMore = true;
+      context.read<GalleryPageBloc>().add(
+        const GalleryPageEvent.loadNextPage(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,92 +56,118 @@ class _GalleryPageState extends State<GalleryPage> {
           });
         }
       },
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Local Gallery')),
-        floatingActionButton:
-            _selectedImage != null
-                ? null
-                : FloatingActionButton(
-                  onPressed: () {
-                    galleryViewModel.pickFiles();
-                  },
-                  child: const Icon(Icons.download_rounded),
-                ),
-        body: Stack(
-          children: [
-            _gallery(),
-            if (_selectedImage != null)
-              GalleryOpenedImage(
-                image: _selectedImage!,
-                onEncrypt: (password, path) {
-                  galleryViewModel
-                      .encryptImage(
+      child: BlocListener<GalleryPageBloc, GalleryPageState>(
+        listenWhen: (previous, current) {
+          return current.maybeMap(
+            loaded: (value) {
+              return previous.maybeMap(
+                loaded: (prev) => prev.images.length != value.images.length,
+                orElse: () => true,
+              );
+            },
+            encrypted: (value) => true,
+            failure: (value) => true,
+            orElse: () => false,
+          );
+        },
+        listener: (context, state) {
+          state.maybeMap(
+            loaded: (value) {
+              _isLoadingMore = false;
+            },
+            encrypted: (value) {
+              context.pop();
+              context.showSuccessSnackbar('Image encrypted successfully!');
+            },
+            failure: (value) {
+              context.showErrorSnackbar(value.message);
+            },
+            orElse: () {},
+          );
+        },
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Local Gallery')),
+          floatingActionButton:
+              _selectedImage != null
+                  ? null
+                  : FloatingActionButton(
+                    onPressed: () {
+                      context.read<GalleryPageBloc>().add(
+                        GalleryPageEvent.pickFiles(),
+                      );
+                    },
+                    child: const Icon(Icons.download_rounded),
+                  ),
+          body: Stack(
+            children: [
+              _gallery(),
+              if (_selectedImage != null)
+                GalleryOpenedImage(
+                  image: _selectedImage!,
+                  onEncrypt: (password, path) {
+                    context.read<GalleryPageBloc>().add(
+                      GalleryPageEvent.encryptImage(
                         image: _selectedImage!,
                         password: password,
                         path: path,
-                      )
-                      .then((error) {
-                        if (!context.mounted) return;
-
-                        if (error == null) {
-                          context.pop();
-                          context.showSuccessSnackbar(
-                            'Image encrypted successfully!',
-                          );
-                        } else {
-                          context.showErrorSnackbar(error);
-                        }
-                      });
-                },
-                onDelete: () {
-                  galleryViewModel.deleteImage(_selectedImage!);
-                  context.pop();
-                  setState(() {
-                    _selectedImage = null;
-                  });
-                },
-              ),
-          ],
+                      ),
+                    );
+                  },
+                  onDelete: () {
+                    context.read<GalleryPageBloc>().add(
+                      GalleryPageEvent.deleteImage(image: _selectedImage!),
+                    );
+                    context.pop();
+                    setState(() {
+                      _selectedImage = null;
+                    });
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _gallery() {
-    return Consumer<GalleryViewModel>(
-      builder: (context, gallery, _) {
-        return GridView.builder(
-          padding: EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-          ),
-          itemCount: gallery.images.length,
-          itemBuilder: (context, index) {
-            if (index >= gallery.images.length) {
-              return Center(child: CircularProgressIndicator(strokeWidth: 2));
-            }
-
-            final image = gallery.images[index];
-            return _image(image);
+    return BlocBuilder<GalleryPageBloc, GalleryPageState>(
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(loaded: (value) => true, orElse: () => false),
+      builder: (context, state) {
+        return state.maybeMap(
+          loaded: (value) {
+            return GridView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.all(8),
+              cacheExtent: 1000, // Limita il cache per ridurre memory usage
+              addRepaintBoundaries: false, // Riduce overhead di repaint
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 4,
+                crossAxisSpacing: 4,
+              ),
+              itemCount: value.images.length,
+              itemBuilder: (context, index) {
+                final image = value.images[index];
+                return CachedImageWidget(
+                  key: ValueKey(image.file.path),
+                  image: image,
+                  onTap: () {
+                    setState(() {
+                      _selectedImage = image;
+                    });
+                  },
+                );
+              },
+            );
           },
+          orElse: () => const SizedBox.shrink(),
         );
+      
       },
     );
   }
 
-  Widget _image(GalleryImage image) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedImage = image;
-        });
-      },
-      child: ClipRRect(
-        borderRadius: AppStyle.borderRadius,
-        child: Image.file(image.file, fit: BoxFit.cover),
-      ),
-    );
-  }
 }
