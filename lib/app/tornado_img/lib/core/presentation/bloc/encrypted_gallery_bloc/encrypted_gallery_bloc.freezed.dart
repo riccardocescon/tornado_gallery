@@ -126,14 +126,14 @@ return deleteFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  loadNextPage,TResult Function( EncryptedImage image)?  deleteImage,TResult Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult Function( EncryptedImage image,  String password,  String? path)?  decrytFolder,TResult Function( String folderName)?  createFolder,TResult Function()?  deleteFolder,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  loadNextPage,TResult Function( EncryptedImage image)?  deleteImage,TResult Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult Function( String password)?  decrytFolder,TResult Function( String folderName)?  createFolder,TResult Function()?  deleteFolder,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _LoadNextPage() when loadNextPage != null:
 return loadNextPage();case _DeleteImage() when deleteImage != null:
 return deleteImage(_that.image);case _DecryptImage() when decrytImage != null:
 return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that.image,_that.password,_that.path);case _CreateFolder() when createFolder != null:
+return decrytFolder(_that.password);case _CreateFolder() when createFolder != null:
 return createFolder(_that.folderName);case _DeleteFolder() when deleteFolder != null:
 return deleteFolder();case _:
   return orElse();
@@ -153,14 +153,14 @@ return deleteFolder();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  loadNextPage,required TResult Function( EncryptedImage image)  deleteImage,required TResult Function( EncryptedImage image,  String password,  String? path)  decrytImage,required TResult Function( EncryptedImage image,  String password,  String? path)  decrytFolder,required TResult Function( String folderName)  createFolder,required TResult Function()  deleteFolder,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  loadNextPage,required TResult Function( EncryptedImage image)  deleteImage,required TResult Function( EncryptedImage image,  String password,  String? path)  decrytImage,required TResult Function( String password)  decrytFolder,required TResult Function( String folderName)  createFolder,required TResult Function()  deleteFolder,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _LoadNextPage():
 return loadNextPage();case _DeleteImage():
 return deleteImage(_that.image);case _DecryptImage():
 return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder():
-return decrytFolder(_that.image,_that.password,_that.path);case _CreateFolder():
+return decrytFolder(_that.password);case _CreateFolder():
 return createFolder(_that.folderName);case _DeleteFolder():
 return deleteFolder();case _:
   throw StateError('Unexpected subclass');
@@ -179,14 +179,14 @@ return deleteFolder();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  loadNextPage,TResult? Function( EncryptedImage image)?  deleteImage,TResult? Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult? Function( EncryptedImage image,  String password,  String? path)?  decrytFolder,TResult? Function( String folderName)?  createFolder,TResult? Function()?  deleteFolder,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  loadNextPage,TResult? Function( EncryptedImage image)?  deleteImage,TResult? Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult? Function( String password)?  decrytFolder,TResult? Function( String folderName)?  createFolder,TResult? Function()?  deleteFolder,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _LoadNextPage() when loadNextPage != null:
 return loadNextPage();case _DeleteImage() when deleteImage != null:
 return deleteImage(_that.image);case _DecryptImage() when decrytImage != null:
 return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that.image,_that.password,_that.path);case _CreateFolder() when createFolder != null:
+return decrytFolder(_that.password);case _CreateFolder() when createFolder != null:
 return createFolder(_that.folderName);case _DeleteFolder() when deleteFolder != null:
 return deleteFolder();case _:
   return null;
@@ -356,12 +356,10 @@ as String?,
 
 
 class _DecryptFolder extends EncryptedGalleryEvent {
-  const _DecryptFolder({required this.image, required this.password, required this.path}): super._();
+  const _DecryptFolder({required this.password}): super._();
   
 
- final  EncryptedImage image;
  final  String password;
- final  String? path;
 
 /// Create a copy of EncryptedGalleryEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -382,7 +380,7 @@ abstract mixin class _$DecryptFolderCopyWith<$Res> implements $EncryptedGalleryE
   factory _$DecryptFolderCopyWith(_DecryptFolder value, $Res Function(_DecryptFolder) _then) = __$DecryptFolderCopyWithImpl;
 @useResult
 $Res call({
- EncryptedImage image, String password, String? path
+ String password
 });
 
 
@@ -399,12 +397,10 @@ class __$DecryptFolderCopyWithImpl<$Res>
 
 /// Create a copy of EncryptedGalleryEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? image = null,Object? password = null,Object? path = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? password = null,}) {
   return _then(_DecryptFolder(
-image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
-as EncryptedImage,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,path: freezed == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String?,
+password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

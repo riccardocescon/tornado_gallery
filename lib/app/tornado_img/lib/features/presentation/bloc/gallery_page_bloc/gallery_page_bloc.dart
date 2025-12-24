@@ -15,22 +15,17 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
 
   GalleryPageBloc() : super(const GalleryPageState.initial()) {
     on<_Setup>((event, emit) async {
-      galleryBloc.state.maybeMap(
-        loaded: (value) {
-          _images = value.images;
-          _emit(emit);
-        },
-        encrypted: (value) {
-          emit(const GalleryPageState.encrypted());
-        },
-        orElse: () {},
-      );
+      _images = galleryBloc.images;
+      _emit(emit);
 
       await for (final galleryState in galleryBloc.stream) {
         galleryState.maybeMap(
           loaded: (value) {
             _images = value.images;
             _emit(emit);
+          },
+          encrypted: (value) {
+            emit(const GalleryPageState.encrypted());
           },
           encryptionFailure: (value) {
             emit(GalleryPageState.failure(message: value.failure.message));
@@ -48,10 +43,13 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
     });
 
     on<_PickFiles>((event, emit) async {
+      emit(GalleryPageState.loading());
       galleryBloc.add(const GalleryEvent.pickFiles());
     });
 
     on<_EncryptImage>((event, emit) async {
+      emit(GalleryPageState.loading());
+      
       galleryBloc.add(
         GalleryEvent.encryptImage(
           image: event.image,
@@ -62,10 +60,14 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
     });
 
     on<_LoadNextPage>((event, emit) async {
+      emit(GalleryPageState.loading());
+      
       galleryBloc.add(const GalleryEvent.loadNextPage());
     });
 
     on<_DeleteImage>((event, emit) async {
+      emit(GalleryPageState.loading());
+      
       galleryBloc.add(GalleryEvent.deleteImage(image: event.image));
     });
   }

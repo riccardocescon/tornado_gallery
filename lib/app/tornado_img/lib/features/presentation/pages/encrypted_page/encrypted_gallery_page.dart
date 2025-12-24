@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/dialogs/create_folder_dialog.dart';
 import 'package:tornado_img_app/core/dialogs/decrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_opened_image.dart';
 
 part 'gallery_fab.dart';
@@ -24,11 +24,18 @@ class EncryptedGalleryPage extends StatefulWidget {
 class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
   EncryptedImage? _selectedImage;
 
-  EncryptedGalleryViewModel get encryptedGalleryViewModel =>
-      Provider.of<EncryptedGalleryViewModel>(context, listen: false);
+  @override
+  void initState() {
+    context.read<EncrpytedGalleryPageBloc>().add(
+      const EncrpytedGalleryPageEvent.setup(),
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final root = context.read<EncrpytedGalleryPageBloc>().root;
+
     return PopScope(
       canPop: _selectedImage == null,
       onPopInvokedWithResult: (didPop, result) {
@@ -41,28 +48,25 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            encryptedGalleryViewModel.root == null
+            root == null
                 ? 'Local Gallery'
-                : encryptedGalleryViewModel.root!
-                    .split('/')
-                    .reversed
-                    .take(3)
-                    .toList()
-                    .reversed
-                    .join('/'),
+                : root.split('/').reversed.take(3).toList().reversed.join('/'),
           ),
           actions: [
             IconButton(
               onPressed: () {
                 showGeneralDialog(
                   context: context,
-                  pageBuilder: (context, _, __) {
+                  pageBuilder: (dialogContext, _, __) {
                     return DecryptDialog(
                       onDecrypt: (password) {
-                        encryptedGalleryViewModel.decryptEntireFolder(
-                          password: password,
+                        context.read<EncrpytedGalleryPageBloc>().add(
+                          EncrpytedGalleryPageEvent.decryptFolder(
+                            password: password,
+                          ),
                         );
-                        context.pop();
+                            
+                        dialogContext.pop();
                       },
                     );
                   },
@@ -70,7 +74,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
               },
               icon: Icon(Icons.lock_open_rounded, size: 20),
             ),
-            if (encryptedGalleryViewModel.root != null)
+            if (root != null)
               IconButton(
                 onPressed: () {
                   showGeneralDialog(
@@ -93,7 +97,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Folder: ${encryptedGalleryViewModel.root}',
+                              'Folder: $root',
                               style: context.textTheme.bodyLarge?.copyWith(
                                 color: context.colorScheme.primary.withValues(
                                   alpha: 0.8,
@@ -112,8 +116,9 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              encryptedGalleryViewModel.deleteFolder();
-                              context.pop();
+                              context.read<EncrpytedGalleryPageBloc>().add(
+                                EncrpytedGalleryPageEvent.deleteFolder(),
+                              );
                               context.pop();
                             },
                             child: Text(
@@ -136,66 +141,96 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
               ),
           ],
         ),
-        floatingActionButton: _GalleryFAB(
-          encryptedGalleryViewModel: encryptedGalleryViewModel,
-        ),
-        body: Stack(
-          children: [
-            _gallery(),
-            if (_selectedImage != null)
-              EncryptedOpenedImage(
-                image: _selectedImage!,
-                onDecrypt: (password) {
-                  encryptedGalleryViewModel
-                      .decryptImage(image: _selectedImage!, password: password)
-                      .then((decryptedBytes) {
-                        if (!context.mounted) return;
-
-                        if (decryptedBytes == null) {
-                          context.showErrorSnackbar('Failed to decrypt image');
-                        } else {
-                          context.pop();
-                          setState(() {
-                            _selectedImage?.decryptedBytes = decryptedBytes;
-                          });
-                        }
-                      });
-                },
-                onDelete: () {
-                  encryptedGalleryViewModel.deleteImage(_selectedImage!);
-                  context.pop();
-                  setState(() {
-                    _selectedImage = null;
-                  });
-                },
+        floatingActionButton: _GalleryFAB(),
+        body: BlocListener<EncrpytedGalleryPageBloc, EncrpytedGalleryPageState>(
+          listenWhen:
+              (previous, current) => current.maybeMap(
+                decrypted:
+                    (_) => previous.maybeMap(
+                      loading: (_) => true,
+                      orElse: () => false,
+                    ),
+                failure: (_) => true,
+                orElse: () => false,
               ),
-          ],
+          listener: (context, state) {
+            state.maybeMap(
+              decrypted: (value) {
+                context.pop();
+                setState(() {
+                  _selectedImage?.decryptedBytes = value.data;
+                });
+              },
+              failure: (value) {
+                context.showErrorSnackbar(value.message);
+              },
+              orElse: () {},
+            );
+          },
+          child: Stack(
+            children: [
+              _gallery(),
+              if (_selectedImage != null)
+                EncryptedOpenedImage(
+                  image: _selectedImage!,
+                  onDecrypt: (password) {
+                    context.read<EncrpytedGalleryPageBloc>().add(
+                      EncrpytedGalleryPageEvent.decryptImage(
+                        image: _selectedImage!,
+                        password: password,
+                        path: null,
+                      ),
+                    );
+                  },
+                  onDelete: () {
+                    context.read<EncrpytedGalleryPageBloc>().add(
+                      EncrpytedGalleryPageEvent.deleteImage(
+                        image: _selectedImage!,
+                      ),
+                    );
+                    context.pop();
+                    setState(() {
+                      _selectedImage = null;
+                    });
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _gallery() {
-    return Consumer<EncryptedGalleryViewModel>(
-      builder: (context, gallery, _) {
-        return GridView.builder(
+    return BlocBuilder<EncrpytedGalleryPageBloc, EncrpytedGalleryPageState>(
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(loaded: (_) => true, orElse: () => false),
+      builder: (context, state) {
+        return state.maybeMap(
+          loaded: (value) {
+            return GridView.builder(
           padding: EdgeInsets.all(8),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             mainAxisSpacing: 4,
             crossAxisSpacing: 4,
           ),
-          itemCount: gallery.entities.length,
+              itemCount: value.images.length,
           itemBuilder: (context, index) {
-            if (index >= gallery.entities.length) {
+                if (index >= value.images.length) {
               return Center(child: CircularProgressIndicator(strokeWidth: 2));
             }
 
-            final entity = gallery.entities[index];
+                final entity = value.images[index];
             if (entity.isImage) return _image(entity.asImage);
             return _folder(entity.asFolder);
           },
         );
+          },
+          orElse: () => const SizedBox(),
+        );
+       
       },
     );
   }

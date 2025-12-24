@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/animations/glitch_loader.dart';
+import 'package:tornado_img_app/core/utils/paths.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
-import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
 
 class EncryptDialog extends StatefulWidget {
   const EncryptDialog({
@@ -150,7 +150,7 @@ class _EncryptDialogState extends State<EncryptDialog> {
 
   Widget _folderSection() {
     return FutureBuilder(
-      future: EncryptedGalleryViewModel.getFolderPaths(),
+      future: getFolderPaths(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();

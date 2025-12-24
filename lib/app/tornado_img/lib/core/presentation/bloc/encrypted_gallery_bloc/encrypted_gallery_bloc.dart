@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -29,9 +30,9 @@ class EncryptedGalleryBloc
   bool _hasMore = true;
   final _entities = <EncryptedEntity>[];
 
-  StreamSubscription<FileSystemEvent>? _streamSubscription;
+  StreamManager<FileSystemEvent>? _streamManager;
 
-  List<EncryptedImage> get _images =>
+  List<EncryptedImage> get images =>
       List<EncryptedImage>.from(_entities.whereType<EncryptedImage>());
   List<EncryptedEntity> get entities => _entities.toList();
   bool get isLoading => _isLoading;
@@ -56,23 +57,11 @@ class EncryptedGalleryBloc
   // Cache album to reuse on pagination
   late FileSystemEntity _album;
 
-  static Future<List<String>> getFolderPaths() async {
-    // Get the application documents directory
-    final appDir = await getApplicationDocumentsDirectory();
-    String path = '${appDir.path}/encrypted';
-    final encryptedDir = Directory(path);
-    if (!encryptedDir.existsSync()) {
-      await encryptedDir.create(recursive: true);
-    }
-
-    final folders =
-        encryptedDir.listSync(recursive: true).whereType<Directory>();
-    return folders.map((dir) => dir.path).toList();
-  }
+  
 
   @override
   Future<void> close() async {
-    await _streamSubscription?.cancel();
+    await _streamManager?.dispose();
     super.close();
   }
 
@@ -84,16 +73,29 @@ class EncryptedGalleryBloc
 
       final albums = encryptedDir.listSync().toList();
 
-      _streamSubscription?.cancel();
-      _streamSubscription = encryptedDir.watch().listen((stream) {
-        if (stream is FileSystemCreateEvent ||
-            stream is FileSystemModifyEvent) {
-          log('File system event: ${stream.runtimeType} - ${stream.path}');
-          final fileName = stream.path.split('/').last;
+      if (albums.isEmpty) {
+        _isLoading = false;
+        _hasMore = false;
+        _emit(emit);
+      } else {
+        _album = encryptedDir;
+        _entities.clear();
+        _currentPage = 0;
+        _hasMore = true;
+
+        add(const EncryptedGalleryEvent.loadNextPage());
+      }
+
+      _streamManager?.dispose();
+      _streamManager = StreamManager.fromStream(encryptedDir.watch());
+      await for (final state in _streamManager!.stream) {
+        if (state is FileSystemCreateEvent || state is FileSystemModifyEvent) {
+          log('File system event: ${state.runtimeType} - ${state.path}');
+          final fileName = state.path.split('/').last;
           final date = DateTime.now();
           final isFile = fileName.contains('.');
           if (isFile) {
-            final file = File(stream.path);
+            final file = File(state.path);
             final imageIndex = _entities.indexWhere(
               (image) => image.tryImage?.id == fileName,
             );
@@ -109,7 +111,7 @@ class EncryptedGalleryBloc
               );
             }
           } else {
-            final dir = Directory(stream.path);
+            final dir = Directory(state.path);
             final folderIndex = _entities.indexWhere(
               (image) => image.tryFolder?.name == dir.path.split('/').last,
             );
@@ -121,30 +123,24 @@ class EncryptedGalleryBloc
           }
 
           _emit(emit);
-        } else if (stream is FileSystemDeleteEvent) {
+          continue;
+        }
+
+        if (state is FileSystemDeleteEvent) {
           _entities.removeWhere(
             (image) =>
-                (image.isImage && image.asImage.file.path == stream.path) ||
+                (image.isImage && image.asImage.file.path == state.path) ||
                 (image.isFolder &&
-                    image.asFolder.name == stream.path.split('/').last),
+                    image.asFolder.name == state.path.split('/').last),
           );
           _emit(emit);
+          continue;
         }
-      });
-
-      if (albums.isEmpty) {
-        _isLoading = false;
-        _hasMore = false;
-        _emit(emit);
-        return;
       }
 
-      _album = encryptedDir;
-      _entities.clear();
-      _currentPage = 0;
-      _hasMore = true;
-
-      add(const EncryptedGalleryEvent.loadNextPage());
+      log(
+        'File system watcher set up for encrypted gallery at ${encryptedDir.path}',
+      );
     });
 
     on<_LoadNextPage>((event, emit) async {
@@ -348,7 +344,7 @@ class EncryptedGalleryBloc
   void _emit(Emitter<EncryptedGalleryState> emit) {
     emit(
       EncryptedGalleryState.loaded(
-        images: List<EncryptedImage>.from(_images),
+        images: List<EncryptedImage>.from(images),
         isLoading: _isLoading,
         hasMore: _hasMore,
       ),

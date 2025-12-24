@@ -31,6 +31,8 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   // Cache album to reuse on pagination
   late AssetPathEntity _album;
 
+  List<GalleryImage> get images => List<GalleryImage>.from(_images);
+
   final _GlobalBlocUtils _utils = _GlobalBlocUtils();
 
   GalleryBloc() : super(const GalleryState.initial()) {
@@ -171,6 +173,8 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     });
 
     on<_EncryptImage>((event, emit) async {
+      emit(const GalleryState.loading());
+      
       String ext = event.image.file.path.split('.').last.toLowerCase();
       final fileBytes = await event.image.file.readAsBytes();
 

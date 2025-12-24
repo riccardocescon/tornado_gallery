@@ -16,9 +16,7 @@ abstract class EncryptedGalleryEvent
     required String? path,
   }) = _DecryptImage;
   const factory EncryptedGalleryEvent.decrytFolder({
-    required EncryptedImage image,
     required String password,
-    required String? path,
   }) = _DecryptFolder;
   const factory EncryptedGalleryEvent.createFolder({
     required String folderName,

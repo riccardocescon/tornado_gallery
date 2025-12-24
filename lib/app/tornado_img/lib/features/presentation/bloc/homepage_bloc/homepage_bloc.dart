@@ -29,36 +29,41 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
       galleryBloc.add(const GalleryEvent.setup());
       encryptedGalleryBloc.add(const EncryptedGalleryEvent.setup());
+      List<GalleryImage>? images;
+      List<EncryptedImage>? latestEncryptedImages;
 
       final mergeStream = Rx.combineLatest2(
         galleryBloc.stream,
         encryptedGalleryBloc.stream,
         (galleryState, encyrptedState) {
           final galleryImages = galleryState.maybeMap(
-            loaded: (value) => value.images,
+            loaded: (value) {
+              images = value.images;
+              return images;
+            },
             orElse: () => null,
           );
 
           final encryptedImages = encyrptedState.maybeMap(
-            loaded: (value) => value.images,
+            loaded: (value) {
+              latestEncryptedImages = value.images;
+              return latestEncryptedImages;
+            },
             orElse: () => null,
           );
 
           emit(
             HomepageState.loaded(
-              images: galleryImages,
-              encryptedImages: encryptedImages,
+              images: galleryImages ?? images,
+              encryptedImages: encryptedImages ?? latestEncryptedImages,
             ),
           );
-
-          return galleryImages != null && encryptedImages != null;
         },
       );
 
       _streamManager?.addStream(mergeStream);
 
-      await for (final result in mergeStream) {
-        if (result == true) break;
+      await for (final _ in mergeStream) {
       }
 
       await _streamManager?.dispose();

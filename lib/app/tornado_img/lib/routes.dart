@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_viewmodel.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
@@ -44,9 +43,8 @@ GoRouter routes = GoRouter(
           path: 'encrypted_gallery',
           name: 'encrypted_gallery',
           builder: (context, state) {
-            final encryptedGallery = state.extra as EncryptedGalleryViewModel;
-            return ChangeNotifierProvider.value(
-              value: encryptedGallery,
+            return BlocProvider(
+              create: (context) => getIt<EncrpytedGalleryPageBloc>(),
               child: EncryptedGalleryPage(),
             );
           },
@@ -56,9 +54,8 @@ GoRouter routes = GoRouter(
     GoRoute(
       path: '/encrypted_gallery/:relativePath',
       builder: (context, state) {
-        final root = state.pathParameters['relativePath']!;
-        return ChangeNotifierProvider(
-          create: (_) => EncryptedGalleryViewModel(root: root)..init(),
+        return BlocProvider(
+          create: (context) => getIt<EncrpytedGalleryPageBloc>(),
           child: EncryptedGalleryPage(),
         );
       },
