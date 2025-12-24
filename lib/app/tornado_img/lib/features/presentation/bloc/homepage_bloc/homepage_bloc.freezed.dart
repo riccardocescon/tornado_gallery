@@ -287,7 +287,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage>? images,  List<EncryptedImage>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -311,7 +311,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage>? images,  List<EncryptedImage>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -334,7 +334,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage>? images,  List<EncryptedImage>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -394,7 +394,7 @@ class _Loading extends HomepageState {
 
 
 class _Loaded extends HomepageState {
-  const _Loaded({required final  List<GalleryImage>? images, required final  List<EncryptedImage>? encryptedImages}): _images = images,_encryptedImages = encryptedImages,super._();
+  const _Loaded({required final  List<GalleryImage>? images, required final  List<EncryptedEntity>? encryptedImages}): _images = images,_encryptedImages = encryptedImages,super._();
   
 
  final  List<GalleryImage>? _images;
@@ -406,8 +406,8 @@ class _Loaded extends HomepageState {
   return EqualUnmodifiableListView(value);
 }
 
- final  List<EncryptedImage>? _encryptedImages;
- List<EncryptedImage>? get encryptedImages {
+ final  List<EncryptedEntity>? _encryptedImages;
+ List<EncryptedEntity>? get encryptedImages {
   final value = _encryptedImages;
   if (value == null) return null;
   if (_encryptedImages is EqualUnmodifiableListView) return _encryptedImages;
@@ -435,7 +435,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $HomepageStateCopyWith<$R
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<GalleryImage>? images, List<EncryptedImage>? encryptedImages
+ List<GalleryImage>? images, List<EncryptedEntity>? encryptedImages
 });
 
 
@@ -456,7 +456,7 @@ class __$LoadedCopyWithImpl<$Res>
   return _then(_Loaded(
 images: freezed == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
 as List<GalleryImage>?,encryptedImages: freezed == encryptedImages ? _self._encryptedImages : encryptedImages // ignore: cast_nullable_to_non_nullable
-as List<EncryptedImage>?,
+as List<EncryptedEntity>?,
   ));
 }
 

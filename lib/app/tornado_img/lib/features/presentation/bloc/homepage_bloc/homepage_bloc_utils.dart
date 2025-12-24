@@ -1,7 +1,7 @@
 part of 'homepage_bloc.dart';
 
 class _HomepageBlocUtils {
-  Future<List<EncryptedImage>> loadLatestEncryptedImages({
+  Future<List<EncryptedEntity>> loadLatestEncryptedImages({
     int limit = 3,
   }) async {
     try {
@@ -13,12 +13,12 @@ class _HomepageBlocUtils {
       }
 
       final files =
-          encryptedDir.listSync().toList()..sort(
+          encryptedDir.listSync().take(limit).toList()..sort(
             (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
           );
 
-      final encryptedImages = <EncryptedImage>[];
-      for (final fileSystem in files.take(limit)) {
+      final encryptedImages = <EncryptedEntity>[];
+      for (final fileSystem in files) {
         final fileName = fileSystem.path.split('/').last;
         if (fileName.contains('.')) {
           final file = File(fileSystem.path);
@@ -26,6 +26,8 @@ class _HomepageBlocUtils {
           encryptedImages.add(
             EncryptedImage(id: fileName, file: file, date: date),
           );
+        } else {
+          encryptedImages.add(EncryptedFolder.empty(fileSystem.path));
         }
       }
 

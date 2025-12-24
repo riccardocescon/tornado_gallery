@@ -178,7 +178,13 @@ class EncrpytedGalleryPageBloc
 
       try {
         await folderPath.create(recursive: true);
-        _album = folderPath;
+        
+        // Create the EncryptedFolder entity and add it to the list
+        final newFolder = EncryptedFolder.empty(folderPath.path);
+        
+        // Add to the beginning of the list (newest first)
+        _entities.insert(0, newFolder);
+        
         _emit(emit);
       } catch (e) {
         log('Error creating folder: $e');

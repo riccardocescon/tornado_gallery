@@ -8,7 +8,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
   const factory HomepageState.loading() = _Loading;
   const factory HomepageState.loaded({
     required List<GalleryImage>? images,
-    required List<EncryptedImage>? encryptedImages,
+    required List<EncryptedEntity>? encryptedImages,
   }) = _Loaded;
   const factory HomepageState.failure({required String message}) = _Failure;
 
