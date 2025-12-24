@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/dialogs/encrypt_dialog.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_opened_image.dart';
 import 'package:tornado_img_app/features/presentation/widgets/cached_image_widget.dart';
+
+part 'widgets/gallery_opened_image.dart';
+part 'widgets/gallery.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -21,8 +24,8 @@ class _GalleryPageState extends State<GalleryPage> {
   late ScrollController _scrollController;
   bool _isLoadingMore = false;
   final ValueNotifier<(int, int)> _visibleRange = ValueNotifier((0, 20));
-  bool _hasRestoredPosition = false; // Track se abbiamo già ripristinato
-  Timer? _savePositionTimer; // Debounce timer per salvataggio posizione
+  bool _hasRestoredPosition = false;
+  Timer? _savePositionTimer;
 
   @override
   void initState() {
@@ -35,7 +38,7 @@ class _GalleryPageState extends State<GalleryPage> {
       final bloc = context.read<GalleryPageBloc>();
       bloc.state.maybeMap(
         loaded: (value) {
-          print(
+          log(
             '📱 InitState: Trovate ${value.images.length} immagini già caricate',
           );
           if (!_hasRestoredPosition) {
@@ -45,7 +48,7 @@ class _GalleryPageState extends State<GalleryPage> {
             });
           }
         },
-        orElse: () => print('📱 InitState: Nessuna immagine caricata ancora'),
+        orElse: () => log('📱 InitState: Nessuna immagine caricata ancora'),
       );
     });
     
@@ -107,7 +110,7 @@ class _GalleryPageState extends State<GalleryPage> {
       final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
       final currentPosition = _scrollController.position.pixels;
       galleryBloc.savedScrollPosition = currentPosition;
-      print('💾 Salvata posizione scroll: $currentPosition');
+      log('💾 Salvata posizione scroll: $currentPosition');
     }
   }
 
@@ -131,7 +134,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
       final targetPosition = savedPosition.clamp(0.0, maxScroll);
 
-      print(
+      log(
         '🔄 Ripristino scroll: saved=$savedPosition, max=$maxScroll, target=$targetPosition',
       );
 
@@ -145,53 +148,11 @@ class _GalleryPageState extends State<GalleryPage> {
     return PopScope(
       canPop: _selectedImage == null,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          // Salva posizione quando si chiude l'immagine aperta
-          _saveScrollPosition();
-          setState(() {
-            _selectedImage = null;
-          });
-        }
+        if (didPop) return;
+
+        _updateSelectedImage(null);
       },
-      child: BlocListener<GalleryPageBloc, GalleryPageState>(
-        listenWhen: (previous, current) {
-          // Sempre ascolta i loaded state per ripristinare posizione
-          return current.maybeMap(
-            loaded: (value) => true, // Sempre true per loaded
-            encrypted: (value) => true,
-            failure: (value) => true,
-            orElse: () => false,
-          );
-        },
-        listener: (context, state) {
-          state.maybeMap(
-            loaded: (value) {
-              print(
-                '🔥 BlocListener: loaded state con ${value.images.length} immagini',
-              );
-              _isLoadingMore = false;
-              // Ripristina posizione scroll solo una volta quando le immagini sono caricate
-              if (!_hasRestoredPosition) {
-                print('✅ Primo caricamento, ripristino posizione...');
-                _hasRestoredPosition = true;
-                // Ritardo più lungo per assicurarsi che il GridView sia completamente renderizzato
-                Future.delayed(const Duration(milliseconds: 200), () {
-                  _restoreScrollPosition();
-                });
-              } else {
-                print('⏭️ Posizione già ripristinata, skip');
-              }
-            },
-            encrypted: (value) {
-              context.pop();
-              context.showSuccessSnackbar('Image encrypted successfully!');
-            },
-            failure: (value) {
-              context.showErrorSnackbar(value.message);
-            },
-            orElse: () {},
-          );
-        },
+      child: _listener(
         child: Scaffold(
           appBar: AppBar(title: const Text('Local Gallery')),
           floatingActionButton:
@@ -207,9 +168,14 @@ class _GalleryPageState extends State<GalleryPage> {
                   ),
           body: Stack(
             children: [
-              _gallery(),
+              _Gallery(
+                scrollController: _scrollController,
+                visibleRange: _visibleRange,
+                onImageSelected: _updateSelectedImage,
+              ),
+              
               if (_selectedImage != null)
-                GalleryOpenedImage(
+                _GalleryOpenedImage(
                   image: _selectedImage!,
                   onEncrypt: (password, path) {
                     context.read<GalleryPageBloc>().add(
@@ -237,49 +203,55 @@ class _GalleryPageState extends State<GalleryPage> {
     );
   }
 
-  Widget _gallery() {
-    return BlocBuilder<GalleryPageBloc, GalleryPageState>(
-      buildWhen:
-          (previous, current) =>
-              current.maybeMap(loaded: (value) => true, orElse: () => false),
-      builder: (context, state) {
-        return state.maybeMap(
-          loaded: (value) {
-            return GridView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.all(8),
-              // Ottimizzazioni conservative per batteria
-              cacheExtent: 400, // Bilanciato per batteria vs performance
-              addRepaintBoundaries: true, // Isola repaint per widget
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-              ),
-              itemCount: value.images.length,
-              itemBuilder: (context, index) {
-                final image = value.images[index];
-                return CachedImageWidget(
-                  key: ValueKey(image.file.path),
-                  image: image,
-                  index: index,
-                  currentVisibleRange: _visibleRange,
-                  onTap: () {
-                    // Salva posizione prima di aprire l'immagine
-                    _saveScrollPosition();
-                    setState(() {
-                      _selectedImage = image;
-                    });
-                  },
-                );
-              },
-            );
-          },
-          orElse: () => const SizedBox.shrink(),
-        );
-      
-      },
-    );
+  void _updateSelectedImage(GalleryImage? image) {
+    _saveScrollPosition();
+    setState(() {
+      _selectedImage = image;
+    });
   }
 
+  Widget _listener({required Widget child}) {
+    return BlocListener<GalleryPageBloc, GalleryPageState>(
+      listenWhen: (previous, current) {
+        // Sempre ascolta i loaded state per ripristinare posizione
+        return current.maybeMap(
+          loaded: (value) => true,
+          encrypted: (value) => true,
+          failure: (value) => true,
+          orElse: () => false,
+        );
+      },
+      listener: (context, state) {
+        state.maybeMap(
+          loaded: (value) {
+            log(
+              '🔥 BlocListener: loaded state with ${value.images.length} images',
+            );
+            _isLoadingMore = false;
+            if (_hasRestoredPosition) {
+              log('⏭️ Position already restored, skip');
+              return;
+            }
+
+            log('✅ First loading, restoring position...');
+            _hasRestoredPosition = true;
+            // Delay to assert that the GridView has built
+            Future.delayed(
+              const Duration(milliseconds: 200),
+              _restoreScrollPosition,
+            );
+          },
+          encrypted: (value) {
+            context.pop();
+            context.showSuccessSnackbar('Image encrypted successfully!');
+          },
+          failure: (value) {
+            context.showErrorSnackbar(value.message);
+          },
+          orElse: () {},
+        );
+      },
+      child: child,
+    );
+  }
 }

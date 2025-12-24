@@ -95,7 +95,7 @@ class EncryptedGalleryViewModel extends ChangeNotifier {
     _streamSubscription?.cancel();
     _streamSubscription = encryptedDir.watch().listen((stream) {
       if (stream is FileSystemCreateEvent || stream is FileSystemModifyEvent) {
-        print('File system event: ${stream.runtimeType} - ${stream.path}');
+        log('File system event: ${stream.runtimeType} - ${stream.path}');
         final fileName = stream.path.split('/').last;
         final date = DateTime.now();
         final isFile = fileName.contains('.');

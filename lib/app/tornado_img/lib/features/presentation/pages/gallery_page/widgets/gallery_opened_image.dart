@@ -1,12 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:tornado_img_app/core/dialogs/encrypt_dialog.dart';
-import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+part of '../gallery_page.dart';
 
-class GalleryOpenedImage extends StatelessWidget {
-  const GalleryOpenedImage({
-    super.key,
+class _GalleryOpenedImage extends StatelessWidget {
+  const _GalleryOpenedImage({
     required this.image,
     required this.onDelete,
     required this.onEncrypt,
