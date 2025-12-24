@@ -44,7 +44,7 @@ extension GalleryPageEventPatterns on GalleryPageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _PickFiles value)?  pickFiles,TResult Function( _EncryptImage value)?  encryptImage,TResult Function( _LoadNextPage value)?  loadNextPage,TResult Function( _DeleteImage value)?  deleteImage,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _PickFiles value)?  pickFiles,TResult Function( _EncryptImage value)?  encryptImage,TResult Function( _LoadNextPage value)?  loadNextPage,TResult Function( _DeleteImage value)?  deleteImage,TResult Function( _SaveScrollPosition value)?  saveScrollPosition,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
@@ -52,7 +52,8 @@ return setup(_that);case _PickFiles() when pickFiles != null:
 return pickFiles(_that);case _EncryptImage() when encryptImage != null:
 return encryptImage(_that);case _LoadNextPage() when loadNextPage != null:
 return loadNextPage(_that);case _DeleteImage() when deleteImage != null:
-return deleteImage(_that);case _:
+return deleteImage(_that);case _SaveScrollPosition() when saveScrollPosition != null:
+return saveScrollPosition(_that);case _:
   return orElse();
 
 }
@@ -70,7 +71,7 @@ return deleteImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _PickFiles value)  pickFiles,required TResult Function( _EncryptImage value)  encryptImage,required TResult Function( _LoadNextPage value)  loadNextPage,required TResult Function( _DeleteImage value)  deleteImage,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _PickFiles value)  pickFiles,required TResult Function( _EncryptImage value)  encryptImage,required TResult Function( _LoadNextPage value)  loadNextPage,required TResult Function( _DeleteImage value)  deleteImage,required TResult Function( _SaveScrollPosition value)  saveScrollPosition,}){
 final _that = this;
 switch (_that) {
 case _Setup():
@@ -78,7 +79,8 @@ return setup(_that);case _PickFiles():
 return pickFiles(_that);case _EncryptImage():
 return encryptImage(_that);case _LoadNextPage():
 return loadNextPage(_that);case _DeleteImage():
-return deleteImage(_that);case _:
+return deleteImage(_that);case _SaveScrollPosition():
+return saveScrollPosition(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -95,7 +97,7 @@ return deleteImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _PickFiles value)?  pickFiles,TResult? Function( _EncryptImage value)?  encryptImage,TResult? Function( _LoadNextPage value)?  loadNextPage,TResult? Function( _DeleteImage value)?  deleteImage,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _PickFiles value)?  pickFiles,TResult? Function( _EncryptImage value)?  encryptImage,TResult? Function( _LoadNextPage value)?  loadNextPage,TResult? Function( _DeleteImage value)?  deleteImage,TResult? Function( _SaveScrollPosition value)?  saveScrollPosition,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
@@ -103,7 +105,8 @@ return setup(_that);case _PickFiles() when pickFiles != null:
 return pickFiles(_that);case _EncryptImage() when encryptImage != null:
 return encryptImage(_that);case _LoadNextPage() when loadNextPage != null:
 return loadNextPage(_that);case _DeleteImage() when deleteImage != null:
-return deleteImage(_that);case _:
+return deleteImage(_that);case _SaveScrollPosition() when saveScrollPosition != null:
+return saveScrollPosition(_that);case _:
   return null;
 
 }
@@ -120,14 +123,15 @@ return deleteImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  pickFiles,TResult Function( GalleryImage image,  String password,  String? path)?  encryptImage,TResult Function()?  loadNextPage,TResult Function( GalleryImage image)?  deleteImage,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  pickFiles,TResult Function( GalleryImage image,  String password,  String? path)?  encryptImage,TResult Function()?  loadNextPage,TResult Function( GalleryImage image)?  deleteImage,TResult Function( double position)?  saveScrollPosition,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _PickFiles() when pickFiles != null:
 return pickFiles();case _EncryptImage() when encryptImage != null:
 return encryptImage(_that.image,_that.password,_that.path);case _LoadNextPage() when loadNextPage != null:
 return loadNextPage();case _DeleteImage() when deleteImage != null:
-return deleteImage(_that.image);case _:
+return deleteImage(_that.image);case _SaveScrollPosition() when saveScrollPosition != null:
+return saveScrollPosition(_that.position);case _:
   return orElse();
 
 }
@@ -145,14 +149,15 @@ return deleteImage(_that.image);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  pickFiles,required TResult Function( GalleryImage image,  String password,  String? path)  encryptImage,required TResult Function()  loadNextPage,required TResult Function( GalleryImage image)  deleteImage,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  pickFiles,required TResult Function( GalleryImage image,  String password,  String? path)  encryptImage,required TResult Function()  loadNextPage,required TResult Function( GalleryImage image)  deleteImage,required TResult Function( double position)  saveScrollPosition,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _PickFiles():
 return pickFiles();case _EncryptImage():
 return encryptImage(_that.image,_that.password,_that.path);case _LoadNextPage():
 return loadNextPage();case _DeleteImage():
-return deleteImage(_that.image);case _:
+return deleteImage(_that.image);case _SaveScrollPosition():
+return saveScrollPosition(_that.position);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -169,14 +174,15 @@ return deleteImage(_that.image);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  pickFiles,TResult? Function( GalleryImage image,  String password,  String? path)?  encryptImage,TResult? Function()?  loadNextPage,TResult? Function( GalleryImage image)?  deleteImage,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  pickFiles,TResult? Function( GalleryImage image,  String password,  String? path)?  encryptImage,TResult? Function()?  loadNextPage,TResult? Function( GalleryImage image)?  deleteImage,TResult? Function( double position)?  saveScrollPosition,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _PickFiles() when pickFiles != null:
 return pickFiles();case _EncryptImage() when encryptImage != null:
 return encryptImage(_that.image,_that.password,_that.path);case _LoadNextPage() when loadNextPage != null:
 return loadNextPage();case _DeleteImage() when deleteImage != null:
-return deleteImage(_that.image);case _:
+return deleteImage(_that.image);case _SaveScrollPosition() when saveScrollPosition != null:
+return saveScrollPosition(_that.position);case _:
   return null;
 
 }
@@ -362,6 +368,61 @@ as GalleryImage,
 }
 
 /// @nodoc
+
+
+class _SaveScrollPosition extends GalleryPageEvent {
+  const _SaveScrollPosition({required this.position}): super._();
+  
+
+ final  double position;
+
+/// Create a copy of GalleryPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SaveScrollPositionCopyWith<_SaveScrollPosition> get copyWith => __$SaveScrollPositionCopyWithImpl<_SaveScrollPosition>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SaveScrollPositionCopyWith<$Res> implements $GalleryPageEventCopyWith<$Res> {
+  factory _$SaveScrollPositionCopyWith(_SaveScrollPosition value, $Res Function(_SaveScrollPosition) _then) = __$SaveScrollPositionCopyWithImpl;
+@useResult
+$Res call({
+ double position
+});
+
+
+
+
+}
+/// @nodoc
+class __$SaveScrollPositionCopyWithImpl<$Res>
+    implements _$SaveScrollPositionCopyWith<$Res> {
+  __$SaveScrollPositionCopyWithImpl(this._self, this._then);
+
+  final _SaveScrollPosition _self;
+  final $Res Function(_SaveScrollPosition) _then;
+
+/// Create a copy of GalleryPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? position = null,}) {
+  return _then(_SaveScrollPosition(
+position: null == position ? _self.position : position // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$GalleryPageState {
 
 
@@ -470,12 +531,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images)?  loaded,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  bool isLoading,  bool hasMore,  double savedScrollPosition)?  loaded,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Encrypted() when encrypted != null:
+return loaded(_that.images,_that.isLoading,_that.hasMore,_that.savedScrollPosition);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -495,12 +556,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images)  loaded,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  bool isLoading,  bool hasMore,  double savedScrollPosition)  loaded,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.images);case _Encrypted():
+return loaded(_that.images,_that.isLoading,_that.hasMore,_that.savedScrollPosition);case _Encrypted():
 return encrypted();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -519,12 +580,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images)?  loaded,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  bool isLoading,  bool hasMore,  double savedScrollPosition)?  loaded,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Encrypted() when encrypted != null:
+return loaded(_that.images,_that.isLoading,_that.hasMore,_that.savedScrollPosition);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -580,7 +641,7 @@ class _Loading extends GalleryPageState {
 
 
 class _Loaded extends GalleryPageState {
-  const _Loaded({required final  List<GalleryImage> images}): _images = images,super._();
+  const _Loaded({required final  List<GalleryImage> images, required this.isLoading, required this.hasMore, this.savedScrollPosition = 0.0}): _images = images,super._();
   
 
  final  List<GalleryImage> _images;
@@ -590,6 +651,9 @@ class _Loaded extends GalleryPageState {
   return EqualUnmodifiableListView(_images);
 }
 
+ final  bool isLoading;
+ final  bool hasMore;
+@JsonKey() final  double savedScrollPosition;
 
 /// Create a copy of GalleryPageState
 /// with the given fields replaced by the non-null parameter values.
@@ -610,7 +674,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $GalleryPageStateCopyWith
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<GalleryImage> images
+ List<GalleryImage> images, bool isLoading, bool hasMore, double savedScrollPosition
 });
 
 
@@ -627,10 +691,13 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of GalleryPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? isLoading = null,Object? hasMore = null,Object? savedScrollPosition = null,}) {
   return _then(_Loaded(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<GalleryImage>,
+as List<GalleryImage>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as bool,savedScrollPosition: null == savedScrollPosition ? _self.savedScrollPosition : savedScrollPosition // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

@@ -9,13 +9,9 @@ abstract class EncryptedGalleryState
   const factory EncryptedGalleryState.loading() = _Loading;
   const factory EncryptedGalleryState.loaded({
     required List<EncryptedImage> images,
-    required bool isLoading,
-    required bool hasMore,
   }) = _Loaded;
   const factory EncryptedGalleryState.decrypted({required Uint8List data}) =
       _Decrypted;
-
-  const factory EncryptedGalleryState.permissionDenied() = _PermissionDenied;
   const factory EncryptedGalleryState.encryptionFailure({
     required EncryptionFailure failure,
   }) = _Failure;
@@ -24,9 +20,8 @@ abstract class EncryptedGalleryState
   List<Object?> get props => map(
     initial: (_) => [],
     loading: (_) => [],
-    loaded: (value) => [value.images, value.isLoading, value.hasMore],
+    loaded: (value) => [value.images],
     decrypted: (value) => [value.data],
-    permissionDenied: (_) => [],
     encryptionFailure: (value) => [value.failure],
   );
 }

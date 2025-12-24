@@ -75,16 +75,23 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   void _saveScrollPosition(double position) {
-    final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
-    galleryBloc.savedScrollPosition = position;
+    final galleryPageBloc = context.read<GalleryPageBloc>();
+    galleryPageBloc.add(
+      GalleryPageEvent.saveScrollPosition(position: position),
+    );
   }
 
   void _restoreScrollPosition() {
     if (!mounted || _hasRestoredPosition) return;
 
     _hasRestoredPosition = true;
-    final galleryBloc = context.read<GalleryPageBloc>().galleryBloc;
-    final savedPosition = galleryBloc.savedScrollPosition;
+    final galleryPageBloc = context.read<GalleryPageBloc>();
+    final currentState = galleryPageBloc.state;
+
+    double? savedPosition;
+    currentState.mapOrNull(
+      loaded: (state) => savedPosition = state.savedScrollPosition,
+    );
 
     Future.delayed(GalleryPageConstants.positionRestoreDelay, () {
       _scrollManager.restorePosition(savedPosition);

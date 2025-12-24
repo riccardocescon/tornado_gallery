@@ -619,12 +619,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<EncryptedImage> images)?  loaded,TResult Function( Uint8List data)?  decrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<EncryptedImage> images,  bool isLoading,  bool hasMore)?  loaded,TResult Function( Uint8List data)?  decrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Decrypted() when decrypted != null:
+return loaded(_that.images,_that.isLoading,_that.hasMore);case _Decrypted() when decrypted != null:
 return decrypted(_that.data);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -644,12 +644,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<EncryptedImage> images)  loaded,required TResult Function( Uint8List data)  decrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<EncryptedImage> images,  bool isLoading,  bool hasMore)  loaded,required TResult Function( Uint8List data)  decrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.images);case _Decrypted():
+return loaded(_that.images,_that.isLoading,_that.hasMore);case _Decrypted():
 return decrypted(_that.data);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -668,12 +668,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<EncryptedImage> images)?  loaded,TResult? Function( Uint8List data)?  decrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<EncryptedImage> images,  bool isLoading,  bool hasMore)?  loaded,TResult? Function( Uint8List data)?  decrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Decrypted() when decrypted != null:
+return loaded(_that.images,_that.isLoading,_that.hasMore);case _Decrypted() when decrypted != null:
 return decrypted(_that.data);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -729,7 +729,7 @@ class _Loading extends EncrpytedGalleryPageState {
 
 
 class _Loaded extends EncrpytedGalleryPageState {
-  const _Loaded({required final  List<EncryptedImage> images}): _images = images,super._();
+  const _Loaded({required final  List<EncryptedImage> images, required this.isLoading, required this.hasMore}): _images = images,super._();
   
 
  final  List<EncryptedImage> _images;
@@ -739,6 +739,8 @@ class _Loaded extends EncrpytedGalleryPageState {
   return EqualUnmodifiableListView(_images);
 }
 
+ final  bool isLoading;
+ final  bool hasMore;
 
 /// Create a copy of EncrpytedGalleryPageState
 /// with the given fields replaced by the non-null parameter values.
@@ -759,7 +761,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $EncrpytedGalleryPageStat
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- List<EncryptedImage> images
+ List<EncryptedImage> images, bool isLoading, bool hasMore
 });
 
 
@@ -776,10 +778,12 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of EncrpytedGalleryPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? isLoading = null,Object? hasMore = null,}) {
   return _then(_Loaded(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<EncryptedImage>,
+as List<EncryptedImage>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
