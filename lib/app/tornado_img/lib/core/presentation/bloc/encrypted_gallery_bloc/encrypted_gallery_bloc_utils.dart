@@ -27,12 +27,13 @@ class _EncryptedGalleryBlocUtils {
     );
 
     final initDecryptTime = DateTime.now();
-    final result = await ImageCrypto.decryptImageObject(
+    final result = await compute(_decryptImageInIsolate, (
       image: decodedImage,
       config: config,
+    ),
     );
     final decryptDuration = DateTime.now().difference(initDecryptTime);
-    log('Image decrypted in ${decryptDuration.inMilliseconds} ms');
+    log('Image decrypted in ${decryptDuration.inMilliseconds} ms (isolate)');
 
     if (result case CryptoFailure failure) {
       log('Decryption failed: ${failure.message}');

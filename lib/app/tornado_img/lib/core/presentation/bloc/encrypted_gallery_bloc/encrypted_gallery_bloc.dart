@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,11 +15,22 @@ import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_ent
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
+import 'package:image/image.dart' as img;
 
 part 'encrypted_gallery_bloc.freezed.dart';
 part 'encrypted_gallery_event.dart';
 part 'encrypted_gallery_state.dart';
 part 'encrypted_gallery_bloc_utils.dart';
+
+// Top-level function for isolate decryption
+typedef DecryptionTask = ({img.Image image, CryptoConfig config});
+
+Future<CryptoResult> _decryptImageInIsolate(DecryptionTask task) async {
+  return await ImageCrypto.decryptImageObject(
+    image: task.image,
+    config: task.config,
+  );
+}
 
 class EncryptedGalleryBloc
     extends Bloc<EncryptedGalleryEvent, EncryptedGalleryState> {
