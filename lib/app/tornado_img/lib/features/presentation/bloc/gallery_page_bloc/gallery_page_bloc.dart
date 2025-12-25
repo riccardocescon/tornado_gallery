@@ -57,6 +57,17 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
         onlyAll: true,
+        filterOption: FilterOptionGroup(
+          imageOption: const FilterOption(
+            sizeConstraint: SizeConstraint(ignoreSize: true),
+          ),
+          orders: [
+            const OrderOption(
+              type: OrderOptionType.createDate,
+              asc: false, // false = descending (newest first)
+            ),
+          ],
+        ),
       );
 
       if (albums.isEmpty) {
@@ -102,8 +113,9 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
           date: asset.createDateTime,
         );
 
-        final insertIndex = _findInsertIndexAscending(_images, newImage.date);
-        _images.insert(insertIndex, newImage);
+        // For pagination, simply append to the end to maintain scroll position
+        // PhotoManager already returns assets in chronological order (newest first)
+        _images.add(newImage);
       }
 
       _currentPage++;
@@ -142,11 +154,9 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
                   file: savedFile,
                   date: savedAsset.createDateTime,
                 );
-                final insertIndex = _findInsertIndexAscending(
-                  _images,
-                  newImage.date,
-                );
-                _images.insert(insertIndex, newImage);
+                
+                // For newly saved images, insert at the top (most recent)
+                _images.insert(0, newImage);
               }
             }
           } else {
@@ -203,13 +213,13 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
   }
 
   // Helper methods
-  int _findInsertIndexAscending(List<GalleryImage> images, DateTime date) {
+  int _findInsertIndexDescending(List<GalleryImage> images, DateTime date) {
     int left = 0;
     int right = images.length;
 
     while (left < right) {
       int mid = (left + right) ~/ 2;
-      if (images[mid].date.isBefore(date)) {
+      if (images[mid].date.isAfter(date)) {
         left = mid + 1;
       } else {
         right = mid;
@@ -224,6 +234,17 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
         onlyAll: true,
+        filterOption: FilterOptionGroup(
+          imageOption: const FilterOption(
+            sizeConstraint: SizeConstraint(ignoreSize: true),
+          ),
+          orders: [
+            const OrderOption(
+              type: OrderOptionType.createDate,
+              asc: false, // false = descending (newest first)
+            ),
+          ],
+        ),
       );
 
       if (albums.isEmpty) return null;
