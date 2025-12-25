@@ -40,7 +40,7 @@ class _HomepageState extends State<Homepage> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Text(
-              packageInfo.version,
+              '${packageInfo.version}+${packageInfo.buildNumber}',
               style: context.textTheme.labelLarge,
             ),
           ),

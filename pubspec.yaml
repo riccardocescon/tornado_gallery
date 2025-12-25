@@ -1,6 +1,6 @@
 name: tornado_img_workspace
 description: "Tornado Image - Monorepo workspace for image encryption app"
-version: 1.0.1
+version: 1.0.1+1
 publish_to: 'none'
 
 environment:
