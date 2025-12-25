@@ -44,11 +44,12 @@ extension HomepageEventPatterns on HomepageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _Refresh value)?  refresh,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _Refresh() when refresh != null:
+return refresh(_that);case _:
   return orElse();
 
 }
@@ -66,11 +67,12 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _Refresh value)  refresh,}){
 final _that = this;
 switch (_that) {
 case _Setup():
-return setup(_that);case _:
+return setup(_that);case _Refresh():
+return refresh(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -87,11 +89,12 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _Refresh value)?  refresh,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _Refresh() when refresh != null:
+return refresh(_that);case _:
   return null;
 
 }
@@ -108,10 +111,11 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  refresh,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _:
+return setup();case _Refresh() when refresh != null:
+return refresh();case _:
   return orElse();
 
 }
@@ -129,10 +133,11 @@ return setup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  refresh,}) {final _that = this;
 switch (_that) {
 case _Setup():
-return setup();case _:
+return setup();case _Refresh():
+return refresh();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -149,10 +154,11 @@ return setup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  refresh,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _:
+return setup();case _Refresh() when refresh != null:
+return refresh();case _:
   return null;
 
 }
@@ -165,6 +171,27 @@ return setup();case _:
 
 class _Setup extends HomepageEvent {
   const _Setup(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Refresh extends HomepageEvent {
+  const _Refresh(): super._();
   
 
 

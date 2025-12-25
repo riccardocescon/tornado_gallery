@@ -24,6 +24,12 @@ class _HomepageState extends State<Homepage> {
     context.read<HomepageBloc>().add(const HomepageEvent.setup());
     super.initState();
   }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    context.read<HomepageBloc>().add(const HomepageEvent.refresh());
+  }
 
   @override
   Widget build(BuildContext context) {

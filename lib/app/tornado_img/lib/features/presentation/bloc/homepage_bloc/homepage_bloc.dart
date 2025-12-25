@@ -19,7 +19,9 @@ part 'homepage_state.dart';
 part 'homepage_bloc_utils.dart';
 
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
-  StreamManager? _streamManager;
+  StreamManager<GalleryPageState>? _streamManager;
+
+  List<GalleryImage>? images;
 
 final _HomepageBlocUtils _utils = _HomepageBlocUtils();
 
@@ -39,34 +41,42 @@ final _HomepageBlocUtils _utils = _HomepageBlocUtils();
       final latestEncryptedImages = await _utils.loadLatestEncryptedImages(
         limit: 3,
       );
-      
-      List<GalleryImage>? images;
 
-      final galleryStream = galleryPageBloc.stream.map((galleryPageState) {
-        return galleryPageState.maybeMap(
+      _streamManager = StreamManager.fromStream(galleryPageBloc.stream);
+
+      await for (final galleryPageState in _streamManager!.stream) {
+        final update = galleryPageState.maybeMap(
           loaded: (value) {
             images = value.images;
-            return HomepageState.loaded(
-              images: images,
-              encryptedImages: latestEncryptedImages,
-            );
+            return true;
           },
           orElse:
-              () => HomepageState.loaded(
+              () => false,
+        );
+        if (!update) continue;
+
+        emit(
+          HomepageState.loaded(
                 images: images,
                 encryptedImages: latestEncryptedImages,
-              ),
+          ),
         );
-      });
-
-      _streamManager?.addStream(galleryStream);
-
-      await for (final state in galleryStream) {
-        emit(state);
       }
-
-      await _streamManager?.dispose();
-      _streamManager = null;
     });
+
+    on<_Refresh>((event, emit) async {
+      // Load latest encrypted images directly
+      final latestEncryptedImages = await _utils.loadLatestEncryptedImages(
+        limit: 3,
+      );
+      
+      emit(
+        HomepageState.loaded(
+          images: images,
+          encryptedImages: latestEncryptedImages,
+        ),
+      );
+    });
+      
   }
 }
