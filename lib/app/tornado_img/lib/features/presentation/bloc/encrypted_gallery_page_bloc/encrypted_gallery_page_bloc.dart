@@ -123,6 +123,14 @@ class EncrpytedGalleryPageBloc
             }
             _emit(emit);
           },
+          folderDeleted: (value) {
+            final deletedFolderPath = value.folderPath;
+            _entities.removeWhere((entity) {
+              return entity.isFolder &&
+                  entity.asFolder.path.endsWith(deletedFolderPath);
+            });
+            _emit(emit);
+          },
           orElse: () {},
         );
       }
@@ -139,7 +147,10 @@ class EncrpytedGalleryPageBloc
             (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
           );
 
-      if (files.isEmpty) {
+      // Filter out files/folders that no longer exist
+      final validFiles = files.where((file) => file.existsSync()).toList();
+
+      if (validFiles.isEmpty) {
         _hasMore = false;
         _isLoading = false;
         _emit(emit);
@@ -148,9 +159,9 @@ class EncrpytedGalleryPageBloc
 
       final start = _currentPage * _pageSize;
       final end = (_currentPage + 1) * _pageSize;
-      final pageFiles = files.sublist(
+      final pageFiles = validFiles.sublist(
         start,
-        end > files.length ? files.length : end,
+        end > validFiles.length ? validFiles.length : end,
       );
 
       if (pageFiles.isEmpty) {
@@ -209,28 +220,15 @@ class EncrpytedGalleryPageBloc
     });
 
     on<_DeleteFolder>((event, emit) async {
-      try {
-        emit(const EncrpytedGalleryPageState.loading());
-        final dir = await encryptedFolder;
-        final dirName = dir.path.split('/').last;
-        if (!await dir.exists()) {
-          log('Folder does not exist: $dirName');
-          return;
-        }
-
-        await dir.delete(recursive: true);
-        _entities.removeWhere(
-          (entity) => entity.isFolder && entity.asFolder.name == dirName,
-        );
-
-        _emit(emit);
-      } catch (e) {
-        log('Error deleting folder: $e');
-        emit(
-          EncrpytedGalleryPageState.failure(
-            message: 'Error deleting folder: $e',
-          ),
-        );
+      // Just delegate to global bloc, it will handle the deletion and notification
+      encryptedGalleryBloc.add(
+        EncryptedGalleryEvent.deleteFolder(folderName: event.folderName),
+      );
+      
+      // If we are in the deleted folder, emit folderDeleted state to navigate back
+      if (_root == event.folderName ||
+          (_root != null && _root!.endsWith(event.folderName))) {
+        emit(const EncrpytedGalleryPageState.folderDeleted());
       }
     });
 

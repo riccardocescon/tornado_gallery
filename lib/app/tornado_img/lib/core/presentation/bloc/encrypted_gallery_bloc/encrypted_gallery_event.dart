@@ -15,6 +15,10 @@ abstract class EncryptedGalleryEvent
     required List<EncryptedImage> images,
     required String password,
   }) = _DecryptFolder;
+  
+  const factory EncryptedGalleryEvent.deleteFolder({
+    required String folderName,
+  }) = _DeleteFolderGlobal;
 
   @override
   List<Object?> get props => [];

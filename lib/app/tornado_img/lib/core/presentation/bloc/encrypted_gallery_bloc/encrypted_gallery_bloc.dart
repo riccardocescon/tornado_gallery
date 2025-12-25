@@ -167,6 +167,26 @@ class EncryptedGalleryBloc
 
       emit(const EncryptedGalleryState.decryptedFolderCompleted());
     });
+
+    on<_DeleteFolderGlobal>((event, emit) async {
+      try {
+        final baseDir = await encryptedFolder;
+        final folderToDelete = Directory('${baseDir.path}/${event.folderName}');
+
+        if (!await folderToDelete.exists()) {
+          log('Folder does not exist: ${event.folderName}');
+          return;
+        }
+
+        await folderToDelete.delete(recursive: true);
+        log('Deleted folder globally: ${event.folderName}');
+
+        // Emit state to notify all pages
+        emit(EncryptedGalleryState.folderDeleted(folderPath: event.folderName));
+      } catch (e) {
+        log('Error deleting folder globally: $e');
+      }
+    });
   }
   
   // Method to clear memory (for memory management if needed)

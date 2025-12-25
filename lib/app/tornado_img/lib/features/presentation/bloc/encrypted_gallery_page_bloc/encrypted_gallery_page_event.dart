@@ -17,7 +17,9 @@ abstract class EncrpytedGalleryPageEvent
   const factory EncrpytedGalleryPageEvent.decryptFolder({
     required String password,
   }) = _DecryptFolder;
-  const factory EncrpytedGalleryPageEvent.deleteFolder() = _DeleteFolder;
+  const factory EncrpytedGalleryPageEvent.deleteFolder({
+    required String folderName,
+  }) = _DeleteFolder;
   const factory EncrpytedGalleryPageEvent.createFolder({
     required String folderName,
   }) = _CreateFolder;

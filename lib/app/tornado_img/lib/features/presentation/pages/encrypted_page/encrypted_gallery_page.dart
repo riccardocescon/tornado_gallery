@@ -244,7 +244,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   void _onDeleteFolder() {
     context.read<EncrpytedGalleryPageBloc>().add(
-      const EncrpytedGalleryPageEvent.deleteFolder(),
+      EncrpytedGalleryPageEvent.deleteFolder(folderName: root!),
     );
     context.pop(); // Close dialog
   }
@@ -257,6 +257,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
     return current.maybeMap(
       decrypted:
           (_) => previous.maybeMap(loading: (_) => true, orElse: () => false),
+      folderDeleted: (_) => true,
       failure: (_) => true,
       orElse: () => false,
     );
@@ -265,6 +266,7 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
   void _handleBlocState(BuildContext context, EncrpytedGalleryPageState state) {
     state.maybeMap(
       decrypted: _onDecryptedState,
+      folderDeleted: (_) => _onFolderDeletedState(context),
       failure: _onFailureState,
       orElse: () {},
     );
@@ -279,5 +281,10 @@ class _EncryptedGalleryPageState extends State<EncryptedGalleryPage> {
 
   void _onFailureState(dynamic value) {
     context.showErrorSnackbar(value.message);
+  }
+
+  void _onFolderDeletedState(BuildContext context) {
+    // Navigate back since the current folder was deleted
+    context.pop();
   }
 }

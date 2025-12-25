@@ -14,6 +14,7 @@ abstract class EncrpytedGalleryPageState
   }) = _Loaded;
   const factory EncrpytedGalleryPageState.decrypted({required Uint8List data}) =
       _Decrypted;
+  const factory EncrpytedGalleryPageState.folderDeleted() = _FolderDeleted;
   const factory EncrpytedGalleryPageState.failure({required String message}) =
       _Failure;
 
@@ -23,6 +24,7 @@ abstract class EncrpytedGalleryPageState
     loading: (_) => [],
     loaded: (value) => [value.entities, value.isLoading, value.hasMore],
     decrypted: (value) => [value.data],
+    folderDeleted: (_) => [],
     failure: (value) => [value.message],
   );
 }

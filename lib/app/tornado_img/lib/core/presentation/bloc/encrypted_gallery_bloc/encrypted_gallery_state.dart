@@ -16,6 +16,9 @@ abstract class EncryptedGalleryState
       _Decrypted;
   const factory EncryptedGalleryState.decryptedFolderCompleted() =
       _DecryptedFolderCompleted;
+  const factory EncryptedGalleryState.folderDeleted({
+    required String folderPath,
+  }) = _FolderDeleted;
   const factory EncryptedGalleryState.encryptionFailure({
     required EncryptionFailure failure,
   }) = _Failure;
@@ -27,6 +30,7 @@ abstract class EncryptedGalleryState
     loaded: (value) => [value.images],
     decrypted: (value) => [value.data],
     decryptedFolderCompleted: (_) => [],
+    folderDeleted: (value) => [value.folderPath],
     encryptionFailure: (value) => [value.failure],
   );
 }
