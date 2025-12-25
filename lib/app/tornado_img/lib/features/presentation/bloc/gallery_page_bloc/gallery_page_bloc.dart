@@ -220,25 +220,73 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
   }
 
   Future<AssetEntity?> _findSavedImageByName(String name) async {
-    final albums = await PhotoManager.getAssetPathList(
-      type: RequestType.image,
-      onlyAll: true,
-    );
-
-    if (albums.isNotEmpty) {
-      final recentAssets = await albums.first.getAssetListPaged(
-        page: 0,
-        size: 20,
+    try {
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        onlyAll: true,
       );
 
-      for (final asset in recentAssets) {
-        if (asset.title?.contains(name) == true) {
-          return asset;
+      if (albums.isEmpty) return null;
+
+      final assetsCount = await albums.first.assetCountAsync;
+      const int searchPageSize = 100;
+
+      log(
+        'Searching for "$name" in $assetsCount total assets (starting from most recent)',
+      );
+
+      // Calculate total pages
+      final totalPages = (assetsCount / searchPageSize).ceil();
+
+      // Start from the LAST page (most recent) and work backwards
+      for (int page = totalPages - 1; page >= 0; page--) {
+        final recentAssets = await albums.first.getAssetListPaged(
+          page: page,
+          size: searchPageSize,
+        );
+
+        // Early termination if no more assets
+        if (recentAssets.isEmpty) {
+          log('No more assets found at page $page, stopping search');
+          continue;
+        }
+
+        // Search within this page (reverse order to get most recent first)
+        for (int i = recentAssets.length - 1; i >= 0; i--) {
+          try {
+            final asset = recentAssets[i];
+            final title = await asset.titleAsync;
+            if (title == name) {
+              log(
+                'Found matching asset: $title at page $page (${totalPages - page} pages from end)',
+              );
+              return asset;
+            }
+          } catch (e) {
+            // Continue if single asset fails
+            log('Error getting title for asset: $e');
+          }
+        }
+        
+        log(
+          'Searched page $page (${recentAssets.length} assets) - ${totalPages - page} pages from end',
+        );
+
+        // Early exit after searching reasonable number of recent pages
+        if ((totalPages - page) > 10) {
+          log(
+            'Searched 10 most recent pages without success, stopping for performance',
+          );
+          break;
         }
       }
-    }
 
-    return null;
+      log('Image "$name" not found in recent assets');
+      return null;
+    } catch (e) {
+      log('Error in _findSavedImageByName: $e');
+      return null;
+    }
   }
 
   void _emit(Emitter<GalleryPageState> emit) {
