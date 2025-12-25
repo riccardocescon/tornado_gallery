@@ -10,8 +10,12 @@ abstract class EncryptedGalleryState
   const factory EncryptedGalleryState.loaded({
     required List<EncryptedImage> images,
   }) = _Loaded;
-  const factory EncryptedGalleryState.decrypted({required Uint8List data}) =
+  const factory EncryptedGalleryState.decrypted({
+    required EncryptedImage data,
+  }) =
       _Decrypted;
+  const factory EncryptedGalleryState.decryptedFolderCompleted() =
+      _DecryptedFolderCompleted;
   const factory EncryptedGalleryState.encryptionFailure({
     required EncryptionFailure failure,
   }) = _Failure;
@@ -22,6 +26,7 @@ abstract class EncryptedGalleryState
     loading: (_) => [],
     loaded: (value) => [value.images],
     decrypted: (value) => [value.data],
+    decryptedFolderCompleted: (_) => [],
     encryptionFailure: (value) => [value.failure],
   );
 }

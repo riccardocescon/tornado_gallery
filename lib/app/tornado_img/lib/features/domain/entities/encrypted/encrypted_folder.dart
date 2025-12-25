@@ -1,7 +1,7 @@
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
-class EncryptedFolder extends EncryptedEntity {
+class EncryptedFolder with EncryptedEntity {
   final String path;
   final List<EncryptedImage> images;
 
@@ -14,6 +14,11 @@ class EncryptedFolder extends EncryptedEntity {
   }
 
   EncryptedFolder({required this.images, required this.path});
+
+  @override
+  EncryptedFolder copyWith({List<EncryptedImage>? images}) {
+    return EncryptedFolder(images: images ?? this.images, path: path);
+  }
 
   factory EncryptedFolder.empty(String path) {
     return EncryptedFolder(images: [], path: path);

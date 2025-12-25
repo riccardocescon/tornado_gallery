@@ -15,6 +15,16 @@ class EncryptedImage extends AppImage with EncryptedEntity {
   });
 
   @override
+  EncryptedImage copyWith({Uint8List? decryptedBytes, bool? isDecrypting}) {
+    return EncryptedImage(
+      id: id,
+      file: file,
+      date: date,
+      decryptedBytes: decryptedBytes ?? this.decryptedBytes,
+    )..isDecrypting = isDecrypting ?? this.isDecrypting;
+  }
+
+  @override
   String toString() {
     return 'EncryptedImage(file: ${file.path}, date: $date)';
   }

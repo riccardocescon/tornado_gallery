@@ -209,22 +209,6 @@ class EncrpytedGalleryPageBloc
     on<_DecryptImage>((event, emit) async {
       emit(const EncrpytedGalleryPageState.loading());
 
-      // Listen to crypto bloc for results
-      final subscription = encryptedGalleryBloc.stream.listen((cryptoState) {
-        cryptoState.maybeMap(
-          decrypted: (value) {
-            emit(EncrpytedGalleryPageState.decrypted(data: value.data));
-          },
-          encryptionFailure: (value) {
-            emit(
-              EncrpytedGalleryPageState.failure(message: value.failure.message),
-            );
-          },
-          orElse: () {},
-        );
-      });
-
-      // Trigger decryption
       encryptedGalleryBloc.add(
         EncryptedGalleryEvent.decrytImage(
           image: event.image,
@@ -233,8 +217,28 @@ class EncrpytedGalleryPageBloc
         ),
       );
 
-      // Cancel subscription after a timeout or success
-      Timer(const Duration(seconds: 30), () => subscription.cancel());
+      await for (final cryptoState in encryptedGalleryBloc.stream) {
+        final completed = cryptoState.maybeMap(
+          decrypted: (value) {
+            emit(
+              EncrpytedGalleryPageState.decrypted(
+                data: value.data.decryptedBytes!,
+              ),
+            );
+
+            return true;
+          },
+          encryptionFailure: (value) {
+            emit(
+              EncrpytedGalleryPageState.failure(message: value.failure.message),
+            );
+            return true;
+          },
+          orElse: () => false,
+        );
+
+        if (completed) break;
+      }
     });
 
     on<_DecryptFolder>((event, emit) async {
@@ -250,22 +254,6 @@ class EncrpytedGalleryPageBloc
         return;
       }
 
-      // Listen to crypto bloc for results
-      final subscription = encryptedGalleryBloc.stream.listen((cryptoState) {
-        cryptoState.maybeMap(
-          decrypted: (value) {
-            _emit(emit); // Update UI with progress
-          },
-          encryptionFailure: (value) {
-            emit(
-              EncrpytedGalleryPageState.failure(message: value.failure.message),
-            );
-          },
-          orElse: () {},
-        );
-      });
-
-      // Trigger folder decryption
       encryptedGalleryBloc.add(
         EncryptedGalleryEvent.decrytFolder(
           images: imagesToDecrypt,
@@ -273,8 +261,34 @@ class EncrpytedGalleryPageBloc
         ),
       );
 
-      // Cancel subscription after a timeout
-      Timer(const Duration(minutes: 5), () => subscription.cancel());
+      await for (final cryptoState in encryptedGalleryBloc.stream) {
+        final completed = cryptoState.maybeMap(
+          decrypted: (value) {
+            final updatedImage = value.data.copyWith();
+            final index = _entities.indexWhere(
+              (entity) =>
+                  !entity.isFolder && entity.asImage.id == updatedImage.id,
+            );
+            if (index == -1) {
+              _entities.add(updatedImage);
+            } else {
+              _entities[index] = updatedImage;
+            }
+            _emit(emit);
+            return false;
+          },
+          decryptedFolderCompleted: (value) => true,
+          encryptionFailure: (value) {
+            emit(
+              EncrpytedGalleryPageState.failure(message: value.failure.message),
+            );
+            return false;
+          },
+          orElse: () => false,
+        );
+
+        if (completed) break;
+      }
     });
   }
 

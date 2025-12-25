@@ -61,7 +61,12 @@ class EncryptedGalleryBloc
           emit(EncryptedGalleryState.encryptionFailure(failure: failure));
         },
         (decryptedBytes) {
-          emit(EncryptedGalleryState.decrypted(data: decryptedBytes));
+          final localImage = _globalImages.firstWhere(
+            (img) => img.id == event.image.id,
+            orElse: () => event.image,
+          );
+          localImage.decryptedBytes = decryptedBytes;
+          emit(EncryptedGalleryState.decrypted(data: localImage));
         },
       );
     });
@@ -89,14 +94,15 @@ class EncryptedGalleryBloc
             log('Decryption succeeded for image ${image.id}');
             image.isDecrypting = false;
             image.decryptedBytes = decryptedBytes;
+            emit(EncryptedGalleryState.decrypted(data: image));
           },
         );
       }
 
-      emit(
-        EncryptedGalleryState.decrypted(data: Uint8List(0)),
-      ); // Signal completion
+      
       log('Decryption of entire folder completed');
+
+      emit(const EncryptedGalleryState.decryptedFolderCompleted());
     });
   }
 }
