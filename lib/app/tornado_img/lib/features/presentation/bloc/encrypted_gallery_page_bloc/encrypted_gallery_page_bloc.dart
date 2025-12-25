@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/presentation/bloc/encrypted_gallery_bloc/encrypted_gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
@@ -82,7 +83,7 @@ class EncrpytedGalleryPageBloc
       _isLoading = true;
 
       final files =
-          (_album as Directory).listSync().toList()..sort(
+          _album!.listSync().toList()..sort(
             (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
           );
 
@@ -107,21 +108,31 @@ class EncrpytedGalleryPageBloc
         return;
       }
 
+      // Collect all image data first
+      final imageDataList = <ImageData>[];
+      final foldersList = <EncryptedFolder>[];
+      
       for (final fileSystem in pageFiles) {
         final fileName = fileSystem.path.split('/').last;
         final date = fileSystem.statSync().modified;
         final file = File(fileSystem.path);
         if (fileName.contains('.')) {
-          _utils.insertImageSorted(
-            _entities,
-            EncryptedImage(id: fileName, file: file, date: date),
-          );
+          imageDataList.add(ImageData(id: fileName, file: file, date: date));
         } else {
-          _utils.insertFolderSorted(
-            _entities,
-            EncryptedFolder.empty(fileSystem.path),
-          );
+          foldersList.add(EncryptedFolder.empty(fileSystem.path));
         }
+      }
+
+      // Use factory method to get images with preserved state
+      final persistentImages = encryptedGalleryBloc
+          .createImagesWithPersistedState(imageDataList);
+
+      // Insert all entities
+      for (final image in persistentImages) {
+        _utils.insertImageSorted(_entities, image);
+      }
+      for (final folder in foldersList) {
+        _utils.insertFolderSorted(_entities, folder);
       }
 
       _currentPage++;

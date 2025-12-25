@@ -212,23 +212,6 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
     );
   }
 
-  // Helper methods
-  int _findInsertIndexDescending(List<GalleryImage> images, DateTime date) {
-    int left = 0;
-    int right = images.length;
-
-    while (left < right) {
-      int mid = (left + right) ~/ 2;
-      if (images[mid].date.isAfter(date)) {
-        left = mid + 1;
-      } else {
-        right = mid;
-      }
-    }
-
-    return left;
-  }
-
   Future<AssetEntity?> _findSavedImageByName(String name) async {
     try {
       final albums = await PhotoManager.getAssetPathList(
