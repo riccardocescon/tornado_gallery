@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/entities/image_data.dart';
+import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/encrypted_gallery_bloc/encrypted_gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
@@ -31,6 +32,8 @@ class EncrpytedGalleryPageBloc
 
   final _EncryptedGalleryPageBlocUtils _utils =
       _EncryptedGalleryPageBlocUtils();
+  
+  StreamManager<EncryptedGalleryState>? _streamManager;
 
   // Delegate to core bloc for operations
   final encryptedGalleryBloc = getIt<EncryptedGalleryBloc>();
@@ -48,6 +51,12 @@ class EncrpytedGalleryPageBloc
       return Directory('${baseDir.path}/$_root');
     }
     return baseDir;
+  }
+
+  @override
+  Future<void> close() {
+    _streamManager?.dispose();
+    return super.close();
   }
 
   EncrpytedGalleryPageBloc()
@@ -73,6 +82,49 @@ class EncrpytedGalleryPageBloc
         _hasMore = true;
 
         add(const EncrpytedGalleryPageEvent.loadNextPage());
+      }
+
+      _streamManager = StreamManager<EncryptedGalleryState>();
+      _streamManager!.addStream(encryptedGalleryBloc.stream);
+
+      await for (final state in _streamManager!.stream) {
+        state.maybeMap(
+          decrypted: (value) {
+            final updatedImage = value.data.copyWith();
+            final index = _entities.indexWhere(
+              (entity) =>
+                  !entity.isFolder && entity.asImage.id == updatedImage.id,
+            );
+            if (index != -1) {
+              _entities[index] = updatedImage;
+            } else {
+              _entities.add(updatedImage);
+            }
+
+            _emit(emit);
+          },
+          loaded: (value) {
+            for (final entity in value.images) {
+              if (entity.isFolder) {
+                final existingIndex = _entities.indexWhere(
+                  (e) => e.isFolder && e.asFolder.path == entity.asFolder.path,
+                );
+                if (existingIndex == -1) {
+                  _utils.insertFolderSorted(_entities, entity.asFolder);
+                }
+              } else {
+                final existingIndex = _entities.indexWhere(
+                  (e) => !e.isFolder && e.asImage.id == entity.asImage.id,
+                );
+                if (existingIndex == -1) {
+                  _utils.insertImageSorted(_entities, entity.asImage);
+                }
+              }
+            }
+            _emit(emit);
+          },
+          orElse: () {},
+        );
       }
     });
 
@@ -275,20 +327,6 @@ class EncrpytedGalleryPageBloc
 
       await for (final cryptoState in encryptedGalleryBloc.stream) {
         final completed = cryptoState.maybeMap(
-          decrypted: (value) {
-            final updatedImage = value.data.copyWith();
-            final index = _entities.indexWhere(
-              (entity) =>
-                  !entity.isFolder && entity.asImage.id == updatedImage.id,
-            );
-            if (index == -1) {
-              _entities.add(updatedImage);
-            } else {
-              _entities[index] = updatedImage;
-            }
-            _emit(emit);
-            return false;
-          },
           decryptedFolderCompleted: (value) => true,
           encryptionFailure: (value) {
             emit(
