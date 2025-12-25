@@ -243,7 +243,8 @@ class EncrpytedGalleryPageBloc
 
     on<_DecryptFolder>((event, emit) async {
       emit(const EncrpytedGalleryPageState.loading());
-      final imagesToDecrypt = images;
+      final imagesToDecrypt =
+          images.where((e) => e.decryptedBytes == null).toList();
 
       if (imagesToDecrypt.isEmpty) {
         emit(
