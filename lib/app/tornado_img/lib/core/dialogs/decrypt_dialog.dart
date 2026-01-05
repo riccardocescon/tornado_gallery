@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tornado_img_app/core/animations/animated_text.dart';
 import 'package:tornado_img_app/extentions.dart';
 
 class DecryptDialog extends StatefulWidget {
@@ -34,10 +35,17 @@ class _DecryptDialogState extends State<DecryptDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          isLoading
+              ? AnimatedText(
+                texts: [
+                  'Decrypting your image.',
+                  'Decrypting your image..',
+                  'Decrypting your image...',
+                ],
+              )
+              :
           Text(
-            isLoading
-                ? 'Decrypting your image...'
-                : 'Write the password to decrypt your image',
+                'Write the password to decrypt your image',
             style: context.textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
