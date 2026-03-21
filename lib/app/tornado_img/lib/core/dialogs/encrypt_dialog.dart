@@ -127,7 +127,7 @@ class _EncryptDialogState extends State<EncryptDialog> {
     final image = SizedBox.square(
       dimension: 100,
       child: ClipRRect(
-        borderRadius: AppStyle.borderRadius,
+        borderRadius: AppStyle.cardBorderRadius,
         child: Image.file(widget.image.file, fit: BoxFit.cover),
       ),
     );
@@ -135,7 +135,7 @@ class _EncryptDialogState extends State<EncryptDialog> {
     if (!isLoading) return image;
 
     return ClipRRect(
-      borderRadius: AppStyle.borderRadius,
+      borderRadius: AppStyle.cardBorderRadius,
       child: SizedBox.square(
         dimension: 100,
         child: GlitchLoader(
@@ -178,13 +178,13 @@ class _EncryptDialogState extends State<EncryptDialog> {
           decoration: InputDecoration(
             hintText: 'Select Folder',
             border: OutlineInputBorder(
-              borderRadius: AppStyle.borderRadius,
+              borderRadius: AppStyle.cardBorderRadius,
               borderSide: BorderSide(color: context.colorScheme.outline),
             ),
             icon: const Icon(Icons.folder_open_rounded, size: 20),
             iconColor: context.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
-          borderRadius: AppStyle.borderRadius,
+          borderRadius: AppStyle.cardBorderRadius,
           isExpanded: true,
           items:
               folderPaths.map((path) {

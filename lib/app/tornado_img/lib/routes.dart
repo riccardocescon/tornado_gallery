@@ -5,7 +5,7 @@ import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gal
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_page.dart';
-import 'package:tornado_img_app/features/presentation/pages/homepage.dart';
+import 'package:tornado_img_app/features/presentation/pages/homepage/homepage.dart';
 import 'package:tornado_img_app/features/presentation/pages/test_page.dart';
 import 'package:tornado_img_app/injection_container.dart';
 

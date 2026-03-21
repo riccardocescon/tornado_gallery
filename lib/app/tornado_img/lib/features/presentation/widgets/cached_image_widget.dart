@@ -64,7 +64,7 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
     return GestureDetector(
       onTap: widget.onTap,
       child: ClipRRect(
-        borderRadius: AppStyle.borderRadius,
+        borderRadius: AppStyle.cardBorderRadius,
         child: Image.file(
           widget.image.file,
           fit: BoxFit.cover,

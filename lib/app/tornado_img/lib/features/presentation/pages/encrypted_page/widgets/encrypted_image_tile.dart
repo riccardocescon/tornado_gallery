@@ -16,7 +16,7 @@ class _EncryptedImageTile extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: ClipRRect(
-            borderRadius: AppStyle.borderRadius,
+            borderRadius: AppStyle.cardBorderRadius,
             child:
                 bytes != null
                     ? _DecryptedImageDisplay(bytes: bytes)

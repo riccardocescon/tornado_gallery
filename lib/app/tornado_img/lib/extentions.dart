@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tornado_img_app/theme/app_colors_ext.dart';
 
 extension BuildContextX on BuildContext {
   /// Returns the current [MediaQuery] of the context.
@@ -12,6 +13,8 @@ extension BuildContextX on BuildContext {
 
   /// Returns the current [ColorScheme] of the context.
   ColorScheme get colorScheme => theme.colorScheme;
+
+  AppColorsExtension get appColors => theme.extension<AppColorsExtension>()!;
 
   void showSuccessSnackbar(String text) {
     ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(text)));

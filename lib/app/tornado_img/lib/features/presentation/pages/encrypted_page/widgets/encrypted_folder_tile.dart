@@ -21,7 +21,7 @@ class _EncryptedFolderTile extends StatelessWidget {
   ButtonStyle _buildButtonStyle(BuildContext context) {
     return FilledButton.styleFrom(
       backgroundColor: context.colorScheme.primary.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(borderRadius: AppStyle.borderRadius),
+      shape: RoundedRectangleBorder(borderRadius: AppStyle.cardBorderRadius),
     );
   }
 

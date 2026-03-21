@@ -1,9 +1,3 @@
 # ninja log v5
-1	381	7957416570874781	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	5a8f360596bb9235
-388	479	7957416572019342	C:/dev/projects/tornado_img/lib/app/tornado_img/build/tornado_img_crypto/intermediates/cxx/Debug/1s212s23/obj/arm64-v8a/libtornado_crypto.so	2734bd375f076fd7
-3	394	7957433382653812	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	5a8f360596bb9235
-394	487	7957433383684484	C:/dev/projects/tornado_img/lib/app/tornado_img/build/tornado_img_crypto/intermediates/cxx/Debug/1s212s23/obj/arm64-v8a/libtornado_crypto.so	2734bd375f076fd7
-3	432	7957468434841577	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	5a8f360596bb9235
-432	522	7957468435858372	C:/dev/projects/tornado_img/lib/app/tornado_img/build/tornado_img_crypto/intermediates/cxx/Debug/1s212s23/obj/arm64-v8a/libtornado_crypto.so	2734bd375f076fd7
 16	13951	7957988895490117	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	5a8f360596bb9235
 13952	14145	7957988897538528	C:/dev/projects/tornado_img/lib/app/tornado_img/build/tornado_img_crypto/intermediates/cxx/Debug/1s212s23/obj/arm64-v8a/libtornado_crypto.so	2734bd375f076fd7
