@@ -3,21 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
-import 'package:tornado_img_app/features/presentation/widgets/bottom_app_nav_bar.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
 part 'widgets/info_cards.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     context.read<HomepageBloc>().add(const HomepageEvent.setup());
@@ -32,33 +31,26 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 24),
-                _title(),
-                const SizedBox(height: 24),
-                _actions(),
-                const SizedBox(height: 24),
-                const _ArchiveState(),
-                const SizedBox(height: 24),
-                const _InfoCards(),
-              ],
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: SingleChildScrollView(
+        child: Column(
+          spacing: 16,
+          children: [
+            const SizedBox(height: 2),
+            _title(),
+            _actions(),
+            const _ArchiveState(),
+            const _InfoCards(),
+          ],
         ),
       ),
-      bottomNavigationBar: BottomAppNavBar(),
     );
   }
 
   Widget _title() {
     return Column(
-      spacing: 12,
+      spacing: 8,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(

@@ -2,29 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 
-enum _Pages {
+enum Pages {
   home(icon: Icons.home, label: 'Home'),
   archive(icon: Icons.lock_rounded, label: 'Archive'),
   settings(icon: Icons.settings, label: 'Settings');
 
-  const _Pages({required this.icon, required this.label});
+  const Pages({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
 }
 
 class BottomAppNavBar extends StatefulWidget {
-  const BottomAppNavBar({super.key});
+  const BottomAppNavBar({super.key, this.onPageChanged});
+
+  final void Function(Pages page)? onPageChanged;
 
   @override
   State<BottomAppNavBar> createState() => _BottomAppNavBarState();
 }
 
 class _BottomAppNavBarState extends State<BottomAppNavBar> {
-  _Pages _currentPage = _Pages.home;
+  Pages _currentPage = Pages.home;
 
   Alignment _pillAlignment(int index) {
-    final count = _Pages.values.length;
+    final count = Pages.values.length;
     if (count == 1) return Alignment.center;
     return Alignment(-1.0 + (2.0 * index) / (count - 1), 0);
   }
@@ -47,7 +49,7 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
           children: [
             _slidingPill(),
 
-            Row(children: _Pages.values.map(_tab).toList()),
+            Row(children: Pages.values.map(_tab).toList()),
           ],
         ),
       ),
@@ -60,7 +62,7 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
       curve: Curves.easeInOutCubicEmphasized,
       alignment: _pillAlignment(_currentPage.index),
       child: FractionallySizedBox(
-        widthFactor: 1 / _Pages.values.length,
+        widthFactor: 1 / Pages.values.length,
         child: Container(
           height: 32,
           decoration: BoxDecoration(
@@ -72,13 +74,16 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
     );
   }
 
-  Widget _tab(_Pages page) {
+  Widget _tab(Pages page) {
     final isSelected = page == _currentPage;
 
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTap: () => setState(() => _currentPage = page),
+        onTap: () {
+          setState(() => _currentPage = page);
+          widget.onPageChanged?.call(page);
+        },
         child: SizedBox(
           height: 32,
           child: Row(

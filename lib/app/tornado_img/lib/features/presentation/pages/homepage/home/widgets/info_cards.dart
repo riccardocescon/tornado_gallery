@@ -1,4 +1,4 @@
-part of '../homepage.dart';
+part of '../home_page.dart';
 
 class _InfoCards extends StatelessWidget {
   const _InfoCards();

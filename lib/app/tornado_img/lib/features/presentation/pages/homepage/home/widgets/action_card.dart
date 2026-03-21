@@ -1,4 +1,4 @@
-part of '../homepage.dart';
+part of '../home_page.dart';
 
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
@@ -99,11 +99,7 @@ class _ActionCard extends StatelessWidget {
                 spacing: 4,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    buttonIcon,
-                    size: 14,
-                    color: foregroundButtonColor,
-                  ),
+                  Icon(buttonIcon, size: 14, color: foregroundButtonColor),
                   Text(
                     buttonText,
                     style: context.textTheme.bodySmall?.copyWith(

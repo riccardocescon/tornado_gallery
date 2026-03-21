@@ -1,4 +1,4 @@
-part of '../homepage.dart';
+part of '../home_page.dart';
 
 class _ArchiveState extends StatelessWidget {
   const _ArchiveState();
@@ -100,48 +100,43 @@ class _ArchiveState extends StatelessWidget {
 
   Widget _openArchiveButton(BuildContext context) {
     return FilledButton(
-                    onPressed: () {},
-                    style: FilledButton.styleFrom(
-                      backgroundColor: context.appColors.softButton,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            AppStyle.cardBorderRadius -
-                            const BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 8,
-                          children: [
-                            Icon(
-                              Icons.lock_rounded,
-                              size: 18,
+      onPressed: () {},
+      style: FilledButton.styleFrom(
+        backgroundColor: context.appColors.softButton,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              AppStyle.cardBorderRadius -
+              const BorderRadius.all(Radius.circular(8)),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.centerRight,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
+            children: [
+              Icon(
+                Icons.lock_rounded,
+                size: 18,
                 color: context.colorScheme.onSurface,
-                            ),
-                            Text(
-                              "Open archive",
-                              style: context.textTheme.bodySmall?.copyWith(
+              ),
+              Text(
+                "Open archive",
+                style: context.textTheme.bodySmall?.copyWith(
                   color: context.colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-            color: context.colorScheme.onSurface.withValues(
-                            alpha: 0.8,
-                          ),
-                        ),
-                      ],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 16,
+            color: context.colorScheme.onSurface.withValues(alpha: 0.8),
+          ),
+        ],
       ),
     );
   }
