@@ -1,12 +1,15 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 class ImageData {
-  final String id;
-  final File file;
-  final DateTime date;
+  final int width;
+  final int height;
+  final int channels;
+  final Uint8List bytes;
 
-  const ImageData({required this.id, required this.file, required this.date});
-
-  @override
-  String toString() => 'ImageData(id: $id, file: ${file.path}, date: $date)';
+  const ImageData({
+    required this.width,
+    required this.height,
+    required this.channels,
+    required this.bytes,
+  });
 }

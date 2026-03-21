@@ -20,6 +20,10 @@ mixin _$EncryptedGalleryEvent {
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryEvent()';
+}
 
 
 }
@@ -44,13 +48,13 @@ extension EncryptedGalleryEventPatterns on EncryptedGalleryEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _DecryptImage value)?  decrytImage,TResult Function( _DecryptFolder value)?  decrytFolder,TResult Function( _DeleteFolderGlobal value)?  deleteFolder,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _DecryptImage value)?  decryptImage,TResult Function( _DecryptFolder value)?  decryptFolder,TResult Function( _DeleteFolderGlobal value)?  deleteFolderGlobal,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _DecryptImage() when decrytImage != null:
-return decrytImage(_that);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that);case _DeleteFolderGlobal() when deleteFolder != null:
-return deleteFolder(_that);case _:
+case _DecryptImage() when decryptImage != null:
+return decryptImage(_that);case _DecryptFolder() when decryptFolder != null:
+return decryptFolder(_that);case _DeleteFolderGlobal() when deleteFolderGlobal != null:
+return deleteFolderGlobal(_that);case _:
   return orElse();
 
 }
@@ -68,13 +72,13 @@ return deleteFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _DecryptImage value)  decrytImage,required TResult Function( _DecryptFolder value)  decrytFolder,required TResult Function( _DeleteFolderGlobal value)  deleteFolder,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _DecryptImage value)  decryptImage,required TResult Function( _DecryptFolder value)  decryptFolder,required TResult Function( _DeleteFolderGlobal value)  deleteFolderGlobal,}){
 final _that = this;
 switch (_that) {
 case _DecryptImage():
-return decrytImage(_that);case _DecryptFolder():
-return decrytFolder(_that);case _DeleteFolderGlobal():
-return deleteFolder(_that);case _:
+return decryptImage(_that);case _DecryptFolder():
+return decryptFolder(_that);case _DeleteFolderGlobal():
+return deleteFolderGlobal(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -91,13 +95,13 @@ return deleteFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _DecryptImage value)?  decrytImage,TResult? Function( _DecryptFolder value)?  decrytFolder,TResult? Function( _DeleteFolderGlobal value)?  deleteFolder,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _DecryptImage value)?  decryptImage,TResult? Function( _DecryptFolder value)?  decryptFolder,TResult? Function( _DeleteFolderGlobal value)?  deleteFolderGlobal,}){
 final _that = this;
 switch (_that) {
-case _DecryptImage() when decrytImage != null:
-return decrytImage(_that);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that);case _DeleteFolderGlobal() when deleteFolder != null:
-return deleteFolder(_that);case _:
+case _DecryptImage() when decryptImage != null:
+return decryptImage(_that);case _DecryptFolder() when decryptFolder != null:
+return decryptFolder(_that);case _DeleteFolderGlobal() when deleteFolderGlobal != null:
+return deleteFolderGlobal(_that);case _:
   return null;
 
 }
@@ -114,12 +118,12 @@ return deleteFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult Function( List<EncryptedImage> images,  String password)?  decrytFolder,TResult Function( String folderName)?  deleteFolder,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image,  String password)?  decryptImage,TResult Function( List<EncryptedImage> images,  String password)?  decryptFolder,TResult Function( String folderName)?  deleteFolderGlobal,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _DecryptImage() when decrytImage != null:
-return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that.images,_that.password);case _DeleteFolderGlobal() when deleteFolder != null:
-return deleteFolder(_that.folderName);case _:
+case _DecryptImage() when decryptImage != null:
+return decryptImage(_that.image,_that.password);case _DecryptFolder() when decryptFolder != null:
+return decryptFolder(_that.images,_that.password);case _DeleteFolderGlobal() when deleteFolderGlobal != null:
+return deleteFolderGlobal(_that.folderName);case _:
   return orElse();
 
 }
@@ -137,12 +141,12 @@ return deleteFolder(_that.folderName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image,  String password,  String? path)  decrytImage,required TResult Function( List<EncryptedImage> images,  String password)  decrytFolder,required TResult Function( String folderName)  deleteFolder,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image,  String password)  decryptImage,required TResult Function( List<EncryptedImage> images,  String password)  decryptFolder,required TResult Function( String folderName)  deleteFolderGlobal,}) {final _that = this;
 switch (_that) {
 case _DecryptImage():
-return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder():
-return decrytFolder(_that.images,_that.password);case _DeleteFolderGlobal():
-return deleteFolder(_that.folderName);case _:
+return decryptImage(_that.image,_that.password);case _DecryptFolder():
+return decryptFolder(_that.images,_that.password);case _DeleteFolderGlobal():
+return deleteFolderGlobal(_that.folderName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -159,12 +163,12 @@ return deleteFolder(_that.folderName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image,  String password,  String? path)?  decrytImage,TResult? Function( List<EncryptedImage> images,  String password)?  decrytFolder,TResult? Function( String folderName)?  deleteFolder,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image,  String password)?  decryptImage,TResult? Function( List<EncryptedImage> images,  String password)?  decryptFolder,TResult? Function( String folderName)?  deleteFolderGlobal,}) {final _that = this;
 switch (_that) {
-case _DecryptImage() when decrytImage != null:
-return decrytImage(_that.image,_that.password,_that.path);case _DecryptFolder() when decrytFolder != null:
-return decrytFolder(_that.images,_that.password);case _DeleteFolderGlobal() when deleteFolder != null:
-return deleteFolder(_that.folderName);case _:
+case _DecryptImage() when decryptImage != null:
+return decryptImage(_that.image,_that.password);case _DecryptFolder() when decryptFolder != null:
+return decryptFolder(_that.images,_that.password);case _DeleteFolderGlobal() when deleteFolderGlobal != null:
+return deleteFolderGlobal(_that.folderName);case _:
   return null;
 
 }
@@ -176,12 +180,11 @@ return deleteFolder(_that.folderName);case _:
 
 
 class _DecryptImage extends EncryptedGalleryEvent {
-  const _DecryptImage({required this.image, required this.password, required this.path}): super._();
+  const _DecryptImage({required this.image, required this.password}): super._();
   
 
  final  EncryptedImage image;
  final  String password;
- final  String? path;
 
 /// Create a copy of EncryptedGalleryEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -193,6 +196,10 @@ _$DecryptImageCopyWith<_DecryptImage> get copyWith => __$DecryptImageCopyWithImp
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryEvent.decryptImage(image: $image, password: $password)';
+}
 
 
 }
@@ -202,7 +209,7 @@ abstract mixin class _$DecryptImageCopyWith<$Res> implements $EncryptedGalleryEv
   factory _$DecryptImageCopyWith(_DecryptImage value, $Res Function(_DecryptImage) _then) = __$DecryptImageCopyWithImpl;
 @useResult
 $Res call({
- EncryptedImage image, String password, String? path
+ EncryptedImage image, String password
 });
 
 
@@ -219,12 +226,11 @@ class __$DecryptImageCopyWithImpl<$Res>
 
 /// Create a copy of EncryptedGalleryEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? image = null,Object? password = null,Object? path = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? image = null,Object? password = null,}) {
   return _then(_DecryptImage(
 image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
 as EncryptedImage,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,path: freezed == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String?,
+as String,
   ));
 }
 
@@ -257,6 +263,10 @@ _$DecryptFolderCopyWith<_DecryptFolder> get copyWith => __$DecryptFolderCopyWith
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryEvent.decryptFolder(images: $images, password: $password)';
+}
 
 
 }
@@ -313,6 +323,10 @@ _$DeleteFolderGlobalCopyWith<_DeleteFolderGlobal> get copyWith => __$DeleteFolde
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryEvent.deleteFolderGlobal(folderName: $folderName)';
+}
 
 
 }
@@ -358,6 +372,10 @@ mixin _$EncryptedGalleryState {
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState()';
+}
 
 
 }
@@ -382,16 +400,15 @@ extension EncryptedGalleryStatePatterns on EncryptedGalleryState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Loaded value)?  loaded,TResult Function( _Decrypted value)?  decrypted,TResult Function( _DecryptedFolderCompleted value)?  decryptedFolderCompleted,TResult Function( _FolderDeleted value)?  folderDeleted,TResult Function( _Failure value)?  encryptionFailure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Decrypted value)?  decrypted,TResult Function( _DecryptedFolderCompleted value)?  decryptedFolderCompleted,TResult Function( _FolderDeleted value)?  folderDeleted,TResult Function( _EncryptionFailure value)?  encryptionFailure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Decrypted() when decrypted != null:
+return loading(_that);case _Decrypted() when decrypted != null:
 return decrypted(_that);case _DecryptedFolderCompleted() when decryptedFolderCompleted != null:
 return decryptedFolderCompleted(_that);case _FolderDeleted() when folderDeleted != null:
-return folderDeleted(_that);case _Failure() when encryptionFailure != null:
+return folderDeleted(_that);case _EncryptionFailure() when encryptionFailure != null:
 return encryptionFailure(_that);case _:
   return orElse();
 
@@ -410,16 +427,15 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Loaded value)  loaded,required TResult Function( _Decrypted value)  decrypted,required TResult Function( _DecryptedFolderCompleted value)  decryptedFolderCompleted,required TResult Function( _FolderDeleted value)  folderDeleted,required TResult Function( _Failure value)  encryptionFailure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Decrypted value)  decrypted,required TResult Function( _DecryptedFolderCompleted value)  decryptedFolderCompleted,required TResult Function( _FolderDeleted value)  folderDeleted,required TResult Function( _EncryptionFailure value)  encryptionFailure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _Loaded():
-return loaded(_that);case _Decrypted():
+return loading(_that);case _Decrypted():
 return decrypted(_that);case _DecryptedFolderCompleted():
 return decryptedFolderCompleted(_that);case _FolderDeleted():
-return folderDeleted(_that);case _Failure():
+return folderDeleted(_that);case _EncryptionFailure():
 return encryptionFailure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -437,16 +453,15 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Loaded value)?  loaded,TResult? Function( _Decrypted value)?  decrypted,TResult? Function( _DecryptedFolderCompleted value)?  decryptedFolderCompleted,TResult? Function( _FolderDeleted value)?  folderDeleted,TResult? Function( _Failure value)?  encryptionFailure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Decrypted value)?  decrypted,TResult? Function( _DecryptedFolderCompleted value)?  decryptedFolderCompleted,TResult? Function( _FolderDeleted value)?  folderDeleted,TResult? Function( _EncryptionFailure value)?  encryptionFailure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Decrypted() when decrypted != null:
+return loading(_that);case _Decrypted() when decrypted != null:
 return decrypted(_that);case _DecryptedFolderCompleted() when decryptedFolderCompleted != null:
 return decryptedFolderCompleted(_that);case _FolderDeleted() when folderDeleted != null:
-return folderDeleted(_that);case _Failure() when encryptionFailure != null:
+return folderDeleted(_that);case _EncryptionFailure() when encryptionFailure != null:
 return encryptionFailure(_that);case _:
   return null;
 
@@ -464,15 +479,14 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<EncryptedImage> images)?  loaded,TResult Function( EncryptedImage data)?  decrypted,TResult Function()?  decryptedFolderCompleted,TResult Function( String folderPath)?  folderDeleted,TResult Function( EncryptionFailure failure)?  encryptionFailure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( EncryptedImage data)?  decrypted,TResult Function()?  decryptedFolderCompleted,TResult Function( String folderPath)?  folderDeleted,TResult Function( EncryptionFailure failure)?  encryptionFailure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Decrypted() when decrypted != null:
+return loading();case _Decrypted() when decrypted != null:
 return decrypted(_that.data);case _DecryptedFolderCompleted() when decryptedFolderCompleted != null:
 return decryptedFolderCompleted();case _FolderDeleted() when folderDeleted != null:
-return folderDeleted(_that.folderPath);case _Failure() when encryptionFailure != null:
+return folderDeleted(_that.folderPath);case _EncryptionFailure() when encryptionFailure != null:
 return encryptionFailure(_that.failure);case _:
   return orElse();
 
@@ -491,15 +505,14 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<EncryptedImage> images)  loaded,required TResult Function( EncryptedImage data)  decrypted,required TResult Function()  decryptedFolderCompleted,required TResult Function( String folderPath)  folderDeleted,required TResult Function( EncryptionFailure failure)  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( EncryptedImage data)  decrypted,required TResult Function()  decryptedFolderCompleted,required TResult Function( String folderPath)  folderDeleted,required TResult Function( EncryptionFailure failure)  encryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Loaded():
-return loaded(_that.images);case _Decrypted():
+return loading();case _Decrypted():
 return decrypted(_that.data);case _DecryptedFolderCompleted():
 return decryptedFolderCompleted();case _FolderDeleted():
-return folderDeleted(_that.folderPath);case _Failure():
+return folderDeleted(_that.folderPath);case _EncryptionFailure():
 return encryptionFailure(_that.failure);case _:
   throw StateError('Unexpected subclass');
 
@@ -517,15 +530,14 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<EncryptedImage> images)?  loaded,TResult? Function( EncryptedImage data)?  decrypted,TResult? Function()?  decryptedFolderCompleted,TResult? Function( String folderPath)?  folderDeleted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( EncryptedImage data)?  decrypted,TResult? Function()?  decryptedFolderCompleted,TResult? Function( String folderPath)?  folderDeleted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when loaded != null:
-return loaded(_that.images);case _Decrypted() when decrypted != null:
+return loading();case _Decrypted() when decrypted != null:
 return decrypted(_that.data);case _DecryptedFolderCompleted() when decryptedFolderCompleted != null:
 return decryptedFolderCompleted();case _FolderDeleted() when folderDeleted != null:
-return folderDeleted(_that.folderPath);case _Failure() when encryptionFailure != null:
+return folderDeleted(_that.folderPath);case _EncryptionFailure() when encryptionFailure != null:
 return encryptionFailure(_that.failure);case _:
   return null;
 
@@ -548,6 +560,10 @@ class _Initial extends EncryptedGalleryState {
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState.initial()';
+}
 
 
 }
@@ -569,73 +585,16 @@ class _Loading extends EncryptedGalleryState {
 
 
 
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class _Loaded extends EncryptedGalleryState {
-  const _Loaded({required final  List<EncryptedImage> images}): _images = images,super._();
-  
-
- final  List<EncryptedImage> _images;
- List<EncryptedImage> get images {
-  if (_images is EqualUnmodifiableListView) return _images;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_images);
-}
-
-
-/// Create a copy of EncryptedGalleryState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _$identity);
-
-
-
-
-
-
-
-}
-
-/// @nodoc
-abstract mixin class _$LoadedCopyWith<$Res> implements $EncryptedGalleryStateCopyWith<$Res> {
-  factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
-@useResult
-$Res call({
- List<EncryptedImage> images
-});
-
-
-
-
-}
-/// @nodoc
-class __$LoadedCopyWithImpl<$Res>
-    implements _$LoadedCopyWith<$Res> {
-  __$LoadedCopyWithImpl(this._self, this._then);
-
-  final _Loaded _self;
-  final $Res Function(_Loaded) _then;
-
-/// Create a copy of EncryptedGalleryState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
-  return _then(_Loaded(
-images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<EncryptedImage>,
-  ));
+@override
+String toString() {
+  return 'EncryptedGalleryState.loading()';
 }
 
 
 }
+
+
+
 
 /// @nodoc
 
@@ -656,6 +615,10 @@ _$DecryptedCopyWith<_Decrypted> get copyWith => __$DecryptedCopyWithImpl<_Decryp
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState.decrypted(data: $data)';
+}
 
 
 }
@@ -706,6 +669,10 @@ class _DecryptedFolderCompleted extends EncryptedGalleryState {
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState.decryptedFolderCompleted()';
+}
 
 
 }
@@ -732,6 +699,10 @@ _$FolderDeletedCopyWith<_FolderDeleted> get copyWith => __$FolderDeletedCopyWith
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState.folderDeleted(folderPath: $folderPath)';
+}
 
 
 }
@@ -771,8 +742,8 @@ as String,
 /// @nodoc
 
 
-class _Failure extends EncryptedGalleryState {
-  const _Failure({required this.failure}): super._();
+class _EncryptionFailure extends EncryptedGalleryState {
+  const _EncryptionFailure({required this.failure}): super._();
   
 
  final  EncryptionFailure failure;
@@ -781,19 +752,23 @@ class _Failure extends EncryptedGalleryState {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$FailureCopyWith<_Failure> get copyWith => __$FailureCopyWithImpl<_Failure>(this, _$identity);
+_$EncryptionFailureCopyWith<_EncryptionFailure> get copyWith => __$EncryptionFailureCopyWithImpl<_EncryptionFailure>(this, _$identity);
 
 
 
 
 
+@override
+String toString() {
+  return 'EncryptedGalleryState.encryptionFailure(failure: $failure)';
+}
 
 
 }
 
 /// @nodoc
-abstract mixin class _$FailureCopyWith<$Res> implements $EncryptedGalleryStateCopyWith<$Res> {
-  factory _$FailureCopyWith(_Failure value, $Res Function(_Failure) _then) = __$FailureCopyWithImpl;
+abstract mixin class _$EncryptionFailureCopyWith<$Res> implements $EncryptedGalleryStateCopyWith<$Res> {
+  factory _$EncryptionFailureCopyWith(_EncryptionFailure value, $Res Function(_EncryptionFailure) _then) = __$EncryptionFailureCopyWithImpl;
 @useResult
 $Res call({
  EncryptionFailure failure
@@ -804,17 +779,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$FailureCopyWithImpl<$Res>
-    implements _$FailureCopyWith<$Res> {
-  __$FailureCopyWithImpl(this._self, this._then);
+class __$EncryptionFailureCopyWithImpl<$Res>
+    implements _$EncryptionFailureCopyWith<$Res> {
+  __$EncryptionFailureCopyWithImpl(this._self, this._then);
 
-  final _Failure _self;
-  final $Res Function(_Failure) _then;
+  final _EncryptionFailure _self;
+  final $Res Function(_EncryptionFailure) _then;
 
 /// Create a copy of EncryptedGalleryState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(_Failure(
+  return _then(_EncryptionFailure(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as EncryptionFailure,
   ));

@@ -7,13 +7,9 @@ abstract class EncryptedGalleryState
 
   const factory EncryptedGalleryState.initial() = _Initial;
   const factory EncryptedGalleryState.loading() = _Loading;
-  const factory EncryptedGalleryState.loaded({
-    required List<EncryptedImage> images,
-  }) = _Loaded;
   const factory EncryptedGalleryState.decrypted({
     required EncryptedImage data,
-  }) =
-      _Decrypted;
+  }) = _Decrypted;
   const factory EncryptedGalleryState.decryptedFolderCompleted() =
       _DecryptedFolderCompleted;
   const factory EncryptedGalleryState.folderDeleted({
@@ -21,13 +17,13 @@ abstract class EncryptedGalleryState
   }) = _FolderDeleted;
   const factory EncryptedGalleryState.encryptionFailure({
     required EncryptionFailure failure,
-  }) = _Failure;
+  }) = _EncryptionFailure;
+
 
   @override
   List<Object?> get props => map(
     initial: (_) => [],
     loading: (_) => [],
-    loaded: (value) => [value.images],
     decrypted: (value) => [value.data],
     decryptedFolderCompleted: (_) => [],
     folderDeleted: (value) => [value.folderPath],

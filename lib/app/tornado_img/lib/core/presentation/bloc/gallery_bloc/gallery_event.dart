@@ -11,5 +11,5 @@ abstract class GalleryEvent with _$GalleryEvent, EquatableMixin {
   }) = _EncryptImage;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [image, password, path];
 }

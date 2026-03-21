@@ -5,18 +5,17 @@ abstract class EncryptedGalleryEvent
     with _$EncryptedGalleryEvent, EquatableMixin {
   const EncryptedGalleryEvent._();
   
-  const factory EncryptedGalleryEvent.decrytImage({
+  const factory EncryptedGalleryEvent.decryptImage({
     required EncryptedImage image,
     required String password,
-    required String? path,
   }) = _DecryptImage;
-  
-  const factory EncryptedGalleryEvent.decrytFolder({
+
+  const factory EncryptedGalleryEvent.decryptFolder({
     required List<EncryptedImage> images,
     required String password,
   }) = _DecryptFolder;
-  
-  const factory EncryptedGalleryEvent.deleteFolder({
+
+  const factory EncryptedGalleryEvent.deleteFolderGlobal({
     required String folderName,
   }) = _DeleteFolderGlobal;
 

@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\android\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\micro\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\android\\.cxx\\RelWithDebInfo\\3g43b1p3\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\micro\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\android\\.cxx\\RelWithDebInfo\\3g43b1p3\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "tornado_crypto::@6890427a1f51a3e7e1df": {
+      "artifactName": "tornado_crypto",
+      "abi": "armeabi-v7a",
+      "output": "C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\lib\\libtornado_crypto.so",
+      "runtimeFiles": []
+    }
+  }
+}

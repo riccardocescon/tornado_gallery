@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/encrypted_gallery_bloc/encrypted_gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
@@ -46,7 +45,7 @@ class EncrpytedGalleryPageBloc
   bool get hasMore => _hasMore;
 
   Future<Directory> get encryptedFolder async {
-    final baseDir = await encryptedGalleryBloc.encryptedFolder;
+    final baseDir = await encryptedGalleryBloc.repository.getEncryptedFolder();
     if (_root != null) {
       return Directory('${baseDir.path}/$_root');
     }
@@ -103,26 +102,6 @@ class EncrpytedGalleryPageBloc
 
             _emit(emit);
           },
-          loaded: (value) {
-            for (final entity in value.images) {
-              if (entity.isFolder) {
-                final existingIndex = _entities.indexWhere(
-                  (e) => e.isFolder && e.asFolder.path == entity.asFolder.path,
-                );
-                if (existingIndex == -1) {
-                  _utils.insertFolderSorted(_entities, entity.asFolder);
-                }
-              } else {
-                final existingIndex = _entities.indexWhere(
-                  (e) => !e.isFolder && e.asImage.id == entity.asImage.id,
-                );
-                if (existingIndex == -1) {
-                  _utils.insertImageSorted(_entities, entity.asImage);
-                }
-              }
-            }
-            _emit(emit);
-          },
           folderDeleted: (value) {
             final deletedFolderPath = value.folderPath;
             _entities.removeWhere((entity) {
@@ -171,29 +150,26 @@ class EncrpytedGalleryPageBloc
         return;
       }
 
-      // Collect all image data first
-      final imageDataList = <ImageData>[];
+      // Insert all entities, preserving cached decrypt state from the global bloc
       final foldersList = <EncryptedFolder>[];
-      
+
       for (final fileSystem in pageFiles) {
         final fileName = fileSystem.path.split('/').last;
         final date = fileSystem.statSync().modified;
         final file = File(fileSystem.path);
         if (fileName.contains('.')) {
-          imageDataList.add(ImageData(id: fileName, file: file, date: date));
+          final existing =
+              encryptedGalleryBloc.images
+                  .where((img) => img.file.path == file.path)
+                  .firstOrNull;
+          final image =
+              existing ?? EncryptedImage(id: fileName, file: file, date: date);
+          _utils.insertImageSorted(_entities, image);
         } else {
           foldersList.add(EncryptedFolder.empty(fileSystem.path));
         }
       }
 
-      // Use factory method to get images with preserved state
-      final persistentImages = encryptedGalleryBloc
-          .createImagesWithPersistedState(imageDataList);
-
-      // Insert all entities
-      for (final image in persistentImages) {
-        _utils.insertImageSorted(_entities, image);
-      }
       for (final folder in foldersList) {
         _utils.insertFolderSorted(_entities, folder);
       }
@@ -222,7 +198,7 @@ class EncrpytedGalleryPageBloc
     on<_DeleteFolder>((event, emit) async {
       // Just delegate to global bloc, it will handle the deletion and notification
       encryptedGalleryBloc.add(
-        EncryptedGalleryEvent.deleteFolder(folderName: event.folderName),
+        EncryptedGalleryEvent.deleteFolderGlobal(folderName: event.folderName),
       );
       
       // If we are in the deleted folder, emit folderDeleted state to navigate back
@@ -271,10 +247,9 @@ class EncrpytedGalleryPageBloc
       emit(const EncrpytedGalleryPageState.loading());
 
       encryptedGalleryBloc.add(
-        EncryptedGalleryEvent.decrytImage(
+        EncryptedGalleryEvent.decryptImage(
           image: event.image,
           password: event.password,
-          path: event.path,
         ),
       );
 
@@ -317,7 +292,7 @@ class EncrpytedGalleryPageBloc
       }
 
       encryptedGalleryBloc.add(
-        EncryptedGalleryEvent.decrytFolder(
+        EncryptedGalleryEvent.decryptFolder(
           images: imagesToDecrypt,
           password: event.password,
         ),

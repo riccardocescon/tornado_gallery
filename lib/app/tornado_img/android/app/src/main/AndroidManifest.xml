@@ -13,6 +13,11 @@
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         >
+        <!-- Declare 16KB page size support for Android 15+ -->
+        <property 
+            android:name="android.app.16kb_page_size" 
+            android:value="true" />
+            
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,0 +1,5 @@
+# ninja log v5
+386	477	7957411588901193	C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/lib/libtornado_crypto.so	976b102e6c344416
+0	379	7957411587801435	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	789120507aa6f14b
+3	390	7957413070659531	CMakeFiles/tornado_crypto.dir/C_/dev/projects/tornado_img/lib/packages/tornado_img_crypto/src/encryptor.cpp.o	789120507aa6f14b
+390	481	7957413071729533	C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/lib/libtornado_crypto.so	976b102e6c344416
