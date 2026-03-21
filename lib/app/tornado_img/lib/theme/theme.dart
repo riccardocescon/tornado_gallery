@@ -21,7 +21,7 @@ class AppColors {
   // Dark theme
   static const Color darkBackground = Color(0xFF0B1220);
   static const Color darkSurface = Color(0xFF121A2A);
-  static const Color darkSurfaceAlt = Color(0xFF182235);
+  static const Color darkSurfaceAlt = Color(0xFF1F2431);
   static const Color darkBorder = Color(0xFF253149);
 
   static const Color darkTextPrimary = Color(0xFFF3F6FB);
@@ -356,6 +356,7 @@ class AppTheme {
     const colorScheme = ColorScheme(
       brightness: Brightness.dark,
       primary: AppColors.primarySoft,
+      primaryContainer: Color(0xFF142742),
       onPrimary: Colors.white,
       secondary: AppColors.primary,
       onSecondary: Colors.white,
@@ -363,6 +364,7 @@ class AppTheme {
       onError: Colors.white,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
+      surfaceContainerHighest: Color(0xFF2A3140),
     );
 
     return ThemeData(

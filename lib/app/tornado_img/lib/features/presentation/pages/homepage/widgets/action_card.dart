@@ -20,14 +20,27 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final foregroundColor =
-        darker ? context.colorScheme.onPrimary : context.colorScheme.primary;
+        darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
+
+    final foregroundButtonColor =
+        darker
+            ? context.colorScheme.primaryContainer
+            : context.colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color:
-            darker ? context.colorScheme.primary : context.colorScheme.surface,
+            darker
+                ? context.colorScheme.primaryContainer
+                : context.colorScheme.surface,
         borderRadius: AppStyle.cardBorderRadius,
+        border:
+            darker
+                ? null
+                : Border.all(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                ),
       ),
       child: Column(
         spacing: 8,
@@ -37,7 +50,9 @@ class _ActionCard extends StatelessWidget {
             icon: icon,
             backgroundColor:
                 darker
-                    ? context.colorScheme.surface.withValues(alpha: 0.1)
+                    ? context.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.1,
+                    )
                     : context.appColors.softBackground,
             iconColor: foregroundColor,
           ),
@@ -87,12 +102,12 @@ class _ActionCard extends StatelessWidget {
                   Icon(
                     buttonIcon,
                     size: 14,
-                    color: context.colorScheme.primary,
+                    color: foregroundButtonColor,
                   ),
                   Text(
                     buttonText,
                     style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.primary,
+                      color: foregroundButtonColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

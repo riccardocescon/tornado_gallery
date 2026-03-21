@@ -26,7 +26,7 @@ class ContainedIcon extends StatelessWidget {
       ),
       child: Icon(
         icon,
-        color: iconColor ?? context.colorScheme.primary,
+        color: iconColor ?? context.colorScheme.onSurface,
         size: size,
       ),
     );

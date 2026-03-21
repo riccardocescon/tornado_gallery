@@ -8,6 +8,7 @@ import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dar
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
+part 'widgets/info_cards.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -35,16 +36,19 @@ class _HomepageState extends State<Homepage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              _title(),
-              const SizedBox(height: 24),
-              _actions(),
-              const SizedBox(height: 24),
-              const _ArchiveState(),
-              const SizedBox(height: 24),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                _title(),
+                const SizedBox(height: 24),
+                _actions(),
+                const SizedBox(height: 24),
+                const _ArchiveState(),
+                const SizedBox(height: 24),
+                const _InfoCards(),
+              ],
+            ),
           ),
         ),
       ),
@@ -89,7 +93,7 @@ class _HomepageState extends State<Homepage> {
             title: "Select Photo",
             subtitle: "Select from your gallery",
             buttonText: "Open gallery",
-            buttonIcon: Icons.open_in_new_rounded,
+            buttonIcon: Icons.image_rounded,
             darker: true,
           ),
         ),

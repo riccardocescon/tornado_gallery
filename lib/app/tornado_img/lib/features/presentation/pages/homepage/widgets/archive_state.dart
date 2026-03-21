@@ -14,6 +14,9 @@ class _ArchiveState extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colorScheme.surface,
             borderRadius: AppStyle.cardBorderRadius,
+            border: Border.all(
+              color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+            ),
           ),
           child: Column(
             spacing: 8,
@@ -22,7 +25,7 @@ class _ArchiveState extends StatelessWidget {
               Text(
                 "Archive state",
                 style: context.textTheme.bodyLarge?.copyWith(
-                  color: context.colorScheme.primary,
+                  color: context.colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -59,7 +62,44 @@ class _ArchiveState extends StatelessWidget {
                     "Last encrypted: 2 days ago",
                     style: context.textTheme.bodyMedium,
                   ),
-                  FilledButton(
+                  _openArchiveButton(context),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _item(BuildContext context, IconData icon, String text) {
+    return Row(
+      spacing: 8,
+      children: [
+        Icon(icon, color: context.colorScheme.onSurface),
+        Text(
+          text,
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: context.colorScheme.onSurface,
+          ),
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 18,
+              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _openArchiveButton(BuildContext context) {
+    return FilledButton(
                     onPressed: () {},
                     style: FilledButton.styleFrom(
                       backgroundColor: context.appColors.softButton,
@@ -83,12 +123,12 @@ class _ArchiveState extends StatelessWidget {
                             Icon(
                               Icons.lock_rounded,
                               size: 18,
-                              color: context.colorScheme.primary,
+                color: context.colorScheme.onSurface,
                             ),
                             Text(
                               "Open archive",
                               style: context.textTheme.bodySmall?.copyWith(
-                                color: context.colorScheme.primary,
+                  color: context.colorScheme.onSurface,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -97,45 +137,12 @@ class _ArchiveState extends StatelessWidget {
                         Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 16,
-                          color: context.colorScheme.primary.withValues(
+            color: context.colorScheme.onSurface.withValues(
                             alpha: 0.8,
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _item(BuildContext context, IconData icon, String text) {
-    return Row(
-      spacing: 8,
-      children: [
-        Icon(icon, color: context.colorScheme.primary),
-        Text(
-          text,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: context.colorScheme.onSurface,
-          ),
-        ),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 18,
-              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

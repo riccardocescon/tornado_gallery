@@ -32,7 +32,10 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      margin: const EdgeInsets.symmetric(
+        vertical: 32,
+        horizontal: 24,
+      ).copyWith(top: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
@@ -61,7 +64,7 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
         child: Container(
           height: 32,
           decoration: BoxDecoration(
-            color: context.colorScheme.primary,
+            color: context.colorScheme.primaryContainer,
             borderRadius: AppStyle.cardBorderRadius,
           ),
         ),
