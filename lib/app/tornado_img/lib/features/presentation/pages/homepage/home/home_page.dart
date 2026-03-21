@@ -31,19 +31,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: 16,
-          children: [
-            const SizedBox(height: 2),
-            _title(),
-            _actions(),
-            const _ArchiveState(),
-            const _InfoCards(),
-          ],
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        spacing: 16,
+        children: [
+          const SizedBox(height: 2),
+          _title(),
+          _actions(),
+          const _ArchiveState(),
+          const _InfoCards(),
+        ],
       ),
     );
   }
