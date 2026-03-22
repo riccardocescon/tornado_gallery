@@ -4,6 +4,7 @@ import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_ima
 class EncryptedFolder with EncryptedEntity {
   final String path;
   final List<EncryptedImage> images;
+  final List<EncryptedFolder> subfolders;
 
   String get name => path.split('/').last;
   String get encryptedRelativePath {
@@ -13,11 +14,19 @@ class EncryptedFolder with EncryptedEntity {
     return Uri.encodeComponent(fullPath);
   }
 
-  EncryptedFolder({required this.images, required this.path});
+  EncryptedFolder({
+    required this.images,
+    required this.path,
+    List<EncryptedFolder>? subfolders,
+  }) : subfolders = subfolders ?? [];
 
   @override
   EncryptedFolder copyWith({List<EncryptedImage>? images}) {
-    return EncryptedFolder(images: images ?? this.images, path: path);
+    return EncryptedFolder(
+      images: images ?? this.images,
+      path: path,
+      subfolders: subfolders,
+    );
   }
 
   factory EncryptedFolder.empty(String path) {

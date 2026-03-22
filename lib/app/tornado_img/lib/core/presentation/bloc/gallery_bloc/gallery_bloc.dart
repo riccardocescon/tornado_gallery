@@ -15,6 +15,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
   GalleryBloc(this.encryptUseCase) : super(const GalleryState.initial()) {
     on<_EncryptImage>(_onEncryptImage);
+    on<_EncryptImages>(_onEncryptImages);
   }
 
   Future<void> _onEncryptImage(
@@ -34,7 +35,39 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     result.fold(
       (failure) => emit(GalleryState.encryptionFailure(failure: failure)),
-      (_) => emit(const GalleryState.encrypted()),
+      (_) => emit(
+        GalleryState.encrypted(encrypted: [event.image], failed: [], total: 1),
+      ),
     );
+  }
+
+  Future<void> _onEncryptImages(
+    _EncryptImages event,
+    Emitter<GalleryState> emit,
+  ) async {
+    emit(const GalleryState.loading());
+
+    final encrypted = <GalleryImage>[];
+    final failed = <GalleryImage>[];
+
+    for (final image in event.images) {
+      final result = await encryptUseCase.call(
+        EncryptImageParams(
+          file: image.file,
+          password: event.password,
+          fileId: image.id,
+          path: event.path,
+        ),
+      );
+
+      result.fold((_) => failed.add(image), (_) => encrypted.add(image));
+      emit(
+        GalleryState.encrypted(
+          encrypted: List<GalleryImage>.from(encrypted),
+          failed: List<GalleryImage>.from(failed),
+          total: event.images.length,
+        ),
+      );
+    }
   }
 }

@@ -6,6 +6,16 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
 
   const factory HomepageState.initial() = _Initial;
   const factory HomepageState.loading() = _Loading;
+  const factory HomepageState.galleryLoading() = _GalleryLoading;
+  const factory HomepageState.galleryImages({
+    required List<GalleryImage> imagesLoaded,
+  }) = _GalleryImages;
+  const factory HomepageState.galleryStatus({
+    required int imagesLoaded,
+    required int folderLoaded,
+    required int bytesLoaded,
+    required DateTime? lastLoaded,
+  }) = _GalleryStatus;
   const factory HomepageState.loaded({
     required List<GalleryImage>? images,
     required List<EncryptedEntity>? encryptedImages,
@@ -13,10 +23,19 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
   const factory HomepageState.failure({required String message}) = _Failure;
 
   @override
-  List<Object?> get props => map(
-    initial: (_) => [],
-    loading: (_) => [],
-    loaded: (value) => [value.images, value.encryptedImages],
-    failure: (value) => [value.message],
+  List<Object?> get props => when(
+    initial: () => [],
+    loading: () => [],
+    galleryLoading: () => [],
+    galleryImages: (imagesLoaded) => [imagesLoaded],
+    galleryStatus:
+        (imagesLoaded, folderLoaded, bytesLoaded, lastLoaded) => [
+          imagesLoaded,
+          folderLoaded,
+          bytesLoaded,
+          lastLoaded,
+        ],
+    loaded: (images, encryptedImages) => [images, encryptedImages],
+    failure: (message) => [message],
   );
 }

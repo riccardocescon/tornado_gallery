@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
@@ -31,16 +34,31 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        spacing: 16,
-        children: [
-          const SizedBox(height: 2),
-          _title(),
-          _actions(),
-          const _ArchiveState(),
-          const _InfoCards(),
-        ],
+    return BlocListener<HomepageBloc, HomepageState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          orElse: () {},
+          galleryImages: (galleryImages) {
+            if (galleryImages.isEmpty) {
+              context.showSnackbar("No images selected");
+              return;
+            }
+
+            context.push("/encryption", extra: galleryImages);
+          },
+        );
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          spacing: 16,
+          children: [
+            const SizedBox(height: 2),
+            _title(),
+            _actions(),
+            const _ArchiveState(),
+            const _InfoCards(),
+          ],
+        ),
       ),
     );
   }
@@ -84,6 +102,10 @@ class _HomePageState extends State<HomePage> {
             buttonText: "Open gallery",
             buttonIcon: Icons.image_rounded,
             darker: true,
+            onPressed:
+                () => context.read<HomepageBloc>().add(
+                  const HomepageEvent.openGallery(),
+                ),
           ),
         ),
         Expanded(
@@ -94,6 +116,7 @@ class _HomePageState extends State<HomePage> {
             buttonText: "Open archive",
             buttonIcon: Icons.lock_rounded,
             darker: false,
+            onPressed: () {},
           ),
         ),
       ],

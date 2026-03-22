@@ -43,7 +43,7 @@ class AppTheme {
   static ThemeData get dark => _buildDarkTheme();
 
   static ThemeData _buildLightTheme() {
-    const colorScheme = ColorScheme(
+    var colorScheme = ColorScheme(
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: Colors.white,
@@ -53,6 +53,7 @@ class AppTheme {
       onError: Colors.white,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightTextPrimary,
+      tertiary: Colors.blue.shade700,
     );
 
     return ThemeData(
@@ -353,7 +354,7 @@ class AppTheme {
   }
 
   static ThemeData _buildDarkTheme() {
-    const colorScheme = ColorScheme(
+    var colorScheme = ColorScheme(
       brightness: Brightness.dark,
       primary: AppColors.primarySoft,
       primaryContainer: Color(0xFF142742),
@@ -365,6 +366,7 @@ class AppTheme {
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
       surfaceContainerHighest: Color(0xFF2A3140),
+      tertiary: Colors.blue.shade300,
     );
 
     return ThemeData(

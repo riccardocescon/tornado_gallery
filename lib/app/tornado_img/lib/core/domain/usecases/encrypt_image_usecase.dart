@@ -6,14 +6,14 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository_impl
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 
-class EncryptImageUseCase extends EncrpytionUseCase<Unit, EncryptImageParams> {
+class EncryptImageUseCase extends EncrpytionUseCase<void, EncryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
   EncryptImageUseCase({required this.imageRepo, required this.storageRepo});
 
   @override
-  Future<Either<EncryptionFailure, Unit>> call(
+  Future<Either<EncryptionFailure, void>> call(
     EncryptImageParams params,
   ) async {
     try {
@@ -38,10 +38,10 @@ class EncryptImageUseCase extends EncrpytionUseCase<Unit, EncryptImageParams> {
       await storageRepo.save(
         bytes: encoded,
         fileName: '${params.fileId}.png',
-        customPath: params.path,
+        path: params.path,
       );
 
-      return const Right(unit);
+      return const Right(null);
     } catch (e) {
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
@@ -52,12 +52,12 @@ class EncryptImageParams {
   final File file;
   final String password;
   final String fileId;
-  final String? path;
+  final String path;
 
   EncryptImageParams({
     required this.file,
     required this.password,
     required this.fileId,
-    this.path,
+    required this.path,
   });
 }

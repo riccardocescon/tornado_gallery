@@ -8,6 +8,7 @@ class _ActionCard extends StatelessWidget {
     required this.buttonIcon,
     required this.buttonText,
     required this.darker,
+    required this.onPressed,
   });
 
   final bool darker;
@@ -16,6 +17,7 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final IconData buttonIcon;
   final String buttonText;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +80,7 @@ class _ActionCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 6.0),
             child: FilledButton(
-              onPressed: () {},
+              onPressed: onPressed,
               style: FilledButton.styleFrom(
                 backgroundColor:
                     darker

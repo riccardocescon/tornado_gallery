@@ -2,10 +2,15 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
@@ -21,9 +26,13 @@ part 'homepage_bloc_utils.dart';
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager<GalleryPageState>? _streamManager;
 
-  List<GalleryImage>? images;
+  final selectedImages = <GalleryImage>[];
 
-final _HomepageBlocUtils _utils = _HomepageBlocUtils();
+final HomepageBlocUtils _utils = HomepageBlocUtils();
+
+  final GalleryBloc _galleryBloc = getIt<GalleryBloc>();
+
+  late EncryptedFolder appRootFolder;
 
   @override
   Future<void> close() {
@@ -33,50 +42,104 @@ final _HomepageBlocUtils _utils = _HomepageBlocUtils();
 
   HomepageBloc() : super(const HomepageState.initial()) {
     on<_Setup>((event, emit) async {
-      final galleryPageBloc = getIt<GalleryPageBloc>();
+      emit(const HomepageState.loading());
 
-      galleryPageBloc.add(const GalleryPageEvent.setup());
+      appRootFolder = await _utils.loadAppRootFolder();
 
-      // Load latest encrypted images directly
-      final latestEncryptedImages = await _utils.loadLatestEncryptedImages(
-        limit: 3,
-      );
+      _emit(emit);
 
-      _streamManager = StreamManager.fromStream(galleryPageBloc.stream);
-
-      await for (final galleryPageState in _streamManager!.stream) {
-        final update = galleryPageState.maybeMap(
-          loaded: (value) {
-            images = value.images;
-            return true;
-          },
-          orElse:
-              () => false,
-        );
-        if (!update) continue;
-
-        emit(
-          HomepageState.loaded(
-                images: images,
-                encryptedImages: latestEncryptedImages,
-          ),
-        );
+      final folderStream = _utils.watchAppFolderChanges(appRootFolder);
+      await for (final _ in folderStream) {
+        _emit(emit);
       }
     });
 
-    on<_Refresh>((event, emit) async {
-      // Load latest encrypted images directly
-      final latestEncryptedImages = await _utils.loadLatestEncryptedImages(
-        limit: 3,
+    on<_Refresh>((event, emit) async {});
+
+    on<_OpenGallery>((event, emit) async {
+      selectedImages.clear();
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: true,
+        withData: true,
       );
-      
-      emit(
-        HomepageState.loaded(
-          images: images,
-          encryptedImages: latestEncryptedImages,
-        ),
-      );
+
+      emit(const HomepageState.galleryLoading());
+
+      if (result == null || result.files.isEmpty) {
+        emit(const HomepageState.galleryImages(imagesLoaded: []));
+        return;
+      }
+
+      for (final file in result.files) {
+        final bytes = file.bytes!;
+        final name = file.name;
+
+        final saveResult = await SaverGallery.saveImage(
+          bytes,
+          quality: 100,
+          fileName: name,
+          skipIfExists: false,
+        );
+
+        if (saveResult.isSuccess) {
+          final savedAsset = await _utils.findSavedImageByName(name);
+          if (savedAsset != null) {
+            final savedFile = await savedAsset.file;
+            if (savedFile != null) {
+              final newImage = GalleryImage(
+                id: savedAsset.id,
+                file: savedFile,
+                date: savedAsset.createDateTime,
+              );
+                
+              // For newly saved images, insert at the top (most recent)
+              selectedImages.insert(0, newImage);
+            }
+          }
+        } else {
+          log('Failed to save image: ${saveResult.errorMessage}');
+        }
+      }
+
+      emit(HomepageState.galleryImages(imagesLoaded: selectedImages));
     });
-      
+  }
+
+  void _emit(Emitter<HomepageState> emit) {
+    final totalImages = appRootFolder.subfolders.fold<int>(
+      appRootFolder.images.length,
+      (previousValue, folder) => previousValue + folder.images.length,
+    );
+
+    final totalBytes = appRootFolder.subfolders.fold<int>(
+      appRootFolder.images.fold<int>(
+        0,
+        (prev, image) => prev + image.file.lengthSync(),
+      ),
+      (prev, folder) =>
+          prev +
+          folder.images.fold<int>(
+            0,
+            (prev2, image) => prev2 + image.file.lengthSync(),
+          ),
+    );
+
+    final lastLoaded =
+        appRootFolder.images.isNotEmpty
+            ? appRootFolder.images
+                .map((img) => img.date)
+                .reduce((a, b) => a.isAfter(b) ? a : b)
+            : null;
+
+    emit(
+      HomepageState.galleryStatus(
+        imagesLoaded: totalImages,
+        folderLoaded: appRootFolder.subfolders.length,
+        bytesLoaded: totalBytes,
+        lastLoaded: lastLoaded,
+      ),
+    );
   }
 }

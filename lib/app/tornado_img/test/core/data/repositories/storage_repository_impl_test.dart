@@ -16,13 +16,13 @@ class _TestableStorageRepo extends StorageRepositoryImpl {
   Future<void> save({
     required Uint8List bytes,
     required String fileName,
-    String? customPath,
+    String? path,
   }) {
-    // Redirect null customPath to the provided baseDirectory
+    // Redirect null path to the provided baseDirectory
     return super.save(
       bytes: bytes,
       fileName: fileName,
-      customPath: customPath ?? baseDirectory,
+      path: path ?? baseDirectory,
     );
   }
 }
@@ -39,18 +39,18 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // save — with explicit customPath
+  // save — with explicit path
   // -------------------------------------------------------------------------
-  group('StorageRepositoryImpl.save (customPath)', () {
+  group('StorageRepositoryImpl.save (path)', () {
     final repo = StorageRepositoryImpl();
 
-    test('creates the file at customPath/encrypted/<fileName>', () async {
+    test('creates the file at path/encrypted/<fileName>', () async {
       final bytes = Uint8List.fromList([1, 2, 3, 4, 5]);
 
       await repo.save(
         bytes: bytes,
         fileName: 'photo.png',
-        customPath: tempDir.path,
+        path: tempDir.path,
       );
 
       final file = File('${tempDir.path}/encrypted/photo.png');
@@ -63,7 +63,7 @@ void main() {
       await repo.save(
         bytes: bytes,
         fileName: 'img.png',
-        customPath: tempDir.path,
+        path: tempDir.path,
       );
 
       final saved =
@@ -78,7 +78,7 @@ void main() {
       await repo.save(
         bytes: Uint8List.fromList([7, 8, 9]),
         fileName: 'new.png',
-        customPath: subDir.path,
+        path: subDir.path,
       );
 
       expect(await File('${subDir.path}/encrypted/new.png').exists(), isTrue);
@@ -93,7 +93,7 @@ void main() {
       await repo.save(
         bytes: newBytes,
         fileName: 'overwrite.png',
-        customPath: tempDir.path,
+        path: tempDir.path,
       );
 
       final saved = await file.readAsBytes();
@@ -109,12 +109,12 @@ void main() {
         await repo.save(
           bytes: bytes1,
           fileName: 'a.png',
-          customPath: tempDir.path,
+          path: tempDir.path,
         );
         await repo.save(
           bytes: bytes2,
           fileName: 'b.png',
-          customPath: tempDir.path,
+          path: tempDir.path,
         );
 
         final savedA =
@@ -129,13 +129,13 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // save — null customPath (redirected via testable subclass)
+  // save — null path (redirected via testable subclass)
   // -------------------------------------------------------------------------
   group(
-    'StorageRepositoryImpl.save (null customPath via testable subclass)',
+    'StorageRepositoryImpl.save (null path via testable subclass)',
     () {
       test(
-        'creates file in the base directory when no customPath given',
+        'creates file in the base directory when no path given',
         () async {
           final repo = _TestableStorageRepo(tempDir.path);
           final bytes = Uint8List.fromList([5, 6, 7]);

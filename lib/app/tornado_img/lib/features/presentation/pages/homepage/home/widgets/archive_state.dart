@@ -33,37 +33,65 @@ class _ArchiveState extends StatelessWidget {
                 height: 1.5,
                 color: context.colorScheme.onSurface.withValues(alpha: 0.2),
               ),
-              _item(context, Icons.folder_rounded, "123 encrypted files"),
-              Container(
-                height: 1.5,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.2),
-              ),
-              _item(context, Icons.archive_rounded, "5 archives"),
-              Container(
-                height: 1.5,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.2),
-              ),
-              Column(
-                spacing: 8,
-                children: [
-                  Row(
+              BlocBuilder<HomepageBloc, HomepageState>(
+                buildWhen:
+                    (previous, current) => current.maybeMap(
+                      galleryStatus: (state) => true,
+                      orElse: () => false,
+                    ),
+                builder: (context, state) {
+                  final amount = state.maybeMap(
+                    galleryStatus: (value) => value.imagesLoaded,
+                    orElse: () => null,
+                  );
+
+                  final folderAmount = state.maybeMap(
+                    galleryStatus: (value) => value.folderLoaded,
+                    orElse: () => null,
+                  );
+
+                  final bytesAmount = state.maybeMap(
+                    galleryStatus: (value) => value.bytesLoaded,
+                    orElse: () => null,
+                  );
+
+                  final lastEncrypted = state.maybeMap(
+                    galleryStatus: (value) => value.lastLoaded,
+                    orElse: () => null,
+                  );
+
+                  return Column(
+                    spacing: 8,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.safety_check_rounded),
-                      const SizedBox(width: 8),
-                      Text(
-                        "1.5 GB protected",
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      _item(
+                        context,
+                        Icons.folder_rounded,
+                        amount?.toString(),
+                        "encrypted files",
+                      ),
+                      Container(
+                        height: 1.5,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
                         ),
                       ),
+                      _item(
+                        context,
+                        Icons.archive_rounded,
+                        folderAmount?.toString(),
+                        "archives",
+                      ),
+                      Container(
+                        height: 1.5,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
+                      ),
+                      _byteProtectedItem(context, bytesAmount, lastEncrypted),
                     ],
-                  ),
-                  Text(
-                    "Last encrypted: 2 days ago",
-                    style: context.textTheme.bodyMedium,
-                  ),
-                  _openArchiveButton(context),
-                ],
+                  );
+                },
               ),
             ],
           ),
@@ -72,17 +100,37 @@ class _ArchiveState extends StatelessWidget {
     );
   }
 
-  Widget _item(BuildContext context, IconData icon, String text) {
+  Widget _item(
+    BuildContext context,
+    IconData icon,
+    String? value,
+    String text,
+  ) {
     return Row(
       spacing: 8,
       children: [
         Icon(icon, color: context.colorScheme.onSurface),
-        Text(
-          text,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: context.colorScheme.onSurface,
-          ),
+
+        Row(
+          spacing: 4,
+          children: [
+            value == null
+                ? LoadingContainer(width: 40)
+                : Text(
+                  value,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: context.colorScheme.onSurface,
+                  ),
+                ),
+            Text(
+              text,
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: context.colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
         Expanded(
           child: Align(
@@ -94,6 +142,79 @@ class _ArchiveState extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _byteProtectedItem(
+    BuildContext context,
+    int? amount,
+    DateTime? lastEncrypted,
+  ) {
+    String? sizeLabel;
+    String sizeUnit = "B";
+    if (amount != null) {
+      if (amount < 1024) {
+        sizeLabel = amount.toString();
+        sizeUnit = "B";
+      } else if (amount < 1024 * 1024) {
+        sizeLabel = (amount / 1024).toStringAsFixed(2);
+        sizeUnit = "KB";
+      } else if (amount < 1024 * 1024 * 1024) {
+        sizeLabel = (amount / (1024 * 1024)).toStringAsFixed(2);
+        sizeUnit = "MB";
+      } else {
+        sizeLabel = (amount / (1024 * 1024 * 1024)).toStringAsFixed(2);
+        sizeUnit = "GB";
+      }
+    }
+
+    final diffDays =
+        lastEncrypted != null
+            ? DateTime.now().difference(lastEncrypted).inDays
+            : null;
+
+    final lastDaySentence =
+        diffDays == 0
+            ? "Today"
+            : diffDays == 1
+            ? "Yesterday"
+            : "$diffDays days ago";
+
+    return Column(
+      spacing: 8,
+      children: [
+        Row(
+          spacing: 8,
+          children: [
+            Icon(Icons.safety_check_rounded),
+            Row(
+              spacing: 4,
+              children: [
+                sizeLabel == null
+                    ? LoadingContainer(width: 40)
+                    : Text(
+                      sizeLabel,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                Text(
+                  "$sizeUnit protected",
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (diffDays != null)
+          Text(
+            "Last encrypted: $lastDaySentence",
+            style: context.textTheme.bodyMedium,
+          ),
+        _openArchiveButton(context),
       ],
     );
   }

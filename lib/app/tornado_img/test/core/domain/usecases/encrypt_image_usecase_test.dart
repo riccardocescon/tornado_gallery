@@ -55,7 +55,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
-          customPath: any(named: 'customPath'),
+          path: any(named: 'path'),
         ),
       ).thenAnswer((_) async {});
 
@@ -83,7 +83,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
-          customPath: any(named: 'customPath'),
+          path: any(named: 'path'),
         ),
       ).thenAnswer((_) async {});
 
@@ -103,7 +103,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: tEncoded,
           fileName: 'abc123.png',
-          customPath: '/my/folder',
+          path: '/my/folder',
         ),
       ]);
     });
@@ -114,7 +114,12 @@ void main() {
         when(() => mockImageRepo.decode(tFile)).thenAnswer((_) async => null);
 
         final result = await useCase.call(
-          EncryptImageParams(file: tFile, password: 'secret', fileId: 'abc123'),
+          EncryptImageParams(
+            file: tFile,
+            password: 'secret',
+            fileId: 'abc123',
+            path: '/path',
+          ),
         );
 
         expect(result.isLeft(), isTrue);
@@ -127,7 +132,7 @@ void main() {
           () => mockStorageRepo.save(
             bytes: any(named: 'bytes'),
             fileName: any(named: 'fileName'),
-            customPath: any(named: 'customPath'),
+            path: any(named: 'path'),
           ),
         );
       },
@@ -143,7 +148,12 @@ void main() {
       when(() => mockImageRepo.encode(any())).thenAnswer((_) async => null);
 
       final result = await useCase.call(
-        EncryptImageParams(file: tFile, password: 'secret', fileId: 'abc123'),
+        EncryptImageParams(
+          file: tFile,
+          password: 'secret',
+          fileId: 'abc123',
+          path: '/path',
+        ),
       );
 
       expect(result.isLeft(), isTrue);
@@ -155,7 +165,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
-          customPath: any(named: 'customPath'),
+          path: any(named: 'path'),
         ),
       );
     });
@@ -166,7 +176,12 @@ void main() {
       ).thenThrow(Exception('disk error'));
 
       final result = await useCase.call(
-        EncryptImageParams(file: tFile, password: 'secret', fileId: 'abc123'),
+        EncryptImageParams(
+          file: tFile,
+          password: 'secret',
+          fileId: 'abc123',
+          path: '/path',
+        ),
       );
 
       expect(result.isLeft(), isTrue);
@@ -188,18 +203,23 @@ void main() {
         () => mockStorageRepo.save(
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
-          customPath: any(named: 'customPath'),
+          path: any(named: 'path'),
         ),
       ).thenThrow(Exception('save error'));
 
       final result = await useCase.call(
-        EncryptImageParams(file: tFile, password: 'secret', fileId: 'abc123'),
+        EncryptImageParams(
+          file: tFile,
+          password: 'secret',
+          fileId: 'abc123',
+          path: '/path',
+        ),
       );
 
       expect(result.isLeft(), isTrue);
     });
 
-    test('uses null customPath when params.path is null', () async {
+    test('uses null path when params.path is null', () async {
       when(
         () => mockImageRepo.decode(tFile),
       ).thenAnswer((_) async => tImageData);
@@ -211,7 +231,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
-          customPath: any(named: 'customPath'),
+          path: any(named: 'path'),
         ),
       ).thenAnswer((_) async {});
 
@@ -220,7 +240,7 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: null,
+          path: '',
         ),
       );
 
@@ -228,7 +248,7 @@ void main() {
         () => mockStorageRepo.save(
           bytes: tEncoded,
           fileName: 'abc123.png',
-          customPath: null,
+          path: '',
         ),
       ).called(1);
     });

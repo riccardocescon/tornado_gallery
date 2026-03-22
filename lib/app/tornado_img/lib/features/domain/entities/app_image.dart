@@ -5,5 +5,7 @@ abstract class AppImage {
   final File file;
   final DateTime date;
 
+  String get name => file.path.replaceAll("\\", "/").split('/').last;
+
   const AppImage({required this.id, required this.file, required this.date});
 }

@@ -19,7 +19,12 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(
-      EncryptImageParams(file: tFile, password: 'pw', fileId: 'img1'),
+      EncryptImageParams(
+        file: tFile,
+        password: 'pw',
+        fileId: 'img1',
+        path: '/path',
+      ),
     );
   });
 
@@ -40,7 +45,7 @@ void main() {
       build: () {
         when(
           () => mockUseCase.call(any()),
-        ).thenAnswer((_) async => const Right(unit));
+        ).thenAnswer((_) async => const Right(null));
         return GalleryBloc(mockUseCase);
       },
       act:
@@ -48,10 +53,14 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'secret',
-              path: null,
+              path: '',
             ),
           ),
-      expect: () => const [GalleryState.loading(), GalleryState.encrypted()],
+      expect:
+          () => [
+            GalleryState.loading(),
+            GalleryState.encrypted(encrypted: [tImage], failed: [], total: 1),
+          ],
     );
 
     blocTest<GalleryBloc, GalleryState>(
@@ -67,7 +76,7 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'secret',
-              path: null,
+              path: '',
             ),
           ),
       expect:

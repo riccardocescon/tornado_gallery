@@ -20,10 +20,6 @@ mixin _$EncryptedGalleryEvent {
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryEvent()';
-}
 
 
 }
@@ -196,10 +192,6 @@ _$DecryptImageCopyWith<_DecryptImage> get copyWith => __$DecryptImageCopyWithImp
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryEvent.decryptImage(image: $image, password: $password)';
-}
 
 
 }
@@ -263,10 +255,6 @@ _$DecryptFolderCopyWith<_DecryptFolder> get copyWith => __$DecryptFolderCopyWith
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryEvent.decryptFolder(images: $images, password: $password)';
-}
 
 
 }
@@ -323,10 +311,6 @@ _$DeleteFolderGlobalCopyWith<_DeleteFolderGlobal> get copyWith => __$DeleteFolde
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryEvent.deleteFolderGlobal(folderName: $folderName)';
-}
 
 
 }
@@ -372,10 +356,6 @@ mixin _$EncryptedGalleryState {
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState()';
-}
 
 
 }
@@ -560,10 +540,6 @@ class _Initial extends EncryptedGalleryState {
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.initial()';
-}
 
 
 }
@@ -585,10 +561,6 @@ class _Loading extends EncryptedGalleryState {
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.loading()';
-}
 
 
 }
@@ -615,10 +587,6 @@ _$DecryptedCopyWith<_Decrypted> get copyWith => __$DecryptedCopyWithImpl<_Decryp
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.decrypted(data: $data)';
-}
 
 
 }
@@ -669,10 +637,6 @@ class _DecryptedFolderCompleted extends EncryptedGalleryState {
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.decryptedFolderCompleted()';
-}
 
 
 }
@@ -699,10 +663,6 @@ _$FolderDeletedCopyWith<_FolderDeleted> get copyWith => __$FolderDeletedCopyWith
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.folderDeleted(folderPath: $folderPath)';
-}
 
 
 }
@@ -758,10 +718,6 @@ _$EncryptionFailureCopyWith<_EncryptionFailure> get copyWith => __$EncryptionFai
 
 
 
-@override
-String toString() {
-  return 'EncryptedGalleryState.encryptionFailure(failure: $failure)';
-}
 
 
 }

@@ -33,4 +33,25 @@ extension BuildContextX on BuildContext {
       ),
     );
   }
+
+  void showSnackbar(
+    String text, {
+    Duration duration = const Duration(seconds: 2),
+  }) {
+    ScaffoldMessenger.of(
+      this,
+    ).showSnackBar(SnackBar(content: Text(text), duration: duration));
+  }
+}
+
+extension ListX<T> on List<T> {
+  /// Returns the first element that satisfies the given [predicate], or `null` if no such element is found.
+  T? firstWhereOrNull(bool Function(T) predicate) {
+    for (final element in this) {
+      if (predicate(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
 }

@@ -6,7 +6,11 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
 
   const factory GalleryState.initial() = _Initial;
   const factory GalleryState.loading() = _Loading;
-  const factory GalleryState.encrypted() = _Encrypted;
+  const factory GalleryState.encrypted({
+    required List<GalleryImage> encrypted,
+    required List<GalleryImage> failed,
+    required int total,
+  }) = _Encrypted;
   const factory GalleryState.encryptionFailure({
     required EncryptionFailure failure,
   }) = _Failure;

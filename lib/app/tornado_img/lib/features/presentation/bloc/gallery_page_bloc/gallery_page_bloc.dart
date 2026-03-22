@@ -175,7 +175,7 @@ class GalleryPageBloc extends Bloc<GalleryPageEvent, GalleryPageState> {
         GalleryEvent.encryptImage(
           image: event.image,
           password: event.password,
-          path: event.path,
+          path: event.path!,
         ),
       );
 
