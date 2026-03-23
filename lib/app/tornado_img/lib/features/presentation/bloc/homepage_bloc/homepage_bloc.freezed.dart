@@ -268,7 +268,7 @@ extension HomepageStatePatterns on HomepageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _GalleryLoading value)?  galleryLoading,TResult Function( _GalleryImages value)?  galleryImages,TResult Function( _GalleryStatus value)?  galleryStatus,TResult Function( _Loaded value)?  loaded,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _GalleryLoading value)?  galleryLoading,TResult Function( _GalleryImages value)?  galleryImages,TResult Function( _GalleryStatus value)?  galleryStatus,TResult Function( _Loaded value)?  loaded,TResult Function( _PermissionDenied value)?  permissionDenied,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -277,7 +277,8 @@ return loading(_that);case _GalleryLoading() when galleryLoading != null:
 return galleryLoading(_that);case _GalleryImages() when galleryImages != null:
 return galleryImages(_that);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Failure() when failure != null:
+return loaded(_that);case _PermissionDenied() when permissionDenied != null:
+return permissionDenied(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -296,7 +297,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _GalleryLoading value)  galleryLoading,required TResult Function( _GalleryImages value)  galleryImages,required TResult Function( _GalleryStatus value)  galleryStatus,required TResult Function( _Loaded value)  loaded,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _GalleryLoading value)  galleryLoading,required TResult Function( _GalleryImages value)  galleryImages,required TResult Function( _GalleryStatus value)  galleryStatus,required TResult Function( _Loaded value)  loaded,required TResult Function( _PermissionDenied value)  permissionDenied,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -305,7 +306,8 @@ return loading(_that);case _GalleryLoading():
 return galleryLoading(_that);case _GalleryImages():
 return galleryImages(_that);case _GalleryStatus():
 return galleryStatus(_that);case _Loaded():
-return loaded(_that);case _Failure():
+return loaded(_that);case _PermissionDenied():
+return permissionDenied(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -323,7 +325,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _GalleryLoading value)?  galleryLoading,TResult? Function( _GalleryImages value)?  galleryImages,TResult? Function( _GalleryStatus value)?  galleryStatus,TResult? Function( _Loaded value)?  loaded,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _GalleryLoading value)?  galleryLoading,TResult? Function( _GalleryImages value)?  galleryImages,TResult? Function( _GalleryStatus value)?  galleryStatus,TResult? Function( _Loaded value)?  loaded,TResult? Function( _PermissionDenied value)?  permissionDenied,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -332,7 +334,8 @@ return loading(_that);case _GalleryLoading() when galleryLoading != null:
 return galleryLoading(_that);case _GalleryImages() when galleryImages != null:
 return galleryImages(_that);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Failure() when failure != null:
+return loaded(_that);case _PermissionDenied() when permissionDenied != null:
+return permissionDenied(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -350,7 +353,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function()?  permissionDenied,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -358,7 +361,8 @@ return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded() when loaded != null:
-return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
+return loaded(_that.images,_that.encryptedImages);case _PermissionDenied() when permissionDenied != null:
+return permissionDenied();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -377,7 +381,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function()  permissionDenied,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -385,7 +389,8 @@ return loading();case _GalleryLoading():
 return galleryLoading();case _GalleryImages():
 return galleryImages(_that.imagesLoaded);case _GalleryStatus():
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded():
-return loaded(_that.images,_that.encryptedImages);case _Failure():
+return loaded(_that.images,_that.encryptedImages);case _PermissionDenied():
+return permissionDenied();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -403,7 +408,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function()?  permissionDenied,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -411,7 +416,8 @@ return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded() when loaded != null:
-return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
+return loaded(_that.images,_that.encryptedImages);case _PermissionDenied() when permissionDenied != null:
+return permissionDenied();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -677,6 +683,27 @@ as List<EncryptedEntity>?,
 
 
 }
+
+/// @nodoc
+
+
+class _PermissionDenied extends HomepageState {
+  const _PermissionDenied(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
 
 /// @nodoc
 

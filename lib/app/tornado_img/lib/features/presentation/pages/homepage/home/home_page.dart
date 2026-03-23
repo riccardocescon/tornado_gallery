@@ -46,6 +46,9 @@ class _HomePageState extends State<HomePage> {
 
             context.push("/encryption", extra: galleryImages);
           },
+          permissionDenied: () {
+            context.showSnackbar("Permission to access photos was denied");
+          },
         );
       },
       child: SingleChildScrollView(

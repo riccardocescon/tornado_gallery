@@ -57,6 +57,7 @@ class HomepageBlocUtils {
           ],
         ),
       );
+      log('Found ${albums.length} albums, starting search for "$name"');
 
       if (albums.isEmpty) return null;
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 
@@ -6,17 +7,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
-import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
-import 'package:tornado_img_app/injection_container.dart';
 
 part 'homepage_bloc.freezed.dart';
 part 'homepage_event.dart';
@@ -29,8 +29,6 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   final selectedImages = <GalleryImage>[];
 
 final HomepageBlocUtils _utils = HomepageBlocUtils();
-
-  final GalleryBloc _galleryBloc = getIt<GalleryBloc>();
 
   late EncryptedFolder appRootFolder;
 
@@ -49,6 +47,7 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
       _emit(emit);
 
       final folderStream = _utils.watchAppFolderChanges(appRootFolder);
+
       await for (final _ in folderStream) {
         _emit(emit);
       }
@@ -57,6 +56,15 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
     on<_Refresh>((event, emit) async {});
 
     on<_OpenGallery>((event, emit) async {
+      
+      emit(const HomepageState.galleryLoading());
+
+      final photoPermission = await Permission.photos.request();
+      if (!photoPermission.isGranted && !photoPermission.isLimited) {
+        emit(HomepageState.permissionDenied());
+        return;
+      }
+
       selectedImages.clear();
 
       final result = await FilePicker.platform.pickFiles(
@@ -65,7 +73,8 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
         withData: true,
       );
 
-      emit(const HomepageState.galleryLoading());
+      log("File picker result: ${result?.files.map((f) => f.name).toList()}");
+
 
       if (result == null || result.files.isEmpty) {
         emit(const HomepageState.galleryImages(imagesLoaded: []));
@@ -84,6 +93,7 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
         );
 
         if (saveResult.isSuccess) {
+          log('Image saved successfully: $name');
           final savedAsset = await _utils.findSavedImageByName(name);
           if (savedAsset != null) {
             final savedFile = await savedAsset.file;
@@ -97,6 +107,8 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
               // For newly saved images, insert at the top (most recent)
               selectedImages.insert(0, newImage);
             }
+          } else {
+            log('Failed to find saved image asset: $name');
           }
         } else {
           log('Failed to save image: ${saveResult.errorMessage}');

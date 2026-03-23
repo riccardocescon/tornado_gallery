@@ -20,6 +20,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
     required List<GalleryImage>? images,
     required List<EncryptedEntity>? encryptedImages,
   }) = _Loaded;
+  const factory HomepageState.permissionDenied() = _PermissionDenied;
   const factory HomepageState.failure({required String message}) = _Failure;
 
   @override
@@ -36,6 +37,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
           lastLoaded,
         ],
     loaded: (images, encryptedImages) => [images, encryptedImages],
+    permissionDenied: () => [],
     failure: (message) => [message],
   );
 }
