@@ -1,0 +1,9 @@
+name: logger
+description: Logger utility for tornado_img
+version: 0.0.1
+publish_to: "none"
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+# Add dependencies here if needed
+dependencies:

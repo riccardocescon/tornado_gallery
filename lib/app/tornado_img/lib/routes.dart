@@ -4,6 +4,7 @@ import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_pag
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
+import 'package:tornado_img_app/features/presentation/pages/app_logger_page/app_logger_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encryption_page/encryption_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_page.dart';
@@ -19,6 +20,13 @@ GoRouter routes = GoRouter(
       name: 'test',
       builder: (context, state) {
         return const TestPage();
+      },
+    ),
+    GoRoute(
+      path: '/logger',
+      name: 'logger',
+      builder: (context, state) {
+        return const AppLoggerPage();
       },
     ),
     GoRoute(

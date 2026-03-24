@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
@@ -73,7 +74,9 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
         withData: true,
       );
 
-      log("File picker result: ${result?.files.map((f) => f.name).toList()}");
+      appLogger.logPageBloc(
+        "File picker result: ${result?.files.map((f) => f.name).toList()}",
+      );
 
 
       if (result == null || result.files.isEmpty) {
@@ -93,7 +96,7 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
         );
 
         if (saveResult.isSuccess) {
-          log('Image saved successfully: $name');
+          appLogger.logPageBloc('Image saved successfully: $name');
           final savedAsset = await _utils.findSavedImageByName(name);
           if (savedAsset != null) {
             final savedFile = await savedAsset.file;
@@ -108,10 +111,16 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
               selectedImages.insert(0, newImage);
             }
           } else {
-            log('Failed to find saved image asset: $name');
+            appLogger.logPageBloc(
+              'Failed to find saved image asset',
+              error: 'Asset not found after saving: $name',
+            );
           }
         } else {
-          log('Failed to save image: ${saveResult.errorMessage}');
+          appLogger.logPageBloc(
+            'Failed to save image',
+            error: saveResult.errorMessage,
+          );
         }
       }
 

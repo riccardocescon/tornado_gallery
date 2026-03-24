@@ -14,6 +14,9 @@ dependencies:
   tornado_img_crypto:
     path: ../../packages/tornado_img_crypto
 
+  logger:
+    path: ../../packages/logger
+
   # UI and navigation
   cupertino_icons: ^1.0.8
   flutter_bloc: ^9.1.1

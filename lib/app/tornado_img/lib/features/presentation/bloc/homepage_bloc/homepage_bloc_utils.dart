@@ -57,14 +57,16 @@ class HomepageBlocUtils {
           ],
         ),
       );
-      log('Found ${albums.length} albums, starting search for "$name"');
+      appLogger.logPageBloc(
+        'Found ${albums.length} albums, starting search for "$name"',
+      );
 
       if (albums.isEmpty) return null;
 
       final assetsCount = await albums.first.assetCountAsync;
       const int searchPageSize = 100;
 
-      log(
+      appLogger.logPageBloc(
         'Searching for "$name" in $assetsCount total assets (starting from most recent)',
       );
 
@@ -80,7 +82,9 @@ class HomepageBlocUtils {
 
         // Early termination if no more assets
         if (recentAssets.isEmpty) {
-          log('No more assets found at page $page, stopping search');
+          appLogger.logPageBloc(
+            'No more assets found at page $page, stopping search',
+          );
           continue;
         }
 
@@ -90,34 +94,40 @@ class HomepageBlocUtils {
             final asset = recentAssets[i];
             final title = await asset.titleAsync;
             if (title == name) {
-              log(
+              appLogger.logPageBloc(
                 'Found matching asset: $title at page $page (${totalPages - page} pages from end)',
               );
               return asset;
             }
           } catch (e) {
             // Continue if single asset fails
-            log('Error getting title for asset: $e');
+            appLogger.logPageBloc(
+              'Error getting title for asset',
+              error: e.toString(),
+            );
           }
         }
 
-        log(
+        appLogger.logPageBloc(
           'Searched page $page (${recentAssets.length} assets) - ${totalPages - page} pages from end',
         );
 
         // Early exit after searching reasonable number of recent pages
         if ((totalPages - page) > 10) {
-          log(
+          appLogger.logPageBloc(
             'Searched 10 most recent pages without success, stopping for performance',
           );
           break;
         }
       }
 
-      log('Image "$name" not found in recent assets');
+      appLogger.logPageBloc('Image "$name" not found in recent assets');
       return null;
     } catch (e) {
-      log('Error in _findSavedImageByName: $e');
+      appLogger.logPageBloc(
+        'Error searching for image by name: $name',
+        error: e.toString(),
+      );
       return null;
     }
   }
@@ -182,7 +192,7 @@ class HomepageBlocUtils {
     );
 
     await for (final event in folderStream) {
-      log("Received file system event: ${event.toString()}");
+      appLogger.logPageBloc("Received file system event: ${event.toString()}");
       final isDirectory =
           event.isDirectory || !event.path.split('/').last.contains('.');
       if (isDirectory) {
@@ -192,7 +202,9 @@ class HomepageBlocUtils {
             _removeEncryptedFolder(rootFolder, folder);
             _lookupTable.remove(event.path);
           }
-          log('Folder deleted: ${event.path}, removed from lookup');
+          appLogger.logPageBloc(
+            'Folder deleted: ${event.path}, removed from lookup',
+          );
           yield null;
           continue;
         }
@@ -207,7 +219,10 @@ class HomepageBlocUtils {
         if (inserted) {
           yield null;
         } else {
-          log('[ERROR]: Failed to insert folder for path: ${event.path}');
+          appLogger.logPageBloc(
+            'Failed to insert folder',
+            error: 'Path: ${event.path}',
+          );
         }
         continue;
       }
@@ -218,12 +233,13 @@ class HomepageBlocUtils {
         final parentFolder = _lookupTable[parentPath];
         if (parentFolder != null) {
           parentFolder.images.removeWhere((img) => img.id == fileName);
-          log(
+          appLogger.logPageBloc(
             'File deleted: ${event.path}, removed from parent folder in lookup',
           );
         } else {
-          log(
-            '[ERROR]: Parent folder not found in lookup for deleted file path: ${event.path}',
+          appLogger.logPageBloc(
+            'Failed to delete file',
+            error: 'Parent folder not found in lookup for path: ${event.path}',
           );
         }
         yield null;
@@ -233,8 +249,9 @@ class HomepageBlocUtils {
       final parentPath = Directory(event.path).parent.path;
       final parentFolder = _lookupTable[parentPath];
       if (parentFolder == null) {
-        log(
-          '[ERROR]: Parent folder not found in lookup for path: ${event.path}',
+        appLogger.logPageBloc(
+          'Failed to add new file',
+          error: 'Parent folder not found in lookup for path: ${event.path}',
         );
         continue;
       }

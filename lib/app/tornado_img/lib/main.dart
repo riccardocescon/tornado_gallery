@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/routes.dart';
 import 'package:tornado_img_app/theme/theme.dart';
 import 'package:tornado_img_app/theme/theme_notifier.dart';
 
-late PackageInfo packageInfo;
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  packageInfo = await PackageInfo.fromPlatform();
+  await initializeGlobals();
   setupInjectionContainer();
   runApp(const MyApp());
 }
