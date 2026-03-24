@@ -18,6 +18,7 @@ import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_fol
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 part 'homepage_bloc.freezed.dart';
 part 'homepage_event.dart';
@@ -56,75 +57,26 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
 
     on<_Refresh>((event, emit) async {});
 
-    on<_OpenGallery>((event, emit) async {
+    on<_GalleryAssetsSelected>((event, emit) async {
       
       emit(const HomepageState.galleryLoading());
 
-      final photoPermission = await Permission.photos.request();
-      if (!photoPermission.isGranted && !photoPermission.isLimited) {
-        emit(HomepageState.permissionDenied());
-        return;
-      }
+      try {
+       
+        selectedImages
+          ..clear()
+          ..addAll(await _utils.mapAssetsToGalleryImages(event.imagesSelected));
 
-      selectedImages.clear();
-
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: true,
-        withData: true,
-      );
-
-      appLogger.logPageBloc(
-        "File picker result: ${result?.files.map((f) => f.name).toList()}",
-      );
-
-
-      if (result == null || result.files.isEmpty) {
-        emit(const HomepageState.galleryImages(imagesLoaded: []));
-        return;
-      }
-
-      for (final file in result.files) {
-        final bytes = file.bytes!;
-        final name = file.name;
-
-        final saveResult = await SaverGallery.saveImage(
-          bytes,
-          quality: 100,
-          fileName: name,
-          skipIfExists: false,
+        emit(
+          HomepageState.galleryImages(imagesLoaded: List.of(selectedImages)),
         );
-
-        if (saveResult.isSuccess) {
-          appLogger.logPageBloc('Image saved successfully: $name');
-          final savedAsset = await _utils.findSavedImageByName(name);
-          if (savedAsset != null) {
-            final savedFile = await savedAsset.file;
-            if (savedFile != null) {
-              final newImage = GalleryImage(
-                id: savedAsset.id,
-                file: savedFile,
-                date: savedAsset.createDateTime,
-              );
-                
-              // For newly saved images, insert at the top (most recent)
-              selectedImages.insert(0, newImage);
-            }
-          } else {
-            appLogger.logPageBloc(
-              'Failed to find saved image asset',
-              error: 'Asset not found after saving: $name',
-            );
-          }
-        } else {
-          appLogger.logPageBloc(
-            'Failed to save image',
-            error: saveResult.errorMessage,
-          );
-        }
+      } catch (e) {
+        appLogger.logPageBloc(
+          'Error opening gallery with photo_manager picker',
+          error: e.toString(),
+        );
+        emit(const HomepageState.galleryImages(imagesLoaded: []));
       }
-
-      emit(HomepageState.galleryImages(imagesLoaded: selectedImages));
     });
   }
 

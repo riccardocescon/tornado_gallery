@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
@@ -45,9 +47,6 @@ class _HomePageState extends State<HomePage> {
             }
 
             context.push("/encryption", extra: galleryImages);
-          },
-          permissionDenied: () {
-            context.showSnackbar("Permission to access photos was denied");
           },
         );
       },
@@ -106,9 +105,32 @@ class _HomePageState extends State<HomePage> {
             buttonIcon: Icons.image_rounded,
             darker: true,
             onPressed:
-                () => context.read<HomepageBloc>().add(
-                  const HomepageEvent.openGallery(),
+                () async {
+              final permissionState =
+                  await PhotoManager.requestPermissionExtend();
+              if (!mounted) return;
+              if (!permissionState.isAuth && !permissionState.isLimited) {
+                context.showSnackbar("Permission to access photos was denied");
+                return;
+              }
+
+              final assets = await AssetPicker.pickAssets(
+                context,
+                pickerConfig: AssetPickerConfig(
+                  requestType: RequestType.image,
+                  maxAssets: 100,
                 ),
+              );
+              if (!mounted) return;
+              if (assets?.isEmpty ?? true) {
+                context.showSnackbar("No images selected");
+                return;
+              }
+
+              context.read<HomepageBloc>().add(
+                HomepageEvent.galleryAssetsSelected(imagesSelected: assets!),
+              );
+            },
           ),
         ),
         Expanded(

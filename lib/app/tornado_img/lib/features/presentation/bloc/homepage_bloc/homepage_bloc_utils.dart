@@ -40,96 +40,29 @@ class HomepageBlocUtils {
   //   }
   // }
 
-  Future<AssetEntity?> findSavedImageByName(String name) async {
+Future<List<GalleryImage>> mapAssetsToGalleryImages(
+    List<AssetEntity> assets,
+  ) async {
+    final List<GalleryImage> images = [];
+
+    for (final asset in assets) {
     try {
-      final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
-        onlyAll: true,
-        filterOption: FilterOptionGroup(
-          imageOption: const FilterOption(
-            sizeConstraint: SizeConstraint(ignoreSize: true),
-          ),
-          orders: [
-            const OrderOption(
-              type: OrderOptionType.createDate,
-              asc: false, // false = descending (newest first)
-            ),
-          ],
-        ),
-      );
-      appLogger.logPageBloc(
-        'Found ${albums.length} albums, starting search for "$name"',
-      );
+        final file = await asset.file;
+        if (file == null) continue;
 
-      if (albums.isEmpty) return null;
-
-      final assetsCount = await albums.first.assetCountAsync;
-      const int searchPageSize = 100;
-
-      appLogger.logPageBloc(
-        'Searching for "$name" in $assetsCount total assets (starting from most recent)',
-      );
-
-      // Calculate total pages
-      final totalPages = (assetsCount / searchPageSize).ceil();
-
-      // Start from the LAST page (most recent) and work backwards
-      for (int page = totalPages - 1; page >= 0; page--) {
-        final recentAssets = await albums.first.getAssetListPaged(
-          page: page,
-          size: searchPageSize,
+        images.add(
+          GalleryImage(id: asset.id, file: file, date: asset.createDateTime),
         );
-
-        // Early termination if no more assets
-        if (recentAssets.isEmpty) {
-          appLogger.logPageBloc(
-            'No more assets found at page $page, stopping search',
-          );
-          continue;
-        }
-
-        // Search within this page (reverse order to get most recent first)
-        for (int i = recentAssets.length - 1; i >= 0; i--) {
-          try {
-            final asset = recentAssets[i];
-            final title = await asset.titleAsync;
-            if (title == name) {
-              appLogger.logPageBloc(
-                'Found matching asset: $title at page $page (${totalPages - page} pages from end)',
-              );
-              return asset;
-            }
-          } catch (e) {
-            // Continue if single asset fails
-            appLogger.logPageBloc(
-              'Error getting title for asset',
-              error: e.toString(),
-            );
-          }
-        }
-
+      } catch (e) {
         appLogger.logPageBloc(
-          'Searched page $page (${recentAssets.length} assets) - ${totalPages - page} pages from end',
+          'Error mapping asset to GalleryImage',
+          error: e.toString(),
         );
-
-        // Early exit after searching reasonable number of recent pages
-        if ((totalPages - page) > 10) {
-          appLogger.logPageBloc(
-            'Searched 10 most recent pages without success, stopping for performance',
-          );
-          break;
-        }
       }
-
-      appLogger.logPageBloc('Image "$name" not found in recent assets');
-      return null;
-    } catch (e) {
-      appLogger.logPageBloc(
-        'Error searching for image by name: $name',
-        error: e.toString(),
-      );
-      return null;
     }
+
+    images.sort((a, b) => b.date.compareTo(a.date));
+    return images;
   }
 
   Future<EncryptedFolder> loadAppRootFolder() async {
