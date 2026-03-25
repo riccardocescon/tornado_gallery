@@ -93,7 +93,11 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
       }
     });
 
-    on<_Refresh>((event, emit) async {});
+    on<_Refresh>((event, emit) async {
+      await _utils.dispose();
+      await _streamManager?.dispose();
+      add(const HomepageEvent.setup());
+    });
 
     on<_GalleryAssetsSelected>((event, emit) async {
       

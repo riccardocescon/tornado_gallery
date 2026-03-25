@@ -13,6 +13,11 @@ class _GalleryStream extends _HomepageStream {
 @visibleForTesting
 class HomepageBlocUtils {
   final _lookupTable = <String, EncryptedFolder>{};
+  StreamManager? _streamManager;
+
+  Future<void> dispose() async {
+    await _streamManager?.dispose();
+  }
   // Future<List<EncryptedEntity>> loadLatestEncryptedImages({
   //   int limit = 3,
   // }) async {
@@ -134,7 +139,10 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       recursive: true,
     );
 
-    await for (final event in folderStream) {
+    await _streamManager?.dispose();
+    _streamManager = StreamManager.fromStream(folderStream);
+
+    await for (final event in _streamManager!.stream) {
       appLogger.logPageBloc("Received file system event: ${event.toString()}");
       final isDirectory =
           event.isDirectory || !event.path.split('/').last.contains('.');
