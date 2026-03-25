@@ -15,6 +15,7 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
   const factory EncryptionPageState.settingsUi({
     required bool galleryVisible,
     required String outputFolder,
+    required bool overrideImage,
     required bool deleteOriginals,
   }) = _SettingsUI;
   const factory EncryptionPageState.encrypting({
@@ -30,9 +31,10 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
     loading: () => [],
     ui: (images, size, dateTime) => [images, size, dateTime],
     settingsUi:
-        (galleryVisible, outputFolder, deleteOriginals) => [
+        (galleryVisible, outputFolder, overrideImage, deleteOriginals) => [
           galleryVisible,
           outputFolder,
+          overrideImage,
           deleteOriginals,
         ],
     encrypting: (archivingState) => [archivingState],

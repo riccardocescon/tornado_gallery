@@ -70,6 +70,37 @@ class _OptionsCard extends StatelessWidget {
               _OutputFolderOption(),
               _divisor(context),
               _OptionItem(
+                icon: Icons.image_outlined,
+                title: "Override image",
+                subtitle:
+                    "Allow ovverride in case of existing image with the same name in output folder",
+                trailing: BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
+                  buildWhen:
+                      (previous, current) => current.maybeMap(
+                        settingsUi: (state) => true,
+                        orElse: () => false,
+                      ),
+                  builder: (context, state) {
+                    final galleryVisibility = state.maybeMap(
+                      settingsUi: (state) => state.overrideImage,
+                      orElse: () => false,
+                    );
+                    return Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: galleryVisibility,
+                        onChanged: (_) {
+                          context.read<EncryptionPageBloc>().add(
+                            const EncryptionPageEvent.toggleOverrideImage(),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              _divisor(context),
+              _OptionItem(
                 icon: Icons.delete_outline_rounded,
                 title: "Delete Originals",
                 subtitle: "Permanently delete original images after encryption",

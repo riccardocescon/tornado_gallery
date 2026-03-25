@@ -18,6 +18,9 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
     required String outputFolder,
   }) = _SetOutputFolder;
 
+  const factory EncryptionPageEvent.toggleOverrideImage() =
+      _ToggleOverrideImage;
+      
   const factory EncryptionPageEvent.toggleDeleteOriginals() =
       _ToggleDeleteOriginals;
 

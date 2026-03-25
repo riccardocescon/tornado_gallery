@@ -87,6 +87,7 @@ class EncrpytionPage extends StatelessWidget {
                             },
                           ),
                           const _OptionsCard(),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ],

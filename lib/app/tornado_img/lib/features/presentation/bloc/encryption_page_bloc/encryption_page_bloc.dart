@@ -20,6 +20,7 @@ class EncryptionPageBloc
   // Settings
   bool galleryVisible = false;
   String outputFolder = '';
+  bool overrideImage = true;
   bool deleteOriginals = false;
 
   EncryptionPageBloc() : super(const EncryptionPageState.initial()) {
@@ -56,6 +57,14 @@ class EncryptionPageBloc
       galleryVisible = !galleryVisible;
 
       outputFolder = await _getOutputFolderRoot();
+      _emitSettings(emit);
+    });
+    on<_SetOutputFolder>((event, emit) async {
+      outputFolder = event.outputFolder;
+      _emitSettings(emit);
+    });
+    on<_ToggleOverrideImage>((event, emit) async {
+      overrideImage = !overrideImage;
       _emitSettings(emit);
     });
     on<_ToggleDeleteOriginals>((event, emit) async {
@@ -119,6 +128,7 @@ class EncryptionPageBloc
       EncryptionPageState.settingsUi(
         galleryVisible: galleryVisible,
         outputFolder: outputFolder,
+        overrideImage: overrideImage,
         deleteOriginals: deleteOriginals,
       ),
     );
