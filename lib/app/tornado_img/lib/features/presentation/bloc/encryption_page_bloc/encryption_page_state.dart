@@ -17,7 +17,9 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
     required String outputFolder,
     required bool deleteOriginals,
   }) = _SettingsUI;
-  const factory EncryptionPageState.encrypting() = _Encrypting;
+  const factory EncryptionPageState.encrypting({
+    required ArchivingState? archivingState,
+  }) = _Encrypting;
   const factory EncryptionPageState.encrypted() = _Encrypted;
   const factory EncryptionPageState.failure({required String message}) =
       _Failure;
@@ -33,7 +35,7 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
           outputFolder,
           deleteOriginals,
         ],
-    encrypting: () => [],
+    encrypting: (archivingState) => [archivingState],
     encrypted: () => [],
     failure: (message) => [message],
   );

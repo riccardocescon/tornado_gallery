@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
@@ -15,6 +16,7 @@ part 'widgets/password_card.dart';
 part 'widgets/options_card.dart';
 part 'widgets/options/option_item.dart';
 part 'widgets/options/output_folder_option.dart';
+part 'widgets/archiving_state_card.dart';
 
 class EncrpytionPage extends StatelessWidget {
   const EncrpytionPage({super.key});
@@ -58,7 +60,32 @@ class EncrpytionPage extends StatelessWidget {
                         children: [
                           const SizedBox(height: 8),
                           _ImagesPreviewCard(),
-                          _PasswordCard(),
+                          BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
+                            buildWhen:
+                                (previous, current) => current.maybeMap(
+                                  encrypting: (state) => true,
+                                  encrypted: (state) => true,
+                                  ui:
+                                      (state) => previous.maybeMap(
+                                        encrypted: (state) => true,
+                                        orElse: () => false,
+                                      ),
+                                  orElse: () => false,
+                                ),
+                            builder: (context, state) {
+                              final encryptingdata = state.maybeMap(
+                                encrypting: (state) => state.archivingState,
+                                orElse: () => null,
+                              );
+                              if (encryptingdata == null) {
+                                return _PasswordCard();
+                              }
+
+                              return _ArchivingStateCard(
+                                archivingState: encryptingdata,
+                              );
+                            },
+                          ),
                           const _OptionsCard(),
                         ],
                       ),
@@ -80,20 +107,26 @@ class EncrpytionPage extends StatelessWidget {
                     orElse: () => false,
                   );
 
-                  if (isEncrypting) return SizedBox.shrink();
-
                   return FilledButton(
                     onPressed:
-                        () => context.read<EncryptionPageBloc>().add(
-                          const EncryptionPageEvent.encrypt(),
-                        ),
+                        isEncrypting
+                            ? () {}
+                            : () => context.read<EncryptionPageBloc>().add(
+                              const EncryptionPageEvent.encrypt(),
+                            ),
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.lock_rounded, size: 18),
+                        isEncrypting
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.lock_rounded, size: 18),
                         Text(
-                          "Encrypt Images",
+                          isEncrypting ? "Encrpyting..." : "Encrypt Images",
                           style: context.textTheme.labelLarge,
                         ),
                       ],

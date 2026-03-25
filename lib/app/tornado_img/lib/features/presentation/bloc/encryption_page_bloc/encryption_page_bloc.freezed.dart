@@ -567,14 +567,14 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult Function()?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting() when encrypting != null:
-return encrypting();case _Encrypted() when encrypted != null:
+return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -594,14 +594,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)  settingsUi,required TResult Function()  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _UI():
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI():
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting():
-return encrypting();case _Encrypted():
+return encrypting(_that.archivingState);case _Encrypted():
 return encrypted();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -620,14 +620,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult? Function()?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting() when encrypting != null:
-return encrypting();case _Encrypted() when encrypted != null:
+return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -807,11 +807,16 @@ as bool,
 
 
 class _Encrypting extends EncryptionPageState {
-  const _Encrypting(): super._();
+  const _Encrypting({required this.archivingState}): super._();
   
 
+ final  ArchivingState? archivingState;
 
-
+/// Create a copy of EncryptionPageState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EncryptingCopyWith<_Encrypting> get copyWith => __$EncryptingCopyWithImpl<_Encrypting>(this, _$identity);
 
 
 
@@ -821,8 +826,37 @@ class _Encrypting extends EncryptionPageState {
 
 }
 
+/// @nodoc
+abstract mixin class _$EncryptingCopyWith<$Res> implements $EncryptionPageStateCopyWith<$Res> {
+  factory _$EncryptingCopyWith(_Encrypting value, $Res Function(_Encrypting) _then) = __$EncryptingCopyWithImpl;
+@useResult
+$Res call({
+ ArchivingState? archivingState
+});
 
 
+
+
+}
+/// @nodoc
+class __$EncryptingCopyWithImpl<$Res>
+    implements _$EncryptingCopyWith<$Res> {
+  __$EncryptingCopyWithImpl(this._self, this._then);
+
+  final _Encrypting _self;
+  final $Res Function(_Encrypting) _then;
+
+/// Create a copy of EncryptionPageState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? archivingState = freezed,}) {
+  return _then(_Encrypting(
+archivingState: freezed == archivingState ? _self.archivingState : archivingState // ignore: cast_nullable_to_non_nullable
+as ArchivingState?,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

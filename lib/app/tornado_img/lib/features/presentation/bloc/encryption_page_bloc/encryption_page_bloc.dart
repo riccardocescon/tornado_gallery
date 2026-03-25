@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 part 'encryption_page_bloc.freezed.dart';
@@ -62,7 +63,15 @@ class EncryptionPageBloc
       _emitSettings(emit);
     });
     on<_Encrypt>((event, emit) async {
-      emit(const EncryptionPageState.encrypting());
+      emit(
+        EncryptionPageState.encrypting(
+          archivingState: ArchivingState(
+            totalImages: images.length,
+            archivedImages: [],
+            failedImages: [],
+          ),
+        ),
+      );
 
       if (password.isEmpty) {
         emit(
@@ -90,6 +99,8 @@ class EncryptionPageBloc
                 state.totalImages) {
               return true;
             }
+
+            emit(EncryptionPageState.encrypting(archivingState: state));
             return false;
           },
           encryptionFailure: (value) => true,

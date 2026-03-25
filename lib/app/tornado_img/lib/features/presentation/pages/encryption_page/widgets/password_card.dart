@@ -4,10 +4,10 @@ class _PasswordCard extends StatefulWidget {
   const _PasswordCard();
 
   @override
-  State<_PasswordCard> createState() => __PasswordCardState();
+  State<_PasswordCard> createState() => __PasswordCard();
 }
 
-class __PasswordCardState extends State<_PasswordCard> {
+class __PasswordCard extends State<_PasswordCard> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
 
