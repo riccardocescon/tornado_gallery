@@ -51,15 +51,15 @@ class _OutputFolderOption extends StatelessWidget {
   }
 }
 
-class _OutputFolderBottomSheet extends StatelessWidget {
-  const _OutputFolderBottomSheet();
+// class _OutputFolderBottomSheet extends StatelessWidget {
+//   const _OutputFolderBottomSheet();
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("Select Output Folder", style: context.textTheme.titleMedium),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         Text("Select Output Folder", style: context.textTheme.titleMedium),
+//       ],
+//     );
+//   }
+// }

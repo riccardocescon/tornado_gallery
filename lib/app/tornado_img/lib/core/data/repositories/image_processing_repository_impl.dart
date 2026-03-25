@@ -9,8 +9,19 @@ import '../models/image_model.dart';
 
 typedef _Task = ({Uint8List bytes, String password});
 
+// Implementation for heavy tasks
 Future<Uint8List> _encrypt(_Task task) {
   return processImage(input: task.bytes, phrase: task.password);
+}
+
+img.Image? _decodeImage((Uint8List, String) args) {
+  final bytes = args.$1;
+  final ext = args.$2;
+  return img.decodeNamedImage('file.$ext', bytes);
+}
+
+Uint8List _encodeImage(ImageModel model) {
+  return img.encodePng(model.toImg());
 }
 
 class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
@@ -18,11 +29,8 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
   Future<ImageData?> decode(File file) async {
     final bytes = await file.readAsBytes();
     final ext = file.path.split('.').last.toLowerCase();
-
-    final decoded = img.decodeNamedImage('file.$ext', bytes);
-
+    final decoded = await compute(_decodeImage, (bytes, ext));
     if (decoded == null) return null;
-
     return ImageModel.fromImg(decoded);
   }
 
@@ -44,7 +52,7 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
   @override
   Future<Uint8List?> encode(ImageData image) async {
     final model = image as ImageModel;
-
-    return img.encodePng(model.toImg());
+    return await compute(_encodeImage, model);
   }
+
 }
