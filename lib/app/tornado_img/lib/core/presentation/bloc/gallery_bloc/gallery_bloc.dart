@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 
@@ -22,7 +23,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _EncryptImage event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(const GalleryState.loading());
+    emit(GalleryState.loading(total: 1));
 
     final result = await encryptUseCase.call(
       EncryptImageParams(
@@ -36,7 +37,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     result.fold(
       (failure) => emit(GalleryState.encryptionFailure(failure: failure)),
       (_) => emit(
-        GalleryState.encrypted(encrypted: [event.image], failed: [], total: 1),
+        GalleryState.encrypted(
+          archivingState: ArchivingState(
+            totalImages: 1,
+            archivedImages: [event.image],
+            failedImages: [],
+          ),
+        ),
       ),
     );
   }
@@ -45,7 +52,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _EncryptImages event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(const GalleryState.loading());
+    emit(GalleryState.loading(total: event.images.length));
 
     final encrypted = <GalleryImage>[];
     final failed = <GalleryImage>[];
@@ -61,12 +68,14 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
       );
 
       result.fold((_) => failed.add(image), (_) => encrypted.add(image));
+
+      final archivingState = ArchivingState(
+        archivedImages: List<GalleryImage>.from(encrypted),
+        failedImages: List<GalleryImage>.from(failed),
+        totalImages: event.images.length,
+      );
       emit(
-        GalleryState.encrypted(
-          encrypted: List<GalleryImage>.from(encrypted),
-          failed: List<GalleryImage>.from(failed),
-          total: event.images.length,
-        ),
+        GalleryState.encrypted(archivingState: archivingState)
       );
     }
   }

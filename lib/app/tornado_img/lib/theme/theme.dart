@@ -50,6 +50,7 @@ class AppTheme {
       secondary: AppColors.primarySoft,
       onSecondary: Colors.white,
       error: AppColors.error,
+      errorContainer: AppColors.error.withValues(alpha: 0.1),
       onError: Colors.white,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightTextPrimary,
@@ -348,6 +349,8 @@ class AppTheme {
         AppColorsExtension(
           softBackground: AppColors.lightSurfaceAlt,
           softButton: AppColors.lightSurfaceAlt,
+          success: AppColors.success,
+          successContainer: AppColors.success.withValues(alpha: 0.1),
         ),
       ],
     );
@@ -362,6 +365,7 @@ class AppTheme {
       secondary: AppColors.primary,
       onSecondary: Colors.white,
       error: AppColors.error,
+      errorContainer: AppColors.error.withValues(alpha: 0.1),
       onError: Colors.white,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
@@ -660,6 +664,8 @@ class AppTheme {
         AppColorsExtension(
           softBackground: AppColors.darkSurfaceAlt,
           softButton: AppColors.darkSurfaceAlt,
+          success: AppColors.success,
+          successContainer: AppColors.success.withValues(alpha: 0.1),
         ),
       ],
     );

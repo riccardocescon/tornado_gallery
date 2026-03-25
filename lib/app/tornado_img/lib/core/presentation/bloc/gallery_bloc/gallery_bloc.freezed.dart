@@ -428,12 +428,12 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> encrypted,  List<GalleryImage> failed,  int total)?  encrypted,TResult Function( EncryptionFailure failure)?  encryptionFailure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( int total)?  loading,TResult Function( ArchivingState archivingState)?  encrypted,TResult Function( EncryptionFailure failure)?  encryptionFailure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Encrypted() when encrypted != null:
-return encrypted(_that.encrypted,_that.failed,_that.total);case _Failure() when encryptionFailure != null:
+return loading(_that.total);case _Encrypted() when encrypted != null:
+return encrypted(_that.archivingState);case _Failure() when encryptionFailure != null:
 return encryptionFailure(_that.failure);case _:
   return orElse();
 
@@ -452,12 +452,12 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> encrypted,  List<GalleryImage> failed,  int total)  encrypted,required TResult Function( EncryptionFailure failure)  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( int total)  loading,required TResult Function( ArchivingState archivingState)  encrypted,required TResult Function( EncryptionFailure failure)  encryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Encrypted():
-return encrypted(_that.encrypted,_that.failed,_that.total);case _Failure():
+return loading(_that.total);case _Encrypted():
+return encrypted(_that.archivingState);case _Failure():
 return encryptionFailure(_that.failure);case _:
   throw StateError('Unexpected subclass');
 
@@ -475,12 +475,12 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> encrypted,  List<GalleryImage> failed,  int total)?  encrypted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( int total)?  loading,TResult? Function( ArchivingState archivingState)?  encrypted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Encrypted() when encrypted != null:
-return encrypted(_that.encrypted,_that.failed,_that.total);case _Failure() when encryptionFailure != null:
+return loading(_that.total);case _Encrypted() when encrypted != null:
+return encrypted(_that.archivingState);case _Failure() when encryptionFailure != null:
 return encryptionFailure(_that.failure);case _:
   return null;
 
@@ -514,11 +514,16 @@ class _Initial extends GalleryState {
 
 
 class _Loading extends GalleryState {
-  const _Loading(): super._();
+  const _Loading({required this.total}): super._();
   
 
+ final  int total;
 
-
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$LoadingCopyWith<_Loading> get copyWith => __$LoadingCopyWithImpl<_Loading>(this, _$identity);
 
 
 
@@ -528,31 +533,46 @@ class _Loading extends GalleryState {
 
 }
 
+/// @nodoc
+abstract mixin class _$LoadingCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
+  factory _$LoadingCopyWith(_Loading value, $Res Function(_Loading) _then) = __$LoadingCopyWithImpl;
+@useResult
+$Res call({
+ int total
+});
 
 
+
+
+}
+/// @nodoc
+class __$LoadingCopyWithImpl<$Res>
+    implements _$LoadingCopyWith<$Res> {
+  __$LoadingCopyWithImpl(this._self, this._then);
+
+  final _Loading _self;
+  final $Res Function(_Loading) _then;
+
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? total = null,}) {
+  return _then(_Loading(
+total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
 
 /// @nodoc
 
 
 class _Encrypted extends GalleryState {
-  const _Encrypted({required final  List<GalleryImage> encrypted, required final  List<GalleryImage> failed, required this.total}): _encrypted = encrypted,_failed = failed,super._();
+  const _Encrypted({required this.archivingState}): super._();
   
 
- final  List<GalleryImage> _encrypted;
- List<GalleryImage> get encrypted {
-  if (_encrypted is EqualUnmodifiableListView) return _encrypted;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_encrypted);
-}
-
- final  List<GalleryImage> _failed;
- List<GalleryImage> get failed {
-  if (_failed is EqualUnmodifiableListView) return _failed;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_failed);
-}
-
- final  int total;
+ final  ArchivingState archivingState;
 
 /// Create a copy of GalleryState
 /// with the given fields replaced by the non-null parameter values.
@@ -573,7 +593,7 @@ abstract mixin class _$EncryptedCopyWith<$Res> implements $GalleryStateCopyWith<
   factory _$EncryptedCopyWith(_Encrypted value, $Res Function(_Encrypted) _then) = __$EncryptedCopyWithImpl;
 @useResult
 $Res call({
- List<GalleryImage> encrypted, List<GalleryImage> failed, int total
+ ArchivingState archivingState
 });
 
 
@@ -590,12 +610,10 @@ class __$EncryptedCopyWithImpl<$Res>
 
 /// Create a copy of GalleryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? encrypted = null,Object? failed = null,Object? total = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? archivingState = null,}) {
   return _then(_Encrypted(
-encrypted: null == encrypted ? _self._encrypted : encrypted // ignore: cast_nullable_to_non_nullable
-as List<GalleryImage>,failed: null == failed ? _self._failed : failed // ignore: cast_nullable_to_non_nullable
-as List<GalleryImage>,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
-as int,
+archivingState: null == archivingState ? _self.archivingState : archivingState // ignore: cast_nullable_to_non_nullable
+as ArchivingState,
   ));
 }
 

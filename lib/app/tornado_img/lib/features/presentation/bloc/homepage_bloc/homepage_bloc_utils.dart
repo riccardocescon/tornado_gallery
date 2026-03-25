@@ -1,5 +1,15 @@
 part of 'homepage_bloc.dart';
 
+sealed class _HomepageStream {}
+
+class _FolderStream extends _HomepageStream {}
+
+class _GalleryStream extends _HomepageStream {
+  final GalleryState galleryState;
+
+  _GalleryStream(this.galleryState);
+}
+
 @visibleForTesting
 class HomepageBlocUtils {
   final _lookupTable = <String, EncryptedFolder>{};

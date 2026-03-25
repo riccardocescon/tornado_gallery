@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
@@ -59,7 +60,13 @@ void main() {
       expect:
           () => [
             GalleryState.loading(),
-            GalleryState.encrypted(encrypted: [tImage], failed: [], total: 1),
+            GalleryState.encrypted(
+              archivingState: ArchivingState(
+                totalImages: 1,
+                archivedImages: [tImage],
+                failedImages: [],
+              ),
+            ),
           ],
     );
 

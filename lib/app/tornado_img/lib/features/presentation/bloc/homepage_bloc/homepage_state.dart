@@ -15,6 +15,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
     required int folderLoaded,
     required int bytesLoaded,
     required DateTime? lastLoaded,
+    required ArchivingState? archivingState,
   }) = _GalleryStatus;
   const factory HomepageState.loaded({
     required List<GalleryImage>? images,
@@ -29,11 +30,13 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
     galleryLoading: () => [],
     galleryImages: (imagesLoaded) => [imagesLoaded],
     galleryStatus:
-        (imagesLoaded, folderLoaded, bytesLoaded, lastLoaded) => [
+        (imagesLoaded, folderLoaded, bytesLoaded, lastLoaded, archivingState) =>
+            [
           imagesLoaded,
           folderLoaded,
           bytesLoaded,
           lastLoaded,
+              archivingState,
         ],
     loaded: (images, encryptedImages) => [images, encryptedImages],
     failure: (message) => [message],

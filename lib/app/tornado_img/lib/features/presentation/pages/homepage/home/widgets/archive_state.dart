@@ -29,6 +29,37 @@ class _ArchiveState extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              BlocBuilder<HomepageBloc, HomepageState>(
+                buildWhen:
+                    (previous, current) => current.maybeMap(
+                      galleryStatus: (state) => true,
+                      orElse: () => false,
+                    ),
+                builder: (context, state) {
+                  return state.maybeMap(
+                    galleryStatus: (value) {
+                      final archivingState = value.archivingState;
+                      if (archivingState == null) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Column(
+                        spacing: 8,
+                        children: [
+                          Container(
+                            height: 1.5,
+                            color: context.colorScheme.onSurface.withValues(
+                              alpha: 0.2,
+                            ),
+                          ),
+                          _archivingItem(context, archivingState),
+                        ],
+                      );
+                    },
+                    orElse: () => const SizedBox.shrink(),
+                  );
+                },
+              ),
               Container(
                 height: 1.5,
                 color: context.colorScheme.onSurface.withValues(alpha: 0.2),
@@ -259,6 +290,86 @@ class _ArchiveState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _archivingItem(BuildContext context, ArchivingState archivingState) {
+    final successImages = archivingState.archivedImages.length;
+    final failedImages = archivingState.failedImages.length;
+    final processingImages =
+        archivingState.totalImages - successImages - failedImages;
+
+    final success = '$successImages Archived';
+    final failed = '$failedImages Failed';
+    final processing = '$processingImages Processing';
+
+    Widget chip(
+      String text,
+      Color foreground,
+      Color background, {
+      Widget? tail,
+    }) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: AppStyle.cardBorderRadius,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: foreground,
+            ),
+          ),
+          if (tail != null) ...[const SizedBox(width: 6), tail],
+        ],
+      ),
+    );
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: [
+        if (successImages > 0)
+          chip(
+            success,
+            context.appColors.success,
+            context.appColors.successContainer,
+            tail: Icon(
+              Icons.check_rounded,
+              size: 16,
+              color: context.appColors.success,
+            ),
+          ),
+
+        if (failedImages > 0)
+          chip(
+            failed,
+            context.colorScheme.error,
+            context.colorScheme.errorContainer,
+            tail: Icon(
+              Icons.error_outline_rounded,
+              size: 16,
+              color: context.colorScheme.error,
+            ),
+          ),
+
+        if (processingImages > 0)
+          chip(
+            processing,
+            context.colorScheme.primary,
+            context.colorScheme.primaryContainer.withValues(alpha: 0.1),
+            tail: const SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(strokeWidth: 1.2),
+            ),
+          ),
+      ],
     );
   }
 }

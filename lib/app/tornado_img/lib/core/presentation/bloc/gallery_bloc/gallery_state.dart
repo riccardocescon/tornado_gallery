@@ -5,21 +5,20 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
   const GalleryState._();
 
   const factory GalleryState.initial() = _Initial;
-  const factory GalleryState.loading() = _Loading;
+  const factory GalleryState.loading({required int total}) = _Loading;
   const factory GalleryState.encrypted({
-    required List<GalleryImage> encrypted,
-    required List<GalleryImage> failed,
-    required int total,
+    required ArchivingState archivingState,
   }) = _Encrypted;
   const factory GalleryState.encryptionFailure({
     required EncryptionFailure failure,
   }) = _Failure;
 
   @override
-  List<Object?> get props => map(
-    initial: (_) => [],
-    loading: (_) => [],
-    encrypted: (_) => [],
-    encryptionFailure: (value) => [value.failure],
+  List<Object?> get props => maybeWhen(
+    initial: () => [],
+    loading: (total) => [total],
+    encrypted: (archivingState) => [archivingState],
+    encryptionFailure: (failure) => [failure],
+    orElse: () => [],
   );
 }

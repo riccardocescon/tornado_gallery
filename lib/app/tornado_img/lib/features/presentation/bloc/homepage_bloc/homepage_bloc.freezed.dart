@@ -390,14 +390,14 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
-return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded() when loaded != null:
+return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded() when loaded != null:
 return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -417,14 +417,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _GalleryLoading():
 return galleryLoading();case _GalleryImages():
 return galleryImages(_that.imagesLoaded);case _GalleryStatus():
-return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded():
+return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded():
 return loaded(_that.images,_that.encryptedImages);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -443,14 +443,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
-return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded);case _Loaded() when loaded != null:
+return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded() when loaded != null:
 return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -588,13 +588,14 @@ as List<GalleryImage>,
 
 
 class _GalleryStatus extends HomepageState {
-  const _GalleryStatus({required this.imagesLoaded, required this.folderLoaded, required this.bytesLoaded, required this.lastLoaded}): super._();
+  const _GalleryStatus({required this.imagesLoaded, required this.folderLoaded, required this.bytesLoaded, required this.lastLoaded, required this.archivingState}): super._();
   
 
  final  int imagesLoaded;
  final  int folderLoaded;
  final  int bytesLoaded;
  final  DateTime? lastLoaded;
+ final  ArchivingState? archivingState;
 
 /// Create a copy of HomepageState
 /// with the given fields replaced by the non-null parameter values.
@@ -615,7 +616,7 @@ abstract mixin class _$GalleryStatusCopyWith<$Res> implements $HomepageStateCopy
   factory _$GalleryStatusCopyWith(_GalleryStatus value, $Res Function(_GalleryStatus) _then) = __$GalleryStatusCopyWithImpl;
 @useResult
 $Res call({
- int imagesLoaded, int folderLoaded, int bytesLoaded, DateTime? lastLoaded
+ int imagesLoaded, int folderLoaded, int bytesLoaded, DateTime? lastLoaded, ArchivingState? archivingState
 });
 
 
@@ -632,13 +633,14 @@ class __$GalleryStatusCopyWithImpl<$Res>
 
 /// Create a copy of HomepageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? imagesLoaded = null,Object? folderLoaded = null,Object? bytesLoaded = null,Object? lastLoaded = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? imagesLoaded = null,Object? folderLoaded = null,Object? bytesLoaded = null,Object? lastLoaded = freezed,Object? archivingState = freezed,}) {
   return _then(_GalleryStatus(
 imagesLoaded: null == imagesLoaded ? _self.imagesLoaded : imagesLoaded // ignore: cast_nullable_to_non_nullable
 as int,folderLoaded: null == folderLoaded ? _self.folderLoaded : folderLoaded // ignore: cast_nullable_to_non_nullable
 as int,bytesLoaded: null == bytesLoaded ? _self.bytesLoaded : bytesLoaded // ignore: cast_nullable_to_non_nullable
 as int,lastLoaded: freezed == lastLoaded ? _self.lastLoaded : lastLoaded // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,archivingState: freezed == archivingState ? _self.archivingState : archivingState // ignore: cast_nullable_to_non_nullable
+as ArchivingState?,
   ));
 }
 

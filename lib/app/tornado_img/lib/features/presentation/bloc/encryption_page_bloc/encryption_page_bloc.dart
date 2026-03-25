@@ -85,7 +85,9 @@ class EncryptionPageBloc
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           encrypted: (value) {
-            if (value.encrypted.length + value.failed.length == images.length) {
+            final state = value.archivingState;
+            if (state.archivedImages.length + state.failedImages.length ==
+                state.totalImages) {
               return true;
             }
             return false;
