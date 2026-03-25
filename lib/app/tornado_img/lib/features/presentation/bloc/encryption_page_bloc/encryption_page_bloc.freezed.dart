@@ -567,12 +567,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images)?  ui,TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult Function()?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult Function()?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
-return ui(_that.images);case _SettingsUI() when settingsUi != null:
+return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting() when encrypting != null:
 return encrypting();case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
@@ -594,12 +594,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images)  ui,required TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)  settingsUi,required TResult Function()  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)  settingsUi,required TResult Function()  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _UI():
-return ui(_that.images);case _SettingsUI():
+return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI():
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting():
 return encrypting();case _Encrypted():
 return encrypted();case _Failure():
@@ -620,12 +620,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images)?  ui,TResult? Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult? Function()?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( bool galleryVisible,  String outputFolder,  bool deleteOriginals)?  settingsUi,TResult? Function()?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
-return ui(_that.images);case _SettingsUI() when settingsUi != null:
+return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.galleryVisible,_that.outputFolder,_that.deleteOriginals);case _Encrypting() when encrypting != null:
 return encrypting();case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
@@ -683,7 +683,7 @@ class _Loading extends EncryptionPageState {
 
 
 class _UI extends EncryptionPageState {
-  const _UI({required final  List<GalleryImage> images}): _images = images,super._();
+  const _UI({required final  List<GalleryImage> images, required this.size, required this.dateTime}): _images = images,super._();
   
 
  final  List<GalleryImage> _images;
@@ -693,6 +693,8 @@ class _UI extends EncryptionPageState {
   return EqualUnmodifiableListView(_images);
 }
 
+ final  String size;
+ final  String dateTime;
 
 /// Create a copy of EncryptionPageState
 /// with the given fields replaced by the non-null parameter values.
@@ -713,7 +715,7 @@ abstract mixin class _$UICopyWith<$Res> implements $EncryptionPageStateCopyWith<
   factory _$UICopyWith(_UI value, $Res Function(_UI) _then) = __$UICopyWithImpl;
 @useResult
 $Res call({
- List<GalleryImage> images
+ List<GalleryImage> images, String size, String dateTime
 });
 
 
@@ -730,10 +732,12 @@ class __$UICopyWithImpl<$Res>
 
 /// Create a copy of EncryptionPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? size = null,Object? dateTime = null,}) {
   return _then(_UI(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<GalleryImage>,
+as List<GalleryImage>,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as String,dateTime: null == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

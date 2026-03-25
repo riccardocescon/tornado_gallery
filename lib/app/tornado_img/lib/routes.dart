@@ -34,7 +34,8 @@ GoRouter routes = GoRouter(
       name: 'home',
       builder: (context, state) {
         return BlocProvider(
-          create: (context) => getIt<HomepageBloc>(),
+          create:
+              (context) => getIt<HomepageBloc>()..add(HomepageEvent.setup()),
           child: const ShellHomepage(),
         );
       },

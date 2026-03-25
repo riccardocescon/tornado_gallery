@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
@@ -23,7 +24,26 @@ class EncryptionPageBloc
   EncryptionPageBloc() : super(const EncryptionPageState.initial()) {
     on<_Setup>((event, emit) async {
       images.addAll(event.images);
-      emit(EncryptionPageState.ui(images: images));
+      final size = images.first.file.lengthSync();
+      String sizeText;
+      if (size < 1024 * 1024) {
+        final sizeInKB = size / 1024;
+        sizeText = '${sizeInKB.toStringAsFixed(2)} KB';
+      } else {
+        final sizeInMB = size / (1024 * 1024);
+        sizeText = '${sizeInMB.toStringAsFixed(2)} MB';
+      }
+
+      final dateTime = DateFormat(
+        "dd MM yyyy",
+      ).format(images.first.file.lastModifiedSync());
+      emit(
+        EncryptionPageState.ui(
+          images: images,
+          size: sizeText,
+          dateTime: dateTime.toString(),
+        ),
+      );
 
       outputFolder = await _getOutputFolderRoot();
       _emitSettings(emit);

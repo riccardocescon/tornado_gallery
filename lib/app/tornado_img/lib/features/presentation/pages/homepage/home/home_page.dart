@@ -22,11 +22,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    context.read<HomepageBloc>().add(const HomepageEvent.setup());
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {

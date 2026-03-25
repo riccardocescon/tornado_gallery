@@ -29,7 +29,15 @@ class _ImagesPreviewCard extends StatelessWidget {
                 spacing: 16,
                 children: [
                   _image(value.images.first.file),
-                  Expanded(child: _fileData(context, value.images)),
+                  Expanded(
+                    child: _fileData(
+                      context,
+                      value.images.first,
+                      value.images.length,
+                      value.size,
+                      value.dateTime,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -45,31 +53,35 @@ class _ImagesPreviewCard extends StatelessWidget {
       borderRadius: AppStyle.cardBorderRadius,
       child: Stack(
         children: [
-          FutureBuilder(
-            future: file.readAsBytes(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return LoadingContainer(width: 128, height: 128);
-              }
-
-              if (snapshot.hasError || snapshot.data == null) {
+          SizedBox.square(
+            dimension: 128,
+            child: Image.file(
+              file,
+              fit: BoxFit.cover,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                if (wasSynchronouslyLoaded) {
+                  return child;
+                }
+                if (frame == null) {
+                  return Container(
+                    color: Colors.grey,
+                    child: const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                }
+                return child;
+              },
+              errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  width: 128,
-                  height: 128,
-                  color: context.colorScheme.errorContainer,
-                  child: Icon(
+                  color: Colors.grey,
+                  child: const Icon(
                     Icons.broken_image_rounded,
-                    color: context.colorScheme.onErrorContainer,
-                    size: 32,
+                    color: Colors.white,
                   ),
                 );
-              }
-
-              return SizedBox.square(
-                dimension: 128,
-                child: Image.memory(snapshot.data!, fit: BoxFit.cover),
-              );
-            },
+              },
+            ),
           ),
           Positioned(
             bottom: 8,
@@ -81,11 +93,20 @@ class _ImagesPreviewCard extends StatelessWidget {
     );
   }
 
-  Widget _fileData(BuildContext context, List<GalleryImage> files) {
-    final file = files.first.file;
+  Widget _fileData(
+    BuildContext context,
+    GalleryImage previewImage,
+    int imagesCount,
+    String sizeText,
+    String dateText,
+  ) {
+    final file = previewImage.file;
     final textStyle = context.textTheme.bodySmall?.copyWith(
       color: context.colorScheme.onSurface.withValues(alpha: 0.4),
     );
+
+    
+    final images = "$imagesCount ${imagesCount > 1 ? 'images' : 'image'}";
 
     return Column(
       spacing: 8,
@@ -98,50 +119,7 @@ class _ImagesPreviewCard extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        Row(
-          children: [
-            FutureBuilder(
-              future: file.length(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return LoadingContainer(width: 40, height: 12);
-                }
-
-                if (snapshot.hasError || snapshot.data == null) {
-                  return Text('Unknown size', style: textStyle);
-                }
-
-                final size = snapshot.data!;
-                String sizeText;
-                if (size < 1024 * 1024) {
-                  final sizeInKB = size / 1024;
-                  sizeText = '${sizeInKB.toStringAsFixed(2)} KB';
-                } else {
-                  final sizeInMB = size / (1024 * 1024);
-                  sizeText = '${sizeInMB.toStringAsFixed(2)} MB';
-                }
-                return Text(sizeText, style: textStyle);
-              },
-            ),
-            Text(' • ', style: textStyle),
-            FutureBuilder(
-              future: file.lastModified(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return LoadingContainer(width: 80, height: 12);
-                }
-
-                if (snapshot.hasError || snapshot.data == null) {
-                  return Text('Unknown date', style: textStyle);
-                }
-
-                final date = snapshot.data!;
-                final formattedDate = DateFormat("dd MMM yyyy").format(date);
-                return Text(formattedDate, style: textStyle);
-              },
-            ),
-          ],
-        ),
+        Text('$sizeText • $dateText', style: textStyle),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -154,7 +132,7 @@ class _ImagesPreviewCard extends StatelessWidget {
             children: [
               const Icon(Icons.image_rounded, size: 14),
               Text(
-                "${files.length} ${files.length > 1 ? 'images' : 'image'}",
+                images,
                 style: context.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
