@@ -16,6 +16,8 @@ extension BuildContextX on BuildContext {
 
   AppColorsExtension get appColors => theme.extension<AppColorsExtension>()!;
 
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+
   void showSuccessSnackbar(String text) {
     ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(text)));
   }

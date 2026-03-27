@@ -24,7 +24,10 @@ class __PasswordCard extends State<_PasswordCard> {
       decoration: BoxDecoration(
         color: context.colorScheme.surfaceContainerLow,
         borderRadius: AppStyle.cardBorderRadius,
-        boxShadow: [
+        boxShadow:
+            context.isDarkMode
+                ? null
+                : [
           BoxShadow(
             color: context.colorScheme.onSurface.withValues(alpha: 0.1),
             blurRadius: 8,
