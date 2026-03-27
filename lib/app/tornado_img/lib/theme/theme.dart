@@ -351,6 +351,7 @@ class AppTheme {
           softButton: AppColors.lightSurfaceAlt,
           success: AppColors.success,
           successContainer: AppColors.success.withValues(alpha: 0.1),
+          scaffoldBackground: AppColors.lightBackground,
         ),
       ],
     );
@@ -666,6 +667,7 @@ class AppTheme {
           softButton: AppColors.darkSurfaceAlt,
           success: AppColors.success,
           successContainer: AppColors.success.withValues(alpha: 0.1),
+          scaffoldBackground: AppColors.darkBackground,
         ),
       ],
     );

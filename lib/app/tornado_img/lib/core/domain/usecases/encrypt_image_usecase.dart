@@ -5,6 +5,7 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 
 class EncryptImageUseCase extends EncrpytionUseCase<void, EncryptImageParams> {
   final ImageProcessingRepository imageRepo;
@@ -43,6 +44,7 @@ class EncryptImageUseCase extends EncrpytionUseCase<void, EncryptImageParams> {
 
       return const Right(null);
     } catch (e) {
+      appLogger.logUsecase('Error encrypting image', error: e.toString());
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }

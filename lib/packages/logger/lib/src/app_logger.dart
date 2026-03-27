@@ -18,6 +18,9 @@ class AppLogger {
       error == null
           ? _addLog(message, LogLayer.repository)
           : _addErrorLog(message, error, LogLayer.repository);
+  void logUsecase(String message, {String? error}) => error == null
+      ? _addLog(message, LogLayer.usecase)
+      : _addErrorLog(message, error, LogLayer.usecase);
   void logApi(String message, {String? error}) =>
       error == null
           ? _addLog(message, LogLayer.api)
@@ -112,4 +115,4 @@ class AppLog {
   }
 }
 
-enum LogLayer { ui, pageBloc, bloc, repository, api, core }
+enum LogLayer { ui, pageBloc, bloc, repository, usecase, api, core }

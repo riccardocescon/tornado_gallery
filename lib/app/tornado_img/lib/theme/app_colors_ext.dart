@@ -5,12 +5,14 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color softButton;
   final Color success;
   final Color successContainer;
+  final Color scaffoldBackground;
 
   AppColorsExtension({
     required this.softBackground,
     required this.softButton,
     required this.success,
     required this.successContainer,
+    required this.scaffoldBackground,
   });
 
   @override
@@ -19,12 +21,14 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? softButton,
     Color? success,
     Color? successContainer,
+    Color? scaffoldBackground,
   }) {
     return AppColorsExtension(
       softBackground: softBackground ?? this.softBackground,
       softButton: softButton ?? this.softButton,
       success: success ?? this.success,
       successContainer: successContainer ?? this.successContainer,
+      scaffoldBackground: scaffoldBackground ?? this.scaffoldBackground,
     );
   }
 
@@ -37,6 +41,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       success: Color.lerp(success, other.success, t)!,
       successContainer:
           Color.lerp(successContainer, other.successContainer, t)!,
+      scaffoldBackground:
+          Color.lerp(scaffoldBackground, other.scaffoldBackground, t)!,
     );
   }
 }

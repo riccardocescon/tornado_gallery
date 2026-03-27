@@ -7,6 +7,7 @@ import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
+import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 part 'widgets/action_card.dart';
@@ -44,47 +45,28 @@ class _HomePageState extends State<HomePage> {
           },
         );
       },
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: 16,
-          children: [
-            const SizedBox(height: 2),
-            _title(),
-            _actions(),
-            const _ArchiveState(),
-            const _InfoCards(),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: SingleChildScrollView(
+          child: Column(
+            spacing: 16,
+            children: [
+              const SizedBox(height: 2),
+              PageTitle(
+                title: "Tornado Gallery",
+                subtitle: "Visually encrypted your images for full privacy",
+                icon: Icons.lock_rounded,
+              ),
+              _actions(),
+              const _ArchiveState(),
+              const _InfoCards(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _title() {
-    return Column(
-      spacing: 8,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          spacing: 12,
-          children: [
-            ContainedIcon(icon: Icons.lock_rounded),
-            Text(
-              "Tornado Gallery",
-              style: context.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        Text(
-          "Visually encrypted your images for full privacy",
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _actions() {
     return Row(

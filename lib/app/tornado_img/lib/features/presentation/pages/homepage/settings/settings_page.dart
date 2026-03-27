@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/theme/theme_notifier.dart';
 
@@ -15,60 +16,68 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      spacing: 16,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Settings Page', style: context.textTheme.headlineMedium),
-        Column(
-          spacing: 12,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colorScheme.surface,
-                borderRadius: AppStyle.cardBorderRadius,
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    "Theme",
-                    style: context.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        spacing: 16,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 2),
+          PageTitle(
+            title: "Settings",
+            subtitle: "Customize your app experience",
+            icon: Icons.settings,
+          ),
+          Column(
+            spacing: 12,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surface,
+                  borderRadius: AppStyle.cardBorderRadius,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      "Theme",
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  Spacer(),
-                  _ThemeSwitcher(),
-                ],
+                    Spacer(),
+                    _ThemeSwitcher(),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colorScheme.surface,
-                borderRadius: AppStyle.cardBorderRadius,
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    "Logger",
-                    style: context.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surface,
+                  borderRadius: AppStyle.cardBorderRadius,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      "Logger",
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      context.push('/logger');
-                    },
-                    icon: Icon(Icons.arrow_forward_ios_rounded),
-                  ),
-                ],
+                    Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        context.push('/logger');
+                      },
+                      icon: Icon(Icons.arrow_forward_ios_rounded),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

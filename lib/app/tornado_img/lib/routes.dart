@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
@@ -33,11 +34,21 @@ GoRouter routes = GoRouter(
       path: '/',
       name: 'home',
       builder: (context, state) {
-        return BlocProvider(
-          create:
-              (context) => getIt<HomepageBloc>()..add(HomepageEvent.setup()),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create:
+                  (context) =>
+                      getIt<HomepageBloc>()..add(HomepageEvent.setup()),
+            ),
+            BlocProvider(
+              create:
+                  (context) =>
+                      getIt<ArchivePageBloc>()..add(ArchivePageEvent.setup()),
+            ),
+          ],
           child: const ShellHomepage(),
-        );
+        ); 
       },
       routes: [
         GoRoute(

@@ -17,3 +17,17 @@ class EncryptionFailure extends Failure {
     return EncryptionFailure._(message: 'Encryption error: $details');
   }
 }
+
+class DecryptionFailure extends Failure {
+  const DecryptionFailure._({required super.message});
+
+  factory DecryptionFailure.unsupportedExtension(String ext) {
+    return DecryptionFailure._(
+      message: 'Unsupported file extension for decryption: $ext',
+    );
+  }
+
+  factory DecryptionFailure.decryptionError(String details) {
+    return DecryptionFailure._(message: 'Decryption error: $details');
+  }
+}

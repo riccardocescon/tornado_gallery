@@ -76,7 +76,7 @@ class _OptionsCard extends StatelessWidget {
                 icon: Icons.image_outlined,
                 title: "Override image",
                 subtitle:
-                    "Allow ovverride in case of existing image with the same name in output folder",
+                    "Allow override in case of existing image with the same name in output folder",
                 trailing: BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
                   buildWhen:
                       (previous, current) => current.maybeMap(

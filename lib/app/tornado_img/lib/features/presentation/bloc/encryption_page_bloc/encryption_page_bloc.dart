@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
@@ -47,7 +47,9 @@ class EncryptionPageBloc
         ),
       );
 
-      outputFolder = await _getOutputFolderRoot();
+      outputFolder = await GalleryPathProvider.getOutputFolderRoot(
+        galleryVisible: galleryVisible,
+      );
       _emitSettings(emit);
     });
     on<_SetPassword>((event, emit) async {
@@ -56,7 +58,9 @@ class EncryptionPageBloc
     on<_ToggleGalleryVisibility>((event, emit) async {
       galleryVisible = !galleryVisible;
 
-      outputFolder = await _getOutputFolderRoot();
+      outputFolder = await GalleryPathProvider.getOutputFolderRoot(
+        galleryVisible: galleryVisible,
+      );
       _emitSettings(emit);
     });
     on<_SetOutputFolder>((event, emit) async {
@@ -132,15 +136,5 @@ class EncryptionPageBloc
         deleteOriginals: deleteOriginals,
       ),
     );
-  }
-
-  Future<String> _getOutputFolderRoot() async {
-    if (galleryVisible) {
-      final root = await getExternalStorageDirectory();
-      if (root != null) return '${root.path}/TornadoGallery';
-    }
-
-    final root = await getApplicationDocumentsDirectory();
-    return '${root.path}/encrypted';
   }
 }

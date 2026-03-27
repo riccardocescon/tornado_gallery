@@ -25,13 +25,10 @@ class _ShellHomepageState extends State<ShellHomepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: PageView(
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: pages,
-          ),
+        child: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: pages,
         ),
       ),
       bottomNavigationBar: BottomAppNavBar(
