@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 class AppLogger {
+  bool showPrints = false;
   final int maxLogs = 1000;
   final List<AppLog> _logs = [];
 
@@ -37,6 +40,8 @@ class AppLogger {
       _logs.removeAt(0);
     }
     _logs.add(AppLog.log(message, layer));
+
+    if (showPrints) log('[${layer.name.toUpperCase()}] $message');
   }
 
   void _addErrorLog(String message, Object error, LogLayer layer) {
@@ -44,6 +49,11 @@ class AppLogger {
       _logs.removeAt(0);
     }
     _logs.add(AppLog.error(message, error, layer));
+
+    log(
+      '[ERROR] [${layer.name.toUpperCase()}] $message - Error: $error',
+      stackTrace: StackTrace.current,
+    );
   }
 }
 

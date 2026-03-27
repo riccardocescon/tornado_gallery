@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
-import 'package:tornado_img_app/core/domain/repositories/storage_repository_impl.dart';
+import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
@@ -95,6 +96,8 @@ class EncryptionPageBloc
         return;
       }
 
+      final remainingImages = images.map((e) => e.file.path).toList();
+
       final galleryBloc = getIt.get<GalleryBloc>();
 
       galleryBloc.add(
@@ -107,6 +110,12 @@ class EncryptionPageBloc
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           encrypted: (value) {
+
+            _syncNewArchivedImages(
+              value.archivingState.archivedImages,
+              remainingImages,
+            );
+
             final state = value.archivingState;
             if (state.archivedImages.length + state.failedImages.length ==
                 state.totalImages) {
@@ -125,6 +134,24 @@ class EncryptionPageBloc
 
       emit(EncryptionPageState.encrypted());
     });
+  }
+
+  void _syncNewArchivedImages(
+    List<GalleryImage> newlyArchived,
+    List<String> remainingImages,
+  ) {
+    final toUpdate =
+        newlyArchived
+            .where((img) => remainingImages.contains(img.file.path))
+            .toList();
+    for (final newArchive in toUpdate) {
+      remainingImages.remove(newArchive.file.path);
+
+      final image = images.firstWhere(
+        (img) => img.file.path == newArchive.file.path,
+      );
+      getIt<AppBloc>().add(AppEvent.addEncryptedImage(image: image));
+    }
   }
 
   void _emitSettings(Emitter<EncryptionPageState> emit) {

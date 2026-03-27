@@ -15,14 +15,16 @@ class _ArchivedTileState extends State<_ArchivedTile> {
   @override
   void initState() {
     widget.image.file.readAsBytes().then((data) {
-      setState(() => bytes = data);
+      if (mounted) {
+        setState(() => bytes = data);
+      }
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 80 + 32,
       child: FilledButton(
         onPressed: () {},

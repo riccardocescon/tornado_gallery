@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
-import 'package:tornado_img_app/core/domain/repositories/storage_repository_impl.dart';
+import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 

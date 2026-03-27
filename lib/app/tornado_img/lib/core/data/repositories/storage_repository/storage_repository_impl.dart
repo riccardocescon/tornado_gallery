@@ -1,0 +1,41 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+
+part 'storage_repository_utils.dart';
+
+class StorageRepositoryImpl implements StorageRepository {
+  final StorageRepositoryUtils utils = StorageRepositoryUtils();
+
+  @override
+  Future<void> save({
+    required Uint8List bytes,
+    required String fileName,
+    required String path,
+  }) async {
+    final file = File('$path/$fileName');
+
+    await file.create(recursive: true);
+    await file.writeAsBytes(bytes);
+  }
+
+  @override
+  Stream<GalleryStreamImage> readImages(String path) async* {
+    final dir = Directory(path);
+    appLogger.logRepository('Reading images from $path');
+    if (!await dir.exists()) {
+      appLogger.logRepository('Directory does not exist: $path');
+      return;
+    }
+
+    yield* utils.readAllImagesRecursively(dir).asyncMap((image) {
+      return GalleryStreamImage.image(
+        image: image,
+        type: GalleryStreamImageType.newImage,
+      );
+    });
+  }
+}

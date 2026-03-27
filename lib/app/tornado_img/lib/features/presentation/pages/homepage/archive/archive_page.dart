@@ -36,6 +36,12 @@ class _ArchivePageState extends State<ArchivePage> {
             ),
           ),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.maxFinite,
+              child: Row(children: [_encryptedFiles()]),
+            ),
+          ),
           _images(),
         ],
       ),
@@ -69,6 +75,44 @@ class _ArchivePageState extends State<ArchivePage> {
             );
           },
           orElse: () => SliverToBoxAdapter(child: const SizedBox()),
+        );
+      },
+    );
+  }
+
+  Widget _encryptedFiles() {
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen:
+          (previous, current) => current.maybeWhen(
+            ui:
+                (images) => previous.maybeWhen(
+                  ui: (prevImages) => prevImages.length != images.length,
+                  orElse: () => true,
+                ),
+            orElse: () => false,
+          ),
+      builder: (context, state) {
+        return state.maybeWhen(
+          ui: (images) {
+            final encryptedCount = images.length;
+            if (encryptedCount == 0) return const SizedBox();
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: context.colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                "$encryptedCount archived ${encryptedCount == 1 ? "file" : "files"}",
+                style: context.textTheme.labelMedium!.copyWith(
+                  color: context.colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          },
+          orElse: () => const SizedBox(),
         );
       },
     );
