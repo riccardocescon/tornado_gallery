@@ -5,11 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/image_lru_cache.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
+import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/archived_tile.dart';
 
@@ -21,11 +23,37 @@ class ArchivePage extends StatefulWidget {
 }
 
 class _ArchivePageState extends State<ArchivePage> {
+  final ScrollController _scrollController = ScrollController();
+  static double _savedScrollOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      _savedScrollOffset = _scrollController.offset;
+    });
+
+    // Restore position after first frame (needs layout to be done)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients && _savedScrollOffset > 0) {
+        _scrollController.jumpTo(_savedScrollOffset);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: CustomScrollView(
+        cacheExtent: 800,
+        controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(child: const SizedBox(height: 18)),
           SliverToBoxAdapter(
@@ -37,7 +65,7 @@ class _ArchivePageState extends State<ArchivePage> {
           ),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
           SliverToBoxAdapter(
-            child: Container(
+            child: SizedBox(
               width: double.maxFinite,
               child: Row(children: [_encryptedFiles()]),
             ),
@@ -58,6 +86,7 @@ class _ArchivePageState extends State<ArchivePage> {
             }
 
             return SliverList.builder(
+              
               itemCount: images.length,
               itemBuilder: (context, index) {
                 return Column(
