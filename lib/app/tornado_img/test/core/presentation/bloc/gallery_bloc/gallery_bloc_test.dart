@@ -46,7 +46,15 @@ void main() {
       build: () {
         when(
           () => mockUseCase.call(any()),
-        ).thenAnswer((_) async => const Right(null));
+        ).thenAnswer(
+          (_) async => Right(
+            GalleryImage(
+              id: 'encrypted_img1',
+              file: File('encrypted_img1.enc'),
+              date: DateTime(2024),
+            ),
+          ),
+        );
         return GalleryBloc(mockUseCase);
       },
       act:
@@ -135,7 +143,15 @@ void main() {
       build: () {
         when(
           () => mockUseCase.call(any()),
-        ).thenAnswer((_) async => const Right(unit));
+        ).thenAnswer(
+          (_) async => Right(
+            GalleryImage(
+              id: 'encrypted_img1',
+              file: File('encrypted_img1.enc'),
+              date: DateTime(2024),
+            ),
+          ),
+        );
         return GalleryBloc(mockUseCase);
       },
       act:

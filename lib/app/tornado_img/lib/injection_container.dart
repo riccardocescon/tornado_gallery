@@ -13,6 +13,7 @@ import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc
 import 'package:tornado_img_app/core/utils/image_lru_cache.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
@@ -29,6 +30,7 @@ void setupInjectionContainer() {
   getIt.registerFactory(() => EncryptionPageBloc());
   getIt.registerFactory(() => EncrpytedGalleryPageBloc());
   getIt.registerFactory(() => ArchivePageBloc(galleryReaderUsecase: getIt()));
+  getIt.registerFactory(() => EncryptedImagePageBloc());
 
   getIt.registerLazySingleton<EncryptImageUseCase>(
     () => EncryptImageUseCase(imageRepo: getIt(), storageRepo: getIt()),

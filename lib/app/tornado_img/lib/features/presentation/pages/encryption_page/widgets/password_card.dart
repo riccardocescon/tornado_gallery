@@ -8,14 +8,6 @@ class _PasswordCard extends StatefulWidget {
 }
 
 class __PasswordCard extends State<_PasswordCard> {
-  final TextEditingController _passwordController = TextEditingController();
-  bool _obscureText = true;
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,35 +41,12 @@ class __PasswordCard extends State<_PasswordCard> {
           const SizedBox(height: 16),
           SizedBox(
             height: 48,
-            child: TextFormField(
-              controller: _passwordController,
-              onTapOutside: (event) => FocusScope.of(context).unfocus(),
+            child: PasswordFormField(
               onChanged: (value) {
                 context.read<EncryptionPageBloc>().add(
                   EncryptionPageEvent.setPassword(password: value),
                 );
               },
-              obscureText: _obscureText,
-              decoration: InputDecoration(
-                hintText: 'Enter your password',
-                fillColor: context.appColors.softBackground.withValues(
-                  alpha: 0.3,
-                ),
-                prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                  icon: Icon(
-                    _obscureText
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    size: 20,
-                  ),
-                ),
-              ),
             ),
           ),
         ],

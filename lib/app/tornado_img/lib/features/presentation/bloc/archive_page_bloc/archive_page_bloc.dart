@@ -33,6 +33,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             switch (streamImage.type) {
               case GalleryStreamImageType.newImage:
                 images.add(streamImage.image!);
+                getIt<AppBloc>().add(
+                  AppEvent.addEncryptedImage(image: streamImage.image!),
+                );
                 break;
               case GalleryStreamImageType.updatedImage:
                 images.removeWhere(

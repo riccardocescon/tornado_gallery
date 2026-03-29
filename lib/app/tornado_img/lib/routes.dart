@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_gallery_page_bloc/encrypted_gallery_page_bloc.dart';
+import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/app_logger_page/app_logger_page.dart';
+import 'package:tornado_img_app/features/presentation/pages/encrypted_image_page/encrypted_image_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_page/encrypted_gallery_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encryption_page/encryption_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/gallery_page/gallery_page.dart';
@@ -63,6 +66,24 @@ GoRouter routes = GoRouter(
                       getIt<EncryptionPageBloc>()
                         ..add(EncryptionPageEvent.setup(images: images)),
               child: EncrpytionPage(),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'encrypted_image_page',
+          name: 'encrypted_image_page',
+          builder: (context, state) {
+            final image = state.extra as GalleryImage;
+
+            return BlocProvider(
+              create:
+                  (context) =>
+                      getIt<EncryptedImagePageBloc>()..add(
+                        EncryptedImagePageEvent.setup(
+                          imagePath: image.file.path,
+                        ),
+                      ),
+              child: EncryptedImagePage(),
             );
           },
         ),

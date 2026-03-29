@@ -10,6 +10,7 @@ import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
+import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 
 part 'widgets/images_preview_card.dart';
 part 'widgets/password_card.dart';

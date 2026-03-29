@@ -42,7 +42,9 @@ class _ArchivedTileState extends State<_ArchivedTile> {
     return SizedBox(
       height: 80 + 32,
       child: FilledButton(
-        onPressed: () {},
+        onPressed: () {
+          context.push('./encrypted_image_page', extra: widget.image);
+        },
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
