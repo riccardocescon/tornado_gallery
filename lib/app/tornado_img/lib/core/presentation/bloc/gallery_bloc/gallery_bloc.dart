@@ -67,7 +67,10 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         ),
       );
 
-      result.fold((_) => failed.add(image), (_) => encrypted.add(image));
+      result.fold(
+        (_) => failed.add(image),
+        (encryptedImage) => encrypted.add(encryptedImage),
+      );
 
       final archivingState = ArchivingState(
         archivedImages: List<GalleryImage>.from(encrypted),

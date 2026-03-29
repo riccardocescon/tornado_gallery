@@ -145,12 +145,9 @@ class EncryptionPageBloc
             .where((img) => remainingImages.contains(img.file.path))
             .toList();
     for (final newArchive in toUpdate) {
+      
       remainingImages.remove(newArchive.file.path);
-
-      final image = images.firstWhere(
-        (img) => img.file.path == newArchive.file.path,
-      );
-      getIt<AppBloc>().add(AppEvent.addEncryptedImage(image: image));
+      getIt<AppBloc>().add(AppEvent.addEncryptedImage(image: newArchive));
     }
   }
 
