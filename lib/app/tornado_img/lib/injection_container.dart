@@ -5,6 +5,7 @@ import 'package:tornado_img_app/core/data/repositories/storage_repository/storag
 import 'package:tornado_img_app/core/domain/repositories/encrypted_gallery_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
@@ -23,7 +24,9 @@ GetIt getIt = GetIt.instance;
 
 void setupInjectionContainer() {
   getIt.registerLazySingleton(() => AppBloc());
-  getIt.registerLazySingleton(() => GalleryBloc(getIt()));
+  getIt.registerLazySingleton(
+    () => GalleryBloc(encryptUseCase: getIt(), decryptUseCase: getIt()),
+  );
   getIt.registerLazySingleton(() => EncryptedGalleryBloc(getIt()));
   getIt.registerFactory(() => HomepageBloc());
   getIt.registerFactory(() => GalleryPageBloc());
@@ -34,6 +37,9 @@ void setupInjectionContainer() {
 
   getIt.registerLazySingleton<EncryptImageUseCase>(
     () => EncryptImageUseCase(imageRepo: getIt(), storageRepo: getIt()),
+  );
+  getIt.registerLazySingleton<DecryptImageUseCase>(
+    () => DecryptImageUseCase(imageRepo: getIt(), storageRepo: getIt()),
   );
   getIt.registerLazySingleton<GalleryReaderUsecase>(
     () => GalleryReaderUsecase(imageRepo: getIt(), storageRepo: getIt()),

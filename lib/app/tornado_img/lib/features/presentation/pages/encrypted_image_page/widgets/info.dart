@@ -10,13 +10,6 @@ class _Info extends StatefulWidget {
 }
 
 class _InfoState extends State<_Info> {
-  final textController = TextEditingController();
-
-  @override
-  void dispose() {
-    textController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +39,11 @@ class _InfoState extends State<_Info> {
         spacing: 16,
         children: [
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              context.read<EncryptedImagePageBloc>().add(
+                const EncryptedImagePageEvent.decrypt(),
+              );
+            },
             style: FilledButton.styleFrom(
               backgroundColor: context.appColors.softBackground,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -85,7 +82,16 @@ class _InfoState extends State<_Info> {
               ],
             ),
           ),
-          SizedBox(height: 48, child: PasswordFormField(onChanged: (value) {})),
+          SizedBox(
+            height: 48,
+            child: PasswordFormField(
+              onChanged: (value) {
+                context.read<EncryptedImagePageBloc>().add(
+                  EncryptedImagePageEvent.updatePassword(value),
+                );
+              },
+            ),
+          ),
           Column(
             spacing: 8,
             children: [

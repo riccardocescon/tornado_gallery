@@ -31,7 +31,35 @@ class EncryptedImagePage extends StatelessWidget {
                 child: Column(
                   spacing: 16,
                   children: [
-                    SizedBox(height: 300, child: _Image(image: image)),
+                    SizedBox(
+                      height: 300,
+                      child: BlocBuilder<
+                        EncryptedImagePageBloc,
+                        EncryptedImagePageState
+                      >(
+                        buildWhen:
+                            (previous, current) => current.maybeMap(
+                              ui: (value) => true,
+                              orElse: () => false,
+                            ),
+                        builder: (context, state) {
+                          final showImage = state.maybeMap(
+                            ui: (value) => value.image,
+                            orElse: () => null,
+                          );
+
+                          if (showImage == null) {
+                            return Container(
+                              height: 300,
+                              width: 200,
+                              color: Colors.red,
+                            );
+                          }
+
+                          return _Image(image: showImage);
+                        },
+                      ),
+                    ),
                     _titleRow(context, image),
                     _Info(image: image),
                   ],

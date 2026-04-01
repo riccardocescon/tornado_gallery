@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GalleryEvent {
 
- String get password; String get path;
+ String get password;
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,7 +34,7 @@ abstract mixin class $GalleryEventCopyWith<$Res>  {
   factory $GalleryEventCopyWith(GalleryEvent value, $Res Function(GalleryEvent) _then) = _$GalleryEventCopyWithImpl;
 @useResult
 $Res call({
- String password, String path
+ String password
 });
 
 
@@ -51,10 +51,9 @@ class _$GalleryEventCopyWithImpl<$Res>
 
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? password = null,Object? path = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? password = null,}) {
   return _then(_self.copyWith(
 password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -76,12 +75,13 @@ extension GalleryEventPatterns on GalleryEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _EncryptImage value)?  encryptImage,TResult Function( _EncryptImages value)?  encryptImages,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _EncryptImage value)?  encryptImage,TResult Function( _EncryptImages value)?  encryptImages,TResult Function( _DecryptImage value)?  decryptImage,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _EncryptImage() when encryptImage != null:
 return encryptImage(_that);case _EncryptImages() when encryptImages != null:
-return encryptImages(_that);case _:
+return encryptImages(_that);case _DecryptImage() when decryptImage != null:
+return decryptImage(_that);case _:
   return orElse();
 
 }
@@ -99,12 +99,13 @@ return encryptImages(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _EncryptImage value)  encryptImage,required TResult Function( _EncryptImages value)  encryptImages,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _EncryptImage value)  encryptImage,required TResult Function( _EncryptImages value)  encryptImages,required TResult Function( _DecryptImage value)  decryptImage,}){
 final _that = this;
 switch (_that) {
 case _EncryptImage():
 return encryptImage(_that);case _EncryptImages():
-return encryptImages(_that);case _:
+return encryptImages(_that);case _DecryptImage():
+return decryptImage(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -121,12 +122,13 @@ return encryptImages(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _EncryptImage value)?  encryptImage,TResult? Function( _EncryptImages value)?  encryptImages,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _EncryptImage value)?  encryptImage,TResult? Function( _EncryptImages value)?  encryptImages,TResult? Function( _DecryptImage value)?  decryptImage,}){
 final _that = this;
 switch (_that) {
 case _EncryptImage() when encryptImage != null:
 return encryptImage(_that);case _EncryptImages() when encryptImages != null:
-return encryptImages(_that);case _:
+return encryptImages(_that);case _DecryptImage() when decryptImage != null:
+return decryptImage(_that);case _:
   return null;
 
 }
@@ -143,11 +145,12 @@ return encryptImages(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( GalleryImage image,  String password,  String path)?  encryptImage,TResult Function( List<GalleryImage> images,  String password,  String path)?  encryptImages,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( GalleryImage image,  String password,  String path)?  encryptImage,TResult Function( List<GalleryImage> images,  String password,  String path)?  encryptImages,TResult Function( GalleryImage image,  String password)?  decryptImage,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EncryptImage() when encryptImage != null:
 return encryptImage(_that.image,_that.password,_that.path);case _EncryptImages() when encryptImages != null:
-return encryptImages(_that.images,_that.password,_that.path);case _:
+return encryptImages(_that.images,_that.password,_that.path);case _DecryptImage() when decryptImage != null:
+return decryptImage(_that.image,_that.password);case _:
   return orElse();
 
 }
@@ -165,11 +168,12 @@ return encryptImages(_that.images,_that.password,_that.path);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( GalleryImage image,  String password,  String path)  encryptImage,required TResult Function( List<GalleryImage> images,  String password,  String path)  encryptImages,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( GalleryImage image,  String password,  String path)  encryptImage,required TResult Function( List<GalleryImage> images,  String password,  String path)  encryptImages,required TResult Function( GalleryImage image,  String password)  decryptImage,}) {final _that = this;
 switch (_that) {
 case _EncryptImage():
 return encryptImage(_that.image,_that.password,_that.path);case _EncryptImages():
-return encryptImages(_that.images,_that.password,_that.path);case _:
+return encryptImages(_that.images,_that.password,_that.path);case _DecryptImage():
+return decryptImage(_that.image,_that.password);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -186,11 +190,12 @@ return encryptImages(_that.images,_that.password,_that.path);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( GalleryImage image,  String password,  String path)?  encryptImage,TResult? Function( List<GalleryImage> images,  String password,  String path)?  encryptImages,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( GalleryImage image,  String password,  String path)?  encryptImage,TResult? Function( List<GalleryImage> images,  String password,  String path)?  encryptImages,TResult? Function( GalleryImage image,  String password)?  decryptImage,}) {final _that = this;
 switch (_that) {
 case _EncryptImage() when encryptImage != null:
 return encryptImage(_that.image,_that.password,_that.path);case _EncryptImages() when encryptImages != null:
-return encryptImages(_that.images,_that.password,_that.path);case _:
+return encryptImages(_that.images,_that.password,_that.path);case _DecryptImage() when decryptImage != null:
+return decryptImage(_that.image,_that.password);case _:
   return null;
 
 }
@@ -207,7 +212,7 @@ class _EncryptImage extends GalleryEvent {
 
  final  GalleryImage image;
 @override final  String password;
-@override final  String path;
+ final  String path;
 
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -272,7 +277,7 @@ class _EncryptImages extends GalleryEvent {
 }
 
 @override final  String password;
-@override final  String path;
+ final  String path;
 
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -323,6 +328,63 @@ as String,
 }
 
 /// @nodoc
+
+
+class _DecryptImage extends GalleryEvent {
+  const _DecryptImage({required this.image, required this.password}): super._();
+  
+
+ final  GalleryImage image;
+@override final  String password;
+
+/// Create a copy of GalleryEvent
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DecryptImageCopyWith<_DecryptImage> get copyWith => __$DecryptImageCopyWithImpl<_DecryptImage>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DecryptImageCopyWith<$Res> implements $GalleryEventCopyWith<$Res> {
+  factory _$DecryptImageCopyWith(_DecryptImage value, $Res Function(_DecryptImage) _then) = __$DecryptImageCopyWithImpl;
+@override @useResult
+$Res call({
+ GalleryImage image, String password
+});
+
+
+
+
+}
+/// @nodoc
+class __$DecryptImageCopyWithImpl<$Res>
+    implements _$DecryptImageCopyWith<$Res> {
+  __$DecryptImageCopyWithImpl(this._self, this._then);
+
+  final _DecryptImage _self;
+  final $Res Function(_DecryptImage) _then;
+
+/// Create a copy of GalleryEvent
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? image = null,Object? password = null,}) {
+  return _then(_DecryptImage(
+image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
+as GalleryImage,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$GalleryState {
 
 
@@ -355,14 +417,16 @@ extension GalleryStatePatterns on GalleryState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Encrypted value)?  encrypted,TResult Function( _Failure value)?  encryptionFailure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Encrypted value)?  encrypted,TResult Function( _Decrypted value)?  decrypted,TResult Function( _EncryptionFailure value)?  encryptionFailure,TResult Function( _DecryptionFailure value)?  decryptionFailure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Encrypted() when encrypted != null:
-return encrypted(_that);case _Failure() when encryptionFailure != null:
-return encryptionFailure(_that);case _:
+return encrypted(_that);case _Decrypted() when decrypted != null:
+return decrypted(_that);case _EncryptionFailure() when encryptionFailure != null:
+return encryptionFailure(_that);case _DecryptionFailure() when decryptionFailure != null:
+return decryptionFailure(_that);case _:
   return orElse();
 
 }
@@ -380,14 +444,16 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _Failure value)  encryptionFailure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _Decrypted value)  decrypted,required TResult Function( _EncryptionFailure value)  encryptionFailure,required TResult Function( _DecryptionFailure value)  decryptionFailure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
 return loading(_that);case _Encrypted():
-return encrypted(_that);case _Failure():
-return encryptionFailure(_that);case _:
+return encrypted(_that);case _Decrypted():
+return decrypted(_that);case _EncryptionFailure():
+return encryptionFailure(_that);case _DecryptionFailure():
+return decryptionFailure(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -404,14 +470,16 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _Failure value)?  encryptionFailure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _Decrypted value)?  decrypted,TResult? Function( _EncryptionFailure value)?  encryptionFailure,TResult? Function( _DecryptionFailure value)?  decryptionFailure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Encrypted() when encrypted != null:
-return encrypted(_that);case _Failure() when encryptionFailure != null:
-return encryptionFailure(_that);case _:
+return encrypted(_that);case _Decrypted() when decrypted != null:
+return decrypted(_that);case _EncryptionFailure() when encryptionFailure != null:
+return encryptionFailure(_that);case _DecryptionFailure() when decryptionFailure != null:
+return decryptionFailure(_that);case _:
   return null;
 
 }
@@ -428,13 +496,15 @@ return encryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( int total)?  loading,TResult Function( ArchivingState archivingState)?  encrypted,TResult Function( EncryptionFailure failure)?  encryptionFailure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( int total)?  loading,TResult Function( ArchivingState archivingState)?  encrypted,TResult Function( DearchivingState archivingState)?  decrypted,TResult Function( EncryptionFailure failure)?  encryptionFailure,TResult Function( EncryptionFailure failure)?  decryptionFailure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.total);case _Encrypted() when encrypted != null:
-return encrypted(_that.archivingState);case _Failure() when encryptionFailure != null:
-return encryptionFailure(_that.failure);case _:
+return encrypted(_that.archivingState);case _Decrypted() when decrypted != null:
+return decrypted(_that.archivingState);case _EncryptionFailure() when encryptionFailure != null:
+return encryptionFailure(_that.failure);case _DecryptionFailure() when decryptionFailure != null:
+return decryptionFailure(_that.failure);case _:
   return orElse();
 
 }
@@ -452,13 +522,15 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( int total)  loading,required TResult Function( ArchivingState archivingState)  encrypted,required TResult Function( EncryptionFailure failure)  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( int total)  loading,required TResult Function( ArchivingState archivingState)  encrypted,required TResult Function( DearchivingState archivingState)  decrypted,required TResult Function( EncryptionFailure failure)  encryptionFailure,required TResult Function( EncryptionFailure failure)  decryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading(_that.total);case _Encrypted():
-return encrypted(_that.archivingState);case _Failure():
-return encryptionFailure(_that.failure);case _:
+return encrypted(_that.archivingState);case _Decrypted():
+return decrypted(_that.archivingState);case _EncryptionFailure():
+return encryptionFailure(_that.failure);case _DecryptionFailure():
+return decryptionFailure(_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -475,13 +547,15 @@ return encryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( int total)?  loading,TResult? Function( ArchivingState archivingState)?  encrypted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( int total)?  loading,TResult? Function( ArchivingState archivingState)?  encrypted,TResult? Function( DearchivingState archivingState)?  decrypted,TResult? Function( EncryptionFailure failure)?  encryptionFailure,TResult? Function( EncryptionFailure failure)?  decryptionFailure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.total);case _Encrypted() when encrypted != null:
-return encrypted(_that.archivingState);case _Failure() when encryptionFailure != null:
-return encryptionFailure(_that.failure);case _:
+return encrypted(_that.archivingState);case _Decrypted() when decrypted != null:
+return decrypted(_that.archivingState);case _EncryptionFailure() when encryptionFailure != null:
+return encryptionFailure(_that.failure);case _DecryptionFailure() when decryptionFailure != null:
+return decryptionFailure(_that.failure);case _:
   return null;
 
 }
@@ -623,17 +697,17 @@ as ArchivingState,
 /// @nodoc
 
 
-class _Failure extends GalleryState {
-  const _Failure({required this.failure}): super._();
+class _Decrypted extends GalleryState {
+  const _Decrypted({required this.archivingState}): super._();
   
 
- final  EncryptionFailure failure;
+ final  DearchivingState archivingState;
 
 /// Create a copy of GalleryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$FailureCopyWith<_Failure> get copyWith => __$FailureCopyWithImpl<_Failure>(this, _$identity);
+_$DecryptedCopyWith<_Decrypted> get copyWith => __$DecryptedCopyWithImpl<_Decrypted>(this, _$identity);
 
 
 
@@ -644,8 +718,63 @@ _$FailureCopyWith<_Failure> get copyWith => __$FailureCopyWithImpl<_Failure>(thi
 }
 
 /// @nodoc
-abstract mixin class _$FailureCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
-  factory _$FailureCopyWith(_Failure value, $Res Function(_Failure) _then) = __$FailureCopyWithImpl;
+abstract mixin class _$DecryptedCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
+  factory _$DecryptedCopyWith(_Decrypted value, $Res Function(_Decrypted) _then) = __$DecryptedCopyWithImpl;
+@useResult
+$Res call({
+ DearchivingState archivingState
+});
+
+
+
+
+}
+/// @nodoc
+class __$DecryptedCopyWithImpl<$Res>
+    implements _$DecryptedCopyWith<$Res> {
+  __$DecryptedCopyWithImpl(this._self, this._then);
+
+  final _Decrypted _self;
+  final $Res Function(_Decrypted) _then;
+
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? archivingState = null,}) {
+  return _then(_Decrypted(
+archivingState: null == archivingState ? _self.archivingState : archivingState // ignore: cast_nullable_to_non_nullable
+as DearchivingState,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _EncryptionFailure extends GalleryState {
+  const _EncryptionFailure({required this.failure}): super._();
+  
+
+ final  EncryptionFailure failure;
+
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EncryptionFailureCopyWith<_EncryptionFailure> get copyWith => __$EncryptionFailureCopyWithImpl<_EncryptionFailure>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EncryptionFailureCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
+  factory _$EncryptionFailureCopyWith(_EncryptionFailure value, $Res Function(_EncryptionFailure) _then) = __$EncryptionFailureCopyWithImpl;
 @useResult
 $Res call({
  EncryptionFailure failure
@@ -656,17 +785,72 @@ $Res call({
 
 }
 /// @nodoc
-class __$FailureCopyWithImpl<$Res>
-    implements _$FailureCopyWith<$Res> {
-  __$FailureCopyWithImpl(this._self, this._then);
+class __$EncryptionFailureCopyWithImpl<$Res>
+    implements _$EncryptionFailureCopyWith<$Res> {
+  __$EncryptionFailureCopyWithImpl(this._self, this._then);
 
-  final _Failure _self;
-  final $Res Function(_Failure) _then;
+  final _EncryptionFailure _self;
+  final $Res Function(_EncryptionFailure) _then;
 
 /// Create a copy of GalleryState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(_Failure(
+  return _then(_EncryptionFailure(
+failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as EncryptionFailure,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _DecryptionFailure extends GalleryState {
+  const _DecryptionFailure({required this.failure}): super._();
+  
+
+ final  EncryptionFailure failure;
+
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DecryptionFailureCopyWith<_DecryptionFailure> get copyWith => __$DecryptionFailureCopyWithImpl<_DecryptionFailure>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DecryptionFailureCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
+  factory _$DecryptionFailureCopyWith(_DecryptionFailure value, $Res Function(_DecryptionFailure) _then) = __$DecryptionFailureCopyWithImpl;
+@useResult
+$Res call({
+ EncryptionFailure failure
+});
+
+
+
+
+}
+/// @nodoc
+class __$DecryptionFailureCopyWithImpl<$Res>
+    implements _$DecryptionFailureCopyWith<$Res> {
+  __$DecryptionFailureCopyWithImpl(this._self, this._then);
+
+  final _DecryptionFailure _self;
+  final $Res Function(_DecryptionFailure) _then;
+
+/// Create a copy of GalleryState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
+  return _then(_DecryptionFailure(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as EncryptionFailure,
   ));

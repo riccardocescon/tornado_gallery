@@ -14,50 +14,23 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EncryptedImagePageEvent {
 
- String get imagePath;
-/// Create a copy of EncryptedImagePageEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$EncryptedImagePageEventCopyWith<EncryptedImagePageEvent> get copyWith => _$EncryptedImagePageEventCopyWithImpl<EncryptedImagePageEvent>(this as EncryptedImagePageEvent, _$identity);
 
 
 
 
 
+
+@override
+String toString() {
+  return 'EncryptedImagePageEvent()';
+}
 
 
 }
 
 /// @nodoc
-abstract mixin class $EncryptedImagePageEventCopyWith<$Res>  {
-  factory $EncryptedImagePageEventCopyWith(EncryptedImagePageEvent value, $Res Function(EncryptedImagePageEvent) _then) = _$EncryptedImagePageEventCopyWithImpl;
-@useResult
-$Res call({
- String imagePath
-});
-
-
-
-
-}
-/// @nodoc
-class _$EncryptedImagePageEventCopyWithImpl<$Res>
-    implements $EncryptedImagePageEventCopyWith<$Res> {
-  _$EncryptedImagePageEventCopyWithImpl(this._self, this._then);
-
-  final EncryptedImagePageEvent _self;
-  final $Res Function(EncryptedImagePageEvent) _then;
-
-/// Create a copy of EncryptedImagePageEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? imagePath = null,}) {
-  return _then(_self.copyWith(
-imagePath: null == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
+class $EncryptedImagePageEventCopyWith<$Res>  {
+$EncryptedImagePageEventCopyWith(EncryptedImagePageEvent _, $Res Function(EncryptedImagePageEvent) __);
 }
 
 
@@ -75,11 +48,13 @@ extension EncryptedImagePageEventPatterns on EncryptedImagePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _UpdatePassword value)?  updatePassword,TResult Function( _Decrypt value)?  decrypt,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _UpdatePassword() when updatePassword != null:
+return updatePassword(_that);case _Decrypt() when decrypt != null:
+return decrypt(_that);case _:
   return orElse();
 
 }
@@ -97,11 +72,13 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _UpdatePassword value)  updatePassword,required TResult Function( _Decrypt value)  decrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup():
-return setup(_that);case _:
+return setup(_that);case _UpdatePassword():
+return updatePassword(_that);case _Decrypt():
+return decrypt(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -118,11 +95,13 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _UpdatePassword value)?  updatePassword,TResult? Function( _Decrypt value)?  decrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _UpdatePassword() when updatePassword != null:
+return updatePassword(_that);case _Decrypt() when decrypt != null:
+return decrypt(_that);case _:
   return null;
 
 }
@@ -139,10 +118,12 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,TResult Function( String password)?  updatePassword,TResult Function()?  decrypt,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that.imagePath);case _:
+return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
+return updatePassword(_that.password);case _Decrypt() when decrypt != null:
+return decrypt();case _:
   return orElse();
 
 }
@@ -160,10 +141,12 @@ return setup(_that.imagePath);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,required TResult Function( String password)  updatePassword,required TResult Function()  decrypt,}) {final _that = this;
 switch (_that) {
 case _Setup():
-return setup(_that.imagePath);case _:
+return setup(_that.imagePath);case _UpdatePassword():
+return updatePassword(_that.password);case _Decrypt():
+return decrypt();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -180,10 +163,12 @@ return setup(_that.imagePath);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,TResult? Function( String password)?  updatePassword,TResult? Function()?  decrypt,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that.imagePath);case _:
+return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
+return updatePassword(_that.password);case _Decrypt() when decrypt != null:
+return decrypt();case _:
   return null;
 
 }
@@ -198,11 +183,11 @@ class _Setup extends EncryptedImagePageEvent {
   const _Setup({required this.imagePath}): super._();
   
 
-@override final  String imagePath;
+ final  String imagePath;
 
 /// Create a copy of EncryptedImagePageEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 _$SetupCopyWith<_Setup> get copyWith => __$SetupCopyWithImpl<_Setup>(this, _$identity);
 
@@ -210,6 +195,10 @@ _$SetupCopyWith<_Setup> get copyWith => __$SetupCopyWithImpl<_Setup>(this, _$ide
 
 
 
+@override
+String toString() {
+  return 'EncryptedImagePageEvent.setup(imagePath: $imagePath)';
+}
 
 
 }
@@ -217,7 +206,7 @@ _$SetupCopyWith<_Setup> get copyWith => __$SetupCopyWithImpl<_Setup>(this, _$ide
 /// @nodoc
 abstract mixin class _$SetupCopyWith<$Res> implements $EncryptedImagePageEventCopyWith<$Res> {
   factory _$SetupCopyWith(_Setup value, $Res Function(_Setup) _then) = __$SetupCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String imagePath
 });
@@ -236,7 +225,7 @@ class __$SetupCopyWithImpl<$Res>
 
 /// Create a copy of EncryptedImagePageEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? imagePath = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? imagePath = null,}) {
   return _then(_Setup(
 imagePath: null == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String,
@@ -245,6 +234,90 @@ as String,
 
 
 }
+
+/// @nodoc
+
+
+class _UpdatePassword extends EncryptedImagePageEvent {
+  const _UpdatePassword(this.password): super._();
+  
+
+ final  String password;
+
+/// Create a copy of EncryptedImagePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UpdatePasswordCopyWith<_UpdatePassword> get copyWith => __$UpdatePasswordCopyWithImpl<_UpdatePassword>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptedImagePageEvent.updatePassword(password: $password)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UpdatePasswordCopyWith<$Res> implements $EncryptedImagePageEventCopyWith<$Res> {
+  factory _$UpdatePasswordCopyWith(_UpdatePassword value, $Res Function(_UpdatePassword) _then) = __$UpdatePasswordCopyWithImpl;
+@useResult
+$Res call({
+ String password
+});
+
+
+
+
+}
+/// @nodoc
+class __$UpdatePasswordCopyWithImpl<$Res>
+    implements _$UpdatePasswordCopyWith<$Res> {
+  __$UpdatePasswordCopyWithImpl(this._self, this._then);
+
+  final _UpdatePassword _self;
+  final $Res Function(_UpdatePassword) _then;
+
+/// Create a copy of EncryptedImagePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? password = null,}) {
+  return _then(_UpdatePassword(
+null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _Decrypt extends EncryptedImagePageEvent {
+  const _Decrypt(): super._();
+  
+
+
+
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptedImagePageEvent.decrypt()';
+}
+
+
+}
+
+
+
 
 /// @nodoc
 mixin _$EncryptedImagePageState {

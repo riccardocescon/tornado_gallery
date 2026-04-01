@@ -4,6 +4,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
@@ -12,8 +13,11 @@ import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
 
+class _MockDecryptImageUseCase extends Mock implements DecryptImageUseCase {}
+
 void main() {
-  late _MockEncryptImageUseCase mockUseCase;
+  late _MockEncryptImageUseCase mockEncryptionUseCase;
+  late _MockDecryptImageUseCase mockDecryptUseCase;
   late GalleryImage tImage;
 
   final tFile = File('test_image.png');
@@ -30,12 +34,16 @@ void main() {
   });
 
   setUp(() {
-    mockUseCase = _MockEncryptImageUseCase();
+    mockEncryptionUseCase = _MockEncryptImageUseCase();
+    mockDecryptUseCase = _MockDecryptImageUseCase();
     tImage = GalleryImage(id: 'img1', file: tFile, date: DateTime(2024));
   });
 
   test('initial state is GalleryState.initial', () {
-    final bloc = GalleryBloc(mockUseCase);
+    final bloc = GalleryBloc(
+      encryptUseCase: mockEncryptionUseCase,
+      decryptUseCase: mockDecryptUseCase,
+    );
     expect(bloc.state, const GalleryState.initial());
     bloc.close();
   });
@@ -45,7 +53,7 @@ void main() {
       'emits [loading, encrypted] when use case succeeds',
       build: () {
         when(
-          () => mockUseCase.call(any()),
+          () => mockEncryptionUseCase.call(any()),
         ).thenAnswer(
           (_) async => Right(
             GalleryImage(
@@ -55,7 +63,10 @@ void main() {
             ),
           ),
         );
-        return GalleryBloc(mockUseCase);
+        return GalleryBloc(
+          encryptUseCase: mockEncryptionUseCase,
+          decryptUseCase: mockDecryptUseCase,
+        );
       },
       act:
           (b) => b.add(
@@ -81,10 +92,13 @@ void main() {
     blocTest<GalleryBloc, GalleryState>(
       'emits [loading, encryptionFailure] when use case returns Left',
       build: () {
-        when(() => mockUseCase.call(any())).thenAnswer(
+        when(() => mockEncryptionUseCase.call(any())).thenAnswer(
           (_) async => Left(EncryptionFailure.encryptionError('bad')),
         );
-        return GalleryBloc(mockUseCase);
+        return GalleryBloc(
+          encryptUseCase: mockEncryptionUseCase,
+          decryptUseCase: mockDecryptUseCase,
+        );
       },
       act:
           (b) => b.add(
@@ -111,10 +125,13 @@ void main() {
     blocTest<GalleryBloc, GalleryState>(
       'emits [loading, encryptionFailure] for unsupported extension',
       build: () {
-        when(() => mockUseCase.call(any())).thenAnswer(
+        when(() => mockEncryptionUseCase.call(any())).thenAnswer(
           (_) async => Left(EncryptionFailure.unsupportedExtension('bmp')),
         );
-        return GalleryBloc(mockUseCase);
+        return GalleryBloc(
+          encryptUseCase: mockEncryptionUseCase,
+          decryptUseCase: mockDecryptUseCase,
+        );
       },
       act:
           (b) => b.add(
@@ -142,7 +159,7 @@ void main() {
       'passes correct params to use case',
       build: () {
         when(
-          () => mockUseCase.call(any()),
+          () => mockEncryptionUseCase.call(any()),
         ).thenAnswer(
           (_) async => Right(
             GalleryImage(
@@ -152,7 +169,10 @@ void main() {
             ),
           ),
         );
-        return GalleryBloc(mockUseCase);
+        return GalleryBloc(
+          encryptUseCase: mockEncryptionUseCase,
+          decryptUseCase: mockDecryptUseCase,
+        );
       },
       act:
           (b) => b.add(
@@ -163,7 +183,8 @@ void main() {
             ),
           ),
       verify: (_) {
-        final captured = verify(() => mockUseCase.call(captureAny())).captured;
+        final captured =
+            verify(() => mockEncryptionUseCase.call(captureAny())).captured;
         final params = captured.first as EncryptImageParams;
         expect(params.file, tFile);
         expect(params.password, 'mypassword');

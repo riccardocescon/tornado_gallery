@@ -16,9 +16,15 @@ abstract class GalleryEvent with _$GalleryEvent, EquatableMixin {
     required String path,
   }) = _EncryptImages;
 
+  const factory GalleryEvent.decryptImage({
+    required GalleryImage image,
+    required String password,
+  }) = _DecryptImage;
+
   @override
   List<Object?> get props => when(
     encryptImage: (image, password, path) => [image, password, path],
     encryptImages: (images, password, path) => [images, password, path],
+    decryptImage: (image, password) => [image, password],
   );
 }

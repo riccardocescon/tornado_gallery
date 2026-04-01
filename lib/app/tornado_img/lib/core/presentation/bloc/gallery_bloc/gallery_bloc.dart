@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 
@@ -13,10 +15,13 @@ part 'gallery_state.dart';
 
 class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   final EncryptImageUseCase encryptUseCase;
+  final DecryptImageUseCase decryptUseCase;
 
-  GalleryBloc(this.encryptUseCase) : super(const GalleryState.initial()) {
+  GalleryBloc({required this.encryptUseCase, required this.decryptUseCase})
+    : super(const GalleryState.initial()) {
     on<_EncryptImage>(_onEncryptImage);
     on<_EncryptImages>(_onEncryptImages);
+    on<_DecryptImage>(_onDecryptImage);
   }
 
   Future<void> _onEncryptImage(
@@ -81,5 +86,29 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         GalleryState.encrypted(archivingState: archivingState)
       );
     }
+  }
+
+  Future<void> _onDecryptImage(
+    _DecryptImage event,
+    Emitter<GalleryState> emit,
+  ) async {
+    emit(const GalleryState.loading(total: 1));
+
+    final result = await decryptUseCase.call(
+      DecryptImageParams(file: event.image.file, password: event.password),
+    );
+
+    result.fold(
+      (failure) => emit(GalleryState.decryptionFailure(failure: failure)),
+      (decrypted) => emit(
+        GalleryState.decrypted(
+          archivingState: DearchivingState(
+            totalImages: 1,
+            dearchivedImages: [decrypted],
+            failedImages: [],
+          ),
+        ),
+      ),
+    );
   }
 }
