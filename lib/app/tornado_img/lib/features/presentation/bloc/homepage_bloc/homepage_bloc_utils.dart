@@ -18,42 +18,6 @@ class HomepageBlocUtils {
   Future<void> dispose() async {
     await _streamManager?.dispose();
   }
-  // Future<List<EncryptedEntity>> loadLatestEncryptedImages({
-  //   int limit = 3,
-  // }) async {
-  //   try {
-  //     final dir = await getApplicationDocumentsDirectory();
-  //     final encryptedDir = Directory('${dir.path}/encrypted');
-
-  //     if (!await encryptedDir.exists()) {
-  //       return [];
-  //     }
-
-  //     final files =
-  //         encryptedDir.listSync().take(limit).toList()..sort(
-  //           (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
-  //         );
-
-  //     final encryptedImages = <EncryptedEntity>[];
-  //     for (final fileSystem in files) {
-  //       final fileName = fileSystem.path.split('/').last;
-  //       if (fileName.contains('.')) {
-  //         final file = File(fileSystem.path);
-  //         final date = fileSystem.statSync().modified;
-  //         encryptedImages.add(
-  //           EncryptedImage(id: fileName, file: file, date: date),
-  //         );
-  //       } else {
-  //         encryptedImages.add(EncryptedFolder.empty(fileSystem.path));
-  //       }
-  //     }
-
-  //     return encryptedImages;
-  //   } catch (e) {
-  //     log('Error loading encrypted images: $e');
-  //     return [];
-  //   }
-  // }
 
 Future<List<GalleryImage>> mapAssetsToGalleryImages(
     List<AssetEntity> assets,
@@ -99,9 +63,8 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
     for (final fileSystem in files) {
       final fileName = fileSystem.path.split('/').last;
       if (fileName.contains('.')) {
-        final file = File(fileSystem.path);
         final date = fileSystem.statSync().modified;
-        folder.images.add(EncryptedImage(id: fileName, file: file, date: date));
+        folder.images.add(EncryptedImage(path: fileSystem.path, date: date));
       } else {
         final subfolder = await _loadSubfolder(fileSystem.path);
         folder.subfolders.add(subfolder);
@@ -117,10 +80,9 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
     for (final fileSystem in files) {
       final fileName = fileSystem.path.split('/').last;
       if (fileName.contains('.')) {
-        final file = File(fileSystem.path);
         final date = fileSystem.statSync().modified;
         rootFolder.images.add(
-          EncryptedImage(id: fileName, file: file, date: date),
+          EncryptedImage(path: fileSystem.path, date: date),
         );
       } else {
         final subfolder = await _loadSubfolder(fileSystem.path);
@@ -179,11 +141,10 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       }
 
       if (event.type == FileSystemEvent.delete) {
-        final fileName = event.path.split('/').last;
         final parentPath = Directory(event.path).parent.path;
         final parentFolder = _lookupTable[parentPath];
         if (parentFolder != null) {
-          parentFolder.images.removeWhere((img) => img.id == fileName);
+          parentFolder.images.removeWhere((img) => img.path == event.path);
           appLogger.logPageBloc(
             'File deleted: ${event.path}, removed from parent folder in lookup',
           );
@@ -207,12 +168,11 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
         continue;
       }
 
-      final fileName = event.path.split('/').last;
       final file = File(event.path);
       final date = file.statSync().modified;
-      final newImage = EncryptedImage(id: fileName, file: file, date: date);
+      final newImage = EncryptedImage(path: event.path, date: date);
 
-      parentFolder.images.removeWhere((img) => img.id == fileName);
+      parentFolder.images.removeWhere((img) => img.path == event.path);
       parentFolder.images.add(newImage);
       yield null;
     }

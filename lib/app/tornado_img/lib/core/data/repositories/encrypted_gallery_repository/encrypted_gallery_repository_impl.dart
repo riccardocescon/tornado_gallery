@@ -34,8 +34,7 @@ class EncryptedGalleryRepositoryImpl implements EncryptedGalleryRepository {
     for (final image in images) {
       final res = await decryptImage(image: image, password: password);
       res.fold((_) {}, (bytes) {
-        image.decryptedBytes = bytes;
-        image.isDecrypting = false;
+        image.bytes = bytes;
         result.add(image);
       });
     }

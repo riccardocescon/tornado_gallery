@@ -1,32 +1,18 @@
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:tornado_img_app/features/domain/entities/app_image.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
+class EncryptedImage {
+  final String path;
+  final DateTime date;
+  Uint8List? bytes;
 
-class EncryptedImage extends AppImage with EncryptedEntity {
-  Uint8List? decryptedBytes;
-  bool isDecrypting = false;
+  bool get isDecrypted => bytes != null;
+
+  File get file => File(path);
 
   EncryptedImage({
-    required super.id,
-    required super.file,
-    required super.date,
-    this.decryptedBytes,
+    required this.path, required this.date, this.bytes,
   });
 
-
-  @override
-  EncryptedImage copyWith({Uint8List? decryptedBytes, bool? isDecrypting}) {
-    return EncryptedImage(
-      id: id,
-      file: file,
-      date: date,
-      decryptedBytes: decryptedBytes ?? this.decryptedBytes,
-    )..isDecrypting = isDecrypting ?? this.isDecrypting;
-  }
-
-  @override
-  String toString() {
-    return 'EncryptedImage(file: ${file.path}, date: $date)';
-  }
+  String get name => path.split('/').last;
 }

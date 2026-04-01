@@ -5,7 +5,6 @@ import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
-import 'package:tornado_img_app/injection_container.dart';
 
 part 'encrypted_image_page_bloc.freezed.dart';
 part 'encrypted_image_page_event.dart';
@@ -16,11 +15,14 @@ class EncryptedImagePageBloc
   String password = '';
   late GalleryImage image;
 
-  EncryptedImagePageBloc() : super(const EncryptedImagePageState.initial()) {
+  late AppBloc appBloc;
+  late GalleryBloc galleryBloc;
+
+  EncryptedImagePageBloc({required this.appBloc, required this.galleryBloc})
+    : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const EncryptedImagePageState.loading());
 
-      final appBloc = getIt<AppBloc>();
       image = appBloc.encryptedImages.firstWhere(
         (img) => img.file.path == event.imagePath,
       );
@@ -40,7 +42,6 @@ class EncryptedImagePageBloc
         return;
       }
 
-      final galleryBloc = getIt<GalleryBloc>();
       galleryBloc.add(
         GalleryEvent.decryptImage(image: image, password: password),
       );
