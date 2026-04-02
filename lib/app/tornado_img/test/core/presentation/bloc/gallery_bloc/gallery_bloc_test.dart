@@ -11,6 +11,7 @@ import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
@@ -31,7 +32,7 @@ void main() {
         file: tFile,
         password: 'pw',
         fileId: 'img1',
-        path: '/path',
+        settings: EncryptionSettings.init().copyWith(outputFolder: '/path')
       ),
     );
   });
@@ -81,7 +82,7 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'secret',
-              path: '',
+              settings: EncryptionSettings.init(),
             ),
           ),
       expect:
@@ -113,7 +114,9 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'secret',
-              path: '',
+              settings: EncryptionSettings.init().copyWith(
+                outputFolder: '/path',
+              ),
             ),
           ),
       expect:
@@ -146,7 +149,10 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'secret',
-              path: '/folder',
+              
+              settings: EncryptionSettings.init().copyWith(
+                outputFolder: '/folder',
+              ),
             ),
           ),
       expect:
@@ -187,7 +193,10 @@ void main() {
             GalleryEvent.encryptImage(
               image: tImage,
               password: 'mypassword',
-              path: '/my/path',
+              
+              settings: EncryptionSettings.init().copyWith(
+                outputFolder: '/my/path',
+              ),
             ),
           ),
       verify: (_) {
@@ -197,7 +206,7 @@ void main() {
         expect(params.file, tFile);
         expect(params.password, 'mypassword');
         expect(params.fileId, 'img1');
-        expect(params.path, '/my/path');
+        expect(params.settings.outputFolder, '/my/path');
       },
     );
   });

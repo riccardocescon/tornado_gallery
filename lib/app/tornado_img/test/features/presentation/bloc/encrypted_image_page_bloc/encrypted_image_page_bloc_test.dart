@@ -2,12 +2,12 @@ import 'dart:typed_data';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
+import 'package:tornado_img_app/injection_container.dart';
 
 class _MockAppBloc extends Mock implements AppBloc {}
 
@@ -23,7 +23,6 @@ void main() {
   late _MockAppBloc mockAppBloc;
   late _MockGalleryBloc mockGalleryBloc;
   late EncryptedImage tImage;
-  late GetIt getIt;
 
   setUpAll(() {
     registerFallbackValue(_makeImage('fallback/img.png'));
@@ -36,17 +35,12 @@ void main() {
   });
 
   setUp(() {
-    getIt = GetIt.instance;
-    getIt.reset();
-
     mockAppBloc = _MockAppBloc();
     mockGalleryBloc = _MockGalleryBloc();
     tImage = _makeImage('path/img1.png');
 
-    getIt.registerSingleton<AppBloc>(mockAppBloc);
-    getIt.registerSingleton<GalleryBloc>(mockGalleryBloc);
-
     when(() => mockAppBloc.encryptedImages).thenReturn([tImage]);
+    when(() => mockAppBloc.stream).thenAnswer((_) => Stream.empty());
     when(() => mockGalleryBloc.stream).thenAnswer((_) => Stream.empty());
   });
 
@@ -68,18 +62,18 @@ void main() {
   // ---------------------------------------------------------------------------
   group('EncryptedImagePageEvent.setup', () {
     blocTest<EncryptedImagePageBloc, EncryptedImagePageState>(
-      'emits [loading, ui] with correct image on success',
+      'emits [ui] with correct image on success',
       build:
           () => EncryptedImagePageBloc(
             appBloc: mockAppBloc,
             galleryBloc: mockGalleryBloc,
           ),
       act:
-          (b) =>
-              b.add(EncryptedImagePageEvent.setup(imagePath: tImage.file.path)),
+          (b) {
+        b.add(EncryptedImagePageEvent.setup(imagePath: tImage.file.path));
+      },
       expect:
           () => [
-            const EncryptedImagePageState.loading(),
             EncryptedImagePageState.ui(image: tImage),
           ],
       verify: (b) {

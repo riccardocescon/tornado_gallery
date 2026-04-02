@@ -598,13 +598,13 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( bool galleryVisible,  String outputFolder,  bool overrideImage,  bool deleteOriginals)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( EncryptionSettings settings)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
-return settingsUi(_that.galleryVisible,_that.outputFolder,_that.overrideImage,_that.deleteOriginals);case _Encrypting() when encrypting != null:
+return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
@@ -625,13 +625,13 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( bool galleryVisible,  String outputFolder,  bool overrideImage,  bool deleteOriginals)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( EncryptionSettings settings)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _UI():
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI():
-return settingsUi(_that.galleryVisible,_that.outputFolder,_that.overrideImage,_that.deleteOriginals);case _Encrypting():
+return settingsUi(_that.settings);case _Encrypting():
 return encrypting(_that.archivingState);case _Encrypted():
 return encrypted();case _Failure():
 return failure(_that.message);case _:
@@ -651,13 +651,13 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( bool galleryVisible,  String outputFolder,  bool overrideImage,  bool deleteOriginals)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( EncryptionSettings settings)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
 return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
-return settingsUi(_that.galleryVisible,_that.outputFolder,_that.overrideImage,_that.deleteOriginals);case _Encrypting() when encrypting != null:
+return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
 return failure(_that.message);case _:
@@ -779,13 +779,10 @@ as String,
 
 
 class _SettingsUI extends EncryptionPageState {
-  const _SettingsUI({required this.galleryVisible, required this.outputFolder, required this.overrideImage, required this.deleteOriginals}): super._();
+  const _SettingsUI({required this.settings}): super._();
   
 
- final  bool galleryVisible;
- final  String outputFolder;
- final  bool overrideImage;
- final  bool deleteOriginals;
+ final  EncryptionSettings settings;
 
 /// Create a copy of EncryptionPageState
 /// with the given fields replaced by the non-null parameter values.
@@ -806,7 +803,7 @@ abstract mixin class _$SettingsUICopyWith<$Res> implements $EncryptionPageStateC
   factory _$SettingsUICopyWith(_SettingsUI value, $Res Function(_SettingsUI) _then) = __$SettingsUICopyWithImpl;
 @useResult
 $Res call({
- bool galleryVisible, String outputFolder, bool overrideImage, bool deleteOriginals
+ EncryptionSettings settings
 });
 
 
@@ -823,13 +820,10 @@ class __$SettingsUICopyWithImpl<$Res>
 
 /// Create a copy of EncryptionPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? galleryVisible = null,Object? outputFolder = null,Object? overrideImage = null,Object? deleteOriginals = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? settings = null,}) {
   return _then(_SettingsUI(
-galleryVisible: null == galleryVisible ? _self.galleryVisible : galleryVisible // ignore: cast_nullable_to_non_nullable
-as bool,outputFolder: null == outputFolder ? _self.outputFolder : outputFolder // ignore: cast_nullable_to_non_nullable
-as String,overrideImage: null == overrideImage ? _self.overrideImage : overrideImage // ignore: cast_nullable_to_non_nullable
-as bool,deleteOriginals: null == deleteOriginals ? _self.deleteOriginals : deleteOriginals // ignore: cast_nullable_to_non_nullable
-as bool,
+settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
+as EncryptionSettings,
   ));
 }
 

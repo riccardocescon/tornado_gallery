@@ -2,7 +2,7 @@ import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 late PackageInfo packageInfo;
-late AppLogger appLogger;
+AppLogger appLogger = AppLogger();
 
 Future<void> initializeGlobals() async {
   packageInfo = await PackageInfo.fromPlatform();

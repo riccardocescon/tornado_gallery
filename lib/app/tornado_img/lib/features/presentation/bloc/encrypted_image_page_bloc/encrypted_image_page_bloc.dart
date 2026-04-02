@@ -30,8 +30,6 @@ class EncryptedImagePageBloc
   EncryptedImagePageBloc({required this.appBloc, required this.galleryBloc})
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
-
-      
       image = appBloc.encryptedImages.firstWhere(
         (img) => img.file.path == event.imagePath,
       );

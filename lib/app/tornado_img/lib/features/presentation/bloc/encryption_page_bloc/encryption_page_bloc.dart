@@ -7,6 +7,7 @@ import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc
 import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 part 'encryption_page_bloc.freezed.dart';
 part 'encryption_page_event.dart';
@@ -21,11 +22,7 @@ class EncryptionPageBloc
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
 
-  // Settings
-  bool galleryVisible = false;
-  String outputFolder = '';
-  bool overrideImage = true;
-  bool deleteOriginals = false;
+  EncryptionSettings settings = EncryptionSettings.init();
 
   EncryptionPageBloc({required this.appBloc, required this.galleryBloc})
     : super(const EncryptionPageState.initial()) {
@@ -52,32 +49,36 @@ class EncryptionPageBloc
         ),
       );
 
-      outputFolder = await GalleryPathProvider.getOutputFolderRoot(
-        galleryVisible: galleryVisible,
+      final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
+        galleryVisible: settings.galleryVisible,
       );
+      settings = settings.copyWith(outputFolder: newOutputFolder);
       _emitSettings(emit);
     });
     on<_SetPassword>((event, emit) async {
       password = event.password;
     });
     on<_ToggleGalleryVisibility>((event, emit) async {
-      galleryVisible = !galleryVisible;
-
-      outputFolder = await GalleryPathProvider.getOutputFolderRoot(
-        galleryVisible: galleryVisible,
+      final newGalleryVisible = !settings.galleryVisible;
+      final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
+        galleryVisible: newGalleryVisible,
+      );
+      settings = settings.copyWith(
+        outputFolder: newOutputFolder,
+        galleryVisible: newGalleryVisible,
       );
       _emitSettings(emit);
     });
     on<_SetOutputFolder>((event, emit) async {
-      outputFolder = event.outputFolder;
+      settings = settings.copyWith(outputFolder: event.outputFolder);
       _emitSettings(emit);
     });
     on<_ToggleOverrideImage>((event, emit) async {
-      overrideImage = !overrideImage;
+      settings = settings.copyWith(overrideImage: !settings.overrideImage);
       _emitSettings(emit);
     });
     on<_ToggleDeleteOriginals>((event, emit) async {
-      deleteOriginals = !deleteOriginals;
+      settings = settings.copyWith(deleteOriginals: !settings.deleteOriginals);
       _emitSettings(emit);
     });
     on<_Encrypt>((event, emit) async {
@@ -106,7 +107,7 @@ class EncryptionPageBloc
         GalleryEvent.encryptImages(
           images: images,
           password: password,
-          path: outputFolder,
+          settings: settings,
         ),
       );
       await for (final state in galleryBloc.stream) {
@@ -156,10 +157,7 @@ class EncryptionPageBloc
   void _emitSettings(Emitter<EncryptionPageState> emit) {
     emit(
       EncryptionPageState.settingsUi(
-        galleryVisible: galleryVisible,
-        outputFolder: outputFolder,
-        overrideImage: overrideImage,
-        deleteOriginals: deleteOriginals,
+        settings: settings
       ),
     );
   }

@@ -12,7 +12,6 @@ import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/bloc/gallery_page_bloc/gallery_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/theme/theme_notifier.dart';
 
@@ -24,7 +23,6 @@ void setupInjectionContainer() {
     () => GalleryBloc(encryptUseCase: getIt(), decryptUseCase: getIt()),
   );
   getIt.registerFactory(() => HomepageBloc());
-  getIt.registerFactory(() => GalleryPageBloc());
   getIt.registerFactory(
     () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
   );

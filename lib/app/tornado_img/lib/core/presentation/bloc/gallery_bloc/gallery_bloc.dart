@@ -7,6 +7,7 @@ import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 
@@ -36,7 +37,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         file: event.image.file,
         password: event.password,
         fileId: event.image.id,
-        path: event.path,
+        settings: event.settings,
       ),
     );
 
@@ -69,7 +70,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
           file: image.file,
           password: event.password,
           fileId: image.id,
-          path: event.path,
+          settings: event.settings,
         ),
       );
 

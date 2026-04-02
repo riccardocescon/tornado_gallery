@@ -13,7 +13,7 @@ class _OutputFolderOption extends StatelessWidget {
           ),
       builder: (context, state) {
         final outputFolder = state.maybeMap(
-          settingsUi: (state) => state.outputFolder,
+          settingsUi: (state) => state.settings.outputFolder,
           orElse: () => "",
         );
         final isLoading = outputFolder.isEmpty;

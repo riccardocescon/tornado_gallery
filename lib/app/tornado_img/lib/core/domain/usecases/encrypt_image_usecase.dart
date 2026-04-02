@@ -8,6 +8,7 @@ import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 
 class EncryptImageUseCase
     extends EncrpytionUseCase<EncryptedImage, EncryptImageParams> {
@@ -42,10 +43,12 @@ class EncryptImageUseCase
       await storageRepo.save(
         bytes: encoded,
         fileName: '${params.fileId}.png',
-        path: params.path,
+        path: params.settings.outputFolder,
       );
 
-      final encryptedFile = File('${params.path}/${params.fileId}.png');
+      final encryptedFile = File(
+        '${params.settings.outputFolder}/${params.fileId}.png',
+      );
       final encryptedImage = EncryptedImage(
         path: encryptedFile.path,
         encryptedInfo: BytesInfo(
@@ -67,12 +70,12 @@ class EncryptImageParams {
   final File file;
   final String password;
   final String fileId;
-  final String path;
+  final EncryptionSettings settings;
 
   EncryptImageParams({
     required this.file,
     required this.password,
     required this.fileId,
-    required this.path,
+    required this.settings,
   });
 }

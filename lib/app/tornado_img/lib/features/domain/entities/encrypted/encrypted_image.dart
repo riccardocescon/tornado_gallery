@@ -45,7 +45,7 @@ class EncryptedImage with EquatableMixin {
     );
   }
 
-  String get name => path.split('/').last;
+  String get name => file.path.replaceAll("\\", "/").split('/').last;
 
   @override
   List<Object?> get props => [path, date, encryptedInfo, decryptInfo];

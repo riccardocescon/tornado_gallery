@@ -52,7 +52,7 @@ class _OptionsCard extends StatelessWidget {
                       ),
                   builder: (context, state) {
                     final galleryVisibility = state.maybeMap(
-                      settingsUi: (state) => state.galleryVisible,
+                      settingsUi: (state) => state.settings.galleryVisible,
                       orElse: () => false,
                     );
                     return Transform.scale(
@@ -85,7 +85,7 @@ class _OptionsCard extends StatelessWidget {
                       ),
                   builder: (context, state) {
                     final galleryVisibility = state.maybeMap(
-                      settingsUi: (state) => state.overrideImage,
+                      settingsUi: (state) => state.settings.overrideImage,
                       orElse: () => false,
                     );
                     return Transform.scale(
@@ -115,7 +115,7 @@ class _OptionsCard extends StatelessWidget {
                       ),
                   builder: (context, state) {
                     final deleteOriginals = state.maybeMap(
-                      settingsUi: (state) => state.deleteOriginals,
+                      settingsUi: (state) => state.settings.deleteOriginals,
                       orElse: () => false,
                     );
                     return Transform.scale(

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/entities/image_data.dart';
@@ -9,6 +8,7 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 
 class _MockImageProcessingRepository extends Mock
     implements ImageProcessingRepository {}
@@ -64,11 +64,18 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '/my/folder',
+          settings: EncryptionSettings.init().copyWith(
+            outputFolder: '/my/folder',
+          )
         ),
       );
 
-      expect(result, const Right(unit));
+      expect(result.isRight(), isTrue);
+      result.fold((_) => fail('Expected Right'), (encryptedImage) {
+        expect(encryptedImage.path, '/my/folder/abc123.png');
+        expect(encryptedImage.encryptedInfo.bytes, tEncoded);
+      });
+      
     });
 
     test('calls repos in correct order with correct arguments', () async {
@@ -92,7 +99,9 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '/my/folder',
+          settings: EncryptionSettings.init().copyWith(
+            outputFolder: '/my/folder',
+          ),
         ),
       );
 
@@ -118,7 +127,7 @@ void main() {
             file: tFile,
             password: 'secret',
             fileId: 'abc123',
-            path: '/path',
+            settings: EncryptionSettings.init().copyWith(outputFolder: '/path'),
           ),
         );
 
@@ -152,7 +161,7 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '/path',
+          settings: EncryptionSettings.init().copyWith(outputFolder: '/path'),
         ),
       );
 
@@ -180,7 +189,7 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '/path',
+          settings: EncryptionSettings.init().copyWith(outputFolder: '/path'),
         ),
       );
 
@@ -212,7 +221,7 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '/path',
+          settings: EncryptionSettings.init().copyWith(outputFolder: '/path'),
         ),
       );
 
@@ -240,7 +249,7 @@ void main() {
           file: tFile,
           password: 'secret',
           fileId: 'abc123',
-          path: '',
+          settings: EncryptionSettings.init(),
         ),
       );
 

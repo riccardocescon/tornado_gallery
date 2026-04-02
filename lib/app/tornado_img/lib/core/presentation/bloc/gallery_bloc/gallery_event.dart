@@ -7,13 +7,13 @@ abstract class GalleryEvent with _$GalleryEvent, EquatableMixin {
   const factory GalleryEvent.encryptImage({
     required GalleryImage image,
     required String password,
-    required String path,
+    required EncryptionSettings settings,
   }) = _EncryptImage;
 
   const factory GalleryEvent.encryptImages({
     required List<GalleryImage> images,
     required String password,
-    required String path,
+    required EncryptionSettings settings,
   }) = _EncryptImages;
 
   const factory GalleryEvent.decryptImage({
