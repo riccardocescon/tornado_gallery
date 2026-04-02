@@ -84,7 +84,7 @@ class _ArchivePageState extends State<ArchivePage> {
         return state.maybeWhen(
           ui: (images) {
             if (images.isEmpty) {
-              return const Center(child: Text("No archived images found"));
+              return SliverFillRemaining(child: _noImages());
             }
 
             return SliverList.builder(
@@ -105,9 +105,31 @@ class _ArchivePageState extends State<ArchivePage> {
               },
             );
           },
-          orElse: () => SliverToBoxAdapter(child: const SizedBox()),
+          orElse: () => SliverFillRemaining(child: _noImages()),
         );
       },
+    );
+  }
+
+  Widget _noImages() {
+    return Column(
+      spacing: 12,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "No archived images found",
+          style: context.textTheme.headlineSmall!.copyWith(
+            color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+        Text(
+          "Your archived images will appear here",
+          style: context.textTheme.bodyMedium!.copyWith(
+            color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 

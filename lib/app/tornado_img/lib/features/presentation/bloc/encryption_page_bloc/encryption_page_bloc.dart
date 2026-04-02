@@ -19,13 +19,17 @@ class EncryptionPageBloc
 
   String password = '';
 
+  final AppBloc appBloc;
+  final GalleryBloc galleryBloc;
+
   // Settings
   bool galleryVisible = false;
   String outputFolder = '';
   bool overrideImage = true;
   bool deleteOriginals = false;
 
-  EncryptionPageBloc() : super(const EncryptionPageState.initial()) {
+  EncryptionPageBloc({required this.appBloc, required this.galleryBloc})
+    : super(const EncryptionPageState.initial()) {
     on<_Setup>((event, emit) async {
       images.addAll(event.images);
       final size = images.first.file.lengthSync();
@@ -97,9 +101,7 @@ class EncryptionPageBloc
         return;
       }
 
-      final remainingImages = images.map((e) => e.file.path).toList();
-
-      final galleryBloc = getIt.get<GalleryBloc>();
+      final archivedImages = <String>[];
 
       galleryBloc.add(
         GalleryEvent.encryptImages(
@@ -114,7 +116,7 @@ class EncryptionPageBloc
 
             _syncNewArchivedImages(
               value.archivingState.archivedImages,
-              remainingImages,
+              archivedImages,
             );
 
             final state = value.archivingState;
@@ -139,16 +141,16 @@ class EncryptionPageBloc
 
   void _syncNewArchivedImages(
     List<EncryptedImage> newlyArchived,
-    List<String> remainingImages,
+    List<String> alreadyArchivedImages,
   ) {
     final toUpdate =
         newlyArchived
-            .where((img) => remainingImages.contains(img.file.path))
+            .where((img) => !alreadyArchivedImages.contains(img.name))
             .toList();
     for (final newArchive in toUpdate) {
       
-      remainingImages.remove(newArchive.file.path);
-      getIt<AppBloc>().add(AppEvent.addEncryptedImage(image: newArchive));
+      alreadyArchivedImages.add(newArchive.path);
+      appBloc.add(AppEvent.addEncryptedImage(image: newArchive));
     }
   }
 

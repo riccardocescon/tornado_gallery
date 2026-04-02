@@ -27,7 +27,9 @@ void setupInjectionContainer() {
   );
   getIt.registerFactory(() => HomepageBloc());
   getIt.registerFactory(() => GalleryPageBloc());
-  getIt.registerFactory(() => EncryptionPageBloc());
+  getIt.registerFactory(
+    () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
+  );
   getIt.registerFactory(
     () => ArchivePageBloc(
       appBloc: getIt(),

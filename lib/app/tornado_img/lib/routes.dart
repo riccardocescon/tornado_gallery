@@ -33,6 +33,7 @@ GoRouter routes = GoRouter(
                       getIt<HomepageBloc>()..add(HomepageEvent.setup()),
             ),
             BlocProvider(
+              lazy: false,
               create:
                   (context) =>
                       getIt<ArchivePageBloc>()..add(ArchivePageEvent.setup()),
