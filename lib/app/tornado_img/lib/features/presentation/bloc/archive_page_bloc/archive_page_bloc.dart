@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
-import 'package:tornado_img_app/injection_container.dart';
 
 part 'archive_page_bloc.freezed.dart';
 part 'archive_page_event.dart';
@@ -15,12 +15,20 @@ part 'archive_page_bloc_utils.dart';
 
 class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final images = <EncryptedImage>[];
+  final deletingImagesQueue = <String>[];
 
   final GalleryReaderUsecase galleryReaderUsecase;
+  final ImageDeleterUsecase imageDeleterUsecase;
 
   // final ArchivePageBlocUtils _utils = ArchivePageBlocUtils();
 
-  ArchivePageBloc({required this.galleryReaderUsecase})
+  final AppBloc appBloc;
+
+  ArchivePageBloc({
+    required this.appBloc,
+    required this.galleryReaderUsecase,
+    required this.imageDeleterUsecase,
+  })
     : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const ArchivePageState.loading());
@@ -33,7 +41,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             switch (streamImage.type) {
               case EncryptedStreamImageType.newImage:
                 images.add(streamImage.image!);
-                getIt<AppBloc>().add(
+                appBloc.add(
                   AppEvent.addEncryptedImage(image: streamImage.image!),
                 );
                 break;
@@ -52,7 +60,6 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
       }
 
-      final appBloc = getIt<AppBloc>();
       await for (final appState in appBloc.stream) {
         appState.maybeMap(
           addedGalleryImage: (value) {
@@ -90,7 +97,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
             if (index != -1) {
               images.removeAt(index);
+              deletingImagesQueue.remove(value.path);
               emit(ArchivePageState.ui(images: List.from(images)));
+              if (deletingImagesQueue.isNotEmpty) {
+                emit(
+                  ArchivePageState.deleting(
+                    paths: List.from(deletingImagesQueue),
+                  ),
+                );
+              }
             } else {
               appLogger.logPageBloc(
                 'Removed image not found in gallery, skipping remove: ${value.path}',
@@ -101,6 +116,26 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
       }
       
+    });
+    on<_ArchivePageDelete>((event, emit) async {
+      deletingImagesQueue.add(event.path);
+      emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
+      final result = await imageDeleterUsecase.call(
+        ImageDeleterParams(path: event.path),
+      );
+
+      result.fold(
+        (failure) {
+          appLogger.logPageBloc(
+            'Failed to delete image',
+            error: failure.message,
+          );
+          emit(ArchivePageState.failure(message: failure.message));
+        },
+        (_) {
+          appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
+        },
+      );
     });
   }
 }

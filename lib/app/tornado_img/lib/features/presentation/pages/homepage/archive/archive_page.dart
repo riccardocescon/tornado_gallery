@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -74,6 +77,9 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _images() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen:
+          (previous, current) =>
+              current.maybeWhen(ui: (images) => true, orElse: () => false),
       builder: (context, state) {
         return state.maybeWhen(
           ui: (images) {

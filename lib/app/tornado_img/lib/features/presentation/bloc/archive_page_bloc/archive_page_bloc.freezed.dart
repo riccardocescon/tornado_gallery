@@ -48,11 +48,12 @@ extension ArchivePageEventPatterns on ArchivePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _ArchivePageDelete value)?  delete,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _ArchivePageDelete() when delete != null:
+return delete(_that);case _:
   return orElse();
 
 }
@@ -70,11 +71,12 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _ArchivePageDelete value)  delete,}){
 final _that = this;
 switch (_that) {
 case _Setup():
-return setup(_that);case _:
+return setup(_that);case _ArchivePageDelete():
+return delete(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -91,11 +93,12 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _ArchivePageDelete value)?  delete,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _:
+return setup(_that);case _ArchivePageDelete() when delete != null:
+return delete(_that);case _:
   return null;
 
 }
@@ -112,10 +115,11 @@ return setup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( String path)?  delete,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _:
+return setup();case _ArchivePageDelete() when delete != null:
+return delete(_that.path);case _:
   return orElse();
 
 }
@@ -133,10 +137,11 @@ return setup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( String path)  delete,}) {final _that = this;
 switch (_that) {
 case _Setup():
-return setup();case _:
+return setup();case _ArchivePageDelete():
+return delete(_that.path);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -153,10 +158,11 @@ return setup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( String path)?  delete,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _:
+return setup();case _ArchivePageDelete() when delete != null:
+return delete(_that.path);case _:
   return null;
 
 }
@@ -188,6 +194,65 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _ArchivePageDelete extends ArchivePageEvent {
+  const _ArchivePageDelete({required this.path}): super._();
+  
+
+ final  String path;
+
+/// Create a copy of ArchivePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ArchivePageDeleteCopyWith<_ArchivePageDelete> get copyWith => __$ArchivePageDeleteCopyWithImpl<_ArchivePageDelete>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'ArchivePageEvent.delete(path: $path)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ArchivePageDeleteCopyWith<$Res> implements $ArchivePageEventCopyWith<$Res> {
+  factory _$ArchivePageDeleteCopyWith(_ArchivePageDelete value, $Res Function(_ArchivePageDelete) _then) = __$ArchivePageDeleteCopyWithImpl;
+@useResult
+$Res call({
+ String path
+});
+
+
+
+
+}
+/// @nodoc
+class __$ArchivePageDeleteCopyWithImpl<$Res>
+    implements _$ArchivePageDeleteCopyWith<$Res> {
+  __$ArchivePageDeleteCopyWithImpl(this._self, this._then);
+
+  final _ArchivePageDelete _self;
+  final $Res Function(_ArchivePageDelete) _then;
+
+/// Create a copy of ArchivePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? path = null,}) {
+  return _then(_ArchivePageDelete(
+path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$ArchivePageState {
@@ -222,12 +287,13 @@ extension ArchivePageStatePatterns on ArchivePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _UI value)?  ui,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _UI() when ui != null:
+return loading(_that);case _Deleting() when deleting != null:
+return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
@@ -247,12 +313,13 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _UI value)  ui,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _UI():
+return loading(_that);case _Deleting():
+return deleting(_that);case _UI():
 return ui(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
@@ -271,12 +338,13 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _UI value)?  ui,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _UI() when ui != null:
+return loading(_that);case _Deleting() when deleting != null:
+return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
@@ -295,11 +363,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<EncryptedImage> images)?  ui,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images)?  ui,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _UI() when ui != null:
+return loading();case _Deleting() when deleting != null:
+return deleting(_that.paths);case _UI() when ui != null:
 return ui(_that.images);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -319,11 +388,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<EncryptedImage> images)  ui,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images)  ui,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _UI():
+return loading();case _Deleting():
+return deleting(_that.paths);case _UI():
 return ui(_that.images);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -342,11 +412,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<EncryptedImage> images)?  ui,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images)?  ui,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _UI() when ui != null:
+return loading();case _Deleting() when deleting != null:
+return deleting(_that.paths);case _UI() when ui != null:
 return ui(_that.images);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -397,6 +468,67 @@ class _Loading extends ArchivePageState {
 
 
 
+
+/// @nodoc
+
+
+class _Deleting extends ArchivePageState {
+  const _Deleting({required final  List<String> paths}): _paths = paths,super._();
+  
+
+ final  List<String> _paths;
+ List<String> get paths {
+  if (_paths is EqualUnmodifiableListView) return _paths;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_paths);
+}
+
+
+/// Create a copy of ArchivePageState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeletingCopyWith<_Deleting> get copyWith => __$DeletingCopyWithImpl<_Deleting>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DeletingCopyWith<$Res> implements $ArchivePageStateCopyWith<$Res> {
+  factory _$DeletingCopyWith(_Deleting value, $Res Function(_Deleting) _then) = __$DeletingCopyWithImpl;
+@useResult
+$Res call({
+ List<String> paths
+});
+
+
+
+
+}
+/// @nodoc
+class __$DeletingCopyWithImpl<$Res>
+    implements _$DeletingCopyWith<$Res> {
+  __$DeletingCopyWithImpl(this._self, this._then);
+
+  final _Deleting _self;
+  final $Res Function(_Deleting) _then;
+
+/// Create a copy of ArchivePageState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? paths = null,}) {
+  return _then(_Deleting(
+paths: null == paths ? _self._paths : paths // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

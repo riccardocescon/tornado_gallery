@@ -39,4 +39,17 @@ class StorageRepositoryImpl implements StorageRepository {
       );
     });
   }
+
+  @override
+  Future<void> delete(String path) async {
+    final file = File(path);
+    if (await file.exists()) {
+      await file.delete();
+    } else {
+      appLogger.logRepository(
+        'File to delete',
+        error: 'File does not exist: $path',
+      );
+    }
+  }
 }

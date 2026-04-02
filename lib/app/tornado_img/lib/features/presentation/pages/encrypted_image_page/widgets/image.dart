@@ -21,9 +21,11 @@ class __ImageState extends State<_Image> {
             orElse: () => false,
           ),
       builder: (context, state) {
+        bool isDecrypted = false;
         final isLoading = state.maybeMap(
           loading: (_) => true,
           ui: (value) {
+            isDecrypted = value.image.decryptInfo != null;
             bytes =
                 value.image.decryptInfo?.bytes ??
                 value.image.encryptedInfo.bytes;
@@ -40,10 +42,10 @@ class __ImageState extends State<_Image> {
           child: ClipRRect(
             borderRadius: AppStyle.cardBorderRadius,
             child: Transform.scale(
-              scale: 10,
+              scale: isDecrypted ? 1 : 10,
               child: Skeletonizer(
                 enabled: isLoading,
-                child: Image.memory(bytes!, fit: BoxFit.contain),
+                child: Image.memory(bytes!, fit: BoxFit.cover),
               ),
             ),
           ),

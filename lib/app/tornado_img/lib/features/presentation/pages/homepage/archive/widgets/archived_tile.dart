@@ -10,49 +10,102 @@ class _ArchivedTile extends StatefulWidget {
 }
 
 class _ArchivedTileState extends State<_ArchivedTile> {
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80 + 32,
-      child: FilledButton(
-        onPressed: () {
-          context.push('./encrypted_image_page', extra: widget.image);
-        },
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppStyle.detailsBorderRadius,
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen:
+          (previous, current) => current.maybeMap(
+            deleting: (value) => value.paths.contains(widget.image.path),
+            orElse: () => false,
           ),
-          backgroundColor: context.appColors.scaffoldBackground,
-          overlayColor: context.colorScheme.onSurface.withValues(alpha: 0.05),
-        ),
-        child: Row(
-          spacing: 16,
-          children: [
-            _image(),
-            Expanded(child: _details()),
-            ContainedIcon(icon: Icons.lock_rounded),
-          ],
-        ),
-      ),
+      builder: (context, state) {
+        final isDeleting = state.maybeMap(
+          deleting: (value) => value.paths.contains(widget.image.path),
+          orElse: () => false,
+        );
+
+        Widget child;
+
+        if (isDeleting) {
+          child = Skeletonizer(child: _content());
+        } else {
+          child = FilledButton(
+            onPressed: () {
+              context.push('./encrypted_image_page', extra: widget.image);
+            },
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: AppStyle.detailsBorderRadius,
+              ),
+              backgroundColor: context.appColors.scaffoldBackground,
+              overlayColor: context.colorScheme.onSurface.withValues(
+                alpha: 0.05,
+              ),
+            ),
+            child: _content(),
+          );
+        }
+
+        return SizedBox(
+          height: 80 + 32,
+          child: FocusedMenuHolder(
+            openWithTap: false,
+            onPressed: () {},
+            menuOffset: 4,
+            menuItems: [
+              FocusedMenuItem(
+                title: Text(
+                  "Delete",
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: context.colorScheme.error,
+                  ),
+                ),
+                onPressed: () {
+                  context.read<ArchivePageBloc>().add(
+                    ArchivePageEvent.delete(path: widget.image.path),
+                  );
+                },
+
+                trailingIcon: Icon(
+                  Icons.delete_rounded,
+                  color: context.colorScheme.error,
+                ),
+              ),
+            ],
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _content() {
+    return Row(
+      spacing: 16,
+      children: [
+        _image(),
+        Expanded(child: _details()),
+        ContainedIcon(icon: Icons.lock_rounded),
+      ],
     );
   }
 
   Widget _image() {
     final bytes =
         widget.image.decryptInfo?.bytes ?? widget.image.encryptedInfo.bytes;
-    
+    final isDecrypted = widget.image.decryptInfo != null;
+
     return ClipRRect(
       borderRadius: AppStyle.detailsBorderRadius,
       child: Transform.scale(
-        scale: bytes.lengthInBytes > 10000000 ? 30 : 10,
-                  child: Image.memory(
-                    bytes,
-                    width: 56,
-                    height: 80,
-                    fit: BoxFit.cover,
-                  ),
+        scale:
+            isDecrypted
+                ? 1
+                : bytes.lengthInBytes > 10000000
+                ? 30
+                : 10,
+        child: Image.memory(bytes, width: 56, height: 80, fit: BoxFit.cover),
       ),
     );
   }
