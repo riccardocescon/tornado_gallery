@@ -6,6 +6,7 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 
@@ -41,11 +42,11 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     result.fold(
       (failure) => emit(GalleryState.encryptionFailure(failure: failure)),
-      (_) => emit(
+      (encryptedImage) => emit(
         GalleryState.encrypted(
           archivingState: ArchivingState(
             totalImages: 1,
-            archivedImages: [event.image],
+            archivedImages: [encryptedImage],
             failedImages: [],
           ),
         ),
@@ -59,7 +60,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   ) async {
     emit(GalleryState.loading(total: event.images.length));
 
-    final encrypted = <GalleryImage>[];
+    final encrypted = <EncryptedImage>[];
     final failed = <GalleryImage>[];
 
     for (final image in event.images) {
@@ -78,7 +79,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
       );
 
       final archivingState = ArchivingState(
-        archivedImages: List<GalleryImage>.from(encrypted),
+        archivedImages: List<EncryptedImage>.from(encrypted),
         failedImages: List<GalleryImage>.from(failed),
         totalImages: event.images.length,
       );
@@ -100,11 +101,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     result.fold(
       (failure) => emit(GalleryState.decryptionFailure(failure: failure)),
-      (decrypted) => emit(
+      (decryptedInfo) => emit(
         GalleryState.decrypted(
           archivingState: DearchivingState(
             totalImages: 1,
-            dearchivedImages: [decrypted],
+            dearchivedImages: [
+              event.image.copyWith(decryptInfo: decryptedInfo),
+            ],
             failedImages: [],
           ),
         ),

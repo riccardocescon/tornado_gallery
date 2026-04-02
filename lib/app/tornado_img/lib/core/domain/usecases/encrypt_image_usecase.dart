@@ -5,18 +5,19 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 class EncryptImageUseCase
-    extends EncrpytionUseCase<GalleryImage, EncryptImageParams> {
+    extends EncrpytionUseCase<EncryptedImage, EncryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
   EncryptImageUseCase({required this.imageRepo, required this.storageRepo});
 
   @override
-  Future<Either<EncryptionFailure, GalleryImage>> call(
+  Future<Either<EncryptionFailure, EncryptedImage>> call(
     EncryptImageParams params,
   ) async {
     try {
@@ -45,9 +46,12 @@ class EncryptImageUseCase
       );
 
       final encryptedFile = File('${params.path}/${params.fileId}.png');
-      final encryptedImage = GalleryImage(
-        id: params.fileId,
-        file: encryptedFile,
+      final encryptedImage = EncryptedImage(
+        path: encryptedFile.path,
+        encryptedInfo: BytesInfo(
+          bytes: encoded,
+          hash: ByteModeling.generateHash(encoded),
+        ),
         date: DateTime.now(),
       );
 

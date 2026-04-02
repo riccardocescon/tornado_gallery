@@ -64,7 +64,15 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       final fileName = fileSystem.path.split('/').last;
       if (fileName.contains('.')) {
         final date = fileSystem.statSync().modified;
-        folder.images.add(EncryptedImage(path: fileSystem.path, date: date));
+        final bytes = await File(fileSystem.path).readAsBytes();
+        final hash = ByteModeling.generateHash(bytes);
+        folder.images.add(
+          EncryptedImage(
+            path: fileSystem.path,
+            encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+            date: date,
+          ),
+        );
       } else {
         final subfolder = await _loadSubfolder(fileSystem.path);
         folder.subfolders.add(subfolder);
@@ -81,8 +89,14 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       final fileName = fileSystem.path.split('/').last;
       if (fileName.contains('.')) {
         final date = fileSystem.statSync().modified;
+        final bytes = await File(fileSystem.path).readAsBytes();
+        final hash = ByteModeling.generateHash(bytes);
         rootFolder.images.add(
-          EncryptedImage(path: fileSystem.path, date: date),
+          EncryptedImage(
+            path: fileSystem.path,
+            encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+            date: date,
+          ),
         );
       } else {
         final subfolder = await _loadSubfolder(fileSystem.path);
@@ -170,7 +184,13 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
 
       final file = File(event.path);
       final date = file.statSync().modified;
-      final newImage = EncryptedImage(path: event.path, date: date);
+      final bytes = await file.readAsBytes();
+      final hash = ByteModeling.generateHash(bytes);
+      final newImage = EncryptedImage(
+        path: event.path,
+        encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+        date: date,
+      );
 
       parentFolder.images.removeWhere((img) => img.path == event.path);
       parentFolder.images.add(newImage);

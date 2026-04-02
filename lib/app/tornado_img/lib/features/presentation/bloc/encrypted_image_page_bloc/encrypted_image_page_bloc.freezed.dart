@@ -352,12 +352,12 @@ extension EncryptedImagePageStatePatterns on EncryptedImagePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Loaded value)?  ui,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Ui value)?  ui,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when ui != null:
+return loading(_that);case _Ui() when ui != null:
 return ui(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
@@ -377,12 +377,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Loaded value)  ui,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Ui value)  ui,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _Loaded():
+return loading(_that);case _Ui():
 return ui(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
@@ -401,12 +401,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Loaded value)?  ui,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Ui value)?  ui,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when ui != null:
+return loading(_that);case _Ui() when ui != null:
 return ui(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
@@ -425,11 +425,11 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( GalleryImage image)?  ui,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( EncryptedImage image)?  ui,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when ui != null:
+return loading();case _Ui() when ui != null:
 return ui(_that.image);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -449,11 +449,11 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( GalleryImage image)  ui,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( EncryptedImage image)  ui,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Loaded():
+return loading();case _Ui():
 return ui(_that.image);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -472,11 +472,11 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( GalleryImage image)?  ui,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( EncryptedImage image)?  ui,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when ui != null:
+return loading();case _Ui() when ui != null:
 return ui(_that.image);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -531,17 +531,17 @@ class _Loading extends EncryptedImagePageState {
 /// @nodoc
 
 
-class _Loaded extends EncryptedImagePageState {
-  const _Loaded({required this.image}): super._();
+class _Ui extends EncryptedImagePageState {
+  const _Ui({required this.image}): super._();
   
 
- final  GalleryImage image;
+ final  EncryptedImage image;
 
 /// Create a copy of EncryptedImagePageState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _$identity);
+_$UiCopyWith<_Ui> get copyWith => __$UiCopyWithImpl<_Ui>(this, _$identity);
 
 
 
@@ -552,11 +552,11 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 }
 
 /// @nodoc
-abstract mixin class _$LoadedCopyWith<$Res> implements $EncryptedImagePageStateCopyWith<$Res> {
-  factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
+abstract mixin class _$UiCopyWith<$Res> implements $EncryptedImagePageStateCopyWith<$Res> {
+  factory _$UiCopyWith(_Ui value, $Res Function(_Ui) _then) = __$UiCopyWithImpl;
 @useResult
 $Res call({
- GalleryImage image
+ EncryptedImage image
 });
 
 
@@ -564,19 +564,19 @@ $Res call({
 
 }
 /// @nodoc
-class __$LoadedCopyWithImpl<$Res>
-    implements _$LoadedCopyWith<$Res> {
-  __$LoadedCopyWithImpl(this._self, this._then);
+class __$UiCopyWithImpl<$Res>
+    implements _$UiCopyWith<$Res> {
+  __$UiCopyWithImpl(this._self, this._then);
 
-  final _Loaded _self;
-  final $Res Function(_Loaded) _then;
+  final _Ui _self;
+  final $Res Function(_Ui) _then;
 
 /// Create a copy of EncryptedImagePageState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? image = null,}) {
-  return _then(_Loaded(
+  return _then(_Ui(
 image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
-as GalleryImage,
+as EncryptedImage,
   ));
 }
 

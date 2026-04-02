@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
@@ -9,6 +10,7 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
@@ -19,6 +21,7 @@ void main() {
   late _MockEncryptImageUseCase mockEncryptionUseCase;
   late _MockDecryptImageUseCase mockDecryptUseCase;
   late GalleryImage tImage;
+  late EncryptedImage tEncryptedImage;
 
   final tFile = File('test_image.png');
 
@@ -37,6 +40,11 @@ void main() {
     mockEncryptionUseCase = _MockEncryptImageUseCase();
     mockDecryptUseCase = _MockDecryptImageUseCase();
     tImage = GalleryImage(id: 'img1', file: tFile, date: DateTime(2024));
+    tEncryptedImage = EncryptedImage(
+      path: 'encrypted_img1.enc',
+      encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
+      date: DateTime(2024),
+    );
   });
 
   test('initial state is GalleryState.initial', () {
@@ -56,9 +64,9 @@ void main() {
           () => mockEncryptionUseCase.call(any()),
         ).thenAnswer(
           (_) async => Right(
-            GalleryImage(
-              id: 'encrypted_img1',
-              file: File('encrypted_img1.enc'),
+            EncryptedImage(
+              path: 'encrypted_img1.enc',
+              encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
               date: DateTime(2024),
             ),
           ),
@@ -82,7 +90,7 @@ void main() {
             GalleryState.encrypted(
               archivingState: ArchivingState(
                 totalImages: 1,
-                archivedImages: [tImage],
+                archivedImages: [tEncryptedImage],
                 failedImages: [],
               ),
             ),
@@ -162,9 +170,9 @@ void main() {
           () => mockEncryptionUseCase.call(any()),
         ).thenAnswer(
           (_) async => Right(
-            GalleryImage(
-              id: 'encrypted_img1',
-              file: File('encrypted_img1.enc'),
+            EncryptedImage(
+              path: 'encrypted_img1.enc',
+              encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
               date: DateTime(2024),
             ),
           ),

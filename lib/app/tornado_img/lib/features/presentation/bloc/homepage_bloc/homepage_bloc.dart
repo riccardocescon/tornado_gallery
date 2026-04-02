@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
@@ -117,7 +118,7 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
           'Error opening gallery with photo_manager picker',
           error: e.toString(),
         );
-        emit(const HomepageState.galleryImages(imagesLoaded: []));
+        emit(HomepageState.galleryImages(imagesLoaded: []));
       }
     });
   }

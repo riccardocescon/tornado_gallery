@@ -10,7 +10,6 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
-import 'package:tornado_img_app/core/utils/image_lru_cache.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
@@ -51,6 +50,5 @@ void setupInjectionContainer() {
     () => ImageProcessingRepositoryImpl(),
   );
 
-  getIt.registerLazySingleton(() => ImageLruCache());
   getIt.registerLazySingleton(() => ThemeNotifier());
 }

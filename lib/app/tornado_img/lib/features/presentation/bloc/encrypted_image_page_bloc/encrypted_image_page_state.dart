@@ -7,8 +7,8 @@ abstract class EncryptedImagePageState
 
   const factory EncryptedImagePageState.initial() = _Initial;
   const factory EncryptedImagePageState.loading() = _Loading;
-  const factory EncryptedImagePageState.ui({required GalleryImage image}) =
-      _Loaded;
+  const factory EncryptedImagePageState.ui({required EncryptedImage image}) =
+      _Ui;
   const factory EncryptedImagePageState.failure({required String message}) =
       _Failure;
 

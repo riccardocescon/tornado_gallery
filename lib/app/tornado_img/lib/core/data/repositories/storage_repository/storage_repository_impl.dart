@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
 part 'storage_repository_utils.dart';
@@ -23,7 +24,7 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Stream<GalleryStreamImage> readImages(String path) async* {
+  Stream<EncryptedStreamImage> readImages(String path) async* {
     final dir = Directory(path);
     appLogger.logRepository('Reading images from $path');
     if (!await dir.exists()) {
@@ -32,9 +33,9 @@ class StorageRepositoryImpl implements StorageRepository {
     }
 
     yield* utils.readAllImagesRecursively(dir).asyncMap((image) {
-      return GalleryStreamImage.image(
+      return EncryptedStreamImage.image(
         image: image,
-        type: GalleryStreamImageType.newImage,
+        type: EncryptedStreamImageType.newImage,
       );
     });
   }

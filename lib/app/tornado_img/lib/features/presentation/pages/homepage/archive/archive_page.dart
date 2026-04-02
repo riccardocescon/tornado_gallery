@@ -1,18 +1,13 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
-import 'package:tornado_img_app/core/utils/image_lru_cache.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
-import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/archived_tile.dart';
 

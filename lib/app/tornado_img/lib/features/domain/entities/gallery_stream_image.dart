@@ -1,29 +1,29 @@
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
-enum GalleryStreamImageType { newImage, updatedImage, deletedImage }
+enum EncryptedStreamImageType { newImage, updatedImage, deletedImage }
 
-class GalleryStreamImage {
+class EncryptedStreamImage {
   final String? path;
-  final GalleryImage? image;
-  final GalleryStreamImageType type;
+  final EncryptedImage? image;
+  final EncryptedStreamImageType type;
 
-  const GalleryStreamImage._({
+  const EncryptedStreamImage._({
     required this.path,
     required this.image,
     required this.type,
   });
 
-  factory GalleryStreamImage.image({
-    required GalleryImage image,
-    required GalleryStreamImageType type,
+  factory EncryptedStreamImage.image({
+    required EncryptedImage image,
+    required EncryptedStreamImageType type,
   }) {
-    return GalleryStreamImage._(image: image, path: null, type: type);
+    return EncryptedStreamImage._(image: image, path: null, type: type);
   }
 
-  factory GalleryStreamImage.path({
+  factory EncryptedStreamImage.path({
     required String path,
-    required GalleryStreamImageType type,
+    required EncryptedStreamImageType type,
   }) {
-    return GalleryStreamImage._(image: null, path: path, type: type);
+    return EncryptedStreamImage._(image: null, path: path, type: type);
   }
 }

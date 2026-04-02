@@ -8,14 +8,14 @@ import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
 class GalleryReaderUsecase
-    extends GalleryReaderUseCase<GalleryStreamImage, void> {
+    extends GalleryReaderUseCase<EncryptedStreamImage, void> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
   GalleryReaderUsecase({required this.imageRepo, required this.storageRepo});
 
   @override
-  Stream<Either<DecryptionFailure, GalleryStreamImage>> call(
+  Stream<Either<DecryptionFailure, EncryptedStreamImage>> call(
     void params,
   ) async* {
     try {

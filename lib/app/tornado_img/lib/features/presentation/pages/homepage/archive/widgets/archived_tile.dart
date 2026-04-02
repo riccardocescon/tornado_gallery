@@ -3,39 +3,13 @@ part of '../archive_page.dart';
 class _ArchivedTile extends StatefulWidget {
   const _ArchivedTile({required this.image});
 
-  final GalleryImage image;
+  final EncryptedImage image;
 
   @override
   State<_ArchivedTile> createState() => _ArchivedTileState();
 }
 
 class _ArchivedTileState extends State<_ArchivedTile> {
-  Uint8List? bytes;
-
-  // Pull cache from DI
-  final _cache = getIt<ImageLruCache>();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadImage();
-  }
-
-  Future<void> _loadImage() async {
-    final path = widget.image.file.path;
-
-    // 1. Check cache first
-    final cached = _cache.get(path);
-    if (cached != null) {
-      if (mounted) setState(() => bytes = cached);
-      return;
-    }
-
-    // 2. Read from disk and cache
-    final data = await widget.image.file.readAsBytes();
-    _cache.put(path, data);
-    if (mounted) setState(() => bytes = data);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,26 +40,19 @@ class _ArchivedTileState extends State<_ArchivedTile> {
   }
 
   Widget _image() {
+    final bytes =
+        widget.image.decryptInfo?.bytes ?? widget.image.encryptedInfo.bytes;
+    
     return ClipRRect(
       borderRadius: AppStyle.detailsBorderRadius,
-      child: Skeletonizer(
-        enabled: bytes == null,
-        child:
-            bytes == null
-                ? Container(
-                  width: 64,
-                  height: 64,
-                  color: context.colorScheme.onSurface,
-                )
-                : Transform.scale(
-                  scale: bytes!.lengthInBytes > 10000000 ? 30 : 10,
+      child: Transform.scale(
+        scale: bytes.lengthInBytes > 10000000 ? 30 : 10,
                   child: Image.memory(
-                    bytes!,
+                    bytes,
                     width: 56,
                     height: 80,
                     fit: BoxFit.cover,
                   ),
-                ),
       ),
     );
   }

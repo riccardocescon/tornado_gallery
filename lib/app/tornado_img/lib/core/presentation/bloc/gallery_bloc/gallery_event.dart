@@ -17,7 +17,7 @@ abstract class GalleryEvent with _$GalleryEvent, EquatableMixin {
   }) = _EncryptImages;
 
   const factory GalleryEvent.decryptImage({
-    required GalleryImage image,
+    required EncryptedImage image,
     required String password,
   }) = _DecryptImage;
 

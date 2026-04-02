@@ -101,6 +101,7 @@ void main() {
   group('decryptFolder', () {
     EncryptedImage _img(String id) => EncryptedImage(
       path: '${tempDir.path}/$id.png',
+      encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
       date: DateTime(2024),
     );
 
@@ -122,8 +123,8 @@ void main() {
       expect(result.isRight(), isTrue);
       result.fold((_) => fail('Expected Right'), (decrypted) {
         expect(decrypted.length, 2);
-        expect(decrypted[0].bytes, tBytes);
-        expect(decrypted[1].bytes, tBytes);
+        expect(decrypted[0].decryptInfo!.bytes, tBytes);
+        expect(decrypted[1].decryptInfo!.bytes, tBytes);
       });
     });
 
@@ -189,10 +190,17 @@ void main() {
         decryptResult: (_) => Right(tBytes),
       );
 
-      await repo.decryptFolder(images: [img1], password: 'pw');
+      final decrypted = await repo.decryptFolder(
+        images: [img1],
+        password: 'pw',
+      );
 
-      expect(img1.bytes, tBytes);
-      expect(img1.isDecrypted, true);
+      expect(decrypted.isRight(), true);
+
+      final decryptedImage =
+          decrypted.getOrElse(() => <EncryptedImage>[]).first;
+      expect(decryptedImage.decryptInfo!.bytes, tBytes);
+      expect(decryptedImage.isDecrypted, true);
     });
   });
 }

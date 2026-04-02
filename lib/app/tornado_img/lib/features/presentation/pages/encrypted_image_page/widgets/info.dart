@@ -3,7 +3,7 @@ part of '../encrypted_image_page.dart';
 class _Info extends StatefulWidget {
   const _Info({required this.image});
 
-  final GalleryImage image;
+  final EncryptedImage image;
 
   @override
   State<_Info> createState() => _InfoState();

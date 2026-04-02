@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 part 'encrypted_image_page_bloc.freezed.dart';
 part 'encrypted_image_page_event.dart';
@@ -13,7 +13,7 @@ part 'encrypted_image_page_state.dart';
 class EncryptedImagePageBloc
     extends Bloc<EncryptedImagePageEvent, EncryptedImagePageState> {
   String password = '';
-  late GalleryImage image;
+  late EncryptedImage image;
 
   late AppBloc appBloc;
   late GalleryBloc galleryBloc;
@@ -21,7 +21,6 @@ class EncryptedImagePageBloc
   EncryptedImagePageBloc({required this.appBloc, required this.galleryBloc})
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
-      emit(const EncryptedImagePageState.loading());
 
       image = appBloc.encryptedImages.firstWhere(
         (img) => img.file.path == event.imagePath,
@@ -52,6 +51,12 @@ class EncryptedImagePageBloc
             final decryptedImage = value.archivingState.dearchivedImages
                 .firstWhereOrNull((e) => e.file.path == image.file.path);
             if (decryptedImage != null) {
+              appBloc.add(
+                AppEvent.setDecryptedInfo(
+                  path: decryptedImage.path,
+                  decryptedInfo: decryptedImage.decryptInfo!,
+                ),
+              );
               emit(EncryptedImagePageState.ui(image: decryptedImage));
             }
             return decryptedImage != null;

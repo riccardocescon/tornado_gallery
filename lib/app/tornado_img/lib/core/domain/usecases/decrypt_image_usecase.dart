@@ -5,18 +5,19 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 class DecryptImageUseCase
-    extends EncrpytionUseCase<GalleryImage, DecryptImageParams> {
+    extends EncrpytionUseCase<BytesInfo, DecryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
   DecryptImageUseCase({required this.imageRepo, required this.storageRepo});
 
   @override
-  Future<Either<EncryptionFailure, GalleryImage>> call(
+  Future<Either<EncryptionFailure, BytesInfo>> call(
     DecryptImageParams params,
   ) async {
     try {
@@ -38,15 +39,12 @@ class DecryptImageUseCase
         return Left(EncryptionFailure.encryptionError('Encoding failed'));
       }
 
-      // TODO: maybe create a temporary image with encrypted to get the decrypted bytes?
-
-      final galleryImage = GalleryImage(
-        id: params.file.path.split('/').last.split('.').first,
-        file: params.file,
-        date: DateTime.now(),
+      final bytesInfo = BytesInfo(
+        bytes: encoded,
+        hash: ByteModeling.generateHash(encoded),
       );
 
-      return Right(galleryImage);
+      return Right(bytesInfo);
     } catch (e) {
       appLogger.logUsecase('Error encrypting image', error: e.toString());
       return Left(EncryptionFailure.encryptionError(e.toString()));

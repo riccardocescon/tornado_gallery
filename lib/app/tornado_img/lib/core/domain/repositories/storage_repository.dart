@@ -8,5 +8,5 @@ abstract class StorageRepository {
     required String fileName,
     required String path,
   });
-  Stream<GalleryStreamImage> readImages(String path);
+  Stream<EncryptedStreamImage> readImages(String path);
 }

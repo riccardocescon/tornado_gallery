@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import '../../../domain/repositories/encrypted_gallery_repository.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
@@ -34,8 +35,10 @@ class EncryptedGalleryRepositoryImpl implements EncryptedGalleryRepository {
     for (final image in images) {
       final res = await decryptImage(image: image, password: password);
       res.fold((_) {}, (bytes) {
-        image.bytes = bytes;
-        result.add(image);
+        final hash = ByteModeling.generateHash(bytes);
+        result.add(
+          image.copyWith(decryptInfo: BytesInfo(bytes: bytes, hash: hash)),
+        );
       });
     }
     return Right(result);

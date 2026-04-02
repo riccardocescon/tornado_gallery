@@ -3,11 +3,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 
 part 'widgets/image.dart';
@@ -21,48 +23,32 @@ class EncryptedImagePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Encrypted Image')),
       body: BlocBuilder<EncryptedImagePageBloc, EncryptedImagePageState>(
+        buildWhen:
+            (previous, current) => current.maybeMap(
+              ui: (value) {
+                return previous.maybeMap(
+                  initial: (_) => true,
+                  orElse: () => false,
+                );
+              },
+              orElse: () => false,
+            ),
         builder: (context, state) {
           return state.maybeMap(
             ui: (value) {
               final image = value.image;
 
               return Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  spacing: 16,
-                  children: [
-                    SizedBox(
-                      height: 300,
-                      child: BlocBuilder<
-                        EncryptedImagePageBloc,
-                        EncryptedImagePageState
-                      >(
-                        buildWhen:
-                            (previous, current) => current.maybeMap(
-                              ui: (value) => true,
-                              orElse: () => false,
-                            ),
-                        builder: (context, state) {
-                          final showImage = state.maybeMap(
-                            ui: (value) => value.image,
-                            orElse: () => null,
-                          );
-
-                          if (showImage == null) {
-                            return Container(
-                              height: 300,
-                              width: 200,
-                              color: Colors.red,
-                            );
-                          }
-
-                          return _Image(image: showImage);
-                        },
-                      ),
-                    ),
-                    _titleRow(context, image),
-                    _Info(image: image),
-                  ],
+                padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      SizedBox(height: 300, child: _Image()),
+                      _titleRow(context, image),
+                      _Info(image: image),
+                    ],
+                  ),
                 ),
               );
             },
@@ -73,7 +59,7 @@ class EncryptedImagePage extends StatelessWidget {
     );
   }
 
-  Widget _titleRow(BuildContext context, GalleryImage image) {
+  Widget _titleRow(BuildContext context, EncryptedImage image) {
     return Row(
       children: [
         Expanded(

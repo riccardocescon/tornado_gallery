@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
@@ -14,7 +14,7 @@ part 'archive_page_state.dart';
 part 'archive_page_bloc_utils.dart';
 
 class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
-  final images = <GalleryImage>[];
+  final images = <EncryptedImage>[];
 
   final GalleryReaderUsecase galleryReaderUsecase;
 
@@ -31,19 +31,19 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           (failure) => emit(ArchivePageState.failure(message: failure.message)),
           (streamImage) {
             switch (streamImage.type) {
-              case GalleryStreamImageType.newImage:
+              case EncryptedStreamImageType.newImage:
                 images.add(streamImage.image!);
                 getIt<AppBloc>().add(
                   AppEvent.addEncryptedImage(image: streamImage.image!),
                 );
                 break;
-              case GalleryStreamImageType.updatedImage:
+              case EncryptedStreamImageType.updatedImage:
                 images.removeWhere(
                   (img) => img.file.path == streamImage.image!.file.path,
                 );
                 images.add(streamImage.image!);
                 break;
-              case GalleryStreamImageType.deletedImage:
+              case EncryptedStreamImageType.deletedImage:
                 images.removeWhere((img) => img.file.path == streamImage.path);
                 break;
             }

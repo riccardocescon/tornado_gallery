@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
@@ -61,7 +61,7 @@ GoRouter routes = GoRouter(
           path: 'encrypted_image_page',
           name: 'encrypted_image_page',
           builder: (context, state) {
-            final image = state.extra as GalleryImage;
+            final image = state.extra as EncryptedImage;
 
             return BlocProvider(
               create:
