@@ -1,8 +1,6 @@
 import 'package:get_it/get_it.dart';
-import 'package:tornado_img_app/core/data/repositories/encrypted_gallery_repository/encrypted_gallery_repository_impl.dart';
 import 'package:tornado_img_app/core/data/repositories/image_processing_repository_impl.dart';
 import 'package:tornado_img_app/core/data/repositories/storage_repository/storage_repository_impl.dart';
-import 'package:tornado_img_app/core/domain/repositories/encrypted_gallery_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
@@ -54,9 +52,6 @@ void setupInjectionContainer() {
     () => ImageDeleterUsecase(storageRepo: getIt()),
   );
 
-  getIt.registerLazySingleton<EncryptedGalleryRepository>(
-    () => EncryptedGalleryRepositoryImpl(),
-  );
   getIt.registerLazySingleton<StorageRepository>(() => StorageRepositoryImpl());
   getIt.registerLazySingleton<ImageProcessingRepository>(
     () => ImageProcessingRepositoryImpl(),

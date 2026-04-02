@@ -8,7 +8,6 @@ import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
-import 'package:tornado_img_app/injection_container.dart';
 part 'encryption_page_bloc.freezed.dart';
 part 'encryption_page_event.dart';
 part 'encryption_page_state.dart';
