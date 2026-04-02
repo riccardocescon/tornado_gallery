@@ -93,8 +93,6 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _DecryptImage event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(const GalleryState.loading(total: 1));
-
     final result = await decryptUseCase.call(
       DecryptImageParams(file: event.image.file, password: event.password),
     );
