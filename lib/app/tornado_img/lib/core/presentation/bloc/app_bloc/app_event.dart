@@ -12,7 +12,7 @@ abstract class AppEvent with _$AppEvent, EquatableMixin {
 
   const factory AppEvent.setDecryptedInfo({
     required String path,
-    required BytesInfo decryptedInfo,
+    required BytesInfo? decryptedInfo,
   }) = _SetDecryptedInfo;
 
   @override

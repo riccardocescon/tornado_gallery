@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/extentions.dart';
@@ -15,18 +16,41 @@ class EncryptedImagePageBloc
   String password = '';
   late EncryptedImage image;
 
+  StreamManager<AppState>? _streamManager;
+
   late AppBloc appBloc;
   late GalleryBloc galleryBloc;
+
+  @override
+  Future<void> close() {
+    _streamManager?.dispose();
+    return super.close();
+  }
 
   EncryptedImagePageBloc({required this.appBloc, required this.galleryBloc})
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
 
+      
       image = appBloc.encryptedImages.firstWhere(
         (img) => img.file.path == event.imagePath,
       );
 
       emit(EncryptedImagePageState.ui(image: image));
+
+      _streamManager = StreamManager.fromStream(appBloc.stream);
+      await for (final state in _streamManager!.stream) {
+        state.maybeMap(
+          updatedGalleryImage: (value) {
+            if (value.image.file.path != event.imagePath) return;
+
+            image = value.image;
+            emit(EncryptedImagePageState.ui(image: image));
+          },
+          orElse: () => null,
+        );
+      }
+
     });
     on<_UpdatePassword>((event, emit) => password = event.password);
     on<_Decrypt>((event, emit) async {
@@ -73,6 +97,13 @@ class EncryptedImagePageBloc
         if (completed) break;
       }
       
+    });
+    on<_Restore>((event, emit) {
+      image = image.overrideWith(decryptInfo: null);
+      appBloc.add(
+        AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
+      );
+      emit(EncryptedImagePageState.ui(image: image));
     });
   }
 }

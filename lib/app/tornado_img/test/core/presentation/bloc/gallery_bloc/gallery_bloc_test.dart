@@ -86,7 +86,7 @@ void main() {
           ),
       expect:
           () => [
-            GalleryState.loading(total: 1),
+            GalleryState.loadingEncryption(total: 1),
             GalleryState.encrypted(
               archivingState: ArchivingState(
                 totalImages: 1,
@@ -118,7 +118,7 @@ void main() {
           ),
       expect:
           () => [
-            const GalleryState.loading(total: 1),
+            const GalleryState.loadingEncryption(total: 1),
             isA<GalleryState>().having(
               (s) => s.maybeMap(
                 encryptionFailure: (f) => f.failure.message,
@@ -151,7 +151,7 @@ void main() {
           ),
       expect:
           () => [
-            const GalleryState.loading(total: 1),
+            const GalleryState.loadingEncryption(total: 1),
             isA<GalleryState>().having(
               (s) => s.maybeMap(
                 encryptionFailure: (f) => f.failure.message,

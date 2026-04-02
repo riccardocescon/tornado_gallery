@@ -12,4 +12,6 @@ abstract class EncryptedImagePageEvent
       _UpdatePassword;
 
   const factory EncryptedImagePageEvent.decrypt() = _Decrypt;
+
+  const factory EncryptedImagePageEvent.restore() = _Restore;
 }

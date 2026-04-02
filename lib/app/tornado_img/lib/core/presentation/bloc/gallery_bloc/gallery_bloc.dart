@@ -29,7 +29,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _EncryptImage event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(GalleryState.loading(total: 1));
+    emit(GalleryState.loadingEncryption(total: 1));
 
     final result = await encryptUseCase.call(
       EncryptImageParams(
@@ -58,7 +58,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _EncryptImages event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(GalleryState.loading(total: event.images.length));
+    emit(GalleryState.loadingEncryption(total: event.images.length));
 
     final encrypted = <EncryptedImage>[];
     final failed = <GalleryImage>[];
@@ -93,6 +93,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _DecryptImage event,
     Emitter<GalleryState> emit,
   ) async {
+    emit(GalleryState.loadingDecryption(total: 1));
     final result = await decryptUseCase.call(
       DecryptImageParams(file: event.image.file, password: event.password),
     );

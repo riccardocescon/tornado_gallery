@@ -48,13 +48,14 @@ extension EncryptedImagePageEventPatterns on EncryptedImagePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _UpdatePassword value)?  updatePassword,TResult Function( _Decrypt value)?  decrypt,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _UpdatePassword value)?  updatePassword,TResult Function( _Decrypt value)?  decrypt,TResult Function( _Restore value)?  restore,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that);case _Decrypt() when decrypt != null:
-return decrypt(_that);case _:
+return decrypt(_that);case _Restore() when restore != null:
+return restore(_that);case _:
   return orElse();
 
 }
@@ -72,13 +73,14 @@ return decrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _UpdatePassword value)  updatePassword,required TResult Function( _Decrypt value)  decrypt,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _UpdatePassword value)  updatePassword,required TResult Function( _Decrypt value)  decrypt,required TResult Function( _Restore value)  restore,}){
 final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that);case _UpdatePassword():
 return updatePassword(_that);case _Decrypt():
-return decrypt(_that);case _:
+return decrypt(_that);case _Restore():
+return restore(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -95,13 +97,14 @@ return decrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _UpdatePassword value)?  updatePassword,TResult? Function( _Decrypt value)?  decrypt,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _UpdatePassword value)?  updatePassword,TResult? Function( _Decrypt value)?  decrypt,TResult? Function( _Restore value)?  restore,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that);case _Decrypt() when decrypt != null:
-return decrypt(_that);case _:
+return decrypt(_that);case _Restore() when restore != null:
+return restore(_that);case _:
   return null;
 
 }
@@ -118,12 +121,13 @@ return decrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,TResult Function( String password)?  updatePassword,TResult Function()?  decrypt,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,TResult Function( String password)?  updatePassword,TResult Function()?  decrypt,TResult Function()?  restore,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that.password);case _Decrypt() when decrypt != null:
-return decrypt();case _:
+return decrypt();case _Restore() when restore != null:
+return restore();case _:
   return orElse();
 
 }
@@ -141,12 +145,13 @@ return decrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,required TResult Function( String password)  updatePassword,required TResult Function()  decrypt,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,required TResult Function( String password)  updatePassword,required TResult Function()  decrypt,required TResult Function()  restore,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that.imagePath);case _UpdatePassword():
 return updatePassword(_that.password);case _Decrypt():
-return decrypt();case _:
+return decrypt();case _Restore():
+return restore();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -163,12 +168,13 @@ return decrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,TResult? Function( String password)?  updatePassword,TResult? Function()?  decrypt,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,TResult? Function( String password)?  updatePassword,TResult? Function()?  decrypt,TResult? Function()?  restore,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that.password);case _Decrypt() when decrypt != null:
-return decrypt();case _:
+return decrypt();case _Restore() when restore != null:
+return restore();case _:
   return null;
 
 }
@@ -311,6 +317,31 @@ class _Decrypt extends EncryptedImagePageEvent {
 @override
 String toString() {
   return 'EncryptedImagePageEvent.decrypt()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Restore extends EncryptedImagePageEvent {
+  const _Restore(): super._();
+  
+
+
+
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptedImagePageEvent.restore()';
 }
 
 

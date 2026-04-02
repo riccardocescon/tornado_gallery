@@ -69,7 +69,7 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
 
           case _GalleryStream(:final galleryState):
             galleryState.maybeMap(
-              loading: (value) {
+              loadingEncryption: (value) {
                 currentArchivingState = ArchivingState(
                   totalImages: value.total,
                   archivedImages: [],

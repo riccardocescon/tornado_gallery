@@ -24,12 +24,7 @@ class EncryptedImagePage extends StatelessWidget {
       body: BlocBuilder<EncryptedImagePageBloc, EncryptedImagePageState>(
         buildWhen:
             (previous, current) => current.maybeMap(
-              ui: (value) {
-                return previous.maybeMap(
-                  initial: (_) => true,
-                  orElse: () => false,
-                );
-              },
+              ui: (value) => true,
               orElse: () => false,
             ),
         builder: (context, state) {
@@ -59,6 +54,8 @@ class EncryptedImagePage extends StatelessWidget {
   }
 
   Widget _titleRow(BuildContext context, EncryptedImage image) {
+    final isDecrypted = image.decryptInfo != null;
+
     return Row(
       children: [
         Expanded(
@@ -71,7 +68,14 @@ class EncryptedImagePage extends StatelessWidget {
           ),
         ),
         FilledButton(
-          onPressed: () {},
+          onPressed:
+              isDecrypted
+                  ? () {
+                    context.read<EncryptedImagePageBloc>().add(
+                      const EncryptedImagePageEvent.restore(),
+                    );
+                  }
+                  : null,
           style: FilledButton.styleFrom(
             backgroundColor: context.appColors.softBackground,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -79,11 +83,30 @@ class EncryptedImagePage extends StatelessWidget {
               borderRadius: AppStyle.detailsBorderRadius,
             ),
           ),
-          child: Row(
-            spacing: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.lock_rounded, color: context.colorScheme.onSurface),
-              Text('Decrypt', style: context.textTheme.bodyLarge),
+              if (isDecrypted)
+                Text(
+                  'Tap to restore',
+                  style: context.textTheme.labelSmall!.copyWith(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              Row(
+                spacing: 4,
+                children: [
+                  Icon(
+                    isDecrypted ? Icons.lock_open_rounded : Icons.lock_rounded,
+                    color: context.colorScheme.onSurface,
+                  ),
+                  Text(
+                    isDecrypted ? 'Decrypted' : 'Encrypted',
+                    style: context.textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+             
             ],
           ),
         ),

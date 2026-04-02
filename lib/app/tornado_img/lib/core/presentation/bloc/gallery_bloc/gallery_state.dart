@@ -5,7 +5,10 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
   const GalleryState._();
 
   const factory GalleryState.initial() = _Initial;
-  const factory GalleryState.loading({required int total}) = _Loading;
+  const factory GalleryState.loadingEncryption({required int total}) =
+      _LoadingEncryption;
+  const factory GalleryState.loadingDecryption({required int total}) =
+      _LoadingDecryption;
   const factory GalleryState.encrypted({
     required ArchivingState archivingState,
   }) = _Encrypted;
@@ -22,7 +25,8 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
   @override
   List<Object?> get props => maybeWhen(
     initial: () => [],
-    loading: (total) => [total],
+    loadingEncryption: (total) => [total],
+    loadingDecryption: (total) => [total],
     encrypted: (archivingState) => [archivingState],
     decrypted: (dearchivingState) => [dearchivingState],
     encryptionFailure: (failure) => [failure],

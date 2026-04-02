@@ -114,7 +114,7 @@ return setDecryptedInfo(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image)?  addEncryptedImage,TResult Function( String path)?  removeEncryptedImage,TResult Function( String path,  BytesInfo decryptedInfo)?  setDecryptedInfo,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image)?  addEncryptedImage,TResult Function( String path)?  removeEncryptedImage,TResult Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
 return addEncryptedImage(_that.image);case _RemoveEncryptedImage() when removeEncryptedImage != null:
@@ -137,7 +137,7 @@ return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image)  addEncryptedImage,required TResult Function( String path)  removeEncryptedImage,required TResult Function( String path,  BytesInfo decryptedInfo)  setDecryptedInfo,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image)  addEncryptedImage,required TResult Function( String path)  removeEncryptedImage,required TResult Function( String path,  BytesInfo? decryptedInfo)  setDecryptedInfo,}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage():
 return addEncryptedImage(_that.image);case _RemoveEncryptedImage():
@@ -159,7 +159,7 @@ return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image)?  addEncryptedImage,TResult? Function( String path)?  removeEncryptedImage,TResult? Function( String path,  BytesInfo decryptedInfo)?  setDecryptedInfo,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image)?  addEncryptedImage,TResult? Function( String path)?  removeEncryptedImage,TResult? Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
 return addEncryptedImage(_that.image);case _RemoveEncryptedImage() when removeEncryptedImage != null:
@@ -290,7 +290,7 @@ class _SetDecryptedInfo extends AppEvent {
   
 
  final  String path;
- final  BytesInfo decryptedInfo;
+ final  BytesInfo? decryptedInfo;
 
 /// Create a copy of AppEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -311,7 +311,7 @@ abstract mixin class _$SetDecryptedInfoCopyWith<$Res> implements $AppEventCopyWi
   factory _$SetDecryptedInfoCopyWith(_SetDecryptedInfo value, $Res Function(_SetDecryptedInfo) _then) = __$SetDecryptedInfoCopyWithImpl;
 @useResult
 $Res call({
- String path, BytesInfo decryptedInfo
+ String path, BytesInfo? decryptedInfo
 });
 
 
@@ -328,11 +328,11 @@ class __$SetDecryptedInfoCopyWithImpl<$Res>
 
 /// Create a copy of AppEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? path = null,Object? decryptedInfo = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? path = null,Object? decryptedInfo = freezed,}) {
   return _then(_SetDecryptedInfo(
 path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String,decryptedInfo: null == decryptedInfo ? _self.decryptedInfo : decryptedInfo // ignore: cast_nullable_to_non_nullable
-as BytesInfo,
+as String,decryptedInfo: freezed == decryptedInfo ? _self.decryptedInfo : decryptedInfo // ignore: cast_nullable_to_non_nullable
+as BytesInfo?,
   ));
 }
 
