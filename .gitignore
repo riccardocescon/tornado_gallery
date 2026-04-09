@@ -49,6 +49,11 @@ app.*.map.json
 # C++ / Native libraries (encryption core — kept private)
 /lib/cpp/
 
+# Android CMake build cache (native compilation artifacts)  
+**/.cxx/
+**/build/
+**/coverage/
+
 # FFI generated files
 /lib/packages/*/tornado_crypto.*
 
