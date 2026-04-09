@@ -1,3 +1,0 @@
-C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/android/.cxx/Debug/1a21z6b7/arm64-v8a/CMakeFiles/tornado_crypto.dir
-C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/android/.cxx/Debug/1a21z6b7/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/android/.cxx/Debug/1a21z6b7/arm64-v8a/CMakeFiles/rebuild_cache.dir

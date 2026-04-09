@@ -1,1 +1,0 @@
-C:\dev\projects\tornado_img\lib\app\tornado_img\build\tornado_img_crypto\intermediates\cxx\Debug\6120k6y2\obj\arm64-v8a

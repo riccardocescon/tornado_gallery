@@ -1,1 +1,0 @@
-C:\dev\projects\tornado_img\lib\app\tornado_img\build\tornado_img_crypto\intermediates\cxx\Debug\1s212s23\obj\armeabi-v7a

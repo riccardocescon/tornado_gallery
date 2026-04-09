@@ -1,7 +1,0 @@
-[
-{
-  "directory": "C:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/android/.cxx/RelWithDebInfo/3g43b1p3/x86_64",
-  "command": "C:\\Users\\micro\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=x86_64-none-linux-android23 --sysroot=C:/Users/micro/AppData/Local/Android/Sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DANDROID_BUILD=1 -DNO_OPENSSL=1 -Dtornado_crypto_EXPORTS -IC:/dev/projects/tornado_img/lib/packages/tornado_img_crypto/android/../src -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wl,-z,max-page-size=16384 -Wl,-z,max-page-size=16384 -O2 -g -DNDEBUG -fPIC -std=c++17 -o CMakeFiles\\tornado_crypto.dir\\C_\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\src\\encryptor.cpp.o -c C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\src\\encryptor.cpp",
-  "file": "C:\\dev\\projects\\tornado_img\\lib\\packages\\tornado_img_crypto\\src\\encryptor.cpp"
-}
-]
