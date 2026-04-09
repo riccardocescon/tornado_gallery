@@ -48,16 +48,6 @@ app.*.map.json
 
 # C++ / Native libraries (encryption core — kept private)
 /lib/cpp/
-*.dll
-*.so
-*.dylib
-*.lib
-*.obj
-*.exe
-*.a
-*.exp
-*.pdb
-*.ilk
 
 # FFI generated files
 /lib/packages/*/tornado_crypto.*
