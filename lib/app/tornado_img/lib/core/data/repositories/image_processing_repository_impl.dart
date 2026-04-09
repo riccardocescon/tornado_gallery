@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
 
 import '../../domain/entities/image_data.dart';
@@ -25,6 +26,14 @@ Uint8List _encodeImage(ImageModel model) {
 }
 
 class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
+
+  ImageProcessingRepositoryImpl() {
+    final packageVersion = getVersion();
+    appLogger.logRepository(
+      "ImageProcessingRepositoryImpl initialized with TornadoImgCrypto version: $packageVersion",
+    );
+  }
+
   @override
   Future<ImageData?> decode(File file) async {
     final bytes = await file.readAsBytes();
