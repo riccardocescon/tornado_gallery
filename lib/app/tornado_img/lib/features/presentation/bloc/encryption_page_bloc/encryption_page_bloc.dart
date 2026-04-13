@@ -52,7 +52,7 @@ class EncryptionPageBloc
       final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
         galleryVisible: settings.galleryVisible,
       );
-      settings = settings.copyWith(outputFolder: newOutputFolder);
+      settings = settings.copyWith(outputFolder: _getUiPath(newOutputFolder));
       _emitSettings(emit);
     });
     on<_SetPassword>((event, emit) async {
@@ -64,7 +64,7 @@ class EncryptionPageBloc
         galleryVisible: newGalleryVisible,
       );
       settings = settings.copyWith(
-        outputFolder: newOutputFolder,
+        outputFolder: _getUiPath(newOutputFolder),
         galleryVisible: newGalleryVisible,
       );
       _emitSettings(emit);
@@ -138,6 +138,8 @@ class EncryptionPageBloc
       emit(EncryptionPageState.encrypted());
     });
   }
+
+  String _getUiPath(String? path) => path ?? "Device Gallery";
 
   void _syncNewArchivedImages(
     List<EncryptedImage> newlyArchived,

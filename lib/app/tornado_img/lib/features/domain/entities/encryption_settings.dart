@@ -6,6 +6,8 @@ class EncryptionSettings with EquatableMixin {
   final bool overrideImage;
   final bool deleteOriginals;
 
+  String? get destinationPath => galleryVisible ? null : outputFolder;
+
   EncryptionSettings({
     required this.galleryVisible,
     required this.outputFolder,

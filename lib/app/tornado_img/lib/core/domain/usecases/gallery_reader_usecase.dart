@@ -23,7 +23,7 @@ class GalleryReaderUsecase
         galleryVisible: false,
       );
       yield* storageRepo
-          .readImages(privateFolderPath)
+          .readImages(privateFolderPath!)
           .asyncMap((image) => Right(image));
 
       // TODO: stream for public folder

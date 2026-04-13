@@ -6,7 +6,7 @@ abstract class StorageRepository {
   Future<void> save({
     required Uint8List bytes,
     required String fileName,
-    required String path,
+    required String? path,
   });
   Stream<EncryptedStreamImage> readImages(String path);
   Future<void> delete(String path);

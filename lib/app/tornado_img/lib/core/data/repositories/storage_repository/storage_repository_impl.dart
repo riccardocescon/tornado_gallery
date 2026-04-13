@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:gal/gal.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
@@ -15,12 +16,21 @@ class StorageRepositoryImpl implements StorageRepository {
   Future<void> save({
     required Uint8List bytes,
     required String fileName,
-    required String path,
+    required String? path,
   }) async {
-    final file = File('$path/$fileName');
+    try {
+      if (path == null) {
+        await Gal.putImageBytes(bytes, name: fileName);
+        return;
+      }
+      
+      final file = File('$path/$fileName');
 
-    await file.create(recursive: true);
-    await file.writeAsBytes(bytes);
+      await file.create(recursive: true);
+      await file.writeAsBytes(bytes);
+    } catch (e) {
+      appLogger.logRepository('Error saving image', error: e.toString());
+    }
   }
 
   @override

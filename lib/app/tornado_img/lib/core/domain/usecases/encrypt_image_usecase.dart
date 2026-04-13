@@ -43,7 +43,7 @@ class EncryptImageUseCase
       await storageRepo.save(
         bytes: encoded,
         fileName: '${params.fileId}.png',
-        path: params.settings.outputFolder,
+        path: params.settings.destinationPath,
       );
 
       final encryptedFile = File(
