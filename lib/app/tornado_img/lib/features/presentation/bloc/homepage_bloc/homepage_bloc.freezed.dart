@@ -44,13 +44,14 @@ extension HomepageEventPatterns on HomepageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _Refresh value)?  refresh,TResult Function( _GalleryAssetsSelected value)?  galleryAssetsSelected,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _Refresh value)?  refresh,TResult Function( _GalleryAssetsSelected value)?  galleryAssetsSelected,TResult Function( _SetScreen value)?  setScreen,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _Refresh() when refresh != null:
 return refresh(_that);case _GalleryAssetsSelected() when galleryAssetsSelected != null:
-return galleryAssetsSelected(_that);case _:
+return galleryAssetsSelected(_that);case _SetScreen() when setScreen != null:
+return setScreen(_that);case _:
   return orElse();
 
 }
@@ -68,13 +69,14 @@ return galleryAssetsSelected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _Refresh value)  refresh,required TResult Function( _GalleryAssetsSelected value)  galleryAssetsSelected,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _Refresh value)  refresh,required TResult Function( _GalleryAssetsSelected value)  galleryAssetsSelected,required TResult Function( _SetScreen value)  setScreen,}){
 final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that);case _Refresh():
 return refresh(_that);case _GalleryAssetsSelected():
-return galleryAssetsSelected(_that);case _:
+return galleryAssetsSelected(_that);case _SetScreen():
+return setScreen(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -91,13 +93,14 @@ return galleryAssetsSelected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _Refresh value)?  refresh,TResult? Function( _GalleryAssetsSelected value)?  galleryAssetsSelected,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _Refresh value)?  refresh,TResult? Function( _GalleryAssetsSelected value)?  galleryAssetsSelected,TResult? Function( _SetScreen value)?  setScreen,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _Refresh() when refresh != null:
 return refresh(_that);case _GalleryAssetsSelected() when galleryAssetsSelected != null:
-return galleryAssetsSelected(_that);case _:
+return galleryAssetsSelected(_that);case _SetScreen() when setScreen != null:
+return setScreen(_that);case _:
   return null;
 
 }
@@ -114,12 +117,13 @@ return galleryAssetsSelected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  refresh,TResult Function( List<AssetEntity> imagesSelected)?  galleryAssetsSelected,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function()?  refresh,TResult Function( List<AssetEntity> imagesSelected)?  galleryAssetsSelected,TResult Function( Pages page)?  setScreen,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _Refresh() when refresh != null:
 return refresh();case _GalleryAssetsSelected() when galleryAssetsSelected != null:
-return galleryAssetsSelected(_that.imagesSelected);case _:
+return galleryAssetsSelected(_that.imagesSelected);case _SetScreen() when setScreen != null:
+return setScreen(_that.page);case _:
   return orElse();
 
 }
@@ -137,12 +141,13 @@ return galleryAssetsSelected(_that.imagesSelected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  refresh,required TResult Function( List<AssetEntity> imagesSelected)  galleryAssetsSelected,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function()  refresh,required TResult Function( List<AssetEntity> imagesSelected)  galleryAssetsSelected,required TResult Function( Pages page)  setScreen,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _Refresh():
 return refresh();case _GalleryAssetsSelected():
-return galleryAssetsSelected(_that.imagesSelected);case _:
+return galleryAssetsSelected(_that.imagesSelected);case _SetScreen():
+return setScreen(_that.page);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -159,12 +164,13 @@ return galleryAssetsSelected(_that.imagesSelected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  refresh,TResult? Function( List<AssetEntity> imagesSelected)?  galleryAssetsSelected,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function()?  refresh,TResult? Function( List<AssetEntity> imagesSelected)?  galleryAssetsSelected,TResult? Function( Pages page)?  setScreen,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _Refresh() when refresh != null:
 return refresh();case _GalleryAssetsSelected() when galleryAssetsSelected != null:
-return galleryAssetsSelected(_that.imagesSelected);case _:
+return galleryAssetsSelected(_that.imagesSelected);case _SetScreen() when setScreen != null:
+return setScreen(_that.page);case _:
   return null;
 
 }
@@ -276,6 +282,61 @@ as List<AssetEntity>,
 }
 
 /// @nodoc
+
+
+class _SetScreen extends HomepageEvent {
+  const _SetScreen({required this.page}): super._();
+  
+
+ final  Pages page;
+
+/// Create a copy of HomepageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetScreenCopyWith<_SetScreen> get copyWith => __$SetScreenCopyWithImpl<_SetScreen>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetScreenCopyWith<$Res> implements $HomepageEventCopyWith<$Res> {
+  factory _$SetScreenCopyWith(_SetScreen value, $Res Function(_SetScreen) _then) = __$SetScreenCopyWithImpl;
+@useResult
+$Res call({
+ Pages page
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetScreenCopyWithImpl<$Res>
+    implements _$SetScreenCopyWith<$Res> {
+  __$SetScreenCopyWithImpl(this._self, this._then);
+
+  final _SetScreen _self;
+  final $Res Function(_SetScreen) _then;
+
+/// Create a copy of HomepageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? page = null,}) {
+  return _then(_SetScreen(
+page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as Pages,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$HomepageState {
 
 
@@ -308,7 +369,7 @@ extension HomepageStatePatterns on HomepageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _GalleryLoading value)?  galleryLoading,TResult Function( _GalleryImages value)?  galleryImages,TResult Function( _GalleryStatus value)?  galleryStatus,TResult Function( _Loaded value)?  loaded,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _GalleryLoading value)?  galleryLoading,TResult Function( _GalleryImages value)?  galleryImages,TResult Function( _GalleryStatus value)?  galleryStatus,TResult Function( _Loaded value)?  loaded,TResult Function( _HomepageSet value)?  homepageSet,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -317,7 +378,8 @@ return loading(_that);case _GalleryLoading() when galleryLoading != null:
 return galleryLoading(_that);case _GalleryImages() when galleryImages != null:
 return galleryImages(_that);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Failure() when failure != null:
+return loaded(_that);case _HomepageSet() when homepageSet != null:
+return homepageSet(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -336,7 +398,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _GalleryLoading value)  galleryLoading,required TResult Function( _GalleryImages value)  galleryImages,required TResult Function( _GalleryStatus value)  galleryStatus,required TResult Function( _Loaded value)  loaded,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _GalleryLoading value)  galleryLoading,required TResult Function( _GalleryImages value)  galleryImages,required TResult Function( _GalleryStatus value)  galleryStatus,required TResult Function( _Loaded value)  loaded,required TResult Function( _HomepageSet value)  homepageSet,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -345,7 +407,8 @@ return loading(_that);case _GalleryLoading():
 return galleryLoading(_that);case _GalleryImages():
 return galleryImages(_that);case _GalleryStatus():
 return galleryStatus(_that);case _Loaded():
-return loaded(_that);case _Failure():
+return loaded(_that);case _HomepageSet():
+return homepageSet(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -363,7 +426,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _GalleryLoading value)?  galleryLoading,TResult? Function( _GalleryImages value)?  galleryImages,TResult? Function( _GalleryStatus value)?  galleryStatus,TResult? Function( _Loaded value)?  loaded,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _GalleryLoading value)?  galleryLoading,TResult? Function( _GalleryImages value)?  galleryImages,TResult? Function( _GalleryStatus value)?  galleryStatus,TResult? Function( _Loaded value)?  loaded,TResult? Function( _HomepageSet value)?  homepageSet,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -372,7 +435,8 @@ return loading(_that);case _GalleryLoading() when galleryLoading != null:
 return galleryLoading(_that);case _GalleryImages() when galleryImages != null:
 return galleryImages(_that);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Failure() when failure != null:
+return loaded(_that);case _HomepageSet() when homepageSet != null:
+return homepageSet(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -390,7 +454,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  galleryLoading,TResult Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult Function( Pages page)?  homepageSet,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -398,7 +462,8 @@ return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded() when loaded != null:
-return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
+return loaded(_that.images,_that.encryptedImages);case _HomepageSet() when homepageSet != null:
+return homepageSet(_that.page);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -417,7 +482,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  galleryLoading,required TResult Function( List<GalleryImage> imagesLoaded)  galleryImages,required TResult Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)  galleryStatus,required TResult Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)  loaded,required TResult Function( Pages page)  homepageSet,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -425,7 +490,8 @@ return loading();case _GalleryLoading():
 return galleryLoading();case _GalleryImages():
 return galleryImages(_that.imagesLoaded);case _GalleryStatus():
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded():
-return loaded(_that.images,_that.encryptedImages);case _Failure():
+return loaded(_that.images,_that.encryptedImages);case _HomepageSet():
+return homepageSet(_that.page);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -443,7 +509,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  galleryLoading,TResult? Function( List<GalleryImage> imagesLoaded)?  galleryImages,TResult? Function( int imagesLoaded,  int folderLoaded,  int bytesLoaded,  DateTime? lastLoaded,  ArchivingState? archivingState)?  galleryStatus,TResult? Function( List<GalleryImage>? images,  List<EncryptedEntity>? encryptedImages)?  loaded,TResult? Function( Pages page)?  homepageSet,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -451,7 +517,8 @@ return loading();case _GalleryLoading() when galleryLoading != null:
 return galleryLoading();case _GalleryImages() when galleryImages != null:
 return galleryImages(_that.imagesLoaded);case _GalleryStatus() when galleryStatus != null:
 return galleryStatus(_that.imagesLoaded,_that.folderLoaded,_that.bytesLoaded,_that.lastLoaded,_that.archivingState);case _Loaded() when loaded != null:
-return loaded(_that.images,_that.encryptedImages);case _Failure() when failure != null:
+return loaded(_that.images,_that.encryptedImages);case _HomepageSet() when homepageSet != null:
+return homepageSet(_that.page);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -714,6 +781,61 @@ class __$LoadedCopyWithImpl<$Res>
 images: freezed == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
 as List<GalleryImage>?,encryptedImages: freezed == encryptedImages ? _self._encryptedImages : encryptedImages // ignore: cast_nullable_to_non_nullable
 as List<EncryptedEntity>?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _HomepageSet extends HomepageState {
+  const _HomepageSet({required this.page}): super._();
+  
+
+ final  Pages page;
+
+/// Create a copy of HomepageState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$HomepageSetCopyWith<_HomepageSet> get copyWith => __$HomepageSetCopyWithImpl<_HomepageSet>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$HomepageSetCopyWith<$Res> implements $HomepageStateCopyWith<$Res> {
+  factory _$HomepageSetCopyWith(_HomepageSet value, $Res Function(_HomepageSet) _then) = __$HomepageSetCopyWithImpl;
+@useResult
+$Res call({
+ Pages page
+});
+
+
+
+
+}
+/// @nodoc
+class __$HomepageSetCopyWithImpl<$Res>
+    implements _$HomepageSetCopyWith<$Res> {
+  __$HomepageSetCopyWithImpl(this._self, this._then);
+
+  final _HomepageSet _self;
+  final $Res Function(_HomepageSet) _then;
+
+/// Create a copy of HomepageState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? page = null,}) {
+  return _then(_HomepageSet(
+page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as Pages,
   ));
 }
 

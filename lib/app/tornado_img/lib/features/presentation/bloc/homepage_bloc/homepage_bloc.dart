@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,12 +26,23 @@ part 'homepage_event.dart';
 part 'homepage_state.dart';
 part 'homepage_bloc_utils.dart';
 
+enum Pages {
+  home(icon: Icons.home, label: 'Home'),
+  archive(icon: Icons.lock_rounded, label: 'Archive'),
+  settings(icon: Icons.settings, label: 'Settings');
+
+  const Pages({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+}
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
 
   final selectedImages = <GalleryImage>[];
+  Pages currentPage = Pages.home;
 
-final HomepageBlocUtils _utils = HomepageBlocUtils();
+  final HomepageBlocUtils _utils = HomepageBlocUtils();
 
   late EncryptedFolder appRootFolder;
   ArchivingState? currentArchivingState;
@@ -120,6 +132,14 @@ final HomepageBlocUtils _utils = HomepageBlocUtils();
         );
         emit(HomepageState.galleryImages(imagesLoaded: []));
       }
+    });
+    on<_SetScreen>((event, emit) {
+      currentPage = event.page;
+      emit(HomepageState.homepageSet(page: event.page));
+
+      // Re-load the latest data when navigating back to the home screen
+      // This will prevent any loading states
+      if (currentPage == Pages.home) _emit(emit);
     });
   }
 

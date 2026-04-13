@@ -252,7 +252,11 @@ class _ArchiveState extends StatelessWidget {
 
   Widget _openArchiveButton(BuildContext context) {
     return FilledButton(
-      onPressed: () {},
+      onPressed: () {
+        context.read<HomepageBloc>().add(
+          HomepageEvent.setScreen(page: Pages.archive),
+        );
+      },
       style: FilledButton.styleFrom(
         backgroundColor: context.appColors.softButton,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -21,6 +21,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
     required List<GalleryImage>? images,
     required List<EncryptedEntity>? encryptedImages,
   }) = _Loaded;
+  const factory HomepageState.homepageSet({required Pages page}) = _HomepageSet;
   const factory HomepageState.failure({required String message}) = _Failure;
 
   @override
@@ -39,6 +40,7 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
               archivingState,
         ],
     loaded: (images, encryptedImages) => [images, encryptedImages],
+    homepageSet: (page) => [page],
     failure: (message) => [message],
   );
 }

@@ -1,22 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
-
-enum Pages {
-  home(icon: Icons.home, label: 'Home'),
-  archive(icon: Icons.lock_rounded, label: 'Archive'),
-  settings(icon: Icons.settings, label: 'Settings');
-
-  const Pages({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-}
+import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 
 class BottomAppNavBar extends StatefulWidget {
-  const BottomAppNavBar({super.key, this.onPageChanged});
-
-  final void Function(Pages page)? onPageChanged;
+  const BottomAppNavBar({super.key});
 
   @override
   State<BottomAppNavBar> createState() => _BottomAppNavBarState();
@@ -33,24 +22,34 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        vertical: 32,
-        horizontal: 24,
-      ).copyWith(top: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        borderRadius: AppStyle.cardBorderRadius,
-      ),
-      child: SizedBox(
-        height: 32,
-        child: Stack(
-          children: [
-            _slidingPill(),
+    return BlocListener<HomepageBloc, HomepageState>(
+      listener: (context, state) {
+        state.maybeMap(
+          homepageSet: (value) {
+            setState(() => _currentPage = value.page);
+          },
+          orElse: () {},
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: 24,
+        ).copyWith(top: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: context.colorScheme.surface,
+          borderRadius: AppStyle.cardBorderRadius,
+        ),
+        child: SizedBox(
+          height: 32,
+          child: Stack(
+            children: [
+              _slidingPill(),
 
-            Row(children: Pages.values.map(_tab).toList()),
-          ],
+              Row(children: Pages.values.map(_tab).toList()),
+            ],
+          ),
         ),
       ),
     );
@@ -81,8 +80,7 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          setState(() => _currentPage = page);
-          widget.onPageChanged?.call(page);
+          context.read<HomepageBloc>().add(HomepageEvent.setScreen(page: page));
         },
         child: SizedBox(
           height: 32,

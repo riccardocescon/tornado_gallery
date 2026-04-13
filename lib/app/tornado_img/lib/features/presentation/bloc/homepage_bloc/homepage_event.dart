@@ -9,6 +9,7 @@ abstract class HomepageEvent with _$HomepageEvent, EquatableMixin {
   const factory HomepageEvent.galleryAssetsSelected({
     required List<AssetEntity> imagesSelected,
   }) = _GalleryAssetsSelected;
+  const factory HomepageEvent.setScreen({required Pages page}) = _SetScreen;
 
   @override
   List<Object?> get props => [];

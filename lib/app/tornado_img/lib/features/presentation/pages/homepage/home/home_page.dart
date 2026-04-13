@@ -117,7 +117,11 @@ class _HomePageState extends State<HomePage> {
             buttonText: "Open archive",
             buttonIcon: Icons.lock_rounded,
             darker: false,
-            onPressed: () {},
+            onPressed: () {
+              context.read<HomepageBloc>().add(
+                HomepageEvent.setScreen(page: Pages.archive),
+              );
+            },
           ),
         ),
       ],
