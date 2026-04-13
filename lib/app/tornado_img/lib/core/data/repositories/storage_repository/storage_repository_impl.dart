@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:gal/gal.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
@@ -20,7 +21,11 @@ class StorageRepositoryImpl implements StorageRepository {
   }) async {
     try {
       if (path == null) {
-        await Gal.putImageBytes(bytes, name: fileName);
+        await Gal.putImageBytes(
+          bytes,
+          name: fileName,
+          album: Constants.appFolderName,
+        );
         return;
       }
       

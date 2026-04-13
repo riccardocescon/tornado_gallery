@@ -52,7 +52,16 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       await encryptedDir.create(recursive: true);
     }
 
-    final rootFolder = await _scanFullFolder(encryptedDir.path);
+    final rootFolder = await _scanFullFolderPrivate(encryptedDir.path);
+    _lookupTable.addAll(_buildFolderIndex(rootFolder));
+    return rootFolder;
+  }
+
+  Future<EncryptedFolder?> loadAppPublicRootFolder() async {
+    final assets = await GalleryPathProvider.getImagesFromPublicGallery();
+    if (assets.isEmpty) return null;
+
+    final rootFolder = await _scanFullFolderPublic(assets);
     _lookupTable.addAll(_buildFolderIndex(rootFolder));
     return rootFolder;
   }
@@ -81,7 +90,7 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
     return folder;
   }
 
-  Future<EncryptedFolder> _scanFullFolder(String path) async {
+  Future<EncryptedFolder> _scanFullFolderPrivate(String path) async {
     final rootFolder = EncryptedFolder.empty(path);
 
     final files = Directory(rootFolder.path).listSync();
@@ -101,6 +110,38 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
       } else {
         final subfolder = await _loadSubfolder(fileSystem.path);
         rootFolder.subfolders.add(subfolder);
+      }
+    }
+
+    return rootFolder;
+  }
+
+  Future<EncryptedFolder> _scanFullFolderPublic(
+    List<AssetEntity> assets,
+  ) async {
+    final relativePath = assets.first.relativePath ?? 'Pictures/TornadoGallery';
+    final rootFolder = EncryptedFolder.empty(relativePath);
+
+    for (final asset in assets) {
+      try {
+        final file = await asset.file;
+        if (file == null) continue;
+        if (file.path.endsWith(Constants.noImageName)) continue;
+
+        final bytes = await file.readAsBytes();
+        final hash = ByteModeling.generateHash(bytes);
+        rootFolder.images.add(
+          EncryptedImage(
+            path: file.path,
+            encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+            date: asset.createDateTime,
+          ),
+        );
+      } catch (e) {
+        appLogger.logPageBloc(
+          'Error loading public image ${asset.id}',
+          error: e.toString(),
+        );
       }
     }
 
@@ -136,7 +177,7 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
           continue;
         }
 
-        final newFolder = await _scanFullFolder(event.path);
+        final newFolder = await _scanFullFolderPrivate(event.path);
 
         final inserted = insertFolderFast(
           rootFolder: rootFolder,
@@ -258,5 +299,23 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
 
     parent.subfolders.add(newFolder);
     return true;
+  }
+
+  Future<bool> createPublicFolder() async {
+    try {
+      final publicAsset = await GalleryPathProvider.getPublicFolder();
+      if (publicAsset != null) return true;
+
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/noimg.jpg');
+      await tempFile.writeAsBytes([]);
+
+      await Gal.putImage(tempFile.path, album: Constants.appFolderName);
+
+      return true;
+    } catch (e) {
+      appLogger.logUsecase('Error creating public folder', error: e.toString());
+      return false;
+    }
   }
 }

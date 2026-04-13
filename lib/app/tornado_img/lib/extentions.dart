@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:tornado_img_app/theme/app_colors_ext.dart';
 
@@ -56,4 +57,10 @@ extension ListX<T> on List<T> {
     }
     return null;
   }
+}
+
+extension EitherX<L, R> on Either<L, R> {
+  L get left => fold((l) => l, (r) => throw StateError('No left value'));
+
+  R get right => fold((l) => throw StateError('No right value'), (r) => r);
 }

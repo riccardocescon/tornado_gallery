@@ -30,7 +30,7 @@ GoRouter routes = GoRouter(
             BlocProvider(
               create:
                   (context) =>
-                      getIt<HomepageBloc>()..add(HomepageEvent.setup()),
+                      getIt<HomepageBloc>(),
             ),
             BlocProvider(
               lazy: false,

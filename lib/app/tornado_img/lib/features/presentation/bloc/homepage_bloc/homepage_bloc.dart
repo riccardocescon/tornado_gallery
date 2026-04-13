@@ -5,12 +5,15 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
@@ -37,6 +40,7 @@ enum Pages {
   final String label;
 }
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
+
   StreamManager? _streamManager;
 
   final selectedImages = <GalleryImage>[];
@@ -44,7 +48,8 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
   final HomepageBlocUtils _utils = HomepageBlocUtils();
 
-  late EncryptedFolder appRootFolder;
+  late EncryptedFolder appEncryptedRootFolder;
+  EncryptedFolder? appPublicEncryptedRootFolder;
   ArchivingState? currentArchivingState;
 
   @override
@@ -57,19 +62,47 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     on<_Setup>((event, emit) async {
       emit(const HomepageState.loading());
 
-      appRootFolder = await _utils.loadAppRootFolder();
+      appEncryptedRootFolder = await _utils.loadAppRootFolder();
+      final mayAppPublicEncryptedRootFolder =
+          await _utils.loadAppPublicRootFolder();
+      if (mayAppPublicEncryptedRootFolder == null) {
+        // Public folder does not exists, create with empty content
+        final success = await _utils.createPublicFolder();
+        if (success) {
+          appPublicEncryptedRootFolder = await _utils.loadAppPublicRootFolder();
+        }
+      } else {
+        appPublicEncryptedRootFolder = mayAppPublicEncryptedRootFolder;
+      }
       
       _emit(emit);
 
-      final folderStream = _utils.watchAppFolderChanges(appRootFolder);
+      final privateFolderStream = _utils.watchAppFolderChanges(
+        appEncryptedRootFolder,
+      );
+
+      Stream? publicFolderStream =
+          appPublicEncryptedRootFolder != null
+              ? _utils.watchAppFolderChanges(appPublicEncryptedRootFolder!)
+              : null;
 
       
-      final taggedFolderStream = folderStream.map((e) => _FolderStream());
+      final taggedPrivateFolderStream = privateFolderStream.map(
+        (e) => _FolderStream(),
+      );
       final taggedGalleryStream = getIt<GalleryBloc>().stream
           .startWith(getIt<GalleryBloc>().state)
           .map((s) => _GalleryStream(s));
 
-      final mergedStream = Rx.merge([taggedFolderStream, taggedGalleryStream]);
+      final taggedPublicFolderStream = publicFolderStream?.map(
+        (e) => _FolderStream(),
+      );
+
+      final mergedStream = Rx.merge([
+        taggedPrivateFolderStream,
+        if (taggedPublicFolderStream != null) taggedPublicFolderStream,
+        taggedGalleryStream,
+      ]);
 
       _streamManager = StreamManager.fromStream(mergedStream);
 
@@ -144,13 +177,21 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   }
 
   void _emit(Emitter<HomepageState> emit) {
-    final totalImages = appRootFolder.subfolders.fold<int>(
-      appRootFolder.images.length,
+    final subFolders =
+        appEncryptedRootFolder.subfolders +
+        (appPublicEncryptedRootFolder?.subfolders ?? []);
+
+    final images =
+        appEncryptedRootFolder.images +
+        (appPublicEncryptedRootFolder?.images ?? []);
+
+    final totalImages = subFolders.fold<int>(
+      images.length,
       (previousValue, folder) => previousValue + folder.images.length,
     );
 
-    final totalBytes = appRootFolder.subfolders.fold<int>(
-      appRootFolder.images.fold<int>(
+    final totalBytes = subFolders.fold<int>(
+      images.fold<int>(
         0,
         (prev, image) => prev + image.file.lengthSync(),
       ),
@@ -163,8 +204,8 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     );
 
     final lastLoaded =
-        appRootFolder.images.isNotEmpty
-            ? appRootFolder.images
+        images.isNotEmpty
+            ? images
                 .map((img) => img.date)
                 .reduce((a, b) => a.isAfter(b) ? a : b)
             : null;
@@ -172,7 +213,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     emit(
       HomepageState.galleryStatus(
         imagesLoaded: totalImages,
-        folderLoaded: appRootFolder.subfolders.length,
+        folderLoaded: appEncryptedRootFolder.subfolders.length,
         bytesLoaded: totalBytes,
         lastLoaded: lastLoaded,
         archivingState: currentArchivingState,
