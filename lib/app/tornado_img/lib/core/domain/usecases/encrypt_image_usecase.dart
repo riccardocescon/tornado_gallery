@@ -21,6 +21,7 @@ class EncryptImageUseCase
   Future<Either<EncryptionFailure, EncryptedImage>> call(
     EncryptImageParams params,
   ) async {
+
     try {
       final decoded = await imageRepo.decode(params.file);
 

@@ -5,6 +5,7 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
@@ -53,6 +54,56 @@ class StorageRepositoryImpl implements StorageRepository {
         type: EncryptedStreamImageType.newImage,
       );
     });
+  }
+
+  @override
+  Stream<EncryptedStreamImage> readPublicGalleryImages() async* {
+    try {
+      final assets = await GalleryPathProvider.getImagesFromPublicGallery();
+
+      final fileStream = Stream.fromIterable(
+        assets,
+      ).asyncMap<EncryptedStreamImage?>((asset) async {
+        try {
+          final file = await asset.file;
+          if (file == null) return null;
+          if (file.path.endsWith(Constants.noImageName)) return null;
+
+          final bytes = await file.readAsBytes();
+
+          final encryptedImage = EncryptedImage(
+            path: file.path,
+            date: asset.createDateTime,
+            encryptedInfo: BytesInfo(
+              bytes: bytes,
+              hash: ByteModeling.generateHash(bytes),
+            ),
+            isPrivateFolder: false,
+          );
+
+          return EncryptedStreamImage.image(
+            image: encryptedImage,
+            type: EncryptedStreamImageType.newImage,
+          );
+        } catch (e) {
+          appLogger.logRepository(
+            'Error reading public image \${asset.id}',
+            error: e.toString(),
+          );
+          return null;
+        }
+      });
+
+      await for (final result in fileStream) {
+        if (result == null) continue;
+        yield result;
+      }
+    } catch (e) {
+      appLogger.logRepository(
+        'Error reading public gallery',
+        error: e.toString(),
+      );
+    }
   }
 
   @override
