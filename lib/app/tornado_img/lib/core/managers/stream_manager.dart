@@ -13,9 +13,14 @@ class StreamManager<T> {
 
   void addStream(Stream<T> stream) {
     _controller = StreamController<T>();
-    _subscription = stream.listen((data) {
-      _controller.add(data);
-    });
+    _subscription = stream.listen(
+      (data) {
+        _controller.add(data);
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        _controller.addError(error, stackTrace);
+      },
+    );
   }
 
   Future<void> dispose() async {

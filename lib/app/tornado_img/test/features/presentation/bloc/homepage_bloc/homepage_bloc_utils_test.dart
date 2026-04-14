@@ -45,6 +45,8 @@ void main() {
   tearDown(() async {
     PathProviderPlatform.instance = originalPlatform;
 
+    await repo.dispose();
+
     if (await tempDir.exists()) {
       await tempDir.delete(recursive: true);
     }
