@@ -59,3 +59,5 @@ app.*.map.json
 
 # App specific
 /lib/app/tornado_img/keystore/
+
+.github

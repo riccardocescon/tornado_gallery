@@ -119,8 +119,12 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
   Future<EncryptedFolder> _scanFullFolderPublic(
     List<AssetEntity> assets,
   ) async {
-    final relativePath = assets.first.relativePath ?? 'Pictures/TornadoGallery';
-    final rootFolder = EncryptedFolder.empty(relativePath);
+    final firstFile = await assets.first.file;
+    final absoluteFolderPath =
+        firstFile?.parent.path ??
+        assets.first.relativePath ??
+        'Pictures/TornadoGallery';
+    final rootFolder = EncryptedFolder.empty(absoluteFolderPath);
 
     for (final asset in assets) {
       try {
@@ -149,8 +153,7 @@ Future<List<GalleryImage>> mapAssetsToGalleryImages(
   }
 
   Stream<void> watchAppFolderChanges(EncryptedFolder rootFolder) async* {
-    final appPath = await getApplicationDocumentsDirectory();
-    final encryptedDir = Directory('${appPath.path}/encrypted');
+    final encryptedDir = Directory(rootFolder.path);
     final folderStream = encryptedDir.watch(
       events: FileSystemEvent.create | FileSystemEvent.delete,
       recursive: true,
