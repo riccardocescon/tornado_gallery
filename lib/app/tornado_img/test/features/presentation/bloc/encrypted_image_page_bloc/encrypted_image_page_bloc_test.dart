@@ -17,6 +17,7 @@ EncryptedImage _makeImage(String path) => EncryptedImage(
   path: path,
   encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
   date: DateTime(2024),
+  isPrivateFolder: true,
 );
 
 void main() {

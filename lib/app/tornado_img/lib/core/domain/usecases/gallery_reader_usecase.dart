@@ -27,7 +27,7 @@ class GalleryReaderUsecase
       final privateFolderPath =
           await GalleryPathProvider.getEncryptedFolderPath();
       yield* storageRepo
-          .readImages(privateFolderPath)
+          .readPrivateImages(privateFolderPath)
           .asyncMap((image) => Right(image));
 
       // Stream per l'album pubblico TornadoGallery
@@ -64,6 +64,7 @@ class GalleryReaderUsecase
               bytes: bytes,
               hash: ByteModeling.generateHash(bytes),
             ),
+            isPrivateFolder: false,
           );
 
           // Crea un EncryptedStreamImage dall'asset pubblico

@@ -55,6 +55,7 @@ class EncryptImageUseCase
           bytes: encoded,
           hash: ByteModeling.generateHash(encoded),
         ),
+        isPrivateFolder: !params.settings.galleryVisible,
         date: DateTime.now(),
       );
 

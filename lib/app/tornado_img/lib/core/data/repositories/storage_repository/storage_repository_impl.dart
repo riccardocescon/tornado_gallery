@@ -39,7 +39,7 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Stream<EncryptedStreamImage> readImages(String path) async* {
+  Stream<EncryptedStreamImage> readPrivateImages(String path) async* {
     final dir = Directory(path);
     appLogger.logRepository('Reading images from $path');
     if (!await dir.exists()) {

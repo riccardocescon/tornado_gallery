@@ -8,6 +8,6 @@ abstract class StorageRepository {
     required String fileName,
     required String? path,
   });
-  Stream<EncryptedStreamImage> readImages(String path);
+  Stream<EncryptedStreamImage> readPrivateImages(String path);
   Future<void> delete(String path);
 }

@@ -8,6 +8,7 @@ class EncryptedImage with EquatableMixin {
   final DateTime date;
   final BytesInfo encryptedInfo;
   final BytesInfo? decryptInfo;
+  final bool isPrivateFolder;
 
   bool get isDecrypted => decryptInfo != null;
 
@@ -17,6 +18,7 @@ class EncryptedImage with EquatableMixin {
     required this.path,
     required this.date,
     required this.encryptedInfo,
+    required this.isPrivateFolder,
     this.decryptInfo,
   });
 
@@ -25,12 +27,14 @@ class EncryptedImage with EquatableMixin {
     DateTime? date,
     BytesInfo? encryptedInfo,
     BytesInfo? decryptInfo,
+    bool? isPrivateFolder,
   }) {
     return EncryptedImage(
       path: path ?? this.path,
       date: date ?? this.date,
       encryptedInfo: encryptedInfo ?? this.encryptedInfo.copyWith(),
       decryptInfo: decryptInfo ?? this.decryptInfo?.copyWith(),
+      isPrivateFolder: isPrivateFolder ?? this.isPrivateFolder,
     );
   }
 
@@ -42,13 +46,20 @@ class EncryptedImage with EquatableMixin {
       date: date,
       encryptedInfo: encryptedInfo,
       decryptInfo: decryptInfo,
+      isPrivateFolder: isPrivateFolder,
     );
   }
 
   String get name => file.path.replaceAll("\\", "/").split('/').last;
 
   @override
-  List<Object?> get props => [path, date, encryptedInfo, decryptInfo];
+  List<Object?> get props => [
+    path,
+    date,
+    encryptedInfo,
+    decryptInfo,
+    isPrivateFolder,
+  ];
 }
 
 class BytesInfo with EquatableMixin {

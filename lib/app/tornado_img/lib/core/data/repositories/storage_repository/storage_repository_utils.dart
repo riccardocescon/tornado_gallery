@@ -25,6 +25,7 @@ class StorageRepositoryUtils {
         path: file.path,
         encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
         date: lastModified,
+        isPrivateFolder: true,
       );
       appLogger.logRepository('Found image: ${file.path}');
       return galleryImage;

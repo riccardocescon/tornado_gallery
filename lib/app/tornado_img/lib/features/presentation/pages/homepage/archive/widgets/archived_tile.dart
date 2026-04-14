@@ -128,8 +128,13 @@ class _ArchivedTileState extends State<_ArchivedTile> {
     date += " at ${DateFormat("HH:mm").format(widget.image.date)}";
 
     String visiblePath = widget.image.file.path;
-    visiblePath = visiblePath.split("encrypted").last;
-    visiblePath = ".../encrypted$visiblePath";
+    if (widget.image.isPrivateFolder) {
+      visiblePath = visiblePath.split("encrypted").last;
+      visiblePath = "../encrypted$visiblePath";
+    } else {
+      visiblePath = visiblePath.split("TornadoGallery").last;
+      visiblePath = "../TornadoGallery$visiblePath";
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

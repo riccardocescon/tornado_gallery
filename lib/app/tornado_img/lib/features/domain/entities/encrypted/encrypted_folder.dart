@@ -5,6 +5,7 @@ class EncryptedFolder with EncryptedEntity {
   final String path;
   final List<EncryptedImage> images;
   final List<EncryptedFolder> subfolders;
+  final bool isPrivateFolder;
 
   String get name => path.split('/').last;
   String get encryptedRelativePath {
@@ -18,6 +19,7 @@ class EncryptedFolder with EncryptedEntity {
     required this.images,
     required this.path,
     List<EncryptedFolder>? subfolders,
+    required this.isPrivateFolder,
   }) : subfolders = subfolders ?? [];
 
   @override
@@ -26,10 +28,15 @@ class EncryptedFolder with EncryptedEntity {
       images: images ?? this.images,
       path: path,
       subfolders: subfolders,
+      isPrivateFolder: isPrivateFolder,
     );
   }
 
-  factory EncryptedFolder.empty(String path) {
-    return EncryptedFolder(images: [], path: path);
+  factory EncryptedFolder.empty(String path, bool isPrivateFolder) {
+    return EncryptedFolder(
+      images: [],
+      path: path,
+      isPrivateFolder: isPrivateFolder,
+    );
   }
 }

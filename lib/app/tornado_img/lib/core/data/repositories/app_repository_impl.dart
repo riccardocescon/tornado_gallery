@@ -139,6 +139,7 @@ class AppRepositoryImpl implements AppRepository {
           path: event.path,
           encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
           date: date,
+          isPrivateFolder: rootFolder.isPrivateFolder,
         );
 
         parentFolder.images.removeWhere((img) => img.path == event.path);
@@ -198,8 +199,11 @@ class AppRepositoryImpl implements AppRepository {
 
   // ── Private helpers ──────────────────────────────────────────────────────
 
-  Future<EncryptedFolder> _loadSubfolder(String path) async {
-    final folder = EncryptedFolder.empty(path);
+  Future<EncryptedFolder> _loadSubfolder(
+    String path,
+    bool isPrivateFolder,
+  ) async {
+    final folder = EncryptedFolder.empty(path, isPrivateFolder);
     final files = Directory(path).listSync();
     for (final fileSystem in files) {
       final fileName = fileSystem.path.split('/').last;
@@ -212,10 +216,14 @@ class AppRepositoryImpl implements AppRepository {
             path: fileSystem.path,
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: date,
+            isPrivateFolder: isPrivateFolder,
           ),
         );
       } else {
-        final subfolder = await _loadSubfolder(fileSystem.path);
+        final subfolder = await _loadSubfolder(
+          fileSystem.path,
+          isPrivateFolder,
+        );
         folder.subfolders.add(subfolder);
       }
     }
@@ -223,7 +231,7 @@ class AppRepositoryImpl implements AppRepository {
   }
 
   Future<EncryptedFolder> _scanFullFolderPrivate(String path) async {
-    final rootFolder = EncryptedFolder.empty(path);
+    final rootFolder = EncryptedFolder.empty(path, true);
 
     final files = Directory(rootFolder.path).listSync();
     for (final fileSystem in files) {
@@ -237,10 +245,11 @@ class AppRepositoryImpl implements AppRepository {
             path: fileSystem.path,
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: date,
+            isPrivateFolder: true,
           ),
         );
       } else {
-        final subfolder = await _loadSubfolder(fileSystem.path);
+        final subfolder = await _loadSubfolder(fileSystem.path, true);
         rootFolder.subfolders.add(subfolder);
       }
     }
@@ -256,7 +265,7 @@ class AppRepositoryImpl implements AppRepository {
         firstFile?.parent.path ??
         assets.first.relativePath ??
         'Pictures/TornadoGallery';
-    final rootFolder = EncryptedFolder.empty(absoluteFolderPath);
+    final rootFolder = EncryptedFolder.empty(absoluteFolderPath, false);
 
     for (final asset in assets) {
       try {
@@ -271,6 +280,7 @@ class AppRepositoryImpl implements AppRepository {
             path: file.path,
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: asset.createDateTime,
+            isPrivateFolder: false,
           ),
         );
       } catch (e) {

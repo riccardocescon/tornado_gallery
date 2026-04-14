@@ -45,6 +45,7 @@ void main() {
       path: 'encrypted_img1.enc',
       encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
       date: DateTime(2024),
+      isPrivateFolder: false,
     );
   });
 
@@ -69,6 +70,7 @@ void main() {
               path: 'encrypted_img1.enc',
               encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
               date: DateTime(2024),
+              isPrivateFolder: true,
             ),
           ),
         );
@@ -180,6 +182,7 @@ void main() {
               path: 'encrypted_img1.enc',
               encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
               date: DateTime(2024),
+              isPrivateFolder: true,
             ),
           ),
         );
