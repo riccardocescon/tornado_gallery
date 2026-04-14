@@ -1,24 +1,17 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:gal/gal.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
+import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
-import 'package:tornado_img_app/core/utils/byte_modeling.dart';
-import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
-import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -39,76 +32,54 @@ enum Pages {
   final IconData icon;
   final String label;
 }
-class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
+class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
 
-  final HomepageBlocUtils _utils = HomepageBlocUtils();
+  final AppRepository _repo;
+  final AppFolderStreamerUsecase _folderStreamer;
 
-  late EncryptedFolder appEncryptedRootFolder;
+  EncryptedFolder? appEncryptedRootFolder;
   EncryptedFolder? appPublicEncryptedRootFolder;
   ArchivingState? currentArchivingState;
 
   @override
   Future<void> close() {
+    _folderStreamer.dispose();
     _streamManager?.dispose();
     return super.close();
   }
 
-  HomepageBloc() : super(const HomepageState.initial()) {
+  HomepageBloc({
+    required AppRepository appRepository,
+    required AppFolderStreamerUsecase folderStreamer,
+  }) : _repo = appRepository,
+       _folderStreamer = folderStreamer,
+       super(const HomepageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const HomepageState.loading());
 
-      appEncryptedRootFolder = await _utils.loadAppRootFolder();
-      final mayAppPublicEncryptedRootFolder =
-          await _utils.loadAppPublicRootFolder();
-      if (mayAppPublicEncryptedRootFolder == null) {
-        // Public folder does not exists, create with empty content
-        final success = await _utils.createPublicFolder();
-        if (success) {
-          appPublicEncryptedRootFolder = await _utils.loadAppPublicRootFolder();
-        }
-      } else {
-        appPublicEncryptedRootFolder = mayAppPublicEncryptedRootFolder;
-      }
-      
-      _emit(emit);
-
-      final privateFolderStream = _utils.watchAppFolderChanges(
-        appEncryptedRootFolder,
+      final taggedFolderStream = _folderStreamer.call().map(
+        (folders) =>
+            _FolderStream(privateFolder: folders.$1, publicFolder: folders.$2),
       );
 
-      Stream? publicFolderStream =
-          appPublicEncryptedRootFolder != null
-              ? _utils.watchAppFolderChanges(appPublicEncryptedRootFolder!)
-              : null;
-
-      
-      final taggedPrivateFolderStream = privateFolderStream.map(
-        (e) => _FolderStream(),
-      );
       final taggedGalleryStream = getIt<GalleryBloc>().stream
           .startWith(getIt<GalleryBloc>().state)
           .map((s) => _GalleryStream(s));
 
-      final taggedPublicFolderStream = publicFolderStream?.map(
-        (e) => _FolderStream(),
-      );
-
-      final mergedStream = Rx.merge([
-        taggedPrivateFolderStream,
-        if (taggedPublicFolderStream != null) taggedPublicFolderStream,
-        taggedGalleryStream,
-      ]);
+      final mergedStream = Rx.merge([taggedFolderStream, taggedGalleryStream]);
 
       _streamManager = StreamManager.fromStream(mergedStream);
 
       await for (final state in _streamManager!.stream) {
         switch (state) {
-          case _FolderStream():
+          case _FolderStream(:final privateFolder, :final publicFolder):
+            appEncryptedRootFolder = privateFolder;
+            appPublicEncryptedRootFolder = publicFolder;
             _emit(emit);
             break;
 
@@ -140,20 +111,18 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     });
 
     on<_Refresh>((event, emit) async {
-      await _utils.dispose();
+      await _repo.dispose();
       await _streamManager?.dispose();
       add(const HomepageEvent.setup());
     });
 
     on<_GalleryAssetsSelected>((event, emit) async {
-      
       emit(const HomepageState.galleryLoading());
 
       try {
-       
         selectedImages
           ..clear()
-          ..addAll(await _utils.mapAssetsToGalleryImages(event.imagesSelected));
+          ..addAll(await _repo.mapAssetsToGalleryImages(event.imagesSelected));
 
         emit(
           HomepageState.galleryImages(imagesLoaded: List.of(selectedImages)),
@@ -166,24 +135,24 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
         emit(HomepageState.galleryImages(imagesLoaded: []));
       }
     });
+
     on<_SetScreen>((event, emit) {
       currentPage = event.page;
       emit(HomepageState.homepageSet(page: event.page));
 
-      // Re-load the latest data when navigating back to the home screen
-      // This will prevent any loading states
       if (currentPage == Pages.home) _emit(emit);
     });
   }
 
   void _emit(Emitter<HomepageState> emit) {
+    final private = appEncryptedRootFolder;
+    if (private == null) return;
+
     final subFolders =
-        appEncryptedRootFolder.subfolders +
-        (appPublicEncryptedRootFolder?.subfolders ?? []);
+        private.subfolders + (appPublicEncryptedRootFolder?.subfolders ?? []);
 
     final images =
-        appEncryptedRootFolder.images +
-        (appPublicEncryptedRootFolder?.images ?? []);
+        private.images + (appPublicEncryptedRootFolder?.images ?? []);
 
     final totalImages = subFolders.fold<int>(
       images.length,
@@ -213,7 +182,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     emit(
       HomepageState.galleryStatus(
         imagesLoaded: totalImages,
-        folderLoaded: appEncryptedRootFolder.subfolders.length,
+        folderLoaded: private.subfolders.length,
         bytesLoaded: totalBytes,
         lastLoaded: lastLoaded,
         archivingState: currentArchivingState,

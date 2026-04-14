@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
+import 'package:tornado_img_app/core/data/repositories/app_repository_impl.dart';
 
 class FakePathProviderPlatform extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
@@ -23,7 +23,7 @@ void main() {
 
   late Directory tempDir;
   late Directory encryptedDir;
-  late HomepageBlocUtils utils;
+  late AppRepositoryImpl repo;
   late PathProviderPlatform originalPlatform;
 
   String safePath(String path) => path.replaceAll("\\", "/");
@@ -39,7 +39,7 @@ void main() {
     await encryptedDir.create(recursive: true);
 
     PathProviderPlatform.instance = FakePathProviderPlatform(tempDir.path);
-    utils = HomepageBlocUtils();
+    repo = AppRepositoryImpl();
   });
 
   tearDown(() async {
@@ -50,16 +50,16 @@ void main() {
     }
   });
 
-  group('watchAppFolderChanges', () {
+  group('watchFolderChanges', () {
     test(
       'adds a new folder to rootFolder when created and yields after insertion',
       () async {
-        final rootFolder = await utils.loadAppRootFolder();
+        final rootFolder = await repo.loadRootFolder();
 
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
-        sub = utils.watchAppFolderChanges(rootFolder).listen((_) {
+        sub = repo.watchFolderChanges(rootFolder).listen((_) {
           completer.complete();
         });
 
@@ -89,11 +89,11 @@ void main() {
         );
         await folderToDelete.create(recursive: true);
 
-        final rootFolder = await utils.loadAppRootFolder();
+        final rootFolder = await repo.loadRootFolder();
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
-        sub = utils.watchAppFolderChanges(rootFolder).listen((_) {
+        sub = repo.watchFolderChanges(rootFolder).listen((_) {
           completer.complete();
         });
 
@@ -127,11 +127,11 @@ void main() {
         final albumDir = Directory('${encryptedDir.path}/album_images');
         await albumDir.create(recursive: true);
 
-        final rootFolder = await utils.loadAppRootFolder();
+        final rootFolder = await repo.loadRootFolder();
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
-        sub = utils.watchAppFolderChanges(rootFolder).listen((_) {
+        sub = repo.watchFolderChanges(rootFolder).listen((_) {
           completer.complete();
         });
 
@@ -170,11 +170,11 @@ void main() {
         final imageFile = File(imagePath);
         await imageFile.writeAsBytes([1, 2, 3, 4]);
 
-        final rootFolder = await utils.loadAppRootFolder();
+        final rootFolder = await repo.loadRootFolder();
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
-        sub = utils.watchAppFolderChanges(rootFolder).listen((_) {
+        sub = repo.watchFolderChanges(rootFolder).listen((_) {
           completer.complete();
         });
 
