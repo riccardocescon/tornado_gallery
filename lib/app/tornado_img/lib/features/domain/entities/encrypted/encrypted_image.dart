@@ -50,7 +50,17 @@ class EncryptedImage with EquatableMixin {
     );
   }
 
-  String get name => file.path.replaceAll("\\", "/").split('/').last;
+  String get name {
+    final raw = file.path.replaceAll("\\", "/").split('/').last;
+    // Normalize double extension e.g. "188.png.png" -> "188.png"
+    final lower = raw.toLowerCase();
+    for (final ext in ['.png', '.jpg', '.jpeg']) {
+      if (lower.endsWith('$ext$ext')) {
+        return raw.substring(0, raw.length - ext.length);
+      }
+    }
+    return raw;
+  }
 
   @override
   List<Object?> get props => [

@@ -182,8 +182,13 @@ class AppRepositoryImpl implements AppRepository {
         final file = await asset.file;
         if (file == null) continue;
 
+        final rawId = asset.id;
+        final cleanId =
+            rawId.contains('.')
+                ? rawId.substring(0, rawId.lastIndexOf('.'))
+                : rawId;
         images.add(
-          GalleryImage(id: asset.id, file: file, date: asset.createDateTime),
+          GalleryImage(id: cleanId, file: file, date: asset.createDateTime),
         );
       } catch (e) {
         appLogger.logPageBloc(
