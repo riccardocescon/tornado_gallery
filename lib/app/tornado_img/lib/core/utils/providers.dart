@@ -27,6 +27,18 @@ class GalleryPathProvider {
     }
   }
 
+  /// Returns the filesystem path for the public gallery folder, or null if
+  /// the platform does not expose a real path (e.g. iOS Photos library).
+  static Future<String?> getPublicFolderPath() async {
+    if (Platform.isAndroid) {
+      final extDir = await getExternalStorageDirectory();
+      if (extDir == null) return null;
+      final rootPath = extDir.path.split('/Android/').first;
+      return '$rootPath/Pictures/${Constants.appFolderName}';
+    }
+    return null;
+  }
+
   static Future<AssetPathEntity?> getPublicFolder() async {
     try {
       final permission = await PhotoManager.requestPermissionExtend();

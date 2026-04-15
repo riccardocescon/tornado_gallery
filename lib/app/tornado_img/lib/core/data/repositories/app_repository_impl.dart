@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
@@ -44,7 +43,17 @@ class AppRepositoryImpl implements AppRepository {
   @override
   Future<EncryptedFolder?> loadPublicRootFolder() async {
     final assets = await GalleryPathProvider.getImagesFromPublicGallery();
-    if (assets.isEmpty) return null;
+
+    if (assets.isEmpty) {
+      // Folder may exist but have no images yet (just created).
+      // Return an empty root so watchFolderChanges can be attached.
+      final path = await GalleryPathProvider.getPublicFolderPath();
+      if (path == null) return null;
+      if (!await Directory(path).exists()) return null;
+      final emptyFolder = EncryptedFolder.empty(path, false);
+      _lookupTable.addAll(_buildFolderIndex(emptyFolder));
+      return emptyFolder;
+    }
 
     final rootFolder = await _scanFullFolderPublic(assets);
     _lookupTable.addAll(_buildFolderIndex(rootFolder));
@@ -158,11 +167,19 @@ class AppRepositoryImpl implements AppRepository {
       final publicAsset = await GalleryPathProvider.getPublicFolder();
       if (publicAsset != null) return true;
 
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File('${tempDir.path}/noimg.jpg');
-      await tempFile.writeAsBytes([]);
+      if (Platform.isIOS || Platform.isMacOS) {
+        final album = await PhotoManager.editor.darwin.createAlbum(
+          Constants.appFolderName,
+        );
+        return album != null;
+      }
 
-      await Gal.putImage(tempFile.path, album: Constants.appFolderName);
+      if (Platform.isAndroid) {
+        final path = await GalleryPathProvider.getPublicFolderPath();
+        if (path == null) return false;
+        await Directory(path).create(recursive: true);
+        return true;
+      }
 
       return true;
     } catch (e) {
@@ -276,7 +293,6 @@ class AppRepositoryImpl implements AppRepository {
       try {
         final file = await asset.file;
         if (file == null) continue;
-        if (file.path.endsWith(Constants.noImageName)) continue;
 
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);

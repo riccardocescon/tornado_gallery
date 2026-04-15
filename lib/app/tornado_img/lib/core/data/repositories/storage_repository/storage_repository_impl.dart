@@ -67,7 +67,6 @@ class StorageRepositoryImpl implements StorageRepository {
         try {
           final file = await asset.file;
           if (file == null) return null;
-          if (file.path.endsWith(Constants.noImageName)) return null;
 
           final bytes = await file.readAsBytes();
 
