@@ -15,9 +15,6 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
   const factory GalleryState.decrypted({
     required DearchivingState archivingState,
   }) = _Decrypted;
-  const factory GalleryState.encryptionFailure({
-    required EncryptionFailure failure,
-  }) = _EncryptionFailure;
   const factory GalleryState.decryptionFailure({
     required EncryptionFailure failure,
   }) = _DecryptionFailure;
@@ -29,7 +26,6 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
     loadingDecryption: (total) => [total],
     encrypted: (archivingState) => [archivingState],
     decrypted: (dearchivingState) => [dearchivingState],
-    encryptionFailure: (failure) => [failure],
     decryptionFailure: (failure) => [failure],
     orElse: () => [],
   );

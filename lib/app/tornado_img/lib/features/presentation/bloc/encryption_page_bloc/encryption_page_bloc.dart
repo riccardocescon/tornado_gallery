@@ -84,10 +84,8 @@ class EncryptionPageBloc
     on<_Encrypt>((event, emit) async {
       emit(
         EncryptionPageState.encrypting(
-          archivingState: ArchivingState(
+          archivingState: ArchivingState.init(
             totalImages: images.length,
-            archivedImages: [],
-            failedImages: [],
           ),
         ),
       );
@@ -120,15 +118,13 @@ class EncryptionPageBloc
             );
 
             final state = value.archivingState;
-            if (state.archivedImages.length + state.failedImages.length ==
-                state.totalImages) {
-              return true;
-            }
-
             emit(EncryptionPageState.encrypting(archivingState: state));
-            return false;
+
+            final elaboratedImages = state.progress;
+
+            final encryptedEverything = elaboratedImages == state.totalImages;
+            return encryptedEverything;
           },
-          encryptionFailure: (value) => true,
           orElse: () => false,
         );
 

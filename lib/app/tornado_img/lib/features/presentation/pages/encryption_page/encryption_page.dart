@@ -18,125 +18,155 @@ part 'widgets/options_card.dart';
 part 'widgets/options/option_item.dart';
 part 'widgets/options/output_folder_option.dart';
 part 'widgets/archiving_state_card.dart';
+part 'widgets/skipped_images_dialog.dart';
 
 class EncrpytionPage extends StatelessWidget {
   const EncrpytionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          iconSize: 18,
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-        title: Column(
-          spacing: 4,
-          children: [
-            const Text("Encryption Page"),
-            Text(
-              "Encrypt your images with a password",
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Column(
-                        spacing: 24,
-                        children: [
-                          const SizedBox(height: 8),
-                          _ImagesPreviewCard(),
-                          BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-                            buildWhen:
-                                (previous, current) => current.maybeMap(
-                                  encrypting: (state) => true,
-                                  encrypted: (state) => true,
-                                  ui:
-                                      (state) => previous.maybeMap(
-                                        encrypted: (state) => true,
-                                        orElse: () => false,
-                                      ),
-                                  orElse: () => false,
-                                ),
-                            builder: (context, state) {
-                              final encryptingdata = state.maybeMap(
-                                encrypting: (state) => state.archivingState,
-                                orElse: () => null,
-                              );
-                              if (encryptingdata == null) {
-                                return _PasswordCard();
-                              }
+    return BlocListener<EncryptionPageBloc, EncryptionPageState>(
+      listener: (context, state) {
+        state.maybeMap(
+          encrypting: (value) {
+            final archivingState = value.archivingState;
+            if (archivingState == null) return;
 
-                              return _ArchivingStateCard(
-                                archivingState: encryptingdata,
-                              );
-                            },
-                          ),
-                          const _OptionsCard(),
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    ],
-                  ),
+            final completed = archivingState.progress;
+            if (completed != archivingState.totalImages) return;
+            if (archivingState.skippedImages.isEmpty) return;
+
+            showDialog(
+              context: context,
+              builder: (context) {
+                return _SkippedImagesDialog(
+                  skippedImages: archivingState.skippedImages,
+                );
+              },
+            );
+          },
+          orElse: () {},
+        );
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => context.pop(),
+            iconSize: 18,
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+          title: Column(
+            spacing: 4,
+            children: [
+              const Text("Encryption Page"),
+              Text(
+                "Encrypt your images with a password",
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ),
-              BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-                buildWhen:
-                    (previous, current) => current.maybeMap(
-                      encrypted: (state) => true,
-                      encrypting: (state) => true,
-                      failure: (state) => true,
-                      orElse: () => false,
-                    ),
-                builder: (context, state) {
-                  final isEncrypting = state.maybeMap(
-                    encrypting: (state) => true,
-                    orElse: () => false,
-                  );
-
-                  return FilledButton(
-                    onPressed:
-                        isEncrypting
-                            ? () {}
-                            : () => context.read<EncryptionPageBloc>().add(
-                              const EncryptionPageEvent.encrypt(),
-                            ),
-                    child: Row(
-                      spacing: 8,
-                      mainAxisAlignment: MainAxisAlignment.center,
+            ],
+          ),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              spacing: 8,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
                       children: [
-                        isEncrypting
-                            ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Icon(Icons.lock_rounded, size: 18),
-                        Text(
-                          isEncrypting ? "Encrpyting..." : "Encrypt Images",
-                          style: context.textTheme.labelLarge,
+                        Column(
+                          spacing: 24,
+                          children: [
+                            const SizedBox(height: 8),
+                            _ImagesPreviewCard(),
+                            BlocBuilder<
+                              EncryptionPageBloc,
+                              EncryptionPageState
+                            >(
+                              buildWhen:
+                                  (previous, current) => current.maybeMap(
+                                    encrypting: (state) => true,
+                                    encrypted: (state) => true,
+                                    ui:
+                                        (state) => previous.maybeMap(
+                                          encrypted: (state) => true,
+                                          orElse: () => false,
+                                        ),
+                                    orElse: () => false,
+                                  ),
+                              builder: (context, state) {
+                                final encryptingdata = state.maybeMap(
+                                  encrypting: (state) => state.archivingState,
+                                  orElse: () => null,
+                                );
+                                if (encryptingdata == null) {
+                                  return _PasswordCard();
+                                }
+
+                                return _ArchivingStateCard(
+                                  archivingState: encryptingdata,
+                                );
+                              },
+                            ),
+                            const _OptionsCard(),
+                            const SizedBox(height: 24),
+                          ],
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                ),
+                BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
+                  buildWhen:
+                      (previous, current) => current.maybeMap(
+                        encrypted: (state) => true,
+                        encrypting: (state) => true,
+                        failure: (state) => true,
+                        orElse: () => false,
+                      ),
+                  builder: (context, state) {
+                    final isEncrypting = state.maybeMap(
+                      encrypting: (state) => true,
+                      orElse: () => false,
+                    );
+
+                    return FilledButton(
+                      onPressed:
+                          isEncrypting
+                              ? () {}
+                              : () => context.read<EncryptionPageBloc>().add(
+                                const EncryptionPageEvent.encrypt(),
+                              ),
+                      child: Row(
+                        spacing: 8,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          isEncrypting
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.lock_rounded, size: 18),
+                          Text(
+                            isEncrypting ? "Encrpyting..." : "Encrypt Images",
+                            style: context.textTheme.labelLarge,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -86,18 +86,15 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           case _GalleryStream(:final galleryState):
             galleryState.maybeMap(
               loadingEncryption: (value) {
-                currentArchivingState = ArchivingState(
+                currentArchivingState = ArchivingState.init(
                   totalImages: value.total,
-                  archivedImages: [],
-                  failedImages: [],
                 );
                 _emit(emit);
               },
               encrypted: (value) {
                 final archive = value.archivingState;
                 final completed =
-                    archive.archivedImages.length +
-                        archive.failedImages.length ==
+                    archive.progress ==
                     archive.totalImages;
 
                 currentArchivingState = completed ? null : archive;

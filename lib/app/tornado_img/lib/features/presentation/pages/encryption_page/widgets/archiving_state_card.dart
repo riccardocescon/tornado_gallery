@@ -9,8 +9,12 @@ class _ArchivingStateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final archivedImages = archivingState.archivedImages.length;
     final failedImages = archivingState.failedImages.length;
+    final skippedImages = archivingState.skippedImages.length;
     final remainingImages =
-        archivingState.totalImages - archivedImages - failedImages;
+        archivingState.totalImages -
+        archivedImages -
+        failedImages -
+        skippedImages;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -66,6 +70,19 @@ class _ArchivingStateCard extends StatelessWidget {
                   context,
                   "Failed",
                   failedImages.toString(),
+                  context.colorScheme.error.withValues(alpha: 0.8),
+                ),
+              ],
+
+              if (skippedImages > 0) ...[
+                Container(
+                  height: 1,
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                ),
+                _item(
+                  context,
+                  "Skipped",
+                  skippedImages.toString(),
                   context.colorScheme.error.withValues(alpha: 0.8),
                 ),
               ],

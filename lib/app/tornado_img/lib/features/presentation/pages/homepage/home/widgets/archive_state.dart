@@ -300,12 +300,17 @@ class _ArchiveState extends StatelessWidget {
   Widget _archivingItem(BuildContext context, ArchivingState archivingState) {
     final successImages = archivingState.archivedImages.length;
     final failedImages = archivingState.failedImages.length;
+    final skippedImages = archivingState.skippedImages.length;
     final processingImages =
-        archivingState.totalImages - successImages - failedImages;
+        archivingState.totalImages -
+        successImages -
+        failedImages -
+        skippedImages;
 
     final success = '$successImages Archived';
     final failed = '$failedImages Failed';
     final processing = '$processingImages Processing';
+    final skipped = '$skippedImages Skipped';
 
     Widget chip(
       String text,
@@ -347,6 +352,18 @@ class _ArchiveState extends StatelessWidget {
               Icons.check_rounded,
               size: 16,
               color: context.appColors.success,
+            ),
+          ),
+
+        if (skippedImages > 0)
+          chip(
+            skipped,
+            context.colorScheme.error,
+            context.colorScheme.errorContainer,
+            tail: Icon(
+              Icons.warning_amber_rounded,
+              size: 16,
+              color: context.colorScheme.error,
             ),
           ),
 

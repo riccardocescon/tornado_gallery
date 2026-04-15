@@ -107,6 +107,12 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
+  Future<bool> imageExists(String path, String fileName) async {
+    final file = File('$path/$fileName');
+    return await file.exists();
+  }
+
+  @override
   Future<void> delete(String path) async {
     final file = File(path);
     if (await file.exists()) {

@@ -23,7 +23,11 @@ GetIt getIt = GetIt.instance;
 void setupInjectionContainer() {
   getIt.registerLazySingleton(() => AppBloc());
   getIt.registerLazySingleton(
-    () => GalleryBloc(encryptUseCase: getIt(), decryptUseCase: getIt()),
+    () => GalleryBloc(
+      encryptUseCase: getIt(),
+      decryptUseCase: getIt(),
+      getIt: getIt,
+    ),
   );
   getIt.registerFactory(
     () => HomepageBloc(appRepository: getIt(), folderStreamer: getIt()),

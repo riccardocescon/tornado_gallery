@@ -23,6 +23,9 @@ class EncryptImageUseCase
   ) async {
 
     try {
+
+      final fileName = '${params.fileId}.png';
+
       final decoded = await imageRepo.decode(params.file);
 
       if (decoded == null) {
@@ -43,7 +46,7 @@ class EncryptImageUseCase
 
       await storageRepo.save(
         bytes: encoded,
-        fileName: '${params.fileId}.png',
+        fileName: fileName,
         path: params.settings.destinationPath,
       );
 
