@@ -30,58 +30,8 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     required this.getIt,
   })
     : super(const GalleryState.initial()) {
-    on<_EncryptImage>(_onEncryptImage);
     on<_EncryptImages>(_onEncryptImages);
     on<_DecryptImage>(_onDecryptImage);
-  }
-
-  Future<void> _onEncryptImage(
-    _EncryptImage event,
-    Emitter<GalleryState> emit,
-  ) async {
-    emit(GalleryState.loadingEncryption(total: 1));
-
-    final encrypted = <EncryptedImage>[];
-    final failed = <GalleryImage>[];
-    final skippedImages = <GalleryImage>[];
-
-    final isSkipped = _isSkipped(
-      event.settings.overrideImage,
-      event.settings.destinationPath,
-      event.image.id,
-    );
-
-    if (isSkipped) {
-      skippedImages.add(event.image);
-      appLogger.logBloc(
-        'Encryption skipped for ${event.image.file.path}: File already exists and override is disabled',
-      );
-    } else {
-    
-
-    final result = await encryptUseCase.call(
-      EncryptImageParams(
-        file: event.image.file,
-        password: event.password,
-        fileId: event.image.id,
-        settings: event.settings,
-      ),
-    );
-
-      result.fold(
-        (_) => failed.add(event.image),
-        (encryptedImage) => encrypted.add(encryptedImage),
-      );
-    }
-
-    GalleryState.encrypted(
-          archivingState: ArchivingState(
-            totalImages: 1,
-        archivedImages: List<EncryptedImage>.from(encrypted),
-        skippedImages: List<GalleryImage>.from(skippedImages),
-        failedImages: List<GalleryImage>.from(failed),
-      ),
-    );
   }
 
   Future<void> _onEncryptImages(

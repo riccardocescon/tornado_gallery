@@ -75,11 +75,10 @@ extension GalleryEventPatterns on GalleryEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _EncryptImage value)?  encryptImage,TResult Function( _EncryptImages value)?  encryptImages,TResult Function( _DecryptImage value)?  decryptImage,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _EncryptImages value)?  encryptImages,TResult Function( _DecryptImage value)?  decryptImage,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _EncryptImage() when encryptImage != null:
-return encryptImage(_that);case _EncryptImages() when encryptImages != null:
+case _EncryptImages() when encryptImages != null:
 return encryptImages(_that);case _DecryptImage() when decryptImage != null:
 return decryptImage(_that);case _:
   return orElse();
@@ -99,11 +98,10 @@ return decryptImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _EncryptImage value)  encryptImage,required TResult Function( _EncryptImages value)  encryptImages,required TResult Function( _DecryptImage value)  decryptImage,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _EncryptImages value)  encryptImages,required TResult Function( _DecryptImage value)  decryptImage,}){
 final _that = this;
 switch (_that) {
-case _EncryptImage():
-return encryptImage(_that);case _EncryptImages():
+case _EncryptImages():
 return encryptImages(_that);case _DecryptImage():
 return decryptImage(_that);case _:
   throw StateError('Unexpected subclass');
@@ -122,11 +120,10 @@ return decryptImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _EncryptImage value)?  encryptImage,TResult? Function( _EncryptImages value)?  encryptImages,TResult? Function( _DecryptImage value)?  decryptImage,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _EncryptImages value)?  encryptImages,TResult? Function( _DecryptImage value)?  decryptImage,}){
 final _that = this;
 switch (_that) {
-case _EncryptImage() when encryptImage != null:
-return encryptImage(_that);case _EncryptImages() when encryptImages != null:
+case _EncryptImages() when encryptImages != null:
 return encryptImages(_that);case _DecryptImage() when decryptImage != null:
 return decryptImage(_that);case _:
   return null;
@@ -145,10 +142,9 @@ return decryptImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( GalleryImage image,  String password,  EncryptionSettings settings)?  encryptImage,TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult Function( EncryptedImage image,  String password)?  decryptImage,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult Function( EncryptedImage image,  String password)?  decryptImage,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _EncryptImage() when encryptImage != null:
-return encryptImage(_that.image,_that.password,_that.settings);case _EncryptImages() when encryptImages != null:
+case _EncryptImages() when encryptImages != null:
 return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImage() when decryptImage != null:
 return decryptImage(_that.image,_that.password);case _:
   return orElse();
@@ -168,10 +164,9 @@ return decryptImage(_that.image,_that.password);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( GalleryImage image,  String password,  EncryptionSettings settings)  encryptImage,required TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)  encryptImages,required TResult Function( EncryptedImage image,  String password)  decryptImage,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)  encryptImages,required TResult Function( EncryptedImage image,  String password)  decryptImage,}) {final _that = this;
 switch (_that) {
-case _EncryptImage():
-return encryptImage(_that.image,_that.password,_that.settings);case _EncryptImages():
+case _EncryptImages():
 return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImage():
 return decryptImage(_that.image,_that.password);case _:
   throw StateError('Unexpected subclass');
@@ -190,75 +185,15 @@ return decryptImage(_that.image,_that.password);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( GalleryImage image,  String password,  EncryptionSettings settings)?  encryptImage,TResult? Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult? Function( EncryptedImage image,  String password)?  decryptImage,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult? Function( EncryptedImage image,  String password)?  decryptImage,}) {final _that = this;
 switch (_that) {
-case _EncryptImage() when encryptImage != null:
-return encryptImage(_that.image,_that.password,_that.settings);case _EncryptImages() when encryptImages != null:
+case _EncryptImages() when encryptImages != null:
 return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImage() when decryptImage != null:
 return decryptImage(_that.image,_that.password);case _:
   return null;
 
 }
 }
-
-}
-
-/// @nodoc
-
-
-class _EncryptImage extends GalleryEvent {
-  const _EncryptImage({required this.image, required this.password, required this.settings}): super._();
-  
-
- final  GalleryImage image;
-@override final  String password;
- final  EncryptionSettings settings;
-
-/// Create a copy of GalleryEvent
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$EncryptImageCopyWith<_EncryptImage> get copyWith => __$EncryptImageCopyWithImpl<_EncryptImage>(this, _$identity);
-
-
-
-
-
-
-
-}
-
-/// @nodoc
-abstract mixin class _$EncryptImageCopyWith<$Res> implements $GalleryEventCopyWith<$Res> {
-  factory _$EncryptImageCopyWith(_EncryptImage value, $Res Function(_EncryptImage) _then) = __$EncryptImageCopyWithImpl;
-@override @useResult
-$Res call({
- GalleryImage image, String password, EncryptionSettings settings
-});
-
-
-
-
-}
-/// @nodoc
-class __$EncryptImageCopyWithImpl<$Res>
-    implements _$EncryptImageCopyWith<$Res> {
-  __$EncryptImageCopyWithImpl(this._self, this._then);
-
-  final _EncryptImage _self;
-  final $Res Function(_EncryptImage) _then;
-
-/// Create a copy of GalleryEvent
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? image = null,Object? password = null,Object? settings = null,}) {
-  return _then(_EncryptImage(
-image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
-as GalleryImage,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
-as EncryptionSettings,
-  ));
-}
-
 
 }
 
