@@ -14,4 +14,6 @@ abstract class EncryptedImagePageEvent
   const factory EncryptedImagePageEvent.decrypt() = _Decrypt;
 
   const factory EncryptedImagePageEvent.restore() = _Restore;
+
+  const factory EncryptedImagePageEvent.saveImage() = _SaveImage;
 }

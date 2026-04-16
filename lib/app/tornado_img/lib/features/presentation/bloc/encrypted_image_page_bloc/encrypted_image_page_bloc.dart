@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
@@ -20,6 +21,7 @@ class EncryptedImagePageBloc
 
   late AppBloc appBloc;
   late GalleryBloc galleryBloc;
+  final ImageSaverUsecase imageSaverUsecase;
 
   @override
   Future<void> close() {
@@ -27,7 +29,11 @@ class EncryptedImagePageBloc
     return super.close();
   }
 
-  EncryptedImagePageBloc({required this.appBloc, required this.galleryBloc})
+  EncryptedImagePageBloc({
+    required this.appBloc,
+    required this.galleryBloc,
+    required this.imageSaverUsecase,
+  })
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
       image = appBloc.encryptedImages.firstWhere(
@@ -102,6 +108,17 @@ class EncryptedImagePageBloc
         AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
       );
       emit(EncryptedImagePageState.ui(image: image));
+    });
+    on<_SaveImage>((event, emit) async {
+      final bytes = image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;
+      final foSave = await imageSaverUsecase.call(
+        ImageSaverParams(bytes: bytes, fileName: image.name),
+      );
+      foSave.fold(
+        (failure) =>
+            emit(EncryptedImagePageState.failure(message: failure.message)),
+        (path) => emit(EncryptedImagePageState.imageSaved(path: image.name)),
+      );
     });
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
@@ -13,6 +14,8 @@ import 'package:tornado_img_app/features/presentation/widgets/password_form_fiel
 
 part 'widgets/image.dart';
 part 'widgets/info.dart';
+part 'widgets/actions.dart';
+part 'widgets/page_background.dart';
 
 class EncryptedImagePage extends StatelessWidget {
   const EncryptedImagePage({super.key});
@@ -21,7 +24,19 @@ class EncryptedImagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Encrypted Image')),
-      body: BlocBuilder<EncryptedImagePageBloc, EncryptedImagePageState>(
+      body: BlocConsumer<EncryptedImagePageBloc, EncryptedImagePageState>(
+        listener: (context, state) {
+          state.maybeMap(
+            imageSaved: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Image saved to gallery: ${value.path}'),
+                ),
+              );
+            },
+            orElse: () {},
+          );
+        },
         buildWhen:
             (previous, current) => current.maybeMap(
               ui: (value) => true,
@@ -41,6 +56,8 @@ class EncryptedImagePage extends StatelessWidget {
                       SizedBox(height: 300, child: _Image()),
                       _titleRow(context, image),
                       _Info(image: image),
+                      _Actions(),
+                      const SizedBox(height: 64),
                     ],
                   ),
                 ),

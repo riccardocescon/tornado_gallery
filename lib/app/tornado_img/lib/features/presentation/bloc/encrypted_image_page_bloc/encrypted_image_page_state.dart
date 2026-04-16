@@ -9,6 +9,8 @@ abstract class EncryptedImagePageState
   const factory EncryptedImagePageState.loading() = _Loading;
   const factory EncryptedImagePageState.ui({required EncryptedImage image}) =
       _Ui;
+  const factory EncryptedImagePageState.imageSaved({required String path}) =
+      _ImageSaved;
   const factory EncryptedImagePageState.failure({required String message}) =
       _Failure;
 
@@ -17,6 +19,7 @@ abstract class EncryptedImagePageState
     initial: (_) => [],
     loading: (_) => [],
     ui: (value) => [value.image],
+    imageSaved: (path) => [path],
     failure: (value) => [value.message],
   );
 }

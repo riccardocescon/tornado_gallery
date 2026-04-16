@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
@@ -15,7 +16,6 @@ import 'package:tornado_img_app/features/presentation/widgets/password_form_fiel
 part 'widgets/images_preview_card.dart';
 part 'widgets/password_card.dart';
 part 'widgets/options_card.dart';
-part 'widgets/options/option_item.dart';
 part 'widgets/options/output_folder_option.dart';
 part 'widgets/archiving_state_card.dart';
 part 'widgets/skipped_images_dialog.dart';

@@ -28,13 +28,7 @@ class _InfoState extends State<_Info> {
 
     final created = DateFormat('yyyy-MM-dd HH:mm:ss').format(stats.changed);
 
-    return Container(
-      width: double.maxFinite,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        borderRadius: AppStyle.cardBorderRadius,
-      ),
+    return _PageBackground(
       child: Column(
         spacing: 16,
         children: [

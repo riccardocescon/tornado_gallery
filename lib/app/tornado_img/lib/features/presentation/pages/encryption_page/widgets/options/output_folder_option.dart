@@ -18,7 +18,7 @@ class _OutputFolderOption extends StatelessWidget {
         );
         final isLoading = outputFolder.isEmpty;
 
-        return _OptionItem(
+        return OptionItem.trailing(
           icon: Icons.folder_outlined,
           title: "Output Folder",
           overrideSubtitle:

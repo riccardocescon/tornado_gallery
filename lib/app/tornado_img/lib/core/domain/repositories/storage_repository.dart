@@ -7,6 +7,7 @@ abstract class StorageRepository {
     required Uint8List bytes,
     required String fileName,
     required String? path,
+    required String? album,
   });
   Stream<EncryptedStreamImage> readPrivateImages(String path);
   Stream<EncryptedStreamImage> readPublicGalleryImages();

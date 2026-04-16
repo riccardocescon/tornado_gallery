@@ -39,7 +39,7 @@ class _OptionsCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _OptionItem(
+              OptionItem.trailing(
                 icon: Icons.remove_red_eye_outlined,
                 title: "Gallery visibility",
                 subtitle:
@@ -72,7 +72,7 @@ class _OptionsCard extends StatelessWidget {
               _divisor(context),
               _OutputFolderOption(),
               _divisor(context),
-              _OptionItem(
+              OptionItem.trailing(
                 icon: Icons.image_outlined,
                 title: "Override image",
                 subtitle:
@@ -103,7 +103,7 @@ class _OptionsCard extends StatelessWidget {
                 ),
               ),
               _divisor(context),
-              _OptionItem(
+              OptionItem.trailing(
                 icon: Icons.delete_outline_rounded,
                 title: "Delete Originals",
                 subtitle: "Permanently delete original images after encryption",
