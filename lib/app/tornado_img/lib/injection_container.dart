@@ -29,7 +29,7 @@ void setupInjectionContainer() {
       getIt: getIt,
     ),
   );
-  getIt.registerFactory(
+  getIt.registerLazySingleton(
     () => HomepageBloc(appRepository: getIt(), folderStreamer: getIt()),
   );
   getIt.registerFactory(

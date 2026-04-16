@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    context.read<HomepageBloc>().add(const HomepageEvent.refresh());
+    context.read<HomepageBloc>().add(const HomepageEvent.setup());
     super.initState();
   }
 

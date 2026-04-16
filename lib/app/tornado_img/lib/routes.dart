@@ -27,10 +27,7 @@ GoRouter routes = GoRouter(
       builder: (context, state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(
-              create:
-                  (context) =>
-                      getIt<HomepageBloc>(),
+            BlocProvider.value(value: getIt<HomepageBloc>(),
             ),
             BlocProvider(
               lazy: false,

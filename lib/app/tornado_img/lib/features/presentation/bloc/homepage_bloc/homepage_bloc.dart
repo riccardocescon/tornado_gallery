@@ -60,6 +60,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
        _folderStreamer = folderStreamer,
        super(const HomepageState.initial()) {
     on<_Setup>((event, emit) async {
+      if (_streamManager != null) return;
       emit(const HomepageState.loading());
 
       final taggedFolderStream = _folderStreamer.call().map(
@@ -110,6 +111,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     on<_Refresh>((event, emit) async {
       await _repo.dispose();
       await _streamManager?.dispose();
+      _streamManager = null;
       add(const HomepageEvent.setup());
     });
 
