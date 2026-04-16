@@ -26,7 +26,11 @@ class StreamManager<T> {
   Future<void> dispose() async {
     if (_subscription == null) return;
 
-    await _subscription!.cancel();
+    final sub = _subscription;
+    _subscription = null;
     await _controller.close();
+    
+    // Native stream cancel can hang
+    sub!.cancel();
   }
 }
