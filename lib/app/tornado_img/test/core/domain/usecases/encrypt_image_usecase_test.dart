@@ -56,6 +56,7 @@ void main() {
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
           path: any(named: 'path'),
+          album: any(named: 'album'),
         ),
       ).thenAnswer((_) async {});
 
@@ -91,6 +92,7 @@ void main() {
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
           path: any(named: 'path'),
+          album: any(named: 'album'),
         ),
       ).thenAnswer((_) async {});
 
@@ -113,6 +115,7 @@ void main() {
           bytes: tEncoded,
           fileName: 'abc123.png',
           path: '/my/folder',
+          album: any(named: 'album'),
         ),
       ]);
     });
@@ -142,6 +145,7 @@ void main() {
             bytes: any(named: 'bytes'),
             fileName: any(named: 'fileName'),
             path: any(named: 'path'),
+            album: any(named: 'album'),
           ),
         );
       },
@@ -175,6 +179,7 @@ void main() {
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
           path: any(named: 'path'),
+          album: any(named: 'album'),
         ),
       );
     });
@@ -213,6 +218,7 @@ void main() {
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
           path: any(named: 'path'),
+          album: any(named: 'album'),
         ),
       ).thenThrow(Exception('save error'));
 
@@ -241,6 +247,7 @@ void main() {
           bytes: any(named: 'bytes'),
           fileName: any(named: 'fileName'),
           path: any(named: 'path'),
+          album: any(named: 'album'),
         ),
       ).thenAnswer((_) async {});
 
@@ -258,6 +265,7 @@ void main() {
           bytes: tEncoded,
           fileName: 'abc123.png',
           path: '',
+          album: any(named: 'album'),
         ),
       ).called(1);
     });
