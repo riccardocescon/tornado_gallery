@@ -6,6 +6,8 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
 
   const factory ArchivePageEvent.setup() = _Setup;
 
-  const factory ArchivePageEvent.delete({required String path}) =
-      _ArchivePageDelete;
+  const factory ArchivePageEvent.delete({
+    required String path,
+    String? assetId,
+  }) = _ArchivePageDelete;
 }

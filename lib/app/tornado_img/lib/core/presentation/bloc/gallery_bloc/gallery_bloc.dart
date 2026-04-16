@@ -64,6 +64,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
           password: event.password,
           fileId: image.id,
           settings: event.settings,
+            assetId: image.id,
         ),
       );
 

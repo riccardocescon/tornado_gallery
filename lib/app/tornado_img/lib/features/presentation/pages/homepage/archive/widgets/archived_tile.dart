@@ -63,7 +63,10 @@ class _ArchivedTileState extends State<_ArchivedTile> {
                 ),
                 onPressed: () {
                   context.read<ArchivePageBloc>().add(
-                    ArchivePageEvent.delete(path: widget.image.path),
+                    ArchivePageEvent.delete(
+                      path: widget.image.path,
+                      assetId: widget.image.assetId,
+                    ),
                   );
                 },
 

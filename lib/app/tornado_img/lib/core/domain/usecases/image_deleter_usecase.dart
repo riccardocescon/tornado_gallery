@@ -14,7 +14,7 @@ class ImageDeleterUsecase extends EncrpytionUseCase<void, ImageDeleterParams> {
     ImageDeleterParams params,
   ) async {
     try {
-      await storageRepo.delete(params.path);
+      await storageRepo.delete(params.path, assetId: params.assetId);
       return const Right(null);
     } catch (e) {
       appLogger.logUsecase('Error deleting image', error: e.toString());
@@ -25,6 +25,7 @@ class ImageDeleterUsecase extends EncrpytionUseCase<void, ImageDeleterParams> {
 
 class ImageDeleterParams {
   final String path;
+  final String? assetId;
 
-  ImageDeleterParams({required this.path});
+  ImageDeleterParams({required this.path, this.assetId});
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:gal/gal.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
@@ -78,6 +79,7 @@ class StorageRepositoryImpl implements StorageRepository {
               hash: ByteModeling.generateHash(bytes),
             ),
             isPrivateFolder: false,
+            assetId: asset.id,
           );
 
           return EncryptedStreamImage.image(
@@ -112,7 +114,11 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Future<void> delete(String path) async {
+  Future<void> delete(String path, {String? assetId}) async {
+    if (assetId != null) {
+      await PhotoManager.editor.deleteWithIds([assetId]);
+      return;
+    }
     final file = File(path);
     if (await file.exists()) {
       await file.delete();

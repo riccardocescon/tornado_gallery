@@ -9,6 +9,7 @@ class EncryptedImage with EquatableMixin {
   final BytesInfo encryptedInfo;
   final BytesInfo? decryptInfo;
   final bool isPrivateFolder;
+  final String? assetId;
 
   bool get isDecrypted => decryptInfo != null;
 
@@ -20,6 +21,7 @@ class EncryptedImage with EquatableMixin {
     required this.encryptedInfo,
     required this.isPrivateFolder,
     this.decryptInfo,
+    this.assetId,
   });
 
   EncryptedImage copyWith({
@@ -28,6 +30,7 @@ class EncryptedImage with EquatableMixin {
     BytesInfo? encryptedInfo,
     BytesInfo? decryptInfo,
     bool? isPrivateFolder,
+    String? assetId,
   }) {
     return EncryptedImage(
       path: path ?? this.path,
@@ -35,6 +38,7 @@ class EncryptedImage with EquatableMixin {
       encryptedInfo: encryptedInfo ?? this.encryptedInfo.copyWith(),
       decryptInfo: decryptInfo ?? this.decryptInfo?.copyWith(),
       isPrivateFolder: isPrivateFolder ?? this.isPrivateFolder,
+      assetId: assetId ?? this.assetId,
     );
   }
 
@@ -47,6 +51,7 @@ class EncryptedImage with EquatableMixin {
       encryptedInfo: encryptedInfo,
       decryptInfo: decryptInfo,
       isPrivateFolder: isPrivateFolder,
+      assetId: assetId,
     );
   }
 
@@ -69,6 +74,7 @@ class EncryptedImage with EquatableMixin {
     encryptedInfo,
     decryptInfo,
     isPrivateFolder,
+    assetId,
   ];
 }
 

@@ -121,7 +121,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       deletingImagesQueue.add(event.path);
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
       final result = await imageDeleterUsecase.call(
-        ImageDeleterParams(path: event.path),
+        ImageDeleterParams(path: event.path, assetId: event.assetId),
       );
 
       result.fold(

@@ -50,6 +50,10 @@ class EncryptImageUseCase
         path: params.settings.destinationPath,
       );
 
+      if (params.settings.deleteOriginals) {
+        storageRepo.delete(params.file.path, assetId: params.assetId);
+      }
+
       final encryptedFile = File(
         '${params.settings.outputFolder}/${params.fileId}.png',
       );
@@ -76,11 +80,13 @@ class EncryptImageParams {
   final String password;
   final String fileId;
   final EncryptionSettings settings;
+  final String? assetId;
 
   EncryptImageParams({
     required this.file,
     required this.password,
     required this.fileId,
     required this.settings,
+    this.assetId,
   });
 }
