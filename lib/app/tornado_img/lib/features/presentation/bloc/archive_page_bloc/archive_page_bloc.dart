@@ -4,7 +4,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
@@ -17,15 +19,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final images = <EncryptedImage>[];
   final deletingImagesQueue = <String>[];
 
+  bool hasAllDecrypted = false;
+
   final GalleryReaderUsecase galleryReaderUsecase;
   final ImageDeleterUsecase imageDeleterUsecase;
 
-  // final ArchivePageBlocUtils _utils = ArchivePageBlocUtils();
-
   final AppBloc appBloc;
+  final GalleryBloc galleryBloc;
 
   ArchivePageBloc({
     required this.appBloc,
+    required this.galleryBloc,
     required this.galleryReaderUsecase,
     required this.imageDeleterUsecase,
   })
@@ -136,6 +140,45 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
         },
       );
+    });
+    on<_ArchivePageEncryptAll>((event, emit) async {
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i].overrideWith(decryptInfo: null);
+
+        appBloc.add(
+          AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
+        );
+      }
+      hasAllDecrypted = false;
+      emit(ArchivePageState.ui(images: List.from(images)));
+    });
+    on<_ArchivePageDecryptAll>((event, emit) async {
+      galleryBloc.add(
+        GalleryEvent.decryptImages(image: images, password: event.passphrase),
+      );
+
+      await for (final state in galleryBloc.stream) {
+        final completed = state.maybeMap(
+          decrypted: (value) {
+            final dearchivingState = value.dearchivingState;
+
+            final completed =
+                dearchivingState.progress == dearchivingState.totalImages;
+
+            if (completed) hasAllDecrypted = true;
+
+            emit(
+              ArchivePageState.decryptingAllUI(
+                dearchivingState: dearchivingState,
+              ),
+            );
+
+            return completed;
+          },
+          orElse: () => false,
+        );
+        if (completed) return;
+      }
     });
   }
 }

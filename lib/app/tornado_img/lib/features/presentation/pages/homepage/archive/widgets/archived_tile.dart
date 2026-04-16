@@ -1,9 +1,13 @@
 part of '../archive_page.dart';
 
 class _ArchivedTile extends StatefulWidget {
-  const _ArchivedTile({required this.image});
+  const _ArchivedTile({
+    required this.image,
+    required this.dearchivingStateType,
+  });
 
   final EncryptedImage image;
+  final DearchivingStateType? dearchivingStateType;
 
   @override
   State<_ArchivedTile> createState() => _ArchivedTileState();
@@ -84,12 +88,36 @@ class _ArchivedTileState extends State<_ArchivedTile> {
   }
 
   Widget _content() {
+    Widget icon = ContainedItem.icon(icon: Icons.lock_rounded);
+
+    if (widget.dearchivingStateType != null) {
+      icon = switch (widget.dearchivingStateType!) {
+        DearchivingStateType.loading => ContainedItem.widget(
+          child: SizedBox.square(
+            dimension: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: context.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        DearchivingStateType.dearchived => ContainedItem.icon(
+          icon: Icons.lock_open_rounded,
+        ),
+        DearchivingStateType.failure => ContainedItem.icon(
+          icon: Icons.error_rounded,
+          backgroundColor: context.colorScheme.error.withValues(alpha: 0.1),
+          iconColor: context.colorScheme.error,
+        ),
+      };
+    }
+
     return Row(
       spacing: 16,
       children: [
         _image(),
         Expanded(child: _details()),
-        ContainedIcon(icon: Icons.lock_rounded),
+        icon,
       ],
     );
   }

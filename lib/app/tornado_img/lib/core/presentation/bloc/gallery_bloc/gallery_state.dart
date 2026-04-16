@@ -13,7 +13,7 @@ abstract class GalleryState with _$GalleryState, EquatableMixin {
     required ArchivingState archivingState,
   }) = _Encrypted;
   const factory GalleryState.decrypted({
-    required DearchivingState archivingState,
+    required DearchivingState dearchivingState,
   }) = _Decrypted;
   const factory GalleryState.decryptionFailure({
     required EncryptionFailure failure,

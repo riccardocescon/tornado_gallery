@@ -10,4 +10,8 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
     required String path,
     String? assetId,
   }) = _ArchivePageDelete;
+
+  const factory ArchivePageEvent.encryptAll() = _ArchivePageEncryptAll;
+  const factory ArchivePageEvent.decryptAll({required String passphrase}) =
+      _ArchivePageDecryptAll;
 }

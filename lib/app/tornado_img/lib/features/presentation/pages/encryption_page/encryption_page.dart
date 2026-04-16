@@ -9,7 +9,7 @@ import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 

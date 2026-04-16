@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 
 class PageTitle extends StatelessWidget {
   const PageTitle({
@@ -23,7 +23,7 @@ class PageTitle extends StatelessWidget {
         Row(
           spacing: 12,
           children: [
-            ContainedIcon(icon: icon),
+            ContainedItem.icon(icon: icon),
             Text(
               title,
               style: context.textTheme.headlineMedium?.copyWith(

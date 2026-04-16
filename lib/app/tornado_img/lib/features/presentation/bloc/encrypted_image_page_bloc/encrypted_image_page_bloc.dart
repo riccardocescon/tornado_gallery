@@ -70,13 +70,13 @@ class EncryptedImagePageBloc
       }
 
       galleryBloc.add(
-        GalleryEvent.decryptImage(image: image, password: password),
+        GalleryEvent.decryptImages(image: [image], password: password),
       );
 
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           decrypted: (value) {
-            final decryptedImage = value.archivingState.dearchivedImages
+            final decryptedImage = value.dearchivingState.dearchivedImages
                 .firstWhereOrNull((e) => e.file.path == image.file.path);
             if (decryptedImage != null) {
               appBloc.add(

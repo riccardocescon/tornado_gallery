@@ -39,6 +39,7 @@ void setupInjectionContainer() {
   getIt.registerFactory(
     () => ArchivePageBloc(
       appBloc: getIt(),
+      galleryBloc: getIt(),
       galleryReaderUsecase: getIt(),
       imageDeleterUsecase: getIt(),
     ),

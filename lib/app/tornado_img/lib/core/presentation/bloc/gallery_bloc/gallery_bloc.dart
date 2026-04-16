@@ -7,6 +7,7 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/failues/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -31,7 +32,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   })
     : super(const GalleryState.initial()) {
     on<_EncryptImages>(_onEncryptImages);
-    on<_DecryptImage>(_onDecryptImage);
+    on<_DecryptImages>(_onDecryptImages);
   }
 
   Future<void> _onEncryptImages(
@@ -92,29 +93,53 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     }
   }
 
-  Future<void> _onDecryptImage(
-    _DecryptImage event,
+  Future<void> _onDecryptImages(
+    _DecryptImages event,
     Emitter<GalleryState> emit,
   ) async {
-    emit(GalleryState.loadingDecryption(total: 1));
-    final result = await decryptUseCase.call(
-      DecryptImageParams(file: event.image.file, password: event.password),
-    );
+    final totalImages = event.image.length;
+    emit(GalleryState.loadingDecryption(total: totalImages));
 
-    result.fold(
-      (failure) => emit(GalleryState.decryptionFailure(failure: failure)),
-      (decryptedInfo) => emit(
-        GalleryState.decrypted(
-          archivingState: DearchivingState(
-            totalImages: 1,
-            dearchivedImages: [
-              event.image.copyWith(decryptInfo: decryptedInfo),
-            ],
-            failedImages: [],
-          ),
+    final loading = event.image.where((e) => e.decryptInfo == null).toList();
+    final dearchived = event.image.where((e) => e.decryptInfo != null).toList();
+    final failed = <EncryptedImage>[];
+
+    emit(
+      GalleryState.decrypted(
+        dearchivingState: DearchivingState(
+          totalImages: totalImages,
+          loadingImages: loading.toList(),
+          dearchivedImages: dearchived.toList(),
+          failedImages: failed.toList(),
         ),
       ),
     );
+
+    for (final image in event.image) {
+      final result = await decryptUseCase.call(
+        DecryptImageParams(file: image.file, password: event.password),
+      );
+
+      loading.remove(image);
+
+      if (result.isLeft()) {
+        failed.add(image);
+      } else {
+        final updatedImage = image.copyWith(decryptInfo: result.right);
+        dearchived.add(updatedImage);
+      }
+
+      emit(
+        GalleryState.decrypted(
+          dearchivingState: DearchivingState(
+            totalImages: totalImages,
+            loadingImages: loading.toList(),
+            dearchivedImages: dearchived.toList(),
+            failedImages: failed.toList(),
+          ),
+        ),
+      );
+    }
   }
 
   bool _isSkipped(bool overrideImage, String? destinationPath, String imageId) {

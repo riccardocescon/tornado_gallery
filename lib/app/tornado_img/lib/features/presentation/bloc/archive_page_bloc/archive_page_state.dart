@@ -10,6 +10,9 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
       _Deleting;
   const factory ArchivePageState.ui({required List<EncryptedImage> images}) =
       _UI;
+  const factory ArchivePageState.decryptingAllUI({
+    required DearchivingState dearchivingState,
+  }) = _DecryptingAllUI;
   const factory ArchivePageState.failure({required String message}) = _Failure;
 
   @override
@@ -18,6 +21,7 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     loading: () => [],
     deleting: (paths) => [paths],
     ui: (images) => [images],
+    decryptingAllUI: (dearchivingState) => [dearchivingState],
     failure: (message) => [message],
   );
 }

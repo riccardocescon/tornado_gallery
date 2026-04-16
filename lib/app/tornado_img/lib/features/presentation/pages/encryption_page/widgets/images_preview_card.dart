@@ -89,7 +89,7 @@ class _ImagesPreviewCard extends StatelessWidget {
           Positioned(
             bottom: 8,
             right: 8,
-            child: ContainedIcon(icon: Icons.image_rounded, size: 20),
+            child: ContainedItem.icon(icon: Icons.image_rounded, size: 20),
           ),
         ],
       ),

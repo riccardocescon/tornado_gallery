@@ -5,7 +5,7 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
-import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';

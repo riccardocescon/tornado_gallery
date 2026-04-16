@@ -7,9 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/widgets/contained_icon.dart';
+import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 
 part 'widgets/archived_tile.dart';
@@ -24,6 +25,7 @@ class ArchivePage extends StatefulWidget {
 class _ArchivePageState extends State<ArchivePage> {
   final ScrollController _scrollController = ScrollController();
   static double _savedScrollOffset = 0;
+  List<EncryptedImage> _lastUiImages = [];
 
   @override
   void initState() {
@@ -31,6 +33,13 @@ class _ArchivePageState extends State<ArchivePage> {
     _scrollController.addListener(() {
       _savedScrollOffset = _scrollController.offset;
     });
+
+    // Set _lastUiImages if the latest state was dearchiving all
+    // so it can show the deachivedAll icons correctly
+    context.read<ArchivePageBloc>().state.mapOrNull(
+      decryptingAllUI:
+          (value) => _lastUiImages = value.dearchivingState.allImages,
+    );
 
     // Restore position after first frame (needs layout to be done)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -79,10 +88,15 @@ class _ArchivePageState extends State<ArchivePage> {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
       buildWhen:
           (previous, current) =>
-              current.maybeWhen(ui: (images) => true, orElse: () => false),
+              current.maybeWhen(
+            ui: (images) => true,
+            decryptingAllUI: (dearchivingState) => true,
+            orElse: () => false,
+          ),
       builder: (context, state) {
         return state.maybeWhen(
           ui: (images) {
+            _lastUiImages = images;
             if (images.isEmpty) {
               return SliverFillRemaining(child: _noImages());
             }
@@ -93,8 +107,36 @@ class _ArchivePageState extends State<ArchivePage> {
               itemBuilder: (context, index) {
                 return Column(
                   children: [
-                    _ArchivedTile(image: images[index]),
+                    _ArchivedTile(
+                      image: images[index],
+                      dearchivingStateType: null,
+                    ),
                     if (index != images.length - 1)
+                      Divider(
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.1,
+                        ),
+                      ),
+                  ],
+                );
+              },
+            );
+          },
+          decryptingAllUI: (dearchivingState) {
+            assert(_lastUiImages.length == dearchivingState.totalImages);
+
+            return SliverList.builder(
+              itemCount: dearchivingState.totalImages,
+              itemBuilder: (context, index) {
+                final image = dearchivingState.allImages.firstWhere(
+                  (e) => e.path == _lastUiImages[index].path,
+                );
+                final state = dearchivingState.getState(image.path);
+
+                return Column(
+                  children: [
+                    _ArchivedTile(image: image, dearchivingStateType: state),
+                    if (index != _lastUiImages.length - 1)
                       Divider(
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.1,

@@ -48,7 +48,7 @@ class _ActionCard extends StatelessWidget {
         spacing: 8,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ContainedIcon(
+          ContainedItem.icon(
             icon: icon,
             backgroundColor:
                 darker
