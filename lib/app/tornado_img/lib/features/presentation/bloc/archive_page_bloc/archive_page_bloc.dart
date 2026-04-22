@@ -60,7 +60,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 images.removeWhere((img) => img.file.path == streamImage.path);
                 break;
             }
-            emit(ArchivePageState.ui(images: List.from(images)));
+
+            _emit(emit);
           },
         );
       }
@@ -73,7 +74,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             );
             if (!alreadyExists) {
               images.add(value.image);
-              emit(ArchivePageState.ui(images: List.from(images)));
+              _emit(emit);
             } else {
               appLogger.logPageBloc(
                 'Image already exists in gallery, skipping add: ${value.image.file.path}',
@@ -93,7 +94,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               images.add(value.image);
             }
 
-            emit(ArchivePageState.ui(images: List.from(images)));
+            _emit(emit);
           },
           removedGalleryImage: (value) {
             final index = images.indexWhere(
@@ -103,7 +104,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             if (index != -1) {
               images.removeAt(index);
               deletingImagesQueue.remove(value.path);
-              emit(ArchivePageState.ui(images: List.from(images)));
+              _emit(emit);
               if (deletingImagesQueue.isNotEmpty) {
                 emit(
                   ArchivePageState.deleting(
@@ -141,7 +142,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           if (deleted) {
             appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
           } else {
-            emit(ArchivePageState.ui(images: List.from(images)));
+            _emit(emit);
           }
         },
       );
@@ -155,7 +156,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
       }
       isDecryptingAllImages = false;
-      emit(ArchivePageState.ui(images: List.from(images)));
+      _emit(emit);
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
       galleryBloc.add(
@@ -187,5 +188,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       isDecryptingAllImages = false;
     });
+  }
+
+  void _emit(Emitter<ArchivePageState> emit) {
+    // TODO: optimize it by saving the sorted images based on the user filter
+    // currently not sxisting, so its sorted by last modified date
+    final sortedImages = List<EncryptedImage>.from(images)..sort(
+      (a, b) => b.file.lastModifiedSync().compareTo(a.file.lastModifiedSync()),
+    );
+
+    emit(ArchivePageState.ui(images: sortedImages));
   }
 }
