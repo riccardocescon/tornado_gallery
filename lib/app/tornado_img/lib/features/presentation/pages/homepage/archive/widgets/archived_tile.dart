@@ -88,7 +88,12 @@ class _ArchivedTileState extends State<_ArchivedTile> {
   }
 
   Widget _content() {
-    Widget icon = ContainedItem.icon(icon: Icons.lock_rounded);
+    Widget icon = ContainedItem.icon(
+      icon:
+          widget.image.decryptInfo == null
+              ? Icons.lock_rounded
+              : Icons.lock_open_rounded,
+    );
 
     if (widget.dearchivingStateType != null) {
       icon = switch (widget.dearchivingStateType!) {
