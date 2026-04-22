@@ -11,6 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeGlobals();
   setupInjectionContainer();
+  await getIt<ThemeNotifier>().load();
   runApp(
     BlocProvider(create: (context) => getIt<AppBloc>(), child: const MyApp()),
   );
