@@ -23,16 +23,20 @@ extension BuildContextX on BuildContext {
     ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  void showErrorSnackbar(String text) {
+  void showErrorSnackbar(
+    String text, {
+    Duration duration = const Duration(seconds: 8),
+  }) {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
         content: Text(
           text,
           style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onErrorContainer,
+            color: colorScheme.onError,
           ),
         ),
-        backgroundColor: colorScheme.errorContainer,
+        backgroundColor: colorScheme.error,
+        duration: duration,
       ),
     );
   }

@@ -20,6 +20,9 @@ class _ArchivedTileState extends State<_ArchivedTile> {
       buildWhen:
           (previous, current) => current.maybeMap(
             deleting: (value) => value.paths.contains(widget.image.path),
+            ui:
+                (value) =>
+                    value.images.any((img) => img.path == widget.image.path),
             orElse: () => false,
           ),
       builder: (context, state) {

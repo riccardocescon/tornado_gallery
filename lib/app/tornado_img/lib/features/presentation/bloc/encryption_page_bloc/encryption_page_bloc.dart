@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -89,6 +90,18 @@ class EncryptionPageBloc
           ),
         ),
       );
+
+
+      final totalEncrytped = appBloc.encryptedImages.length + images.length;
+      if (totalEncrytped > Constants.maxEncryptedImages) {
+        emit(
+          const EncryptionPageState.failure(
+            message:
+                'Encryption limit reached. Please delete some encrypted images to continue.',
+          ),
+        );
+        return;
+      }
 
       if (password.isEmpty) {
         emit(

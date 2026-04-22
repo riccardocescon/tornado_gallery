@@ -136,8 +136,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           );
           emit(ArchivePageState.failure(message: failure.message));
         },
-        (_) {
-          appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
+        (deleted) {
+          if (deleted) {
+            appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
+          } else {
+            emit(ArchivePageState.ui(images: List.from(images)));
+          }
         },
       );
     });
@@ -156,7 +160,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       galleryBloc.add(
         GalleryEvent.decryptImages(image: images, password: event.passphrase),
       );
-      
+
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           decrypted: (value) {

@@ -60,8 +60,8 @@ class _ArchiveState extends StatelessWidget {
                   );
                 },
               ),
-              Container(
-                height: 1.5,
+              Divider(
+                height: 2,
                 color: context.colorScheme.onSurface.withValues(alpha: 0.2),
               ),
               BlocBuilder<HomepageBloc, HomepageState>(
@@ -101,8 +101,8 @@ class _ArchiveState extends StatelessWidget {
                         amount?.toString(),
                         "encrypted files",
                       ),
-                      Container(
-                        height: 1.5,
+                      Divider(
+                        height: 2,
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.2,
                         ),
@@ -113,13 +113,20 @@ class _ArchiveState extends StatelessWidget {
                         folderAmount?.toString(),
                         "archives",
                       ),
-                      Container(
-                        height: 1.5,
+                      Divider(
+                        height: 2,
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.2,
                         ),
                       ),
                       _byteProtectedItem(context, bytesAmount, lastEncrypted),
+                      Divider(
+                        height: 2,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
+                      ),
+                      _usageBar(context),
                     ],
                   );
                 },
@@ -391,6 +398,87 @@ class _ArchiveState extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _usageBar(BuildContext context) {
+    return BlocBuilder<AppBloc, AppState>(
+      buildWhen:
+          (previous, current) => current.maybeMap(
+            addedGalleryImage: (value) => true,
+            removedGalleryImage: (value) => true,
+            orElse: () => false,
+          ),
+      builder: (context, state) {
+        final totalImages = getIt<AppBloc>().encryptedImages.length;
+        final percentage =
+            totalImages > 0
+                ? (totalImages / Constants.maxEncryptedImages).clamp(0, 1)
+                : 0.0;
+
+        final barColor =
+            percentage < 0.7
+                ? context.colorScheme.primary
+                : percentage < 0.9
+                ? Colors.orange
+                : context.colorScheme.error;
+
+        return Column(
+          spacing: 6,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Storage usage",
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  "${(percentage * 100).toStringAsFixed(1)}%",
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+            ClipRRect(
+              borderRadius: AppStyle.cardBorderRadius,
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.maxFinite,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.primary.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Container(
+                        width: percentage * constraints.maxWidth,
+                        height: 12,
+                        decoration: BoxDecoration(color: barColor),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "Encrypted images: $totalImages/${Constants.maxEncryptedImages}",
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

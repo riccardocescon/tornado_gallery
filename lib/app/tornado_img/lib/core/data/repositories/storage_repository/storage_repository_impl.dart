@@ -114,19 +114,22 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Future<void> delete(String path, {String? assetId}) async {
+  Future<bool> delete(String path, {String? assetId}) async {
     if (assetId != null) {
-      await PhotoManager.editor.deleteWithIds([assetId]);
-      return;
+      final deletes = await PhotoManager.editor.deleteWithIds([assetId]);
+      return deletes.isNotEmpty;
     }
+
     final file = File(path);
     if (await file.exists()) {
       await file.delete();
+      return true;
     } else {
       appLogger.logRepository(
         'File to delete',
         error: 'File does not exist: $path',
       );
+      return false;
     }
   }
 }

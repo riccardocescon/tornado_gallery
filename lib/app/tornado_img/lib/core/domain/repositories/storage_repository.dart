@@ -12,5 +12,5 @@ abstract class StorageRepository {
   Stream<EncryptedStreamImage> readPrivateImages(String path);
   Stream<EncryptedStreamImage> readPublicGalleryImages();
   Future<bool> imageExists(String path, String fileName);
-  Future<void> delete(String path, {String? assetId});
+  Future<bool> delete(String path, {String? assetId});
 }

@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:tornado_img_app/extentions.dart';
 
 class PasswordFormField extends StatefulWidget {
-  const PasswordFormField({super.key, this.onChanged});
+  const PasswordFormField({super.key, this.onChanged, this.initialValue});
 
   final void Function(String)? onChanged;
+  final String? initialValue;
 
   @override
   State<PasswordFormField> createState() => _PasswordFormFieldState();
 }
 
 class _PasswordFormFieldState extends State<PasswordFormField> {
-  final _passwordController = TextEditingController();
+  late final TextEditingController _passwordController;
   bool _obscureText = true;
+
+  @override
+  void initState() {
+    _passwordController = TextEditingController(text: widget.initialValue);
+    super.initState();
+  }
 
   @override
   void dispose() {

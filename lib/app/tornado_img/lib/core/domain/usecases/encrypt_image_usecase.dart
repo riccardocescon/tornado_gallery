@@ -67,6 +67,7 @@ class EncryptImageUseCase
         ),
         isPrivateFolder: !params.settings.galleryVisible,
         date: DateTime.now(),
+        assetId: params.assetId,
       );
 
       return Right(encryptedImage);

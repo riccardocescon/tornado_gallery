@@ -11,6 +11,7 @@ class __PasswordCard extends State<_PasswordCard> {
 
   @override
   Widget build(BuildContext context) {
+    final pageBloc = context.read<EncryptionPageBloc>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -42,11 +43,11 @@ class __PasswordCard extends State<_PasswordCard> {
           SizedBox(
             height: 48,
             child: PasswordFormField(
-              onChanged: (value) {
-                context.read<EncryptionPageBloc>().add(
-                  EncryptionPageEvent.setPassword(password: value),
-                );
-              },
+              initialValue: pageBloc.password,
+              onChanged:
+                  (value) => pageBloc.add(
+                    EncryptionPageEvent.setPassword(password: value),
+                  ),
             ),
           ),
         ],

@@ -45,6 +45,9 @@ class EncrpytionPage extends StatelessWidget {
               },
             );
           },
+          failure: (value) {
+            context.showErrorSnackbar("Encryption failed: ${value.message}");
+          },
           orElse: () {},
         );
       },
@@ -98,6 +101,7 @@ class EncrpytionPage extends StatelessWidget {
                                           encrypted: (state) => true,
                                           orElse: () => false,
                                         ),
+                                    failure: (state) => true,
                                     orElse: () => false,
                                   ),
                               builder: (context, state) {
