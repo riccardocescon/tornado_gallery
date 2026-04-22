@@ -181,7 +181,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     emit(
       HomepageState.galleryStatus(
         imagesLoaded: totalImages,
-        folderLoaded: private.subfolders.length,
+        folderLoaded: private.subfolders.length + 1,
         bytesLoaded: totalBytes,
         lastLoaded: lastLoaded,
         archivingState: currentArchivingState,

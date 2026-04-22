@@ -19,7 +19,6 @@ class _ArchiveState extends StatelessWidget {
             ),
           ),
           child: Column(
-            spacing: 8,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -60,9 +59,12 @@ class _ArchiveState extends StatelessWidget {
                   );
                 },
               ),
-              Divider(
-                height: 2,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.2),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Divider(
+                  height: 2,
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.2),
+                ),
               ),
               BlocBuilder<HomepageBloc, HomepageState>(
                 buildWhen:
@@ -92,7 +94,6 @@ class _ArchiveState extends StatelessWidget {
                   );
 
                   return Column(
-                    spacing: 8,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _item(
@@ -100,6 +101,11 @@ class _ArchiveState extends StatelessWidget {
                         Icons.folder_rounded,
                         amount?.toString(),
                         "encrypted files",
+                        () {
+                          context.read<HomepageBloc>().add(
+                            const HomepageEvent.setScreen(page: Pages.archive),
+                          );
+                        }
                       ),
                       Divider(
                         height: 2,
@@ -112,6 +118,12 @@ class _ArchiveState extends StatelessWidget {
                         Icons.archive_rounded,
                         folderAmount?.toString(),
                         "archives",
+                        () {
+                          context.showSnackbar(
+                            "Feature coming soon",
+                            duration: const Duration(seconds: 1),
+                          );
+                        },
                       ),
                       Divider(
                         height: 2,
@@ -119,14 +131,24 @@ class _ArchiveState extends StatelessWidget {
                           alpha: 0.2,
                         ),
                       ),
-                      _byteProtectedItem(context, bytesAmount, lastEncrypted),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: _byteProtectedItem(
+                          context,
+                          bytesAmount,
+                          lastEncrypted,
+                        ),
+                      ),
                       Divider(
                         height: 2,
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.2,
                         ),
                       ),
-                      _usageBar(context),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: _usageBar(context),
+                      ),
                     ],
                   );
                 },
@@ -143,44 +165,56 @@ class _ArchiveState extends StatelessWidget {
     IconData icon,
     String? value,
     String text,
+    VoidCallback? onTap,
   ) {
-    return Row(
-      spacing: 8,
-      children: [
-        Icon(icon, color: context.colorScheme.onSurface),
+    return Material(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppStyle.cardBorderRadius,
+        splashFactory: InkRipple.splashFactory,
+        splashColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            spacing: 8,
+            children: [
+              Icon(icon, color: context.colorScheme.onSurface),
 
-        Row(
-          spacing: 4,
-          children: [
-            value == null
-                ? LoadingContainer(width: 40)
-                : Text(
-                  value,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: context.colorScheme.onSurface,
+              Row(
+                spacing: 4,
+                children: [
+                  value == null
+                      ? LoadingContainer(width: 40)
+                      : Text(
+                        value,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: context.colorScheme.onSurface,
+                        ),
+                      ),
+                  Text(
+                    text,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: context.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 18,
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-            Text(
-              text,
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: context.colorScheme.onSurface,
               ),
-            ),
-          ],
-        ),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 18,
-              color: context.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
