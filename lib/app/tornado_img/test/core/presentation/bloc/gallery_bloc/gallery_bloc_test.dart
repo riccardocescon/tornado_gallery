@@ -35,7 +35,7 @@ GalleryBloc _makeBloc({
   return GalleryBloc(
     encryptUseCase: encrypt,
     decryptUseCase: decrypt,
-    getIt: getIt,
+    appBloc: appBloc,
   );
 }
 
@@ -102,6 +102,7 @@ void main() {
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -137,6 +138,7 @@ void main() {
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -172,6 +174,7 @@ void main() {
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/folder',
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -207,6 +210,7 @@ void main() {
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/my/path',
               ),
+              filename: null,
             ),
           ),
       verify: (_) {
@@ -244,6 +248,7 @@ void main() {
             settings: EncryptionSettings.init().copyWith(
               outputFolder: _tDestination,
             ),
+            filename: null,
           ),
         );
       },
@@ -295,6 +300,7 @@ void main() {
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -340,6 +346,7 @@ void main() {
                 outputFolder: _tDestination,
                 overrideImage: true,
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -377,6 +384,7 @@ void main() {
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
+              filename: null,
             ),
           ),
       expect:
@@ -426,6 +434,7 @@ void main() {
               outputFolder: _tDestination,
               overrideImage: false,
             ),
+            filename: null,
           ),
         );
       },

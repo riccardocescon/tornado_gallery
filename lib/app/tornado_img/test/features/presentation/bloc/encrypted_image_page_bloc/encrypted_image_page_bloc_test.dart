@@ -32,8 +32,8 @@ void main() {
   setUpAll(() {
     registerFallbackValue(_makeImage('fallback/img.png'));
     registerFallbackValue(
-      GalleryEvent.decryptImage(
-        image: _makeImage('fallback/img.png'),
+      GalleryEvent.decryptImages(
+        image: [_makeImage('fallback/img.png')],
         password: 'fallback',
       ),
     );
@@ -154,7 +154,7 @@ void main() {
       verify: (_) {
         verify(
           () => mockGalleryBloc.add(
-            GalleryEvent.decryptImage(image: tImage, password: 'test123'),
+            GalleryEvent.decryptImages(image: [tImage], password: 'test123'),
           ),
         ).called(1);
       },
