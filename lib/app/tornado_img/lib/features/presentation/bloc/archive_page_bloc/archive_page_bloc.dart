@@ -19,7 +19,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final images = <EncryptedImage>[];
   final deletingImagesQueue = <String>[];
 
-  bool hasAllDecrypted = false;
+  bool isDecryptingAllImages = false;
+  bool get hasAllDecrypted => images.every((img) => img.decryptInfo != null);
 
   final GalleryReaderUsecase galleryReaderUsecase;
   final ImageDeleterUsecase imageDeleterUsecase;
@@ -153,13 +154,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
         );
       }
-      hasAllDecrypted = false;
+      isDecryptingAllImages = false;
       emit(ArchivePageState.ui(images: List.from(images)));
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
       galleryBloc.add(
         GalleryEvent.decryptImages(image: images, password: event.passphrase),
       );
+
+      isDecryptingAllImages = true;
 
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
@@ -168,8 +171,6 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
             final completed =
                 dearchivingState.progress == dearchivingState.totalImages;
-
-            if (completed) hasAllDecrypted = true;
 
             emit(
               ArchivePageState.decryptingAllUI(
@@ -183,6 +184,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
         if (completed) return;
       }
+
+      isDecryptingAllImages = false;
     });
   }
 }

@@ -71,7 +71,9 @@ class _ShellHomepageState extends State<ShellHomepage> {
                         orElse: () => false,
                       ),
                   builder: (context, state) {
-                    final hasAllDecrypted =
+                    final isDecrypting =
+                        context.read<ArchivePageBloc>().isDecryptingAllImages;
+                    final hasDecryptedAll =
                         context.read<ArchivePageBloc>().hasAllDecrypted;
 
                     final isLoading = state.maybeMap(
@@ -79,14 +81,14 @@ class _ShellHomepageState extends State<ShellHomepage> {
                           (value) =>
                               value.dearchivingState.totalImages !=
                               value.dearchivingState.progress,
-                      orElse: () => hasAllDecrypted,
+                      orElse: () => isDecrypting && !hasDecryptedAll,
                     );
 
                     if (isLoading) return const SizedBox.shrink();
 
                     return FloatingActionButton(
                       onPressed: () {
-                        if (hasAllDecrypted) {
+                        if (isDecrypting) {
                           context.read<ArchivePageBloc>().add(
                             const ArchivePageEvent.encryptAll(),
                           );
@@ -108,7 +110,7 @@ class _ShellHomepageState extends State<ShellHomepage> {
                         );
                       },
                       child: Icon(
-                        hasAllDecrypted
+                        context.read<ArchivePageBloc>().hasAllDecrypted
                             ? Icons.lock_rounded
                             : Icons.lock_open_rounded,
                       ),
