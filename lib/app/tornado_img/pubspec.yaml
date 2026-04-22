@@ -45,6 +45,7 @@ dependencies:
   wechat_assets_picker: ^10.1.0
   focused_menu: ^1.0.5
   gal: ^2.3.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -57,3 +58,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/

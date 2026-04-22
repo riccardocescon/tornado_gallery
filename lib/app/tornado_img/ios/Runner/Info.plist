@@ -51,5 +51,10 @@
 	<string>Photo library access is required to select images to encrypt.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Permission required to save decrypted images to your photo library.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mailto</string>
+		<string>https</string>
+	</array>
 </dict>
 </plist>
