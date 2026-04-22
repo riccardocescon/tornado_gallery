@@ -423,60 +423,78 @@ class _ArchiveState extends StatelessWidget {
                 ? Colors.orange
                 : context.colorScheme.error;
 
-        return Column(
-          spacing: 6,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Material(
+          child: InkWell(
+            onTap: () {
+              context.read<HomepageBloc>().add(
+                HomepageEvent.setScreen(page: Pages.settings),
+              );
+            },
+            borderRadius: AppStyle.cardBorderRadius,
+            splashFactory: InkRipple.splashFactory,
+            splashColor: context.colorScheme.primary.withValues(alpha: 0.1),
+            child: Column(
+              spacing: 6,
               children: [
-                Text(
-                  "Storage usage",
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: context.colorScheme.onSurface,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Storage usage",
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: context.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      "${(percentage * 100).toStringAsFixed(1)}%",
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                ClipRRect(
+                  borderRadius: AppStyle.cardBorderRadius,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: double.maxFinite,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: context.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                        ),
+                      ),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Container(
+                            width: percentage * constraints.maxWidth,
+                            height: 12,
+                            decoration: BoxDecoration(color: barColor),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  "${(percentage * 100).toStringAsFixed(1)}%",
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    "Encrypted images: $totalImages/${Constants.maxEncryptedImages}",
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurface.withValues(
+                        alpha: 0.7,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            ClipRRect(
-              borderRadius: AppStyle.cardBorderRadius,
-              child: Stack(
-                children: [
-                  Container(
-                    width: double.maxFinite,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.primary.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Container(
-                        width: percentage * constraints.maxWidth,
-                        height: 12,
-                        decoration: BoxDecoration(color: barColor),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                "Encrypted images: $totalImages/${Constants.maxEncryptedImages}",
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

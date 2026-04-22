@@ -74,6 +74,31 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surface,
+                  borderRadius: AppStyle.cardBorderRadius,
+                ),
+                child: Column(
+                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Storage usage",
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "Currently the storage limit is set to 50 encypted files.\nIn future updates more storage management options will be added.",
+                      style: context.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
