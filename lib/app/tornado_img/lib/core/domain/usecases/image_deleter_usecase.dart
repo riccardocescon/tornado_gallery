@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
-import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
 class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {

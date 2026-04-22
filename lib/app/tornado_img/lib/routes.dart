@@ -51,7 +51,7 @@ GoRouter routes = GoRouter(
                   (context) =>
                       getIt<EncryptionPageBloc>()
                         ..add(EncryptionPageEvent.setup(images: images)),
-              child: EncrpytionPage(),
+              child: EncryptionPage(),
             );
           },
         ),

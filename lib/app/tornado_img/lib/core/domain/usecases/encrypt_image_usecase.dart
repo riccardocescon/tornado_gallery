@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
-import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';

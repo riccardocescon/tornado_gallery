@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
-import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';

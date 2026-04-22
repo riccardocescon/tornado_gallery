@@ -8,7 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
-import 'package:tornado_img_app/core/failues/failures.dart';
+import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';

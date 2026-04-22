@@ -20,8 +20,8 @@ part 'widgets/options/output_folder_option.dart';
 part 'widgets/archiving_state_card.dart';
 part 'widgets/skipped_images_dialog.dart';
 
-class EncrpytionPage extends StatelessWidget {
-  const EncrpytionPage({super.key});
+class EncryptionPage extends StatelessWidget {
+  const EncryptionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
