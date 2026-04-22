@@ -19,6 +19,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -38,44 +39,68 @@ class _SettingsPageState extends State<SettingsPage> {
               spacing: 12,
               children: [
                 Container(
+                  width: double.maxFinite,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: context.colorScheme.surface,
                     borderRadius: AppStyle.cardBorderRadius,
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Theme",
+                        "App",
                         style: context.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      Spacer(),
-                      _ThemeSwitcher(),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.surface,
-                    borderRadius: AppStyle.cardBorderRadius,
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Logger",
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Spacer(),
-                      IconButton(
-                        onPressed: () {
-                          context.push('/logger');
-                        },
-                        icon: Icon(Icons.arrow_forward_ios_rounded),
+                      Column(
+                        spacing: 8,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Theme", style: context.textTheme.bodyLarge),
+                              _ThemeSwitcher(),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                "Logger",
+                                style: context.textTheme.bodyLarge,
+                              ),
+                              Spacer(),
+                              IconButton(
+                                onPressed: () {
+                                  context.push('/logger');
+                                },
+                                icon: Icon(Icons.arrow_forward_ios_rounded),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                "Request feature / Report bug",
+                                style: context.textTheme.bodyLarge,
+                              ),
+                              Spacer(),
+                              IconButton(
+                                onPressed: () {
+                                  final url = Uri.parse(
+                                    "https://github.com/riccardocescon/tornado_gallery/issues",
+                                  );
+                                  canLaunchUrl(url).then((can) {
+                                    if (!can) return;
+                                    launchUrl(url);
+                                  });
+                                },
+                                icon: Icon(Icons.open_in_new_rounded),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -364,7 +389,7 @@ class _ThemeSwitcher extends StatelessWidget {
                                     size: 16,
                                     color:
                                         isSelected
-                                            ? context.colorScheme.primary
+                                            ? context.colorScheme.onSurface
                                             : context.colorScheme.onSurface
                                                 .withValues(alpha: 0.35),
                                   ),
