@@ -27,7 +27,7 @@ void setupInjectionContainer() {
     () => GalleryBloc(
       encryptUseCase: getIt(),
       decryptUseCase: getIt(),
-      getIt: getIt,
+      appBloc: getIt(),
     ),
   );
   getIt.registerLazySingleton(

@@ -23,12 +23,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   final EncryptImageUseCase encryptUseCase;
   final DecryptImageUseCase decryptUseCase;
 
-  final GetIt getIt;
+  final AppBloc appBloc;
+
 
   GalleryBloc({
     required this.encryptUseCase,
     required this.decryptUseCase,
-    required this.getIt,
+    required this.appBloc,
   })
     : super(const GalleryState.initial()) {
     on<_EncryptImages>(_onEncryptImages);
@@ -77,7 +78,10 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
             error: error.message,
           );
         },
-        (encryptedImage) => encrypted.add(encryptedImage),
+          (encryptedImage) {
+            encrypted.add(encryptedImage);
+            appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
+          },
       );
       }
 
@@ -127,6 +131,12 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
       } else {
         final updatedImage = image.copyWith(decryptInfo: result.right);
         dearchived.add(updatedImage);
+        appBloc.add(
+          AppEvent.setDecryptedInfo(
+            path: updatedImage.path,
+            decryptedInfo: result.right,
+          ),
+        );
       }
 
       emit(
@@ -145,7 +155,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   bool _isSkipped(bool overrideImage, String? destinationPath, String imageId) {
     if (overrideImage) return false;
 
-    final encryptedImages = getIt.get<AppBloc>().encryptedImages;
+    final encryptedImages = appBloc.encryptedImages;
     final exists = encryptedImages.any(
       (img) => img.file.path == '$destinationPath/$imageId.png',
     );

@@ -156,7 +156,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       galleryBloc.add(
         GalleryEvent.decryptImages(image: images, password: event.passphrase),
       );
-
+      
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           decrypted: (value) {
