@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to capture photos for encryption.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is required to select images to encrypt.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Permission required to save decrypted images to your photo library.</string>
 </dict>
 </plist>
