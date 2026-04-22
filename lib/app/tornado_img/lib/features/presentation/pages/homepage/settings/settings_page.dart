@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:tornado_img_app/injection_container.dart';
@@ -99,6 +102,80 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
               ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surface,
+                  borderRadius: AppStyle.cardBorderRadius,
+                ),
+                child: Column(
+                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Info",
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    Column(
+                      spacing: 4,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'App version:',
+                              style: context.textTheme.labelMedium,
+                            ),
+                            Text(
+                              '${packageInfo.version}+${packageInfo.buildNumber}',
+                              style: context.textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('OS:', style: context.textTheme.labelMedium),
+                            Text(
+                              Platform.operatingSystem,
+                              style: context.textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'OS version:',
+                              style: context.textTheme.labelMedium,
+                            ),
+                            Text(
+                              Platform.operatingSystemVersion,
+                              style: context.textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'locale',
+                              style: context.textTheme.labelMedium,
+                            ),
+                            Text(
+                              Platform.localeName,
+                              style: context.textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -108,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 class _ThemeSwitcher extends StatelessWidget {
-  _ThemeSwitcher();
+  const _ThemeSwitcher();
 
   static const _options = [
     (ThemeMode.light, Icons.wb_sunny_rounded, 'Light'),
