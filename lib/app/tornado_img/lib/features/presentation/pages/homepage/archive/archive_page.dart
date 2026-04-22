@@ -195,13 +195,16 @@ class _ArchivePageState extends State<ArchivePage> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: context.colorScheme.primary.withValues(alpha: 0.1),
+                color: context.appColors.softBackground.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
                 "$encryptedCount archived ${encryptedCount == 1 ? "file" : "files"}",
                 style: context.textTheme.labelMedium!.copyWith(
-                  color: context.colorScheme.primary,
+                  color:
+                      context.isDarkMode
+                          ? context.colorScheme.onPrimary.withValues(alpha: 0.7)
+                          : context.colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

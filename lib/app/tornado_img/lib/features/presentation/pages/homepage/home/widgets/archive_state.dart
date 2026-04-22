@@ -432,7 +432,7 @@ class _ArchiveState extends StatelessWidget {
             },
             borderRadius: AppStyle.cardBorderRadius,
             splashFactory: InkRipple.splashFactory,
-            splashColor: context.colorScheme.primary.withValues(alpha: 0.1),
+            splashColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
             child: Column(
               spacing: 6,
               children: [
@@ -465,7 +465,7 @@ class _ArchiveState extends StatelessWidget {
                         height: 12,
                         decoration: BoxDecoration(
                           color: context.colorScheme.primary.withValues(
-                            alpha: 0.1,
+                            alpha: context.isDarkMode ? 0.3 : 0.1,
                           ),
                         ),
                       ),

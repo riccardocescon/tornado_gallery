@@ -118,7 +118,7 @@ class _ImagesPreviewCard extends StatelessWidget {
         Text(
           file.path.split('/').last,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.primary,
+            color: context.colorScheme.onSurface,
             fontWeight: FontWeight.w500,
           ),
         ),
