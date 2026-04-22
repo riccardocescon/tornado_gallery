@@ -37,6 +37,7 @@ class StorageRepositoryImpl implements StorageRepository {
       await file.writeAsBytes(bytes);
     } catch (e) {
       appLogger.logRepository('Error saving image', error: e.toString());
+      rethrow;
     }
   }
 
@@ -104,6 +105,7 @@ class StorageRepositoryImpl implements StorageRepository {
         'Error reading public gallery',
         error: e.toString(),
       );
+      // Permission denied or gallery unavailable — yield nothing, let homepage load normally
     }
   }
 

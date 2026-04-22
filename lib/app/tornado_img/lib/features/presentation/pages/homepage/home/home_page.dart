@@ -38,6 +38,9 @@ class _HomePageState extends State<HomePage> {
       listener: (context, state) {
         state.maybeWhen(
           orElse: () {},
+          failure: (message) {
+            context.showErrorSnackbar("Failed to load images");
+          },
           galleryImages: (galleryImages) {
             if (galleryImages.isEmpty) {
               context.showSnackbar("No images selected");

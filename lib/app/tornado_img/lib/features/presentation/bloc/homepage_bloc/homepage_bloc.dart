@@ -131,7 +131,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           'Error opening gallery with photo_manager picker',
           error: e.toString(),
         );
-        emit(HomepageState.galleryImages(imagesLoaded: []));
+        emit(HomepageState.failure(message: e.toString()));
       }
     });
 

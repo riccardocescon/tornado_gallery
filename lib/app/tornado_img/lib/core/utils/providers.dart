@@ -23,7 +23,11 @@ class GalleryPathProvider {
 
       return tornadoAssets;
     } catch (e) {
-      return [];
+      appLogger.logCore(
+        'Error reading public gallery images',
+        error: e.toString(),
+      );
+      rethrow;
     }
   }
 
@@ -39,9 +43,19 @@ class GalleryPathProvider {
     return null;
   }
 
-  static Future<AssetPathEntity?> getPublicFolder() async {
+  static Future<AssetPathEntity?> getPublicFolder({
+    bool requestIfNeeded = false,
+  }) async {
     try {
-      final permission = await PhotoManager.requestPermissionExtend();
+      final PermissionState permission;
+      if (requestIfNeeded) {
+        permission = await PhotoManager.requestPermissionExtend();
+      } else {
+        permission = await PhotoManager.getPermissionState(
+          requestOption: PermissionRequestOption(),
+        );
+      }
+
       if (permission == PermissionState.denied ||
           permission == PermissionState.restricted) {
         appLogger.logCore(

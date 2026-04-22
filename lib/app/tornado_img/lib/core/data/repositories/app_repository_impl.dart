@@ -164,7 +164,9 @@ class AppRepositoryImpl implements AppRepository {
   @override
   Future<bool> createPublicFolder() async {
     try {
-      final publicAsset = await GalleryPathProvider.getPublicFolder();
+      final publicAsset = await GalleryPathProvider.getPublicFolder(
+        requestIfNeeded: true,
+      );
       if (publicAsset != null) return true;
 
       if (Platform.isIOS || Platform.isMacOS) {

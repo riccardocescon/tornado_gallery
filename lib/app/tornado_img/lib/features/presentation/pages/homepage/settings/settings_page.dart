@@ -94,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     Text(
-                      "Currently the storage limit is set to 50 encypted files.\nIn future updates more storage management options will be added.",
+                      "Currently the storage limit is set to 50 encrypted files.\nIn future updates more storage management options will be added.",
                       style: context.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.normal,
                       ),
