@@ -63,7 +63,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         EncryptImageParams(
           file: image.file,
           password: event.password,
-          fileId: image.id,
+            fileId: event.filename ?? image.id,
           settings: event.settings,
             assetId: image.id,
         ),

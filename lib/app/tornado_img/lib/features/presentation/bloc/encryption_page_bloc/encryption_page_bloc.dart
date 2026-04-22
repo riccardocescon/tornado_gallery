@@ -19,6 +19,7 @@ class EncryptionPageBloc
   final images = <GalleryImage>[];
 
   String password = '';
+  String fileName = '';
 
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
@@ -58,6 +59,9 @@ class EncryptionPageBloc
     });
     on<_SetPassword>((event, emit) async {
       password = event.password;
+    });
+    on<_SetFileName>((event, emit) async {
+      fileName = event.name;
     });
     on<_ToggleGalleryVisibility>((event, emit) async {
       final newGalleryVisible = !settings.galleryVisible;
@@ -119,6 +123,7 @@ class EncryptionPageBloc
           images: images,
           password: password,
           settings: settings,
+          filename: fileName.isEmpty ? null : fileName,
         ),
       );
       await for (final state in galleryBloc.stream) {

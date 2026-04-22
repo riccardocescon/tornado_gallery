@@ -10,6 +10,9 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
 
   const factory EncryptionPageEvent.setPassword({required String password}) =
       _SetPassword;
+      
+  const factory EncryptionPageEvent.setFileName({required String name}) =
+      _SetFileName;
 
   const factory EncryptionPageEvent.toggleGalleryVisibility() =
       _ToggleGalleryVisibility;

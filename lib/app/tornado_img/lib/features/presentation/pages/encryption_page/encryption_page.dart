@@ -110,7 +110,13 @@ class EncrpytionPage extends StatelessWidget {
                                   orElse: () => null,
                                 );
                                 if (encryptingdata == null) {
-                                  return _PasswordCard();
+                                  return _PasswordCard(
+                                    imagesSize:
+                                        context
+                                            .watch<EncryptionPageBloc>()
+                                            .images
+                                            .length,
+                                  );
                                 }
 
                                 return _ArchivingStateCard(

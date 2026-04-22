@@ -48,12 +48,13 @@ extension EncryptionPageEventPatterns on EncryptionPageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _SetPassword value)?  setPassword,TResult Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult Function( _SetOutputFolder value)?  setOutputFolder,TResult Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult Function( _Encrypt value)?  encrypt,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _SetPassword value)?  setPassword,TResult Function( _SetFileName value)?  setFileName,TResult Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult Function( _SetOutputFolder value)?  setOutputFolder,TResult Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult Function( _Encrypt value)?  encrypt,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _SetPassword() when setPassword != null:
-return setPassword(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setPassword(_that);case _SetFileName() when setFileName != null:
+return setFileName(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility(_that);case _SetOutputFolder() when setOutputFolder != null:
 return setOutputFolder(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
@@ -76,12 +77,13 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _SetPassword value)  setPassword,required TResult Function( _ToggleGalleryVisibility value)  toggleGalleryVisibility,required TResult Function( _SetOutputFolder value)  setOutputFolder,required TResult Function( _ToggleOverrideImage value)  toggleOverrideImage,required TResult Function( _ToggleDeleteOriginals value)  toggleDeleteOriginals,required TResult Function( _Encrypt value)  encrypt,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _SetPassword value)  setPassword,required TResult Function( _SetFileName value)  setFileName,required TResult Function( _ToggleGalleryVisibility value)  toggleGalleryVisibility,required TResult Function( _SetOutputFolder value)  setOutputFolder,required TResult Function( _ToggleOverrideImage value)  toggleOverrideImage,required TResult Function( _ToggleDeleteOriginals value)  toggleDeleteOriginals,required TResult Function( _Encrypt value)  encrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that);case _SetPassword():
-return setPassword(_that);case _ToggleGalleryVisibility():
+return setPassword(_that);case _SetFileName():
+return setFileName(_that);case _ToggleGalleryVisibility():
 return toggleGalleryVisibility(_that);case _SetOutputFolder():
 return setOutputFolder(_that);case _ToggleOverrideImage():
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals():
@@ -103,12 +105,13 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _SetPassword value)?  setPassword,TResult? Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult? Function( _SetOutputFolder value)?  setOutputFolder,TResult? Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult? Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult? Function( _Encrypt value)?  encrypt,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _SetPassword value)?  setPassword,TResult? Function( _SetFileName value)?  setFileName,TResult? Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult? Function( _SetOutputFolder value)?  setOutputFolder,TResult? Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult? Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult? Function( _Encrypt value)?  encrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _SetPassword() when setPassword != null:
-return setPassword(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setPassword(_that);case _SetFileName() when setFileName != null:
+return setFileName(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility(_that);case _SetOutputFolder() when setOutputFolder != null:
 return setOutputFolder(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
@@ -130,11 +133,12 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images)?  setup,TResult Function( String password)?  setPassword,TResult Function()?  toggleGalleryVisibility,TResult Function( String outputFolder)?  setOutputFolder,TResult Function()?  toggleOverrideImage,TResult Function()?  toggleDeleteOriginals,TResult Function()?  encrypt,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images)?  setup,TResult Function( String password)?  setPassword,TResult Function( String name)?  setFileName,TResult Function()?  toggleGalleryVisibility,TResult Function( String outputFolder)?  setOutputFolder,TResult Function()?  toggleOverrideImage,TResult Function()?  toggleDeleteOriginals,TResult Function()?  encrypt,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.images);case _SetPassword() when setPassword != null:
-return setPassword(_that.password);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setPassword(_that.password);case _SetFileName() when setFileName != null:
+return setFileName(_that.name);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility();case _SetOutputFolder() when setOutputFolder != null:
 return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage();case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
@@ -157,11 +161,12 @@ return encrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images)  setup,required TResult Function( String password)  setPassword,required TResult Function()  toggleGalleryVisibility,required TResult Function( String outputFolder)  setOutputFolder,required TResult Function()  toggleOverrideImage,required TResult Function()  toggleDeleteOriginals,required TResult Function()  encrypt,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images)  setup,required TResult Function( String password)  setPassword,required TResult Function( String name)  setFileName,required TResult Function()  toggleGalleryVisibility,required TResult Function( String outputFolder)  setOutputFolder,required TResult Function()  toggleOverrideImage,required TResult Function()  toggleDeleteOriginals,required TResult Function()  encrypt,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that.images);case _SetPassword():
-return setPassword(_that.password);case _ToggleGalleryVisibility():
+return setPassword(_that.password);case _SetFileName():
+return setFileName(_that.name);case _ToggleGalleryVisibility():
 return toggleGalleryVisibility();case _SetOutputFolder():
 return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage():
 return toggleOverrideImage();case _ToggleDeleteOriginals():
@@ -183,11 +188,12 @@ return encrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images)?  setup,TResult? Function( String password)?  setPassword,TResult? Function()?  toggleGalleryVisibility,TResult? Function( String outputFolder)?  setOutputFolder,TResult? Function()?  toggleOverrideImage,TResult? Function()?  toggleDeleteOriginals,TResult? Function()?  encrypt,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images)?  setup,TResult? Function( String password)?  setPassword,TResult? Function( String name)?  setFileName,TResult? Function()?  toggleGalleryVisibility,TResult? Function( String outputFolder)?  setOutputFolder,TResult? Function()?  toggleOverrideImage,TResult? Function()?  toggleDeleteOriginals,TResult? Function()?  encrypt,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.images);case _SetPassword() when setPassword != null:
-return setPassword(_that.password);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setPassword(_that.password);case _SetFileName() when setFileName != null:
+return setFileName(_that.name);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility();case _SetOutputFolder() when setOutputFolder != null:
 return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage();case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
@@ -317,6 +323,65 @@ class __$SetPasswordCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? password = null,}) {
   return _then(_SetPassword(
 password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _SetFileName extends EncryptionPageEvent {
+  const _SetFileName({required this.name}): super._();
+  
+
+ final  String name;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetFileNameCopyWith<_SetFileName> get copyWith => __$SetFileNameCopyWithImpl<_SetFileName>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptionPageEvent.setFileName(name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetFileNameCopyWith<$Res> implements $EncryptionPageEventCopyWith<$Res> {
+  factory _$SetFileNameCopyWith(_SetFileName value, $Res Function(_SetFileName) _then) = __$SetFileNameCopyWithImpl;
+@useResult
+$Res call({
+ String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetFileNameCopyWithImpl<$Res>
+    implements _$SetFileNameCopyWith<$Res> {
+  __$SetFileNameCopyWithImpl(this._self, this._then);
+
+  final _SetFileName _self;
+  final $Res Function(_SetFileName) _then;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? name = null,}) {
+  return _then(_SetFileName(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

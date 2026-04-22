@@ -142,10 +142,10 @@ return decryptImages(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult Function( List<EncryptedImage> image,  String password)?  decryptImages,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings,  String? filename)?  encryptImages,TResult Function( List<EncryptedImage> image,  String password)?  decryptImages,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EncryptImages() when encryptImages != null:
-return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImages() when decryptImages != null:
+return encryptImages(_that.images,_that.password,_that.settings,_that.filename);case _DecryptImages() when decryptImages != null:
 return decryptImages(_that.image,_that.password);case _:
   return orElse();
 
@@ -164,10 +164,10 @@ return decryptImages(_that.image,_that.password);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)  encryptImages,required TResult Function( List<EncryptedImage> image,  String password)  decryptImages,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images,  String password,  EncryptionSettings settings,  String? filename)  encryptImages,required TResult Function( List<EncryptedImage> image,  String password)  decryptImages,}) {final _that = this;
 switch (_that) {
 case _EncryptImages():
-return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImages():
+return encryptImages(_that.images,_that.password,_that.settings,_that.filename);case _DecryptImages():
 return decryptImages(_that.image,_that.password);case _:
   throw StateError('Unexpected subclass');
 
@@ -185,10 +185,10 @@ return decryptImages(_that.image,_that.password);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images,  String password,  EncryptionSettings settings)?  encryptImages,TResult? Function( List<EncryptedImage> image,  String password)?  decryptImages,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images,  String password,  EncryptionSettings settings,  String? filename)?  encryptImages,TResult? Function( List<EncryptedImage> image,  String password)?  decryptImages,}) {final _that = this;
 switch (_that) {
 case _EncryptImages() when encryptImages != null:
-return encryptImages(_that.images,_that.password,_that.settings);case _DecryptImages() when decryptImages != null:
+return encryptImages(_that.images,_that.password,_that.settings,_that.filename);case _DecryptImages() when decryptImages != null:
 return decryptImages(_that.image,_that.password);case _:
   return null;
 
@@ -201,7 +201,7 @@ return decryptImages(_that.image,_that.password);case _:
 
 
 class _EncryptImages extends GalleryEvent {
-  const _EncryptImages({required final  List<GalleryImage> images, required this.password, required this.settings}): _images = images,super._();
+  const _EncryptImages({required final  List<GalleryImage> images, required this.password, required this.settings, required this.filename}): _images = images,super._();
   
 
  final  List<GalleryImage> _images;
@@ -213,6 +213,7 @@ class _EncryptImages extends GalleryEvent {
 
 @override final  String password;
  final  EncryptionSettings settings;
+ final  String? filename;
 
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -233,7 +234,7 @@ abstract mixin class _$EncryptImagesCopyWith<$Res> implements $GalleryEventCopyW
   factory _$EncryptImagesCopyWith(_EncryptImages value, $Res Function(_EncryptImages) _then) = __$EncryptImagesCopyWithImpl;
 @override @useResult
 $Res call({
- List<GalleryImage> images, String password, EncryptionSettings settings
+ List<GalleryImage> images, String password, EncryptionSettings settings, String? filename
 });
 
 
@@ -250,12 +251,13 @@ class __$EncryptImagesCopyWithImpl<$Res>
 
 /// Create a copy of GalleryEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? images = null,Object? password = null,Object? settings = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? images = null,Object? password = null,Object? settings = null,Object? filename = freezed,}) {
   return _then(_EncryptImages(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
 as List<GalleryImage>,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
-as EncryptionSettings,
+as EncryptionSettings,filename: freezed == filename ? _self.filename : filename // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
