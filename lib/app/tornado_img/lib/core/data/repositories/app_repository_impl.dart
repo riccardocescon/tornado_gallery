@@ -101,6 +101,9 @@ class AppRepositoryImpl implements AppRepository {
           );
 
           if (inserted) {
+            // Keep the lookup table in sync so future delete events can find
+            // this folder (and any nested subfolders it may contain).
+            _lookupTable.addAll(_buildFolderIndex(newFolder));
             yield null;
           } else {
             appLogger.logPageBloc(

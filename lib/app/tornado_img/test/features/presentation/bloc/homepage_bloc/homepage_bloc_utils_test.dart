@@ -86,18 +86,36 @@ void main() {
     test(
       'removes a folder from rootFolder when deleted and yields after removal',
       () async {
+        // Start from a clean, empty rootFolder — same initial state as the
+        // create test. This is required on Windows: Directory.watch() only
+        // reliably fires delete events for directories whose full lifecycle
+        // (create → delete) occurs while the watcher is running.
+        final rootFolder = await repo.loadRootFolder();
+
+        var emissionCount = 0;
+        final createCompleter = Completer<void>();
+        final deleteCompleter = Completer<void>();
+        late final StreamSubscription sub;
+
         final folderToDelete = Directory(
           '${encryptedDir.path}/album_to_delete',
         );
-        await folderToDelete.create(recursive: true);
-
-        final rootFolder = await repo.loadRootFolder();
-        final completer = Completer<void>();
-        late final StreamSubscription sub;
 
         sub = repo.watchFolderChanges(rootFolder).listen((_) {
-          completer.complete();
+          emissionCount++;
+          if (emissionCount == 1 && !createCompleter.isCompleted) {
+            createCompleter.complete();
+          } else if (emissionCount == 2 && !deleteCompleter.isCompleted) {
+            deleteCompleter.complete();
+          }
         });
+
+        // Give the watcher time to initialise before making changes.
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        // Step 1: create the folder while the watcher is running.
+        await folderToDelete.create(recursive: true);
+        await createCompleter.future.timeout(const Duration(seconds: 5));
 
         expect(
           rootFolder.subfolders.any(
@@ -106,11 +124,12 @@ void main() {
           isTrue,
         );
 
-        await Future.delayed(const Duration(seconds: 3));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
-        await folderToDelete.delete(recursive: true);
+        // Step 2: delete the folder — still within the watcher's active period.
+        await folderToDelete.delete();
 
-        await completer.future.timeout(const Duration(seconds: 10));
+        await deleteCompleter.future.timeout(const Duration(seconds: 10));
 
         expect(
           rootFolder.subfolders.any(
