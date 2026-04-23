@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 
 part 'widgets/image.dart';
+part 'widgets/image_fullscreen_viewer.dart';
 part 'widgets/info.dart';
 part 'widgets/actions.dart';
 part 'widgets/page_background.dart';

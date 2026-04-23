@@ -41,11 +41,30 @@ class __ImageState extends State<_Image> {
         return Center(
           child: ClipRRect(
             borderRadius: AppStyle.cardBorderRadius,
-            child: Transform.scale(
-              scale: isDecrypted ? 1 : 10,
-              child: Skeletonizer(
-                enabled: isLoading,
-                child: Image.memory(bytes!, fit: BoxFit.cover),
+            child: GestureDetector(
+              onTap: () {
+                final bloc = context.read<EncryptedImagePageBloc>();
+                final allImages = context.read<AppBloc>().encryptedImages;
+                final index = allImages.indexWhere(
+                  (img) => img.file.path == bloc.image.file.path,
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    fullscreenDialog: true,
+                    builder:
+                        (_) => _FullscreenImageViewer(
+                          images: allImages,
+                          initialIndex: index == -1 ? 0 : index,
+                        ),
+                  ),
+                );
+              },
+              child: Transform.scale(
+                scale: isDecrypted ? 1 : 10,
+                child: Skeletonizer(
+                  enabled: isLoading,
+                  child: Image.memory(bytes!, fit: BoxFit.cover),
+                ),
               ),
             ),
           ),
