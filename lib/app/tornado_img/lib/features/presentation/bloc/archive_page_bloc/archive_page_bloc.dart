@@ -94,6 +94,10 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               images.add(value.image);
             }
 
+            // Prevent a UI build if all images are decrypting
+            // this would override the state and the loading indicator would never show
+            if (isDecryptingAllImages) return;
+
             _emit(emit);
           },
           removedGalleryImage: (value) {
