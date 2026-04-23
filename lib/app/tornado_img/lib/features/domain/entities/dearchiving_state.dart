@@ -35,6 +35,22 @@ class DearchivingState with EquatableMixin {
     required this.failedImages,
   });
 
+  DearchivingState copyWith({
+    int? totalImages,
+    List<EncryptedImage>? loadingImages,
+    List<EncryptedImage>? dearchivedImages,
+    List<EncryptedImage>? failedImages,
+  }) {
+    return DearchivingState(
+      totalImages: totalImages ?? this.totalImages,
+      loadingImages: loadingImages ?? this.loadingImages.toList(),
+      dearchivedImages: dearchivedImages ?? this.dearchivedImages.toList(),
+      failedImages: failedImages ?? this.failedImages.toList(),
+    );
+  }
+
+  @override
+
   @override
   List<Object?> get props => [
     totalImages,

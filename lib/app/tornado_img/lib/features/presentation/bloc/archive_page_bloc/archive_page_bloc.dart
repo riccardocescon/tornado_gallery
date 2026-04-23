@@ -163,8 +163,20 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       _emit(emit);
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
+
+      final sortedImages = this.sortedImages;
+      final sortedImagesTable = {
+        for (int i = 0; i < sortedImages.length; i++) i: sortedImages[i],
+      };
+      sortedImages.removeWhere((img) => img.decryptInfo != null);
+      bool hasRemovedImages =
+          sortedImages.length != sortedImagesTable.keys.length;
+
       galleryBloc.add(
-        GalleryEvent.decryptImages(image: images, password: event.passphrase),
+        GalleryEvent.decryptImages(
+          image: sortedImages,
+          password: event.passphrase,
+        ),
       );
 
       isDecryptingAllImages = true;
@@ -172,10 +184,30 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           decrypted: (value) {
-            final dearchivingState = value.dearchivingState;
+            var dearchivingState = value.dearchivingState;
 
             final completed =
                 dearchivingState.progress == dearchivingState.totalImages;
+
+            if (hasRemovedImages) {
+              final sortedImagesTableValues =
+                  sortedImagesTable.entries.toList();
+              for (final dearchivedImage in dearchivingState.dearchivedImages) {
+                final item = sortedImagesTableValues.firstWhere(
+                  (value) => value.value.path == dearchivedImage.path,
+                );
+                if (item.value.isDecrypted) continue;
+
+                sortedImagesTable[item.key] = item.value.overrideWith(
+                  decryptInfo: dearchivedImage.decryptInfo,
+                );
+              }
+
+              dearchivingState = dearchivingState.copyWith(
+                totalImages: sortedImagesTable.length,
+                dearchivedImages: sortedImagesTable.values.toList(),
+              );
+            }
 
             emit(
               ArchivePageState.decryptingAllUI(
@@ -194,12 +226,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     });
   }
 
-  void _emit(Emitter<ArchivePageState> emit) {
+  List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
     // currently not sxisting, so its sorted by last modified date
-    final sortedImages = List<EncryptedImage>.from(images)..sort(
+    final sorted = List<EncryptedImage>.from(images);
+    sorted.sort(
       (a, b) => b.file.lastModifiedSync().compareTo(a.file.lastModifiedSync()),
     );
+    return sorted;
+  }
+
+  void _emit(Emitter<ArchivePageState> emit) {
 
     emit(ArchivePageState.ui(images: sortedImages));
   }
