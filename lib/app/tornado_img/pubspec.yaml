@@ -46,6 +46,7 @@ dependencies:
   focused_menu: ^1.0.5
   gal: ^2.3.2
   url_launcher: ^6.3.2
+  upgrader: ^13.1.0
 
 dev_dependencies:
   flutter_test:

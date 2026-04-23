@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
@@ -58,10 +59,16 @@ class _HomePageState extends State<HomePage> {
             spacing: 16,
             children: [
               const SizedBox(height: 2),
-              PageTitle(
-                title: "Tornado Gallery",
-                subtitle: "Visually encrypted your images for full privacy",
-                icon: Icons.lock_rounded,
+              Column(
+                spacing: 8,
+                children: [
+                  PageTitle(
+                    title: "Tornado Gallery",
+                    subtitle: "Visually encrypted your images for full privacy",
+                    icon: Icons.lock_rounded,
+                  ),
+                  UpdateAppCard(),
+                ],
               ),
               _actions(),
               const _ArchiveState(),

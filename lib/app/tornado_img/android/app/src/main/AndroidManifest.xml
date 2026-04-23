@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Requried for auto-updates checks-->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
 
     <application
         android:label="tornado_img"

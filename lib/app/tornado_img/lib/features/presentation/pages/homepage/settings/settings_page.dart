@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/assets.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
@@ -30,10 +31,16 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 2),
-            PageTitle(
-              title: "Settings",
-              subtitle: "Customize your app experience",
-              icon: Icons.settings,
+            Column(
+              spacing: 8,
+              children: [
+                PageTitle(
+                  title: "Settings",
+                  subtitle: "Customize your app experience",
+                  icon: Icons.settings,
+                ),
+                UpdateAppCard(),
+              ],
             ),
             Column(
               spacing: 12,
