@@ -38,10 +38,14 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     on<_Setup>((event, emit) async {
       emit(const ArchivePageState.loading());
 
+      bool hasFailure = false;
       final galleryStream = galleryReaderUsecase.call(null);
       await for (final result in galleryStream) {
         result.fold(
-          (failure) => emit(ArchivePageState.failure(message: failure.message)),
+          (failure) {
+            hasFailure = true;
+            emit(ArchivePageState.failure(message: failure.message));
+          },
           (streamImage) {
             switch (streamImage.type) {
               case EncryptedStreamImageType.newImage:
@@ -60,10 +64,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 images.removeWhere((img) => img.file.path == streamImage.path);
                 break;
             }
-
-            _emit(emit);
           },
         );
+      }
+
+      if (!hasFailure) {
+        _emit(emit);
       }
 
       await for (final appState in appBloc.stream) {
@@ -230,9 +236,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     // TODO: optimize it by saving the sorted images based on the user filter
     // currently not sxisting, so its sorted by last modified date
     final sorted = List<EncryptedImage>.from(images);
-    sorted.sort(
-      (a, b) => b.file.lastModifiedSync().compareTo(a.file.lastModifiedSync()),
-    );
+    sorted.sort((a, b) {
+      DateTime getDate(EncryptedImage img) {
+        try {
+          return img.file.lastModifiedSync();
+        } catch (_) {
+          return img.date;
+        }
+      }
+
+      return getDate(b).compareTo(getDate(a));
+    });
     return sorted;
   }
 

@@ -47,6 +47,7 @@ void main() {
     );
     registerFallbackValue(ImageDeleterParams(path: 'fallback'));
     registerFallbackValue(AppEvent.removeEncryptedImage(path: 'fallback'));
+    registerFallbackValue(GalleryEvent.decryptImages(image: [], password: ''));
   });
 
   setUp(() {
