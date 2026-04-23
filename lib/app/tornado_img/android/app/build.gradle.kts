@@ -60,6 +60,15 @@ android {
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
+
+            // R8 full-mode: minify + obfuscate Kotlin/Java bytecode
+            isMinifyEnabled = true
+            // Remove unused resources
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
