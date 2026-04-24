@@ -8,7 +8,7 @@
 PRODUCT_NAME = tornado_img
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.riccardocescon.tornadoImg
+PRODUCT_BUNDLE_IDENTIFIER = com.flockit.tornadogallery
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.riccardocescon. All rights reserved.

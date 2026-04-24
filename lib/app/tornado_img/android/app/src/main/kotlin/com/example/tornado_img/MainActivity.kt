@@ -1,4 +1,4 @@
-package com.riccardocescon.tornado_img
+package com.flockit.tornadogallery
 
 import io.flutter.embedding.android.FlutterActivity
 
