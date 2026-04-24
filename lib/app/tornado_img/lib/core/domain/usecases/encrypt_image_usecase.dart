@@ -59,15 +59,16 @@ class EncryptImageUseCase
       final encryptedFile = File(
         '${params.settings.outputFolder}/${params.fileId}.png',
       );
+      final isGalleryVisible = params.settings.galleryVisible;
       final encryptedImage = EncryptedImage(
         path: encryptedFile.path,
         encryptedInfo: BytesInfo(
           bytes: encoded,
           hash: ByteModeling.generateHash(encoded),
         ),
-        isPrivateFolder: !params.settings.galleryVisible,
+        isPrivateFolder: !isGalleryVisible,
         date: DateTime.now(),
-        assetId: params.assetId,
+        assetId: isGalleryVisible ? params.assetId : null,
       );
 
       return Right(encryptedImage);
