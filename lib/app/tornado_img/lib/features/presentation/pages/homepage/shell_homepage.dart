@@ -58,6 +58,11 @@ class _ShellHomepageState extends State<ShellHomepage> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: BlocBuilder<HomepageBloc, HomepageState>(
+        buildWhen:
+            (previous, current) => current.maybeMap(
+              homepageSet: (value) => true,
+              orElse: () => false,
+            ),
         builder: (context, state) {
           return state.maybeMap(
             orElse: () => const SizedBox.shrink(),
@@ -88,7 +93,7 @@ class _ShellHomepageState extends State<ShellHomepage> {
 
                     return FloatingActionButton(
                       onPressed: () {
-                        if (isDecrypting) {
+                        if (hasDecryptedAll) {
                           context.read<ArchivePageBloc>().add(
                             const ArchivePageEvent.encryptAll(),
                           );
@@ -110,7 +115,7 @@ class _ShellHomepageState extends State<ShellHomepage> {
                         );
                       },
                       child: Icon(
-                        context.read<ArchivePageBloc>().hasAllDecrypted
+                        hasDecryptedAll
                             ? Icons.lock_rounded
                             : Icons.lock_open_rounded,
                       ),
