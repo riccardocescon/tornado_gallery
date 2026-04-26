@@ -1,0 +1,36 @@
+# C++ source (encryption core — kept private)
+src/
+
+# Build artifacts
+build_windows/
+build/
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.obj
+*.exp
+*.pdb
+*.ilk
+
+# IDE files
+.vscode/
+.dart_tool/
+.idea/
+
+# Dart/Flutter
+pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform specific
+*.xcodeproj
+*.xcworkspace
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
