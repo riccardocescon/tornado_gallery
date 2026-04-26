@@ -1,0 +1,6 @@
+# CODEOWNERS file for tornado_gallery
+# This file defines who is responsible for code review
+# If the PR author is the codeowner, they can self-approve
+
+# Default owner for all files
+* @riccardocescon
