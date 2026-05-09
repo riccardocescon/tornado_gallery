@@ -7,10 +7,13 @@ import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/assets.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/theme/theme_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+part 'widgets/info_cards.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -122,6 +125,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     spacing: 8,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        "What's Tornado Gallery?",
+                        style: context.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        "Tornado Gallery aims to provide a new level of privacy for your photos by encyrpting them visually, preventing social embarrassment and adding an additional layer of security for picture scans from storage drivers",
+                        style: context.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                      _InfoCards(),
                       Text(
                         "Storage usage",
                         style: context.textTheme.bodyLarge?.copyWith(

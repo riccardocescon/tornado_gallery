@@ -16,7 +16,6 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
-part 'widgets/info_cards.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -72,7 +71,6 @@ class _HomePageState extends State<HomePage> {
               ),
               _actions(),
               const _ArchiveState(),
-              // const _InfoCards(),
             ],
           ),
         ),
