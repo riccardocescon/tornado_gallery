@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
               ),
               _actions(),
               const _ArchiveState(),
-              const _InfoCards(),
+              // const _InfoCards(),
             ],
           ),
         ),
@@ -82,62 +82,65 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget _actions() {
-    return Row(
-      spacing: 16,
-      children: [
-        Expanded(
-          child: _ActionCard(
-            icon: Icons.image_rounded,
-            title: "Select Photo",
-            subtitle: "Select from your gallery",
-            buttonText: "Open gallery",
-            buttonIcon: Icons.image_rounded,
-            darker: true,
-            onPressed:
-                () async {
-              final permissionState =
-                  await PhotoManager.requestPermissionExtend();
-              if (!mounted) return;
-              if (!permissionState.isAuth && !permissionState.isLimited) {
-                context.showSnackbar("Permission to access photos was denied");
-                return;
-              }
+    return IntrinsicHeight(
+      child: Row(
+        spacing: 16,
+        children: [
+          Expanded(
+            child: _ActionCard(
+              icon: Icons.image_rounded,
+              title: "Select Photo",
+              subtitle: "Select from your gallery",
+              buttonText: "Open gallery",
+              buttonIcon: Icons.image_rounded,
+              darker: true,
+              onPressed: () async {
+                final permissionState =
+                    await PhotoManager.requestPermissionExtend();
+                if (!mounted) return;
+                if (!permissionState.isAuth && !permissionState.isLimited) {
+                  context.showSnackbar(
+                    "Permission to access photos was denied",
+                  );
+                  return;
+                }
 
-              final assets = await AssetPicker.pickAssets(
-                context,
-                pickerConfig: AssetPickerConfig(
-                  requestType: RequestType.image,
-                  maxAssets: 100,
-                ),
-              );
-              if (!mounted) return;
-              if (assets?.isEmpty ?? true) {
-                context.showSnackbar("No images selected");
-                return;
-              }
+                final assets = await AssetPicker.pickAssets(
+                  context,
+                  pickerConfig: AssetPickerConfig(
+                    requestType: RequestType.image,
+                    maxAssets: 100,
+                  ),
+                );
+                if (!mounted) return;
+                if (assets?.isEmpty ?? true) {
+                  context.showSnackbar("No images selected");
+                  return;
+                }
 
-              context.read<HomepageBloc>().add(
-                HomepageEvent.galleryAssetsSelected(imagesSelected: assets!),
-              );
-            },
+                context.read<HomepageBloc>().add(
+                  HomepageEvent.galleryAssetsSelected(imagesSelected: assets!),
+                );
+              },
+            ),
           ),
-        ),
-        Expanded(
-          child: _ActionCard(
-            icon: Icons.lock_rounded,
-            title: "My encrypted photos",
-            subtitle: "View and decrypt",
-            buttonText: "Open archive",
-            buttonIcon: Icons.lock_rounded,
-            darker: false,
-            onPressed: () {
-              context.read<HomepageBloc>().add(
-                HomepageEvent.setScreen(page: Pages.archive),
-              );
-            },
+          Expanded(
+            child: _ActionCard(
+              icon: Icons.lock_rounded,
+              title: "My encrypted photos",
+              subtitle: "View and decrypt",
+              buttonText: "Open archive",
+              buttonIcon: Icons.lock_rounded,
+              darker: false,
+              onPressed: () {
+                context.read<HomepageBloc>().add(
+                  HomepageEvent.setScreen(page: Pages.archive),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

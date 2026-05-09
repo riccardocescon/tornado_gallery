@@ -48,6 +48,9 @@ dependencies:
   url_launcher: ^6.3.2
   upgrader: ^13.1.0
 
+  
+  device_preview_plus: ^2.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
