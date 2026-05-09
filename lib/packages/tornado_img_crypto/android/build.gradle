@@ -24,17 +24,13 @@ android {
         
         // Explicitly specify target architectures
         ndk {
-            abiFilters 'arm64-v8a', 'armeabi-v7a'
+            abiFilters 'arm64-v8a'
         }
         
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
                 arguments "-DANDROID_STL=c++_shared"
-                // Add 16KB page size compatibility
-                cFlags "-Wl,-z,max-page-size=16384"
-                cppFlags "-Wl,-z,max-page-size=16384"
-                // Ensure correct architecture targets
                 targets "tornado_crypto"
             }
         }

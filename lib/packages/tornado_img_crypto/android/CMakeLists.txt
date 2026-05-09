@@ -11,9 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(ANDROID)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     
-    # Add 16KB page size compatibility flags for Android
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-z,max-page-size=16384")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-z,max-page-size=16384")
+    # Add 16KB page size compatibility flags (linker only)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
     
     # Ensure correct architecture compilation
@@ -23,32 +21,36 @@ endif()
 
 # Add the main source files
 add_library(tornado_crypto SHARED
-    ../src/encryptor.cpp
+    ../../../cpp/src/encryptor.cpp
 )
 
 # Find required libraries for Android
 find_library(log-lib log)
 
-# Try to find OpenSSL if available
-find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
-    pkg_check_modules(OPENSSL QUIET openssl)
-endif()
+# Resolve the path to the prebuilt OpenSSL for the current ABI.
+# The third_party folder lives at  <repo>/lib/cpp/third_party/openssl-android/.
+# From this file's location (android/) we go up three levels to reach lib/cpp/.
+set(OPENSSL_PREBUILT_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../cpp/third_party/openssl-android/${ANDROID_ABI}"
+)
 
-# If OpenSSL is not found, use simplified crypto
-if(NOT OPENSSL_FOUND)
-    message(STATUS "OpenSSL not found, building with simplified crypto for Android")
-    target_compile_definitions(tornado_crypto PRIVATE
-        ANDROID_BUILD=1
-        NO_OPENSSL=1
+if(EXISTS "${OPENSSL_PREBUILT_DIR}/lib/libcrypto.a")
+    message(STATUS "Using prebuilt OpenSSL for ${ANDROID_ABI}: ${OPENSSL_PREBUILT_DIR}")
+
+    add_library(ssl_crypto STATIC IMPORTED)
+    set_target_properties(ssl_crypto PROPERTIES
+        IMPORTED_LOCATION "${OPENSSL_PREBUILT_DIR}/lib/libcrypto.a"
     )
-else()
-    # Link OpenSSL if available
-    target_link_libraries(tornado_crypto
-        ${OPENSSL_LIBRARIES}
-    )
+
     target_include_directories(tornado_crypto PRIVATE
-        ${OPENSSL_INCLUDE_DIRS}
+        "${OPENSSL_PREBUILT_DIR}/include"
+    )
+
+    target_link_libraries(tornado_crypto ssl_crypto)
+else()
+    message(WARNING
+        "Prebuilt OpenSSL not found for ABI ${ANDROID_ABI} at ${OPENSSL_PREBUILT_DIR}. "
+        "The build will likely fail."
     )
 endif()
 
@@ -59,5 +61,5 @@ target_link_libraries(tornado_crypto
 
 # Include directories
 target_include_directories(tornado_crypto PRIVATE
-    ../src
+    ../../../cpp/src
 )

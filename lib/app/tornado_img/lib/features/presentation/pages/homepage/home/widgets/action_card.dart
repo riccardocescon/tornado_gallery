@@ -58,24 +58,26 @@ class _ActionCard extends StatelessWidget {
                     : context.appColors.softBackground,
             iconColor: foregroundColor,
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
-            children: [
-              Text(
-                title,
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: foregroundColor,
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(
+                  title,
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: foregroundColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              Text(
-                subtitle,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: foregroundColor.withValues(alpha: 0.8),
+                Text(
+                  subtitle,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: foregroundColor.withValues(alpha: 0.8),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 6.0),
@@ -102,11 +104,14 @@ class _ActionCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(buttonIcon, size: 14, color: foregroundButtonColor),
-                  Text(
-                    buttonText,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: foregroundButtonColor,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      buttonText,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: foregroundButtonColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
