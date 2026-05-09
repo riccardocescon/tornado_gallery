@@ -63,7 +63,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   PageTitle(
                     title: "Tornado Gallery",
-                    subtitle: "Visually encrypted your images for full privacy",
+                    subtitle:
+                        "Visually encrypting your images for full privacy",
                     icon: Icons.lock_rounded,
                   ),
                   UpdateAppCard(),

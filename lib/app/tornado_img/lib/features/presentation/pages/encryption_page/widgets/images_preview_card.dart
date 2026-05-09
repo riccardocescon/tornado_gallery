@@ -21,26 +21,34 @@ class _ImagesPreviewCard extends StatelessWidget {
                     context.isDarkMode
                         ? null
                         : [
-                  BoxShadow(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                          BoxShadow(
+                            color: context.colorScheme.onSurface.withValues(
+                              alpha: 0.1,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
               ),
-              child: Row(
-                spacing: 16,
+              child: Column(
+                spacing: 12,
                 children: [
-                  _image(value.images.first.file),
-                  Expanded(
-                    child: _fileData(
-                      context,
-                      value.images.first,
-                      value.images.length,
-                      value.size,
-                      value.dateTime,
-                    ),
+                  Row(
+                    spacing: 16,
+                    children: [
+                      _image(value.images.first.file),
+                      Expanded(
+                        child: _fileData(
+                          context,
+                          value.images.first,
+                          value.images.length,
+                          value.size,
+                          value.dateTime,
+                        ),
+                      ),
+                    ],
                   ),
+                  _imagesCompletedCard(),
                 ],
               ),
             );
@@ -108,7 +116,6 @@ class _ImagesPreviewCard extends StatelessWidget {
       color: context.colorScheme.onSurface.withValues(alpha: 0.4),
     );
 
-    
     final images = "$imagesCount ${imagesCount > 1 ? 'images' : 'image'}";
 
     return Column(
@@ -144,6 +151,32 @@ class _ImagesPreviewCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _imagesCompletedCard() {
+    return BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
+      builder: (context, state) {
+        return state.maybeMap(
+          encrypted: (_) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: context.appColors.successContainer,
+                borderRadius: AppStyle.cardBorderRadius,
+              ),
+              child: Text(
+                'Encprytion completed successfully!',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.appColors.success,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          },
+          orElse: () => const SizedBox.shrink(),
+        );
+      },
     );
   }
 }
