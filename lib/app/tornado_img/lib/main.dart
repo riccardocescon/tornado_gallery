@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevicePreview(
-      enabled: kDebugMode && true,
+      enabled: kDebugMode && false,
       builder: (context) {
         return ListenableBuilder(
           listenable: getIt<ThemeNotifier>(),
