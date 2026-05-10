@@ -106,7 +106,7 @@ class _ArchivePageState extends State<ArchivePage> {
                   },
                   icon: Icon(
                     Icons.upload_file_rounded,
-                    color: context.colorScheme.primary.withValues(alpha: 0.7),
+                    color: context.colorScheme.onSurface,
                   ),
                 ),
               ],
