@@ -30,14 +30,15 @@ class _ArchivePageState extends State<ArchivePage> {
   static double _savedScrollOffset = 0;
   List<EncryptedImage> _lastUiImages = [];
 
-  bool _isSelectionMode = false;
   final Set<String> _selectedPaths = {};
 
   void _activateSelection(EncryptedImage image) {
     setState(() {
-      _isSelectionMode = true;
       _selectedPaths.add(image.storagePath.path);
     });
+    context.read<ArchivePageBloc>().add(
+      const ArchivePageEvent.activateSelectionMode(),
+    );
   }
 
   void _toggleSelection(String path) {
@@ -52,9 +53,11 @@ class _ArchivePageState extends State<ArchivePage> {
 
   void _cancelSelection() {
     setState(() {
-      _isSelectionMode = false;
       _selectedPaths.clear();
     });
+    context.read<ArchivePageBloc>().add(
+      const ArchivePageEvent.cancelSelectionMode(),
+    );
   }
 
   void _deleteSelected() {
@@ -106,8 +109,22 @@ class _ArchivePageState extends State<ArchivePage> {
         slivers: [
           SliverToBoxAdapter(child: const SizedBox(height: 18)),
           SliverToBoxAdapter(
-            child:
-                _isSelectionMode
+            child: BlocBuilder<ArchivePageBloc, ArchivePageState>(
+              buildWhen:
+                  (previous, current) => current.maybeWhen(
+                    ui:
+                        (images, isSelectionMode) => previous.maybeWhen(
+                          ui: (_, prevMode) => prevMode != isSelectionMode,
+                          orElse: () => true,
+                        ),
+                    orElse: () => false,
+                  ),
+              builder: (context, state) {
+                final isSelectionMode = state.maybeWhen(
+                  ui: (_, mode) => mode,
+                  orElse: () => false,
+                );
+                return isSelectionMode
                     ? Row(
                       children: [
                         TextButton(
@@ -181,7 +198,9 @@ class _ArchivePageState extends State<ArchivePage> {
                           ),
                         ),
                       ],
-                    ),
+                    );
+              },
+            ),
           ),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
           SliverToBoxAdapter(
@@ -200,13 +219,13 @@ class _ArchivePageState extends State<ArchivePage> {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
       buildWhen:
           (previous, current) => current.maybeWhen(
-            ui: (images) => true,
+            ui: (images, isSelectionMode) => true,
             decryptingAllUI: (dearchivingState) => true,
             orElse: () => false,
           ),
       builder: (context, state) {
         return state.maybeWhen(
-          ui: (images) {
+          ui: (images, isSelectionMode) {
             _lastUiImages = images;
             if (images.isEmpty) {
               return SliverFillRemaining(child: _noImages());
@@ -221,7 +240,7 @@ class _ArchivePageState extends State<ArchivePage> {
                     _ArchivedTile(
                       image: image,
                       dearchivingStateType: null,
-                      isSelectionMode: _isSelectionMode,
+                      isSelectionMode: isSelectionMode,
                       isSelected: _selectedPaths.contains(
                         image.storagePath.path,
                       ),
@@ -300,15 +319,15 @@ class _ArchivePageState extends State<ArchivePage> {
       buildWhen:
           (previous, current) => current.maybeWhen(
             ui:
-                (images) => previous.maybeWhen(
-                  ui: (prevImages) => prevImages.length != images.length,
+                (images, isSelectionMode) => previous.maybeWhen(
+                  ui: (prevImages, _) => prevImages.length != images.length,
                   orElse: () => true,
                 ),
             orElse: () => false,
           ),
       builder: (context, state) {
         return state.maybeWhen(
-          ui: (images) {
+          ui: (images, _) {
             final encryptedCount = images.length;
             if (encryptedCount == 0) return const SizedBox();
 

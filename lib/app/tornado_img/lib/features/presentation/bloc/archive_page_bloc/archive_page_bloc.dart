@@ -28,6 +28,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   bool isDecryptingAllImages = false;
   bool get hasAllDecrypted => images.every((img) => img.decryptInfo != null);
 
+  bool _isSelectionMode = false;
+
   final GalleryReaderUsecase galleryReaderUsecase;
   final ImageDeleterUsecase imageDeleterUsecase;
 
@@ -305,6 +307,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       emit(const ArchivePageState.imported());
     });
+    on<_ActivateSelectionMode>(_onActivateSelectionMode);
+    on<_CancelSelectionMode>(_onCancelSelectionMode);
   }
 
   List<EncryptedImage> get sortedImages {
@@ -326,7 +330,27 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   }
 
   void _emit(Emitter<ArchivePageState> emit) {
+    emit(
+      ArchivePageState.ui(
+        images: sortedImages,
+        isSelectionMode: _isSelectionMode,
+      ),
+    );
+  }
 
-    emit(ArchivePageState.ui(images: sortedImages));
+  void _onActivateSelectionMode(
+    _ActivateSelectionMode event,
+    Emitter<ArchivePageState> emit,
+  ) {
+    _isSelectionMode = true;
+    _emit(emit);
+  }
+
+  void _onCancelSelectionMode(
+    _CancelSelectionMode event,
+    Emitter<ArchivePageState> emit,
+  ) {
+    _isSelectionMode = false;
+    _emit(emit);
   }
 }

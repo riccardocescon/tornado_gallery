@@ -9,8 +9,10 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
   const factory ArchivePageState.importing() = _Importing;
   const factory ArchivePageState.deleting({required List<String> paths}) =
       _Deleting;
-  const factory ArchivePageState.ui({required List<EncryptedImage> images}) =
-      _UI;
+  const factory ArchivePageState.ui({
+    required List<EncryptedImage> images,
+    @Default(false) bool isSelectionMode,
+  }) = _UI;
   const factory ArchivePageState.decryptingAllUI({
     required DearchivingState dearchivingState,
   }) = _DecryptingAllUI;
@@ -22,7 +24,7 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     initial: () => [],
     loading: () => [],
     deleting: (paths) => [paths],
-    ui: (images) => [images],
+    ui: (images, isSelectionMode) => [images, isSelectionMode],
     importing: () => [],
     imported: () => [],
     decryptingAllUI: (dearchivingState) => [dearchivingState],

@@ -30,6 +30,15 @@ class _ShellHomepageState extends State<ShellHomepage> {
   void _onPop() {
     final bloc = context.read<HomepageBloc>();
     if (bloc.currentPage != Pages.home) {
+      final archiveBloc = context.read<ArchivePageBloc>();
+      if (bloc.currentPage == Pages.archive &&
+          archiveBloc.state.maybeWhen(
+            ui: (_, isSelectionMode) => isSelectionMode,
+            orElse: () => false,
+          )) {
+        archiveBloc.add(const ArchivePageEvent.cancelSelectionMode());
+        return;
+      }
       bloc.add(const HomepageEvent.setScreen(page: Pages.home));
       return;
     }

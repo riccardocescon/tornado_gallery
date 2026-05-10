@@ -19,4 +19,8 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
   const factory ArchivePageEvent.encryptAll() = _ArchivePageEncryptAll;
   const factory ArchivePageEvent.decryptAll({required String passphrase}) =
       _ArchivePageDecryptAll;
+
+  const factory ArchivePageEvent.activateSelectionMode() =
+      _ActivateSelectionMode;
+  const factory ArchivePageEvent.cancelSelectionMode() = _CancelSelectionMode;
 }
