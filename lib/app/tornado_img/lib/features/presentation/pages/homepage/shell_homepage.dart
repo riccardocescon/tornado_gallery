@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
@@ -18,6 +19,7 @@ class ShellHomepage extends StatefulWidget {
 class _ShellHomepageState extends State<ShellHomepage> {
   final pages = const [HomePage(), ArchivePage(), SettingsPage()];
   late final PageController _pageController = PageController();
+  DateTime? _lastBackPress;
 
   @override
   void dispose() {
@@ -25,9 +27,38 @@ class _ShellHomepageState extends State<ShellHomepage> {
     super.dispose();
   }
 
+  void _onPop() {
+    final bloc = context.read<HomepageBloc>();
+    if (bloc.currentPage != Pages.home) {
+      bloc.add(const HomepageEvent.setScreen(page: Pages.home));
+      return;
+    }
+
+    final now = DateTime.now();
+    if (_lastBackPress != null &&
+        now.difference(_lastBackPress!) < const Duration(seconds: 1)) {
+      SystemNavigator.pop();
+      return;
+    }
+
+    _lastBackPress = now;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Press back again to exit the app'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<HomepageBloc, HomepageState>(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _onPop();
+      },
+      child: BlocListener<HomepageBloc, HomepageState>(
       listener: (context, state) {
         state.maybeMap(
           homepageSet: (value) {
@@ -50,6 +81,7 @@ class _ShellHomepageState extends State<ShellHomepage> {
         ),
         floatingActionButton: _fab(),
         bottomNavigationBar: BottomAppNavBar(),
+      ),
       ),
     );
   }
