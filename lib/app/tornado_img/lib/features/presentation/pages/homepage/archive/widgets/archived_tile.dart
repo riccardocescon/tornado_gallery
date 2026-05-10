@@ -219,6 +219,8 @@ class _ArchivedTileState extends State<_ArchivedTile> {
           style: context.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         Expanded(
           child: Column(

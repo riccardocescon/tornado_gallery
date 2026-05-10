@@ -77,13 +77,17 @@ class EncryptedImagePage extends StatelessWidget {
     final isDecrypted = image.decryptInfo != null;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8,
             children: [
               ContainedItem.icon(icon: Icons.lock_rounded),
-              Text(image.name, style: context.textTheme.headlineSmall),
+              Expanded(
+                child: Text(image.name, style: context.textTheme.headlineSmall),
+              ),
             ],
           ),
         ),
