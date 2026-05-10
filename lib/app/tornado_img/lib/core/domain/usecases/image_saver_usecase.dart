@@ -14,13 +14,18 @@ class ImageSaverUsecase extends EncrpytionUseCase<void, ImageSaverParams> {
   @override
   Future<Either<EncryptionFailure, void>> call(ImageSaverParams params) async {
     try {
-      final fixedFileName = params.fileName.split('.').first;
+
+      // For the private folder, the name must contain the extension, but for the gallery, it must not
+      final fixedFileName =
+          params.path != null
+              ? params.fileName
+              : params.fileName.split('.').first;
 
       await storageRepo.save(
         bytes: params.bytes,
         fileName: fixedFileName,
-        path: null,
-        album: null,
+        path: params.path,
+        album: params.album,
       );
       return const Right(null);
     } catch (e) {
@@ -33,6 +38,39 @@ class ImageSaverUsecase extends EncrpytionUseCase<void, ImageSaverParams> {
 class ImageSaverParams {
   final Uint8List bytes;
   final String fileName;
+  final String? path;
+  final String? album;
 
-  ImageSaverParams({required this.bytes, required this.fileName});
+  ImageSaverParams._({
+    required this.bytes,
+    required this.fileName,
+    required this.path,
+    required this.album,
+  });
+
+  factory ImageSaverParams.gallery({
+    required Uint8List bytes,
+    required String fileName,
+    String? album,
+  }) {
+    return ImageSaverParams._(
+      bytes: bytes,
+      fileName: fileName,
+      album: album,
+      path: null,
+    );
+  }
+
+  factory ImageSaverParams.appFolder({
+    required Uint8List bytes,
+    required String fileName,
+    required String path,
+  }) {
+    return ImageSaverParams._(
+      bytes: bytes,
+      fileName: fileName,
+      path: path,
+      album: null,
+    );
+  }
 }

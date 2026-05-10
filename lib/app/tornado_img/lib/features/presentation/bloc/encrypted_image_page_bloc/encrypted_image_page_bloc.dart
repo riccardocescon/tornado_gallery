@@ -112,7 +112,7 @@ class EncryptedImagePageBloc
     on<_SaveImage>((event, emit) async {
       final bytes = image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;
       final foSave = await imageSaverUsecase.call(
-        ImageSaverParams(bytes: bytes, fileName: image.name),
+        ImageSaverParams.gallery(bytes: bytes, fileName: image.name),
       );
       foSave.fold(
         (failure) =>

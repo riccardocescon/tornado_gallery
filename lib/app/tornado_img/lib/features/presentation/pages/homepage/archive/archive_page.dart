@@ -4,16 +4,20 @@ import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
+import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 
 part 'widgets/archived_tile.dart';
+part 'widgets/import_images_bottom_sheet.dart';
 
 class ArchivePage extends StatefulWidget {
   const ArchivePage({super.key});
@@ -54,7 +58,7 @@ class _ArchivePageState extends State<ArchivePage> {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -65,10 +69,47 @@ class _ArchivePageState extends State<ArchivePage> {
         slivers: [
           SliverToBoxAdapter(child: const SizedBox(height: 18)),
           SliverToBoxAdapter(
-            child: PageTitle(
-              title: "Archive",
-              subtitle: "View and manage your archived images",
-              icon: Icons.archive,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: PageTitle(
+                    title: "Archive",
+                    subtitle: "View and manage your archived images",
+                    icon: Icons.archive,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    final assets = await PicturesProvider.pickImagesFromGallery(
+                      context,
+                    );
+
+                    assets.fold(
+                      (errMessage) {
+                        if (errMessage != null) {
+                          context.showSnackbar(errMessage);
+                        }
+                      },
+                      (assets) {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) {
+                            return BlocProvider.value(
+                              value: context.read<ArchivePageBloc>(),
+                              child: _ImportImagesBottomSheet(assets: assets),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  icon: Icon(
+                    Icons.upload_file_rounded,
+                    color: context.colorScheme.primary.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
             ),
           ),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
@@ -87,8 +128,7 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget _images() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
       buildWhen:
-          (previous, current) =>
-              current.maybeWhen(
+          (previous, current) => current.maybeWhen(
             ui: (images) => true,
             decryptingAllUI: (dearchivingState) => true,
             orElse: () => false,
@@ -102,7 +142,6 @@ class _ArchivePageState extends State<ArchivePage> {
             }
 
             return SliverList.builder(
-              
               itemCount: images.length,
               itemBuilder: (context, index) {
                 return Column(

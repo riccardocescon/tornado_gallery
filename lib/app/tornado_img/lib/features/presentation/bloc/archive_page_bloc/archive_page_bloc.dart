@@ -1,11 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
+import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
@@ -28,11 +34,14 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
 
+  final ImageSaverUsecase imageSaverUseCase;
+
   ArchivePageBloc({
     required this.appBloc,
     required this.galleryBloc,
     required this.galleryReaderUsecase,
     required this.imageDeleterUsecase,
+    required this.imageSaverUseCase,
   })
     : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
@@ -230,11 +239,58 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       isDecryptingAllImages = false;
     });
+    on<_ImportImages>((event, emit) async {
+      emit(const ArchivePageState.importing());
+
+      for (final file in event.assets) {
+        final bytes = await file.originBytes;
+        if (bytes == null) continue;
+
+        final fileName = '${file.title ?? file.id}.png';
+        final params =
+            event.saveToAppFolder
+                ? ImageSaverParams.appFolder(
+                  bytes: bytes,
+                  fileName: fileName,
+                  path: await GalleryPathProvider.getEncryptedFolderPath(),
+                )
+                : ImageSaverParams.gallery(
+                  bytes: bytes,
+                  fileName: fileName,
+                  album: Constants.appFolderName,
+                );
+        final result = await imageSaverUseCase.call(params);
+        if (result.isLeft()) {
+          appLogger.logPageBloc(
+            'Failed to import image: $fileName',
+            error: result.left.message,
+          );
+        } else {
+          final hash = ByteModeling.generateHash(bytes);
+          final rootDirPath =
+              event.saveToGallery
+                  ? await GalleryPathProvider.getPublicFolderPath()
+                  : await GalleryPathProvider.getEncryptedFolderPath();
+          final path = '$rootDirPath/$fileName';
+
+          final encryptedImage = EncryptedImage(
+            encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+            date: DateTime.now(),
+            isPrivateFolder: event.saveToAppFolder,
+            assetId: file.id,
+            path: path,
+          );
+          appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
+        }
+      }
+
+      emit(const ArchivePageState.imported());
+    });
   }
 
   List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
-    // currently not sxisting, so its sorted by last modified date
+    // currently not existing, so its sorted by last modified date
     final sorted = List<EncryptedImage>.from(images);
     sorted.sort((a, b) {
       DateTime getDate(EncryptedImage img) {

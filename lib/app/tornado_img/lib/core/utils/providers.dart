@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:dartz/dartz.dart';
+import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class GalleryPathProvider {
 
@@ -98,10 +101,36 @@ class GalleryPathProvider {
     required bool galleryVisible,
   }) async {
     if (galleryVisible) {
-      // Per la galleria pubblica, ritorna null perché usiamo photo_manager
+      // For public gallery, we are using_manager
       return null;
     } else {
       return await getEncryptedFolderPath();
     }
+  }
+}
+
+class PicturesProvider {
+  static Future<Either<String?, List<AssetEntity>>> pickImagesFromGallery(
+    BuildContext context,
+  ) async {
+    final permissionState = await PhotoManager.requestPermissionExtend();
+    if (!context.mounted) return Left(null);
+    if (!permissionState.isAuth && !permissionState.isLimited) {
+      return Left("Permission to access photos was denied");
+    }
+
+    final assets = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: AssetPickerConfig(
+        requestType: RequestType.image,
+        maxAssets: 100,
+      ),
+    );
+    if (!context.mounted) return Left(null);
+    if (assets?.isEmpty ?? true) {
+      return Left("No images selected");
+    }
+
+    return Right(assets!);
   }
 }

@@ -42,6 +42,7 @@ void setupInjectionContainer() {
       galleryBloc: getIt(),
       galleryReaderUsecase: getIt(),
       imageDeleterUsecase: getIt(),
+      imageSaverUseCase: getIt(),
     ),
   );
   getIt.registerFactory(

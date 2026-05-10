@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
@@ -230,6 +232,8 @@ class AppRepositoryImpl implements AppRepository {
     String path,
     bool isPrivateFolder,
   ) async {
+    try {
+
     final folder = EncryptedFolder.empty(path, isPrivateFolder);
     final files = Directory(path).listSync();
     for (final fileSystem in files) {
@@ -255,6 +259,23 @@ class AppRepositoryImpl implements AppRepository {
       }
     }
     return folder;
+    } catch (e) {
+      appLogger.logRepository(
+        'Error loading subfolder at $path',
+        error: e.toString(),
+      );
+
+      if (kDebugMode) {
+        log(
+          "---------------- DELETING BAD CREATED FOLDER: $path ----------------",
+        );
+        final file = File(path);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      }
+      return EncryptedFolder.empty(path, isPrivateFolder);
+    }
   }
 
   Future<EncryptedFolder> _scanFullFolderPrivate(String path) async {
