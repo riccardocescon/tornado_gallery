@@ -37,7 +37,7 @@ class EncryptedImagePageBloc
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
       image = appBloc.encryptedImages.firstWhere(
-        (img) => img.file.path == event.imagePath,
+        (img) => img.storagePath.file.path == event.imagePath,
       );
 
       emit(EncryptedImagePageState.ui(image: image));
@@ -46,7 +46,7 @@ class EncryptedImagePageBloc
       await for (final state in _streamManager!.stream) {
         state.maybeMap(
           updatedGalleryImage: (value) {
-            if (value.image.file.path != event.imagePath) return;
+            if (value.image.storagePath.file.path != event.imagePath) return;
 
             image = value.image;
             emit(EncryptedImagePageState.ui(image: image));
@@ -77,11 +77,13 @@ class EncryptedImagePageBloc
         final completed = state.maybeMap(
           decrypted: (value) {
             final decryptedImage = value.dearchivingState.dearchivedImages
-                .firstWhereOrNull((e) => e.file.path == image.file.path);
+                .firstWhereOrNull(
+                  (e) => e.storagePath.file.path == image.storagePath.file.path,
+                );
             if (decryptedImage != null) {
               appBloc.add(
                 AppEvent.setDecryptedInfo(
-                  path: decryptedImage.path,
+                  path: decryptedImage.storagePath.path,
                   decryptedInfo: decryptedImage.decryptInfo!,
                 ),
               );
@@ -105,7 +107,7 @@ class EncryptedImagePageBloc
     on<_Restore>((event, emit) {
       image = image.overrideWith(decryptInfo: null);
       appBloc.add(
-        AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
+        AppEvent.setDecryptedInfo(path: image.storagePath.path, decryptedInfo: null),
       );
       emit(EncryptedImagePageState.ui(image: image));
     });

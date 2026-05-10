@@ -114,7 +114,7 @@ class _FullscreenImageViewerState extends State<_FullscreenImageViewer>
                 final bytes =
                     image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;
                 return _ZoomablePage(
-                  key: ValueKey(image.path),
+                  key: ValueKey(image.storagePath.path),
                   bytes: bytes,
                   onZoomChanged: (zoomed) => _isZoomed.value = zoomed,
                 );

@@ -3,6 +3,7 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
 class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
   final StorageRepository storageRepo;
@@ -15,8 +16,7 @@ class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
   ) async {
     try {
       final result = await storageRepo.delete(
-        params.path,
-        assetId: params.assetId,
+        params.images.map((img) => img.storagePath).toList(),
       );
       return Right(result);
     } catch (e) {
@@ -27,8 +27,7 @@ class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
 }
 
 class ImageDeleterParams {
-  final String path;
-  final String? assetId;
+  final List<EncryptedImage> images;
 
-  ImageDeleterParams({required this.path, this.assetId});
+  ImageDeleterParams({required this.images});
 }

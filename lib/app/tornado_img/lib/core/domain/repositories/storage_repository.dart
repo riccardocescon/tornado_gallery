@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
 abstract class StorageRepository {
@@ -12,5 +13,5 @@ abstract class StorageRepository {
   Stream<EncryptedStreamImage> readPrivateImages(String path);
   Stream<EncryptedStreamImage> readPublicGalleryImages();
   Future<bool> imageExists(String path, String fileName);
-  Future<bool> delete(String path, {String? assetId});
+  Future<bool> delete(List<StoragePath> images);
 }

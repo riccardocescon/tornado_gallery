@@ -12,7 +12,6 @@ import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
-import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 
@@ -30,6 +29,44 @@ class _ArchivePageState extends State<ArchivePage> {
   final ScrollController _scrollController = ScrollController();
   static double _savedScrollOffset = 0;
   List<EncryptedImage> _lastUiImages = [];
+
+  bool _isSelectionMode = false;
+  final Set<String> _selectedPaths = {};
+
+  void _activateSelection(EncryptedImage image) {
+    setState(() {
+      _isSelectionMode = true;
+      _selectedPaths.add(image.storagePath.path);
+    });
+  }
+
+  void _toggleSelection(String path) {
+    setState(() {
+      if (_selectedPaths.contains(path)) {
+        _selectedPaths.remove(path);
+      } else {
+        _selectedPaths.add(path);
+      }
+    });
+  }
+
+  void _cancelSelection() {
+    setState(() {
+      _isSelectionMode = false;
+      _selectedPaths.clear();
+    });
+  }
+
+  void _deleteSelected() {
+    final selectedImages =
+        _lastUiImages
+            .where((img) => _selectedPaths.contains(img.storagePath.path))
+            .toList();
+    context.read<ArchivePageBloc>().add(
+      ArchivePageEvent.delete(images: selectedImages),
+    );
+    _cancelSelection();
+  }
 
   @override
   void initState() {
@@ -69,48 +106,82 @@ class _ArchivePageState extends State<ArchivePage> {
         slivers: [
           SliverToBoxAdapter(child: const SizedBox(height: 18)),
           SliverToBoxAdapter(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: PageTitle(
-                    title: "Archive",
-                    subtitle: "View and manage your archived images",
-                    icon: Icons.archive,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final assets = await PicturesProvider.pickImagesFromGallery(
-                      context,
-                    );
+            child:
+                _isSelectionMode
+                    ? Row(
+                      children: [
+                        TextButton(
+                          onPressed: _cancelSelection,
+                          child: const Text("Cancel"),
+                        ),
+                        const Spacer(),
+                        Text(
+                          "${_selectedPaths.length} selected",
+                          style: context.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed:
+                              _selectedPaths.isEmpty ? null : _deleteSelected,
+                          icon: Icon(
+                            Icons.delete_rounded,
+                            color:
+                                _selectedPaths.isEmpty
+                                    ? context.colorScheme.onSurface.withValues(
+                                      alpha: 0.3,
+                                    )
+                                    : context.colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    )
+                    : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: PageTitle(
+                            title: "Archive",
+                            subtitle: "View and manage your archived images",
+                            icon: Icons.archive,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            final assets =
+                                await PicturesProvider.pickImagesFromGallery(
+                                  context,
+                                );
 
-                    assets.fold(
-                      (errMessage) {
-                        if (errMessage != null) {
-                          context.showSnackbar(errMessage);
-                        }
-                      },
-                      (assets) {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (_) {
-                            return BlocProvider.value(
-                              value: context.read<ArchivePageBloc>(),
-                              child: _ImportImagesBottomSheet(assets: assets),
+                            assets.fold(
+                              (errMessage) {
+                                if (errMessage != null) {
+                                  context.showSnackbar(errMessage);
+                                }
+                              },
+                              (assets) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (_) {
+                                    return BlocProvider.value(
+                                      value: context.read<ArchivePageBloc>(),
+                                      child: _ImportImagesBottomSheet(
+                                        assets: assets,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    );
-                  },
-                  icon: Icon(
-                    Icons.upload_file_rounded,
-                    color: context.colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
+                          icon: Icon(
+                            Icons.upload_file_rounded,
+                            color: context.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
           ),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
           SliverToBoxAdapter(
@@ -144,11 +215,19 @@ class _ArchivePageState extends State<ArchivePage> {
             return SliverList.builder(
               itemCount: images.length,
               itemBuilder: (context, index) {
+                final image = images[index];
                 return Column(
                   children: [
                     _ArchivedTile(
-                      image: images[index],
+                      image: image,
                       dearchivingStateType: null,
+                      isSelectionMode: _isSelectionMode,
+                      isSelected: _selectedPaths.contains(
+                        image.storagePath.path,
+                      ),
+                      onToggleSelection:
+                          () => _toggleSelection(image.storagePath.path),
+                      onActivateSelection: () => _activateSelection(image),
                     ),
                     if (index != images.length - 1)
                       Divider(
@@ -168,9 +247,11 @@ class _ArchivePageState extends State<ArchivePage> {
               itemCount: dearchivingState.totalImages,
               itemBuilder: (context, index) {
                 final image = dearchivingState.allImages.firstWhere(
-                  (e) => e.path == _lastUiImages[index].path,
+                  (e) =>
+                      e.storagePath.path ==
+                      _lastUiImages[index].storagePath.path,
                 );
-                final state = dearchivingState.getState(image.path);
+                final state = dearchivingState.getState(image.storagePath.path);
 
                 return Column(
                   children: [

@@ -120,7 +120,10 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     for (final image in event.image) {
       final result = await decryptUseCase.call(
-        DecryptImageParams(file: image.file, password: event.password),
+        DecryptImageParams(
+          file: image.storagePath.file,
+          password: event.password,
+        ),
       );
 
       loading.remove(image);
@@ -132,7 +135,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         dearchived.add(updatedImage);
         appBloc.add(
           AppEvent.setDecryptedInfo(
-            path: updatedImage.path,
+            path: updatedImage.storagePath.path,
             decryptedInfo: result.right,
           ),
         );
@@ -156,7 +159,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     final encryptedImages = appBloc.encryptedImages;
     final exists = encryptedImages.any(
-      (img) => img.file.path == '$destinationPath/$imageId.png',
+      (img) => img.storagePath.file.path == '$destinationPath/$imageId.png',
     );
     return exists;
   }

@@ -65,12 +65,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 break;
               case EncryptedStreamImageType.updatedImage:
                 images.removeWhere(
-                  (img) => img.file.path == streamImage.image!.file.path,
+                  (img) =>
+                      img.storagePath.file.path ==
+                      streamImage.image!.storagePath.file.path,
                 );
                 images.add(streamImage.image!);
                 break;
               case EncryptedStreamImageType.deletedImage:
-                images.removeWhere((img) => img.file.path == streamImage.path);
+                images.removeWhere(
+                  (img) => img.storagePath.file.path == streamImage.path,
+                );
                 break;
             }
           },
@@ -85,26 +89,28 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         appState.maybeMap(
           addedGalleryImage: (value) {
             final alreadyExists = images.any(
-              (img) => img.file.path == value.image.file.path,
+              (img) =>
+                  img.storagePath.file.path ==
+                  value.image.storagePath.file.path,
             );
             if (!alreadyExists) {
               images.add(value.image);
               _emit(emit);
             } else {
               appLogger.logPageBloc(
-                'Image already exists in gallery, skipping add: ${value.image.file.path}',
+                'Image already exists in gallery, skipping add: ${value.image.storagePath.file.path}',
               );
             }
           },
           updatedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.file.path == value.image.file.path,
+              (img) => img.storagePath.file.path == value.image.storagePath.file.path,
             );
             if (index != -1) {
               images[index] = value.image;
             } else {
               appLogger.logPageBloc(
-                'Updated image not found in gallery, adding as new: ${value.image.file.path}',
+                'Updated image not found in gallery, adding as new: ${value.image.storagePath.file.path}',
               );
               images.add(value.image);
             }
@@ -117,7 +123,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           },
           removedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.file.path == value.path,
+              (img) => img.storagePath.file.path == value.path,
             );
 
             if (index != -1) {
@@ -143,10 +149,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       
     });
     on<_ArchivePageDelete>((event, emit) async {
-      deletingImagesQueue.add(event.path);
+      deletingImagesQueue.addAll(
+        event.images.map((img) => img.storagePath.path),
+      );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
       final result = await imageDeleterUsecase.call(
-        ImageDeleterParams(path: event.path, assetId: event.assetId),
+        ImageDeleterParams(images: event.images),
       );
 
       result.fold(
@@ -159,7 +167,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         },
         (deleted) {
           if (deleted) {
-            appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
+            for (final image in event.images) {
+              appBloc.add(
+                AppEvent.removeEncryptedImage(path: image.storagePath.path),
+              );
+            }
           } else {
             _emit(emit);
           }
@@ -171,7 +183,10 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         final image = images[i].overrideWith(decryptInfo: null);
 
         appBloc.add(
-          AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
+          AppEvent.setDecryptedInfo(
+            path: image.storagePath.path,
+            decryptedInfo: null,
+          ),
         );
       }
       isDecryptingAllImages = false;
@@ -209,7 +224,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                   sortedImagesTable.entries.toList();
               for (final dearchivedImage in dearchivingState.dearchivedImages) {
                 final item = sortedImagesTableValues.firstWhere(
-                  (value) => value.value.path == dearchivedImage.path,
+                  (value) =>
+                      value.value.storagePath.path ==
+                      dearchivedImage.storagePath.path,
                 );
                 if (item.value.isDecrypted) continue;
 
@@ -274,11 +291,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           final path = '$rootDirPath/$fileName';
 
           final encryptedImage = EncryptedImage(
+            storagePath: StoragePath(
+              path: path,
+              isPrivateFolder: event.saveToAppFolder,
+              assetId: file.id,
+            ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: DateTime.now(),
-            isPrivateFolder: event.saveToAppFolder,
-            assetId: file.id,
-            path: path,
           );
           appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
         }
@@ -295,7 +314,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     sorted.sort((a, b) {
       DateTime getDate(EncryptedImage img) {
         try {
-          return img.file.lastModifiedSync();
+          return img.storagePath.file.lastModifiedSync();
         } catch (_) {
           return img.date;
         }

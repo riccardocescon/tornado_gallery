@@ -165,7 +165,7 @@ class EncryptionPageBloc
             .toList();
     for (final newArchive in toUpdate) {
       
-      alreadyArchivedImages.add(newArchive.path);
+      alreadyArchivedImages.add(newArchive.storagePath.path);
       appBloc.add(AppEvent.addEncryptedImage(image: newArchive));
     }
   }

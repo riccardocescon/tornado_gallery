@@ -13,8 +13,7 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
   }) = _ImportImages;
 
   const factory ArchivePageEvent.delete({
-    required String path,
-    String? assetId,
+    required List<EncryptedImage> images,
   }) = _ArchivePageDelete;
 
   const factory ArchivePageEvent.encryptAll() = _ArchivePageEncryptAll;

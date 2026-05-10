@@ -46,7 +46,9 @@ class __ImageState extends State<_Image> {
                 final bloc = context.read<EncryptedImagePageBloc>();
                 final allImages = context.read<AppBloc>().encryptedImages;
                 final index = allImages.indexWhere(
-                  (img) => img.file.path == bloc.image.file.path,
+                  (img) =>
+                      img.storagePath.file.path ==
+                      bloc.image.storagePath.file.path,
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(

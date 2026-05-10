@@ -66,7 +66,7 @@ GoRouter routes = GoRouter(
                   (context) =>
                       getIt<EncryptedImagePageBloc>()..add(
                         EncryptedImagePageEvent.setup(
-                          imagePath: image.file.path,
+                          imagePath: image.storagePath.file.path,
                         ),
                       ),
               child: EncryptedImagePage(),

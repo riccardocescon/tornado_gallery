@@ -120,7 +120,9 @@ class AppRepositoryImpl implements AppRepository {
           final parentPath = Directory(event.path).parent.path;
           final parentFolder = _lookupTable[parentPath];
           if (parentFolder != null) {
-            parentFolder.images.removeWhere((img) => img.path == event.path);
+            parentFolder.images.removeWhere(
+              (img) => img.storagePath.path == event.path,
+            );
             appLogger.logPageBloc(
               'File deleted: ${event.path}, removed from parent folder in lookup',
             );
@@ -150,13 +152,18 @@ class AppRepositoryImpl implements AppRepository {
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
         final newImage = EncryptedImage(
-          path: event.path,
+          storagePath: StoragePath(
+            path: event.path,
+            isPrivateFolder: rootFolder.isPrivateFolder,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
           date: date,
-          isPrivateFolder: rootFolder.isPrivateFolder,
         );
 
-        parentFolder.images.removeWhere((img) => img.path == event.path);
+        parentFolder.images.removeWhere(
+          (img) => img.storagePath.path == event.path,
+        );
         parentFolder.images.add(newImage);
         yield null;
       }
@@ -244,10 +251,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         folder.images.add(
           EncryptedImage(
-            path: fileSystem.path,
+              storagePath: StoragePath(
+                path: fileSystem.path,
+                isPrivateFolder: isPrivateFolder,
+                assetId: null,
+              ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
-            date: date,
-            isPrivateFolder: isPrivateFolder,
+              date: date,
           ),
         );
       } else {
@@ -290,10 +300,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         rootFolder.images.add(
           EncryptedImage(
-            path: fileSystem.path,
+            storagePath: StoragePath(
+              path: fileSystem.path,
+              isPrivateFolder: true,
+              assetId: null,
+            ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: date,
-            isPrivateFolder: true,
           ),
         );
       } else {
@@ -324,10 +337,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         rootFolder.images.add(
           EncryptedImage(
-            path: file.path,
+            storagePath: StoragePath(
+              path: file.path,
+              isPrivateFolder: false,
+              assetId: asset.id,
+            ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: asset.createDateTime,
-            isPrivateFolder: false,
           ),
         );
       } catch (e) {

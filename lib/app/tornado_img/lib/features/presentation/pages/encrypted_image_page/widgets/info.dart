@@ -13,7 +13,7 @@ class _InfoState extends State<_Info> {
 
   @override
   Widget build(BuildContext context) {
-    final stats = widget.image.file.statSync();
+    final stats = widget.image.storagePath.file.statSync();
     final size = stats.size;
     String sizeText;
     if (size < 1024) {
@@ -92,7 +92,7 @@ class _InfoState extends State<_Info> {
               _infoItem('Name', widget.image.name),
               _infoItem('Size', sizeText),
               _infoItem('Created', created),
-              _infoItem('Path', widget.image.file.path),
+              _infoItem('Path', widget.image.storagePath.file.path),
             ],
           ),
         ],

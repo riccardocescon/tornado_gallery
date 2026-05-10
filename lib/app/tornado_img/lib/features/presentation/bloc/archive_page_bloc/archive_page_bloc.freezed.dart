@@ -124,12 +124,12 @@ return decryptAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult Function( String path,  String? assetId)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete() when delete != null:
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll() when encryptAll != null:
+return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
 return decryptAll(_that.passphrase);case _:
   return orElse();
@@ -149,12 +149,12 @@ return decryptAll(_that.passphrase);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)  importImages,required TResult Function( String path,  String? assetId)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _ImportImages():
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete():
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll():
+return delete(_that.images);case _ArchivePageEncryptAll():
 return encryptAll();case _ArchivePageDecryptAll():
 return decryptAll(_that.passphrase);case _:
   throw StateError('Unexpected subclass');
@@ -173,12 +173,12 @@ return decryptAll(_that.passphrase);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult? Function( String path,  String? assetId)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete() when delete != null:
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll() when encryptAll != null:
+return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
 return decryptAll(_that.passphrase);case _:
   return null;
@@ -286,11 +286,16 @@ as bool,
 
 
 class _ArchivePageDelete extends ArchivePageEvent {
-  const _ArchivePageDelete({required this.path, this.assetId}): super._();
+  const _ArchivePageDelete({required final  List<EncryptedImage> images}): _images = images,super._();
   
 
- final  String path;
- final  String? assetId;
+ final  List<EncryptedImage> _images;
+ List<EncryptedImage> get images {
+  if (_images is EqualUnmodifiableListView) return _images;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_images);
+}
+
 
 /// Create a copy of ArchivePageEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -304,7 +309,7 @@ _$ArchivePageDeleteCopyWith<_ArchivePageDelete> get copyWith => __$ArchivePageDe
 
 @override
 String toString() {
-  return 'ArchivePageEvent.delete(path: $path, assetId: $assetId)';
+  return 'ArchivePageEvent.delete(images: $images)';
 }
 
 
@@ -315,7 +320,7 @@ abstract mixin class _$ArchivePageDeleteCopyWith<$Res> implements $ArchivePageEv
   factory _$ArchivePageDeleteCopyWith(_ArchivePageDelete value, $Res Function(_ArchivePageDelete) _then) = __$ArchivePageDeleteCopyWithImpl;
 @useResult
 $Res call({
- String path, String? assetId
+ List<EncryptedImage> images
 });
 
 
@@ -332,11 +337,10 @@ class __$ArchivePageDeleteCopyWithImpl<$Res>
 
 /// Create a copy of ArchivePageEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? path = null,Object? assetId = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
   return _then(_ArchivePageDelete(
-path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String,assetId: freezed == assetId ? _self.assetId : assetId // ignore: cast_nullable_to_non_nullable
-as String?,
+images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
+as List<EncryptedImage>,
   ));
 }
 
