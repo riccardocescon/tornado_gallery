@@ -14,6 +14,9 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
   const factory EncryptionPageEvent.setFileName({required String name}) =
       _SetFileName;
 
+  const factory EncryptionPageEvent.selectImage({required int index}) =
+      _SelectImage;
+
   const factory EncryptionPageEvent.toggleGalleryVisibility() =
       _ToggleGalleryVisibility;
 

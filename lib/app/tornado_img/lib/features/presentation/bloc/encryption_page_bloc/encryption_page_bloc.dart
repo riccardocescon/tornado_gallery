@@ -19,7 +19,8 @@ class EncryptionPageBloc
   final images = <GalleryImage>[];
 
   String password = '';
-  String fileName = '';
+  Map<int, String> fileNames = {};
+  int selectedImageIndex = 0;
 
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
@@ -30,26 +31,12 @@ class EncryptionPageBloc
     : super(const EncryptionPageState.initial()) {
     on<_Setup>((event, emit) async {
       images.addAll(event.images);
-      final size = images.first.file.lengthSync();
-      String sizeText;
-      if (size < 1024 * 1024) {
-        final sizeInKB = size / 1024;
-        sizeText = '${sizeInKB.toStringAsFixed(2)} KB';
-      } else {
-        final sizeInMB = size / (1024 * 1024);
-        sizeText = '${sizeInMB.toStringAsFixed(2)} MB';
+      for (int i = 0; i < images.length; i++) {
+        fileNames[i] = images[i].file.path.split('/').last.split('.').first;
       }
 
-      final dateTime = DateFormat(
-        "dd MM yyyy",
-      ).format(images.first.file.lastModifiedSync());
-      emit(
-        EncryptionPageState.ui(
-          images: images,
-          size: sizeText,
-          dateTime: dateTime.toString(),
-        ),
-      );
+      // Preload data as soon as they are available
+      _emitImageData(emit);
 
       final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
         galleryVisible: settings.galleryVisible,
@@ -61,7 +48,8 @@ class EncryptionPageBloc
       password = event.password;
     });
     on<_SetFileName>((event, emit) async {
-      fileName = event.name;
+      fileNames[selectedImageIndex] = event.name;
+      _emitImageData(emit);
     });
     on<_ToggleGalleryVisibility>((event, emit) async {
       final newGalleryVisible = !settings.galleryVisible;
@@ -85,6 +73,10 @@ class EncryptionPageBloc
     on<_ToggleDeleteOriginals>((event, emit) async {
       settings = settings.copyWith(deleteOriginals: !settings.deleteOriginals);
       _emitSettings(emit);
+    });
+    on<_SelectImage>((event, emit) async {
+      selectedImageIndex = event.index;
+      _emitImageData(emit);
     });
     on<_Encrypt>((event, emit) async {
       emit(
@@ -120,10 +112,16 @@ class EncryptionPageBloc
 
       galleryBloc.add(
         GalleryEvent.encryptImages(
-          images: images,
+          images: Map.fromEntries(
+            images.map(
+              (galleryImage) => MapEntry(
+                galleryImage,
+                fileNames[images.indexOf(galleryImage)],
+              ),
+            ),
+          ),
           password: password,
           settings: settings,
-          filename: fileName.isEmpty ? null : fileName,
         ),
       );
       await for (final state in galleryBloc.stream) {
@@ -168,6 +166,30 @@ class EncryptionPageBloc
       alreadyArchivedImages.add(newArchive.storagePath.path);
       appBloc.add(AppEvent.addEncryptedImage(image: newArchive));
     }
+  }
+
+  void _emitImageData(Emitter<EncryptionPageState> emit) {
+    final size = images[selectedImageIndex].file.lengthSync();
+    String sizeText;
+    if (size < 1024 * 1024) {
+      final sizeInKB = size / 1024;
+      sizeText = '${sizeInKB.toStringAsFixed(2)} KB';
+    } else {
+      final sizeInMB = size / (1024 * 1024);
+      sizeText = '${sizeInMB.toStringAsFixed(2)} MB';
+    }
+
+    final dateTime = DateFormat(
+      "dd MM yyyy",
+    ).format(images.first.file.lastModifiedSync());
+    emit(
+      EncryptionPageState.ui(
+        images: images,
+        fileName: fileNames[selectedImageIndex]!,
+        size: sizeText,
+        dateTime: dateTime.toString(),
+      ),
+    );
   }
 
   void _emitSettings(Emitter<EncryptionPageState> emit) {

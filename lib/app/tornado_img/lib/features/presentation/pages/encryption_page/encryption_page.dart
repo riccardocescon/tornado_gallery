@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +12,8 @@ import 'package:tornado_img_app/features/presentation/widgets/loading_container.
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 
 part 'widgets/images_preview_card.dart';
+part 'widgets/images_preview/single_image_layout.dart';
+part 'widgets/images_preview/multi_images_layout.dart';
 part 'widgets/password_card.dart';
 part 'widgets/options_card.dart';
 part 'widgets/options/output_folder_option.dart';

@@ -45,7 +45,9 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     final failed = <GalleryImage>[];
     final skippedImages = <GalleryImage>[];
 
-    for (final image in event.images) {
+    for (final entry in event.images.entries) {
+      final image = entry.key;
+      final filename = entry.value;
 
       final skipped = _isSkipped(
         event.settings.overrideImage,
@@ -63,7 +65,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         EncryptImageParams(
           file: image.file,
           password: event.password,
-            fileId: event.filename ?? image.id,
+            fileId: filename ?? image.id,
           settings: event.settings,
             assetId: image.id,
         ),
