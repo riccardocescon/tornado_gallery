@@ -53,41 +53,74 @@ class _MultiImagesLayoutState extends State<_MultiImagesLayout> {
                   itemSnapping: true,
                   itemBuilder: (context, index) {
                     final image = widget.images[index];
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ClipRRect(
-                        borderRadius: AppStyle.cardBorderRadius,
-                        child: Image.file(
-                          image.file,
-                          fit: BoxFit.cover,
-                          frameBuilder: (
-                            context,
-                            child,
-                            frame,
-                            wasSynchronouslyLoaded,
-                          ) {
-                            if (wasSynchronouslyLoaded) return child;
-                            if (frame == null) {
-                              return Container(
-                                color: Colors.grey,
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            fullscreenDialog: true,
+                            builder:
+                                (_) => FullscreenImageViewer(
+                                  images: widget.images,
+                                  getBytes:
+                                      (image) => image.file.readAsBytesSync(),
+                                  getFilePath: (image) => image.file.path,
+                                  initialIndex: index,
+                                ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ClipRRect(
+                          borderRadius: AppStyle.cardBorderRadius,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.file(
+                                image.file,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                                frameBuilder: (
+                                  context,
+                                  child,
+                                  frame,
+                                  wasSynchronouslyLoaded,
+                                ) {
+                                  if (wasSynchronouslyLoaded) return child;
+                                  if (frame == null) {
+                                    return Container(
+                                      color: Colors.grey,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return child;
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey,
+                                    child: const Icon(
+                                      Icons.broken_image_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                },
+                              ),
+                              if (index == _currentIndex)
+                                Positioned(
+                                  bottom: 8,
+                                  right: 8,
+                                  child: ContainedItem.icon(
+                                    icon: Icons.image_rounded,
+                                    size: 20,
                                   ),
                                 ),
-                              );
-                            }
-                            return child;
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey,
-                              child: const Icon(
-                                Icons.broken_image_rounded,
-                                color: Colors.white,
-                              ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
                       ),
                     );

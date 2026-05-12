@@ -22,37 +22,53 @@ class _SingleImageLayout extends StatelessWidget {
           borderRadius: AppStyle.cardBorderRadius,
           child: Stack(
             children: [
-              SizedBox.square(
-                dimension: 128,
-                child: Image.file(
-                  image.file,
-                  fit: BoxFit.cover,
-                  frameBuilder: (
-                    context,
-                    child,
-                    frame,
-                    wasSynchronouslyLoaded,
-                  ) {
-                    if (wasSynchronouslyLoaded) return child;
-                    if (frame == null) {
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      fullscreenDialog: true,
+                      builder:
+                          (_) => FullscreenImageViewer(
+                            images: [image],
+                            getBytes: (image) => image.file.readAsBytesSync(),
+                            getFilePath: (image) => image.file.path,
+                            initialIndex: 0,
+                          ),
+                    ),
+                  );
+                },
+                child: SizedBox.square(
+                  dimension: 128,
+                  child: Image.file(
+                    image.file,
+                    fit: BoxFit.cover,
+                    frameBuilder: (
+                      context,
+                      child,
+                      frame,
+                      wasSynchronouslyLoaded,
+                    ) {
+                      if (wasSynchronouslyLoaded) return child;
+                      if (frame == null) {
+                        return Container(
+                          color: Colors.grey,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      }
+                      return child;
+                    },
+                    errorBuilder: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        child: const Icon(
+                          Icons.broken_image_rounded,
+                          color: Colors.white,
                         ),
                       );
-                    }
-                    return child;
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey,
-                      child: const Icon(
-                        Icons.broken_image_rounded,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
               Positioned(

@@ -54,8 +54,13 @@ class __ImageState extends State<_Image> {
                   MaterialPageRoute<void>(
                     fullscreenDialog: true,
                     builder:
-                        (_) => _FullscreenImageViewer(
+                        (_) => FullscreenImageViewer(
                           images: allImages,
+                          getBytes:
+                              (image) =>
+                                  image.decryptInfo?.bytes ??
+                                  image.encryptedInfo.bytes,
+                          getFilePath: (image) => image.storagePath.path,
                           initialIndex: index == -1 ? 0 : index,
                         ),
                   ),
