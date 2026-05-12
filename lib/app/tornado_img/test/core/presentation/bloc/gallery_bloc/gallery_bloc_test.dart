@@ -65,10 +65,13 @@ void main() {
     mockDecryptUseCase = _MockDecryptImageUseCase();
     tImage = GalleryImage(id: _tImageId, file: tFile, date: DateTime(2024));
     tEncryptedImage = EncryptedImage(
-      path: 'encrypted_img1.enc',
+      storagePath: StoragePath(
+        path: 'encrypted_img1.enc',
+        isPrivateFolder: false,
+        assetId: null,
+      ),
       encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
       date: DateTime(2024),
-      isPrivateFolder: false,
     );
   });
 
@@ -97,12 +100,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -133,12 +135,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -169,12 +170,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/folder',
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -205,12 +205,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'mypassword',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/my/path',
               ),
-              filename: null,
             ),
           ),
       verify: (_) {
@@ -243,12 +242,11 @@ void main() {
         );
         b.add(
           GalleryEvent.encryptImages(
-            images: [tImage, image2],
+            images: {tImage: null, image2: null},
             password: 'secret',
             settings: EncryptionSettings.init().copyWith(
               outputFolder: _tDestination,
             ),
-            filename: null,
           ),
         );
       },
@@ -280,10 +278,13 @@ void main() {
       'skips image when overrideImage is false and image exists at destination',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         return _makeBloc(
           encrypt: mockEncryptionUseCase,
@@ -294,13 +295,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -322,10 +322,13 @@ void main() {
       'does not skip image when overrideImage is true even if image exists at destination',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         when(
           () => mockEncryptionUseCase.call(any()),
@@ -340,13 +343,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: true,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -378,13 +380,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -406,10 +407,13 @@ void main() {
       'skips existing images and encrypts new ones in a mixed batch',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         when(
           () => mockEncryptionUseCase.call(any()),
@@ -428,13 +432,12 @@ void main() {
         );
         b.add(
           GalleryEvent.encryptImages(
-            images: [tImage, image2],
+            images: {tImage: null, image2: null},
             password: 'secret',
             settings: EncryptionSettings.init().copyWith(
               outputFolder: _tDestination,
               overrideImage: false,
             ),
-            filename: null,
           ),
         );
       },

@@ -73,7 +73,7 @@ void main() {
 
       expect(result.isRight(), isTrue);
       result.fold((_) => fail('Expected Right'), (encryptedImage) {
-        expect(encryptedImage.path, '/my/folder/abc123.png');
+        expect(encryptedImage.storagePath.path, '/my/folder/abc123.png');
         expect(encryptedImage.encryptedInfo.bytes, tEncoded);
       });
       

@@ -17,10 +17,11 @@ class _MockGalleryBloc extends Mock implements GalleryBloc {}
 class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
 
 EncryptedImage _makeImage(String path) => EncryptedImage(
-  path: path,
+  storagePath: StoragePath(
+    path: path,
+    isPrivateFolder: true, assetId: null),
   encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
   date: DateTime(2024),
-  isPrivateFolder: true,
 );
 
 void main() {
@@ -79,7 +80,11 @@ void main() {
           ),
       act:
           (b) {
-        b.add(EncryptedImagePageEvent.setup(imagePath: tImage.file.path));
+        b.add(
+          EncryptedImagePageEvent.setup(
+            imagePath: tImage.storagePath.file.path,
+          ),
+        );
       },
       expect:
           () => [

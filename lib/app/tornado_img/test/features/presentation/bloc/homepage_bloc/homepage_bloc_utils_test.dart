@@ -114,7 +114,7 @@ void main() {
         expect(parentFolder.images.length, 1);
         expect(parentFolder.images.first.name, 'photo_1.jpg');
         expect(
-          safePath(parentFolder.images.first.file.path),
+          safePath(parentFolder.images.first.storagePath.file.path),
           safePath(imagePath),
         );
 
