@@ -96,6 +96,21 @@ class GalleryPathProvider {
     return directory.path;
   }
 
+  /// After saving a new image to the public gallery, call this with the exact
+  /// [fileName] (without extension) to retrieve the asset ID that PhotoManager
+  /// assigned to it. Returns null if not found.
+  static Future<String?> findGalleryAssetIdByName(String fileName) async {
+    final album = await getPublicFolder();
+    if (album == null) return null;
+    // Load a batch of recent assets to find the matching one by title.
+    final assets = await album.getAssetListPaged(page: 0, size: 200);
+    final baseName = fileName.split('.').first;
+    final match = assets.firstWhereOrNull(
+      (a) => a.title != null && a.title!.startsWith(baseName),
+    );
+    return match?.id;
+  }
+
   /// Metodo legacy per compatibilità
   static Future<String?> getOutputFolderRoot({
     required bool galleryVisible,

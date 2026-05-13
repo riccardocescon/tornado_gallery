@@ -41,7 +41,8 @@ class AppFolderStreamerUsecase {
       ]);
       _streamManager = StreamManager.fromStream(merged);
 
-      await for (final _ in _streamManager!.stream) {
+      await for (final _ in _streamManager!.stream
+          .debounceTime(const Duration(milliseconds: 200))) {
         yield (privateFolder, publicFolder);
       }
     } catch (e) {

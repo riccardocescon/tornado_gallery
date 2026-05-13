@@ -293,11 +293,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                   : await GalleryPathProvider.getEncryptedFolderPath();
           final path = '$rootDirPath/$fileName';
 
+          final String? galleryAssetId =
+              event.saveToGallery
+                  ? await GalleryPathProvider.findGalleryAssetIdByName(fileName)
+                  : null;
+
           final encryptedImage = EncryptedImage(
             storagePath: StoragePath(
               path: path,
               isPrivateFolder: event.saveToAppFolder,
-              assetId: asset.id,
+              assetId: galleryAssetId,
             ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: DateTime.now(),
