@@ -14,17 +14,11 @@ class _RenameBottomSheetState extends State<_RenameBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   String? _errorText;
 
-  static final _fileNameRegex = RegExp(r'^[a-zA-Z0-9]+$');
-  final images = getIt<AppBloc>().encryptedImages;
-
   String? _validate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name cannot be empty';
-    }
-    if (!_fileNameRegex.hasMatch(value)) {
-      return 'Name can only contain letters and numbers';
-    }
+    final baseError = validateFileName(value);
+    if (baseError != null) return baseError;
 
+    final images = getIt<AppBloc>().encryptedImages;
     final alreadyExists = images.any((image) {
       final nameWithoutExtension = image.name.split('.').first;
       return nameWithoutExtension == value;

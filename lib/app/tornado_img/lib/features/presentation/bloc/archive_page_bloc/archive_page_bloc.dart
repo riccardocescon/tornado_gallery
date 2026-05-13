@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
@@ -15,6 +14,7 @@ import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/features/domain/entities/import_image_asset.dart';
 
 part 'archive_page_bloc.freezed.dart';
 part 'archive_page_event.dart';
@@ -261,11 +261,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     on<_ImportImages>((event, emit) async {
       emit(const ArchivePageState.importing());
 
-      for (final file in event.assets) {
-        final bytes = await file.originBytes;
+      for (final item in event.assets) {
+        final asset = item.asset;
+        final bytes = await asset.originBytes;
         if (bytes == null) continue;
 
-        final fileName = '${file.title ?? file.id}.png';
+        final fileName = '${item.name}.png';
         final params =
             event.saveToAppFolder
                 ? ImageSaverParams.appFolder(
@@ -296,7 +297,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             storagePath: StoragePath(
               path: path,
               isPrivateFolder: event.saveToAppFolder,
-              assetId: file.id,
+              assetId: asset.id,
             ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: DateTime.now(),

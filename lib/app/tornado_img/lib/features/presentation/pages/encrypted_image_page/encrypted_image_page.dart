@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
-import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/presentation/pages/fullscreen_image_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
@@ -15,6 +14,7 @@ import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
+import 'package:tornado_img_app/core/utils/file_name_validator.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/image.dart';

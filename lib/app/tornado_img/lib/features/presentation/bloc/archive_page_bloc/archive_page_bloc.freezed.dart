@@ -130,7 +130,7 @@ return cancelSelectionMode(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,TResult Function()?  activateSelectionMode,TResult Function()?  cancelSelectionMode,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,TResult Function()?  activateSelectionMode,TResult Function()?  cancelSelectionMode,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
@@ -157,7 +157,7 @@ return cancelSelectionMode();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,required TResult Function()  activateSelectionMode,required TResult Function()  cancelSelectionMode,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,required TResult Function()  activateSelectionMode,required TResult Function()  cancelSelectionMode,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _ImportImages():
@@ -183,7 +183,7 @@ return cancelSelectionMode();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<AssetEntity> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,TResult? Function()?  activateSelectionMode,TResult? Function()?  cancelSelectionMode,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,TResult? Function()?  activateSelectionMode,TResult? Function()?  cancelSelectionMode,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
@@ -229,11 +229,11 @@ String toString() {
 
 
 class _ImportImages extends ArchivePageEvent {
-  const _ImportImages({required final  List<AssetEntity> assets, required this.saveToAppFolder, required this.saveToGallery}): _assets = assets,super._();
+  const _ImportImages({required final  List<ImportImageAsset> assets, required this.saveToAppFolder, required this.saveToGallery}): _assets = assets,super._();
   
 
- final  List<AssetEntity> _assets;
- List<AssetEntity> get assets {
+ final  List<ImportImageAsset> _assets;
+ List<ImportImageAsset> get assets {
   if (_assets is EqualUnmodifiableListView) return _assets;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_assets);
@@ -265,7 +265,7 @@ abstract mixin class _$ImportImagesCopyWith<$Res> implements $ArchivePageEventCo
   factory _$ImportImagesCopyWith(_ImportImages value, $Res Function(_ImportImages) _then) = __$ImportImagesCopyWithImpl;
 @useResult
 $Res call({
- List<AssetEntity> assets, bool saveToAppFolder, bool saveToGallery
+ List<ImportImageAsset> assets, bool saveToAppFolder, bool saveToGallery
 });
 
 
@@ -285,7 +285,7 @@ class __$ImportImagesCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? assets = null,Object? saveToAppFolder = null,Object? saveToGallery = null,}) {
   return _then(_ImportImages(
 assets: null == assets ? _self._assets : assets // ignore: cast_nullable_to_non_nullable
-as List<AssetEntity>,saveToAppFolder: null == saveToAppFolder ? _self.saveToAppFolder : saveToAppFolder // ignore: cast_nullable_to_non_nullable
+as List<ImportImageAsset>,saveToAppFolder: null == saveToAppFolder ? _self.saveToAppFolder : saveToAppFolder // ignore: cast_nullable_to_non_nullable
 as bool,saveToGallery: null == saveToGallery ? _self.saveToGallery : saveToGallery // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
