@@ -48,14 +48,15 @@ extension EncryptedImagePageEventPatterns on EncryptedImagePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _UpdatePassword value)?  updatePassword,TResult Function( _Decrypt value)?  decrypt,TResult Function( _Restore value)?  restore,TResult Function( _SaveImage value)?  saveImage,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _UpdatePassword value)?  updatePassword,TResult Function( _Decrypt value)?  decrypt,TResult Function( _Restore value)?  restore,TResult Function( _Rename value)?  rename,TResult Function( _SaveImage value)?  saveImage,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that);case _Decrypt() when decrypt != null:
 return decrypt(_that);case _Restore() when restore != null:
-return restore(_that);case _SaveImage() when saveImage != null:
+return restore(_that);case _Rename() when rename != null:
+return rename(_that);case _SaveImage() when saveImage != null:
 return saveImage(_that);case _:
   return orElse();
 
@@ -74,14 +75,15 @@ return saveImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _UpdatePassword value)  updatePassword,required TResult Function( _Decrypt value)  decrypt,required TResult Function( _Restore value)  restore,required TResult Function( _SaveImage value)  saveImage,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _UpdatePassword value)  updatePassword,required TResult Function( _Decrypt value)  decrypt,required TResult Function( _Restore value)  restore,required TResult Function( _Rename value)  rename,required TResult Function( _SaveImage value)  saveImage,}){
 final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that);case _UpdatePassword():
 return updatePassword(_that);case _Decrypt():
 return decrypt(_that);case _Restore():
-return restore(_that);case _SaveImage():
+return restore(_that);case _Rename():
+return rename(_that);case _SaveImage():
 return saveImage(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -99,14 +101,15 @@ return saveImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _UpdatePassword value)?  updatePassword,TResult? Function( _Decrypt value)?  decrypt,TResult? Function( _Restore value)?  restore,TResult? Function( _SaveImage value)?  saveImage,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _UpdatePassword value)?  updatePassword,TResult? Function( _Decrypt value)?  decrypt,TResult? Function( _Restore value)?  restore,TResult? Function( _Rename value)?  rename,TResult? Function( _SaveImage value)?  saveImage,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that);case _Decrypt() when decrypt != null:
 return decrypt(_that);case _Restore() when restore != null:
-return restore(_that);case _SaveImage() when saveImage != null:
+return restore(_that);case _Rename() when rename != null:
+return rename(_that);case _SaveImage() when saveImage != null:
 return saveImage(_that);case _:
   return null;
 
@@ -124,13 +127,14 @@ return saveImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,TResult Function( String password)?  updatePassword,TResult Function()?  decrypt,TResult Function()?  restore,TResult Function()?  saveImage,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String imagePath)?  setup,TResult Function( String password)?  updatePassword,TResult Function()?  decrypt,TResult Function()?  restore,TResult Function( String newName)?  rename,TResult Function()?  saveImage,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that.password);case _Decrypt() when decrypt != null:
 return decrypt();case _Restore() when restore != null:
-return restore();case _SaveImage() when saveImage != null:
+return restore();case _Rename() when rename != null:
+return rename(_that.newName);case _SaveImage() when saveImage != null:
 return saveImage();case _:
   return orElse();
 
@@ -149,13 +153,14 @@ return saveImage();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,required TResult Function( String password)  updatePassword,required TResult Function()  decrypt,required TResult Function()  restore,required TResult Function()  saveImage,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String imagePath)  setup,required TResult Function( String password)  updatePassword,required TResult Function()  decrypt,required TResult Function()  restore,required TResult Function( String newName)  rename,required TResult Function()  saveImage,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that.imagePath);case _UpdatePassword():
 return updatePassword(_that.password);case _Decrypt():
 return decrypt();case _Restore():
-return restore();case _SaveImage():
+return restore();case _Rename():
+return rename(_that.newName);case _SaveImage():
 return saveImage();case _:
   throw StateError('Unexpected subclass');
 
@@ -173,13 +178,14 @@ return saveImage();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,TResult? Function( String password)?  updatePassword,TResult? Function()?  decrypt,TResult? Function()?  restore,TResult? Function()?  saveImage,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String imagePath)?  setup,TResult? Function( String password)?  updatePassword,TResult? Function()?  decrypt,TResult? Function()?  restore,TResult? Function( String newName)?  rename,TResult? Function()?  saveImage,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.imagePath);case _UpdatePassword() when updatePassword != null:
 return updatePassword(_that.password);case _Decrypt() when decrypt != null:
 return decrypt();case _Restore() when restore != null:
-return restore();case _SaveImage() when saveImage != null:
+return restore();case _Rename() when rename != null:
+return rename(_that.newName);case _SaveImage() when saveImage != null:
 return saveImage();case _:
   return null;
 
@@ -359,6 +365,65 @@ String toString() {
 /// @nodoc
 
 
+class _Rename extends EncryptedImagePageEvent {
+  const _Rename({required this.newName}): super._();
+  
+
+ final  String newName;
+
+/// Create a copy of EncryptedImagePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RenameCopyWith<_Rename> get copyWith => __$RenameCopyWithImpl<_Rename>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptedImagePageEvent.rename(newName: $newName)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RenameCopyWith<$Res> implements $EncryptedImagePageEventCopyWith<$Res> {
+  factory _$RenameCopyWith(_Rename value, $Res Function(_Rename) _then) = __$RenameCopyWithImpl;
+@useResult
+$Res call({
+ String newName
+});
+
+
+
+
+}
+/// @nodoc
+class __$RenameCopyWithImpl<$Res>
+    implements _$RenameCopyWith<$Res> {
+  __$RenameCopyWithImpl(this._self, this._then);
+
+  final _Rename _self;
+  final $Res Function(_Rename) _then;
+
+/// Create a copy of EncryptedImagePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? newName = null,}) {
+  return _then(_Rename(
+newName: null == newName ? _self.newName : newName // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _SaveImage extends EncryptedImagePageEvent {
   const _SaveImage(): super._();
   
@@ -414,14 +479,15 @@ extension EncryptedImagePageStatePatterns on EncryptedImagePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Ui value)?  ui,TResult Function( _ImageSaved value)?  imageSaved,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Ui value)?  ui,TResult Function( _ImageSaved value)?  imageSaved,TResult Function( _ImageRenamed value)?  imageRenamed,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Ui() when ui != null:
 return ui(_that);case _ImageSaved() when imageSaved != null:
-return imageSaved(_that);case _Failure() when failure != null:
+return imageSaved(_that);case _ImageRenamed() when imageRenamed != null:
+return imageRenamed(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -440,14 +506,15 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Ui value)  ui,required TResult Function( _ImageSaved value)  imageSaved,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Ui value)  ui,required TResult Function( _ImageSaved value)  imageSaved,required TResult Function( _ImageRenamed value)  imageRenamed,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
 return loading(_that);case _Ui():
 return ui(_that);case _ImageSaved():
-return imageSaved(_that);case _Failure():
+return imageSaved(_that);case _ImageRenamed():
+return imageRenamed(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -465,14 +532,15 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Ui value)?  ui,TResult? Function( _ImageSaved value)?  imageSaved,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Ui value)?  ui,TResult? Function( _ImageSaved value)?  imageSaved,TResult? Function( _ImageRenamed value)?  imageRenamed,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Ui() when ui != null:
 return ui(_that);case _ImageSaved() when imageSaved != null:
-return imageSaved(_that);case _Failure() when failure != null:
+return imageSaved(_that);case _ImageRenamed() when imageRenamed != null:
+return imageRenamed(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -490,13 +558,14 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( EncryptedImage image)?  ui,TResult Function( String path)?  imageSaved,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( EncryptedImage image)?  ui,TResult Function( String path)?  imageSaved,TResult Function()?  imageRenamed,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Ui() when ui != null:
 return ui(_that.image);case _ImageSaved() when imageSaved != null:
-return imageSaved(_that.path);case _Failure() when failure != null:
+return imageSaved(_that.path);case _ImageRenamed() when imageRenamed != null:
+return imageRenamed();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -515,13 +584,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( EncryptedImage image)  ui,required TResult Function( String path)  imageSaved,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( EncryptedImage image)  ui,required TResult Function( String path)  imageSaved,required TResult Function()  imageRenamed,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Ui():
 return ui(_that.image);case _ImageSaved():
-return imageSaved(_that.path);case _Failure():
+return imageSaved(_that.path);case _ImageRenamed():
+return imageRenamed();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -539,13 +609,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( EncryptedImage image)?  ui,TResult? Function( String path)?  imageSaved,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( EncryptedImage image)?  ui,TResult? Function( String path)?  imageSaved,TResult? Function()?  imageRenamed,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Ui() when ui != null:
 return ui(_that.image);case _ImageSaved() when imageSaved != null:
-return imageSaved(_that.path);case _Failure() when failure != null:
+return imageSaved(_that.path);case _ImageRenamed() when imageRenamed != null:
+return imageRenamed();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -705,6 +776,27 @@ as String,
 
 
 }
+
+/// @nodoc
+
+
+class _ImageRenamed extends EncryptedImagePageState {
+  const _ImageRenamed(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
 
 /// @nodoc
 

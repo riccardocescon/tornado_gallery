@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
@@ -22,6 +23,7 @@ class EncryptedImagePageBloc
   late AppBloc appBloc;
   late GalleryBloc galleryBloc;
   final ImageSaverUsecase imageSaverUsecase;
+  final ImageRenamerUsecase imageRenamerUsecase;
 
   @override
   Future<void> close() {
@@ -33,6 +35,7 @@ class EncryptedImagePageBloc
     required this.appBloc,
     required this.galleryBloc,
     required this.imageSaverUsecase,
+    required this.imageRenamerUsecase,
   })
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
@@ -110,6 +113,39 @@ class EncryptedImagePageBloc
         AppEvent.setDecryptedInfo(path: image.storagePath.path, decryptedInfo: null),
       );
       emit(EncryptedImagePageState.ui(image: image));
+    });
+    on<_Rename>((event, emit) async {
+      emit(const EncryptedImagePageState.loading());
+
+      final parts = image.storagePath.path.split('/');
+      final oldFileName = parts.removeLast();
+      final ext = oldFileName.split('.').last;
+      final path = parts.join('/');
+
+      final foRename = await imageRenamerUsecase.call(
+        ImageRenamerParams(
+          path: path,
+          oldFileName: oldFileName,
+          newFileName: '${event.newName}.$ext',
+        ),
+      );
+
+      foRename.fold(
+        (failure) =>
+            emit(EncryptedImagePageState.failure(message: failure.message)),
+        (success) {
+          appBloc.add(
+            AppEvent.removeEncryptedImage(path: image.storagePath.path),
+          );
+          final newPath = '$path/${event.newName}.$ext';
+          image = image.copyWith(
+            storagePath: image.storagePath.copyWith(path: newPath),
+          );
+          appBloc.add(AppEvent.addEncryptedImage(image: image));
+          emit(const EncryptedImagePageState.imageRenamed());
+          emit(EncryptedImagePageState.ui(image: image));
+        },
+      );
     });
     on<_SaveImage>((event, emit) async {
       final bytes = image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;

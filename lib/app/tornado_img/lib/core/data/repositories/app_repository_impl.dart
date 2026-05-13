@@ -66,7 +66,10 @@ class AppRepositoryImpl implements AppRepository {
   Stream<void> watchFolderChanges(EncryptedFolder rootFolder) async* {
     final encryptedDir = Directory(rootFolder.path);
     final folderStream = encryptedDir.watch(
-      events: FileSystemEvent.create | FileSystemEvent.delete,
+      events:
+          FileSystemEvent.create |
+          FileSystemEvent.delete |
+          FileSystemEvent.move,
       recursive: true,
     );
 
@@ -137,8 +140,9 @@ class AppRepositoryImpl implements AppRepository {
           continue;
         }
 
-        final parentPath = Directory(event.path).parent.path;
-        final parentFolder = _lookupTable[parentPath];
+        File file = File(event.path);
+        String parentPath = Directory(event.path).parent.path;
+        EncryptedFolder? parentFolder = _lookupTable[parentPath];
         if (parentFolder == null) {
           appLogger.logPageBloc(
             'Failed to add new file',
@@ -147,13 +151,45 @@ class AppRepositoryImpl implements AppRepository {
           continue;
         }
 
-        final file = File(event.path);
+        if (event.type == FileSystemEvent.move) {
+          // Delete the old image entry
+          final oldPath = event.path;
+          parentFolder.images.removeWhere(
+            (img) => img.storagePath.path == oldPath,
+          );
+          appLogger.logPageBloc(
+            'File moved: $oldPath, removed from old parent folder in lookup',
+          );
+
+          // Proceed to add the new image entry with the new path
+          final newPath = (event as FileSystemMoveEvent).destination;
+          if (newPath == null) {
+            appLogger.logPageBloc(
+              'Failed to add moved file',
+              error:
+                  'New path is null for moved file event: ${event.toString()}',
+            );
+            continue;
+          }
+          parentPath = Directory(newPath).parent.path;
+          parentFolder = _lookupTable[parentPath];
+          if (parentFolder == null) {
+            appLogger.logPageBloc(
+              'Failed to add new file',
+              error:
+                  'Parent folder not found in lookup for path: ${event.path}',
+            );
+            continue;
+          }
+          file = File(newPath);
+        }
+
         final date = file.statSync().modified;
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
         final newImage = EncryptedImage(
           storagePath: StoragePath(
-            path: event.path,
+            path: file.path,
             isPrivateFolder: rootFolder.isPrivateFolder,
             assetId: null,
           ),

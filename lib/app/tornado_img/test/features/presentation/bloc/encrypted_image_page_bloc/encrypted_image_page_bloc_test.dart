@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
@@ -16,6 +17,8 @@ class _MockGalleryBloc extends Mock implements GalleryBloc {}
 
 class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
 
+class _MockImageRenamerUsecase extends Mock implements ImageRenamerUsecase {}
+
 EncryptedImage _makeImage(String path) => EncryptedImage(
   storagePath: StoragePath(
     path: path,
@@ -28,6 +31,7 @@ void main() {
   late _MockAppBloc mockAppBloc;
   late _MockGalleryBloc mockGalleryBloc;
   late _MockImageSaverUsecase mockImageSaverUsecase;
+  late _MockImageRenamerUsecase mockImageRenamerUsecase;
   late EncryptedImage tImage;
 
   setUpAll(() {
@@ -45,6 +49,7 @@ void main() {
     mockGalleryBloc = _MockGalleryBloc();
     tImage = _makeImage('path/img1.png');
     mockImageSaverUsecase = _MockImageSaverUsecase();
+    mockImageRenamerUsecase = _MockImageRenamerUsecase();
 
     when(() => mockAppBloc.encryptedImages).thenReturn([tImage]);
     when(() => mockAppBloc.stream).thenAnswer((_) => Stream.empty());
@@ -61,6 +66,7 @@ void main() {
       appBloc: mockAppBloc,
       galleryBloc: mockGalleryBloc,
       imageSaverUsecase: mockImageSaverUsecase,
+      imageRenamerUsecase: mockImageRenamerUsecase,
     );
     expect(bloc.state, const EncryptedImagePageState.initial());
     bloc.close();
@@ -77,6 +83,7 @@ void main() {
             appBloc: mockAppBloc,
             galleryBloc: mockGalleryBloc,
             imageSaverUsecase: mockImageSaverUsecase,
+            imageRenamerUsecase: mockImageRenamerUsecase,
           ),
       act:
           (b) {
@@ -105,6 +112,7 @@ void main() {
         appBloc: mockAppBloc,
         galleryBloc: mockGalleryBloc,
         imageSaverUsecase: mockImageSaverUsecase,
+        imageRenamerUsecase: mockImageRenamerUsecase,
       );
       const testPassword = 'test123';
 
@@ -128,6 +136,7 @@ void main() {
             appBloc: mockAppBloc,
             galleryBloc: mockGalleryBloc,
             imageSaverUsecase: mockImageSaverUsecase,
+            imageRenamerUsecase: mockImageRenamerUsecase,
           ),
       seed: () => EncryptedImagePageState.ui(image: tImage),
       act: (b) => b.add(const EncryptedImagePageEvent.decrypt()),
@@ -148,6 +157,7 @@ void main() {
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
           imageSaverUsecase: mockImageSaverUsecase,
+          imageRenamerUsecase: mockImageRenamerUsecase,
         );
       },
       seed: () => EncryptedImagePageState.ui(image: tImage),

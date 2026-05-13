@@ -2,9 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/presentation/pages/fullscreen_image_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
@@ -13,11 +15,13 @@ import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
+import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/image.dart';
 part 'widgets/info.dart';
 part 'widgets/actions.dart';
 part 'widgets/page_background.dart';
+part 'widgets/rename_bottom_sheet.dart';
 
 class EncryptedImagePage extends StatelessWidget {
   const EncryptedImagePage({super.key});
@@ -34,6 +38,11 @@ class EncryptedImagePage extends StatelessWidget {
                 SnackBar(
                   content: Text('Image saved to gallery: ${value.path}'),
                 ),
+              );
+            },
+            imageRenamed: (value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Image renamed successfully')),
               );
             },
             orElse: () {},
@@ -58,7 +67,7 @@ class EncryptedImagePage extends StatelessWidget {
                       SizedBox(height: 300, child: _Image()),
                       _titleRow(context, image),
                       _Info(image: image),
-                      _Actions(),
+                      _Actions(image: image),
                       const SizedBox(height: 64),
                     ],
                   ),

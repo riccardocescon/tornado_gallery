@@ -144,4 +144,30 @@ class StorageRepositoryImpl implements StorageRepository {
 
     return deleted;
   }
+  
+  @override
+  Future<bool> rename(
+    String path,
+    String oldFileName,
+    String newFileName,
+  ) async {
+    final oldFile = File('$path/$oldFileName');
+    final newFile = File('$path/$newFileName');
+
+    if (!await oldFile.exists()) {
+      appLogger.logRepository(
+        'Rename failed: Original file does not exist',
+        error: 'File does not exist: ${oldFile.path}',
+      );
+      return false;
+    }
+
+    try {
+      await oldFile.rename(newFile.path);
+      return true;
+    } catch (e) {
+      appLogger.logRepository('Error renaming file', error: e.toString());
+      return false;
+    }
+  }
 }
