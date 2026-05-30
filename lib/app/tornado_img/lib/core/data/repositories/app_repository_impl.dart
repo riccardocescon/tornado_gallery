@@ -63,6 +63,20 @@ class AppRepositoryImpl implements AppRepository {
   @override
   Stream<void> watchFolderChanges(EncryptedFolder rootFolder) async* {
     final encryptedDir = Directory(rootFolder.path);
+    // On macOS/iOS, /var is a symlink to /private/var. FSEvents always delivers
+    // resolved paths, but stored paths use the original (unresolved) form.
+    // Resolve the root once and strip the resolved prefix from incoming events
+    // so all lookups and stored paths remain consistent.
+    final resolvedRoot = await encryptedDir.resolveSymbolicLinks();
+    final originalRoot = rootFolder.path;
+
+    String normalizePath(String p) {
+      if (originalRoot != resolvedRoot && p.startsWith(resolvedRoot)) {
+        return originalRoot + p.substring(resolvedRoot.length);
+      }
+      return p;
+    }
+
     final folderStream = encryptedDir.watch(
       events: FileSystemEvent.create | FileSystemEvent.delete,
       recursive: true,
@@ -74,26 +88,46 @@ class AppRepositoryImpl implements AppRepository {
 
     try {
       await for (final event in sm.stream) {
+        final path = normalizePath(event.path);
         appLogger.logPageBloc(
           "Received file system event: ${event.toString()}",
         );
-        final isDirectory =
-            event.isDirectory || !event.path.split('/').last.contains('.');
-        if (isDirectory) {
-          if (event.type == FileSystemEvent.delete) {
-            final folder = _lookupTable[event.path];
-            if (folder != null) {
-              _removeEncryptedFolder(rootFolder, folder);
-              _lookupTable.remove(event.path);
-            }
-            appLogger.logPageBloc(
-              'Folder deleted: ${event.path}, removed from lookup',
-            );
-            yield null;
-            continue;
-          }
 
-          final newFolder = await _scanFullFolderPrivate(event.path);
+        if (event.type == FileSystemEvent.delete) {
+          // On macOS, event.isDirectory is unreliable for delete events because
+          // the file no longer exists. Use the lookup table instead: if the
+          // path is a known folder, treat it as a folder delete; otherwise
+          // treat it as a file delete and look up the parent folder.
+          final folder = _lookupTable[path];
+          if (folder != null) {
+            _removeEncryptedFolder(rootFolder, folder);
+            _lookupTable.remove(path);
+            appLogger.logPageBloc(
+              'Folder deleted: $path, removed from lookup',
+            );
+          } else {
+            final parentPath = Directory(path).parent.path;
+            final parentFolder = _lookupTable[parentPath];
+            if (parentFolder != null) {
+              parentFolder.images.removeWhere((img) => img.path == path);
+              appLogger.logPageBloc(
+                'File deleted: $path, removed from parent folder in lookup',
+              );
+            } else {
+              appLogger.logPageBloc(
+                'Failed to delete item',
+                error: 'Path not found in lookup: $path',
+              );
+            }
+          }
+          yield null;
+          continue;
+        }
+
+        final isDirectory =
+            event.isDirectory || !path.split('/').last.contains('.');
+        if (isDirectory) {
+          final newFolder = await _scanFullFolderPrivate(path);
 
           final inserted = insertFolderFast(
             rootFolder: rootFolder,
@@ -108,55 +142,48 @@ class AppRepositoryImpl implements AppRepository {
           } else {
             appLogger.logPageBloc(
               'Failed to insert folder',
-              error: 'Path: ${event.path}',
+              error: 'Path: $path',
             );
           }
           continue;
         }
 
-        if (event.type == FileSystemEvent.delete) {
-          final parentPath = Directory(event.path).parent.path;
-          final parentFolder = _lookupTable[parentPath];
-          if (parentFolder != null) {
-            parentFolder.images.removeWhere((img) => img.path == event.path);
-            appLogger.logPageBloc(
-              'File deleted: ${event.path}, removed from parent folder in lookup',
-            );
-          } else {
-            appLogger.logPageBloc(
-              'Failed to delete file',
-              error:
-                  'Parent folder not found in lookup for path: ${event.path}',
-            );
-          }
-          yield null;
-          continue;
-        }
-
-        final parentPath = Directory(event.path).parent.path;
+        final parentPath = Directory(path).parent.path;
         final parentFolder = _lookupTable[parentPath];
         if (parentFolder == null) {
           appLogger.logPageBloc(
             'Failed to add new file',
-            error: 'Parent folder not found in lookup for path: ${event.path}',
+            error: 'Parent folder not found in lookup for path: $path',
           );
           continue;
         }
 
-        final file = File(event.path);
+        final file = File(path);
+        // On macOS, FSEvents fires a spurious CREATE event for a file that is
+        // concurrently being deleted (race condition). Skip gracefully so the
+        // subsequent DELETE event can handle the removal correctly.
+        if (!file.existsSync()) continue;
+
         final date = file.statSync().modified;
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
         final newImage = EncryptedImage(
-          path: event.path,
+          path: path,
           encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
           date: date,
           isPrivateFolder: rootFolder.isPrivateFolder,
         );
 
-        parentFolder.images.removeWhere((img) => img.path == event.path);
+        // On macOS, FSEvents fires spurious CREATE events for already-existing
+        // files when the watcher first starts (initial state replay). Only
+        // notify listeners when the image is genuinely new to avoid triggering
+        // a UI refresh for these no-op resync events.
+        final wasPresent = parentFolder.images.any((img) => img.path == path);
+        parentFolder.images.removeWhere((img) => img.path == path);
         parentFolder.images.add(newImage);
-        yield null;
+        if (!wasPresent) {
+          yield null;
+        }
       }
     } finally {
       await _streamManagers[rootFolder.path]?.dispose();
