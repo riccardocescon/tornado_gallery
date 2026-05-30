@@ -32,7 +32,9 @@ class AppRepositoryImpl implements AppRepository {
   @override
   Future<EncryptedFolder> loadRootFolder() async {
     final appPath = await getApplicationDocumentsDirectory();
-    final encryptedDir = Directory('${appPath.path}/encrypted');
+    final encryptedDir = Directory(
+      '${appPath.path}${Platform.pathSeparator}encrypted',
+    );
     final encryptedExists = await encryptedDir.exists();
     if (!encryptedExists) {
       await encryptedDir.create(recursive: true);
@@ -78,8 +80,6 @@ class AppRepositoryImpl implements AppRepository {
       return;
     }
 
-    final folderStream = DirectoryWatcher(encryptedDir.path).events;
-
     // On macOS/iOS, /var is a symlink to /private/var. FSEvents always delivers
     // resolved paths, but stored paths use the original (unresolved) form.
     // Resolve the root once and strip the resolved prefix from incoming events
@@ -100,13 +100,44 @@ class AppRepositoryImpl implements AppRepository {
     }
 
     await _streamManagers[rootFolder.path]?.dispose();
-    final sm = StreamManager.fromStream(folderStream);
+    final watcher = DirectoryWatcher(encryptedDir.path);
+    final sm = StreamManager.fromStream(watcher.events);
     _streamManagers[rootFolder.path] = sm;
+
+    // Wait for the watcher to finish its initialization window (the watcher
+    // package intentionally discards all events until ready to filter out
+    // spurious OS events that predate the watch start).
+    await watcher.ready;
+
     final pendingRemovals = <String, DateTime>{};
     const removeCoalesceWindow = Duration(milliseconds: 700);
 
+    final mergedController = StreamController<WatchEvent?>();
+
+    // Schedules a one-shot null pulse into mergedController after the coalesce
+    // window expires. Only called when a removal is queued, so no timer runs
+    // when pendingRemovals is empty.
+    void schedulePendingFlush() {
+      Future.delayed(
+        removeCoalesceWindow + const Duration(milliseconds: 50),
+        () {
+          if (!mergedController.isClosed) mergedController.add(null);
+        },
+      );
+    }
+
+    final fsSub = sm.stream.listen(
+      (e) {
+        if (!mergedController.isClosed) mergedController.add(e);
+      },
+      onDone: () => mergedController.close(),
+      onError: (Object e, StackTrace s) {
+        if (!mergedController.isClosed) mergedController.addError(e, s);
+      },
+    );
+
     try {
-      await for (final event in sm.stream) {
+      await for (final event in mergedController.stream) {
         final flushed = _flushExpiredRemovals(
           rootFolder: rootFolder,
           pendingRemovals: pendingRemovals,
@@ -116,6 +147,9 @@ class AppRepositoryImpl implements AppRepository {
           yield null;
         }
 
+        // Delayed flush pulse — only used to drive the flush above.
+        if (event == null) continue;
+
         if (event.type != ChangeType.ADD &&
             event.type != ChangeType.REMOVE &&
             event.type != ChangeType.MODIFY) {
@@ -123,9 +157,6 @@ class AppRepositoryImpl implements AppRepository {
         }
 
         final path = normalizePath(event.path);
-        appLogger.logPageBloc(
-          "Received file system event: ${event.toString()}",
-        );
 
         if (event.type == ChangeType.MODIFY) {
           continue;
@@ -135,6 +166,9 @@ class AppRepositoryImpl implements AppRepository {
           // Watcher reports rename/move as REMOVE + ADD. Delay remove briefly
           // so we can coalesce the pair and treat it as a move.
           pendingRemovals[path] = DateTime.now();
+          // Schedule a one-shot flush after the coalesce window so the removal
+          // is processed even if no further FS events arrive.
+          schedulePendingFlush();
           continue;
         }
 
@@ -170,11 +204,6 @@ class AppRepositoryImpl implements AppRepository {
             // this folder (and any nested subfolders it may contain).
             _lookupTable.addAll(_buildFolderIndex(newFolder));
             yield null;
-          } else {
-            appLogger.logPageBloc(
-              'Failed to insert folder',
-              error: 'Path: $path',
-            );
           }
           continue;
         }
@@ -233,6 +262,8 @@ class AppRepositoryImpl implements AppRepository {
         }
       }
     } finally {
+      await fsSub.cancel();
+      await mergedController.close();
       await _streamManagers[rootFolder.path]?.dispose();
       _streamManagers.remove(rootFolder.path);
     }

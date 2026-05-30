@@ -65,12 +65,26 @@ void main() {
           completer.complete();
         });
 
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        // Give the async generator a moment to set up the watcher and reach
+        // the `await watcher.ready` checkpoint. On Windows the isolate-based
+        // DirectoryWatcher can take up to ~3 s to be ready in flutter test.
+        await Future<void>.delayed(const Duration(seconds: 3));
 
         final newFolderPath = '${encryptedDir.path}/album_1';
         await Directory(newFolderPath).create(recursive: true);
+        // DirectoryWatcher does not emit events for empty directory creation.
+        // We add a marker file (.nomedia) to trigger an initial ADD event so
+        // that _recoverMissingParentFolder scans the new folder, inserts album_1
+        // into rootFolder.subfolders and builds the lookup entry. Because the
+        // scan immediately finds this file wasPresent=true — no yield yet.
+        // After a short delay (scan finishes synchronously, well under 500 ms)
+        // we create a second file that is NOT in the cached image list; this
+        // second event has wasPresent=false and causes the stream to yield.
+        await File('$newFolderPath/.nomedia').writeAsBytes([0]);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await File('$newFolderPath/trigger.jpg').writeAsBytes([1, 2, 3]);
 
-        await completer.future.timeout(const Duration(seconds: 3));
+        await completer.future.timeout(const Duration(seconds: 10));
 
         expect(
           rootFolder.subfolders.any(
