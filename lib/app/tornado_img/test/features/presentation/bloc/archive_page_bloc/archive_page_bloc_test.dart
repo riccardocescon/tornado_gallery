@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
@@ -17,15 +18,18 @@ class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUsecase {}
 
 class _MockImageDeleterUsecase extends Mock implements ImageDeleterUsecase {}
 
+class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
+
 class _MockAppBloc extends Mock implements AppBloc {}
 
 class _MockGalleryBloc extends Mock implements GalleryBloc {}
 
 EncryptedImage _makeImage(String path) => EncryptedImage(
-  path: path,
+  storagePath: StoragePath(
+    path: path,
+    isPrivateFolder: true, assetId: null),
   encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
   date: DateTime(2024),
-  isPrivateFolder: true,
 );
 
 EncryptedStreamImage _makeStreamImage(String path) =>
@@ -37,6 +41,7 @@ EncryptedStreamImage _makeStreamImage(String path) =>
 void main() {
   late _MockGalleryReaderUsecase mockGalleryReader;
   late _MockImageDeleterUsecase mockImageDeleter;
+  late _MockImageSaverUsecase mockImageSaver;
   late _MockAppBloc mockAppBloc;
   late _MockGalleryBloc mockGalleryBloc;
 
@@ -45,7 +50,7 @@ void main() {
     registerFallbackValue(
       AppEvent.addEncryptedImage(image: _makeImage('fallback/img.png')),
     );
-    registerFallbackValue(ImageDeleterParams(path: 'fallback'));
+    registerFallbackValue(ImageDeleterParams(images: []));
     registerFallbackValue(AppEvent.removeEncryptedImage(path: 'fallback'));
     registerFallbackValue(GalleryEvent.decryptImages(image: [], password: ''));
   });
@@ -53,6 +58,7 @@ void main() {
   setUp(() {
     mockGalleryReader = _MockGalleryReaderUsecase();
     mockImageDeleter = _MockImageDeleterUsecase();
+    mockImageSaver = _MockImageSaverUsecase();
     mockAppBloc = _MockAppBloc();
     mockGalleryBloc = _MockGalleryBloc();
 
@@ -68,6 +74,7 @@ void main() {
     galleryBloc: mockGalleryBloc,
     galleryReaderUsecase: mockGalleryReader,
     imageDeleterUsecase: mockImageDeleter,
+    imageSaverUseCase: mockImageSaver,
   );
 
   test('initial state is ArchivePageState.initial', () {
@@ -181,7 +188,7 @@ void main() {
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
         await Future<void>.delayed(const Duration(milliseconds: 50));
-        b.add(const ArchivePageEvent.delete(path: '/enc/img1.png'));
+        b.add(ArchivePageEvent.delete(images: [_makeImage('/enc/img1.png')]));
       },
       expect:
           () => [
@@ -216,7 +223,7 @@ void main() {
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
         await Future<void>.delayed(const Duration(milliseconds: 50));
-        b.add(const ArchivePageEvent.delete(path: '/enc/img.png'));
+        b.add(ArchivePageEvent.delete(images: [_makeImage('/enc/img.png')]));
       },
       expect:
           () => [

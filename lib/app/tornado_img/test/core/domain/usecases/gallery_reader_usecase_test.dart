@@ -28,10 +28,13 @@ class _FakePathProviderPlatform extends PathProviderPlatform
 EncryptedStreamImage _makeStreamImage(String path) =>
     EncryptedStreamImage.image(
       image: EncryptedImage(
-        path: path,
+        storagePath: StoragePath(
+          path: path,
+          isPrivateFolder: true,
+          assetId: '',
+        ),
         encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
         date: DateTime(2024),
-        isPrivateFolder: true,
       ),
       type: EncryptedStreamImageType.newImage,
     );

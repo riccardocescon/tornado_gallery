@@ -14,7 +14,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc() : super(const AppState.initial()) {
     on<_AddEncryptedImage>((event, emit) {
       final update = encryptedImages.indexWhere(
-        (img) => img.file.path == event.image.file.path,
+        (img) => img.storagePath.file.path == event.image.storagePath.file.path,
       );
       if (update != -1) {
         encryptedImages[update] = event.image;
@@ -25,12 +25,14 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       }
     });
     on<_RemoveEncryptedImage>((event, emit) {
-      encryptedImages.removeWhere((img) => img.file.path == event.path);
+      encryptedImages.removeWhere(
+        (img) => img.storagePath.file.path == event.path,
+      );
       emit(AppState.removedGalleryImage(path: event.path));
     });
     on<_SetDecryptedInfo>((event, emit) {
       final index = encryptedImages.indexWhere(
-        (img) => img.file.path == event.path,
+        (img) => img.storagePath.file.path == event.path,
       );
       if (index == -1) {
         appLogger.logBloc(

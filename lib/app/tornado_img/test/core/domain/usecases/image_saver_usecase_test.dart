@@ -35,7 +35,7 @@ void main() {
       ).thenAnswer((_) async {});
 
       final result = await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'image.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'image.png'),
       );
 
       expect(result.isRight(), isTrue);
@@ -52,7 +52,7 @@ void main() {
       ).thenAnswer((_) async {});
 
       await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'photo.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'photo.png'),
       );
 
       verify(
@@ -76,7 +76,7 @@ void main() {
       ).thenThrow(Exception('write error'));
 
       final result = await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'image.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'image.png'),
       );
 
       expect(result.isLeft(), isTrue);

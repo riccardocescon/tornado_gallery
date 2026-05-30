@@ -4,10 +4,18 @@ class _ArchivedTile extends StatefulWidget {
   const _ArchivedTile({
     required this.image,
     required this.dearchivingStateType,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+    this.onToggleSelection,
+    this.onActivateSelection,
   });
 
   final EncryptedImage image;
   final DearchivingStateType? dearchivingStateType;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback? onToggleSelection;
+  final VoidCallback? onActivateSelection;
 
   @override
   State<_ArchivedTile> createState() => _ArchivedTileState();
@@ -19,15 +27,16 @@ class _ArchivedTileState extends State<_ArchivedTile> {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
       buildWhen:
           (previous, current) => current.maybeMap(
-            deleting: (value) => value.paths.contains(widget.image.path),
+            deleting:
+                (value) => value.paths.contains(widget.image.storagePath.path),
             ui:
                 (value) =>
-                    value.images.any((img) => img.path == widget.image.path),
+                    value.images.any((img) => img.storagePath.path == widget.image.storagePath.path),
             orElse: () => false,
           ),
       builder: (context, state) {
         final isDeleting = state.maybeMap(
-          deleting: (value) => value.paths.contains(widget.image.path),
+          deleting: (value) => value.paths.contains(widget.image.storagePath.path),
           orElse: () => false,
         );
 
@@ -35,11 +44,36 @@ class _ArchivedTileState extends State<_ArchivedTile> {
 
         if (isDeleting) {
           child = Skeletonizer(child: _content());
+        } else if (widget.isSelectionMode) {
+          child = GestureDetector(
+            onTap: widget.onToggleSelection,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color:
+                    widget.isSelected
+                        ? context.colorScheme.primary.withValues(alpha: 0.12)
+                        : context.appColors.scaffoldBackground,
+                borderRadius: AppStyle.detailsBorderRadius,
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _content()),
+                  const SizedBox(width: 8),
+                  Checkbox(
+                    value: widget.isSelected,
+                    onChanged: (_) => widget.onToggleSelection?.call(),
+                  ),
+                ],
+              ),
+            ),
+          );
         } else {
           child = FilledButton(
             onPressed: () {
               context.push('./encrypted_image_page', extra: widget.image);
             },
+            onLongPress: widget.onActivateSelection,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.all(16),
               shape: RoundedRectangleBorder(
@@ -52,6 +86,10 @@ class _ArchivedTileState extends State<_ArchivedTile> {
             ),
             child: _content(),
           );
+        }
+
+        if (widget.isSelectionMode) {
+          return SizedBox(height: 80 + 32, child: child);
         }
 
         return SizedBox(
@@ -71,12 +109,10 @@ class _ArchivedTileState extends State<_ArchivedTile> {
                 onPressed: () {
                   context.read<ArchivePageBloc>().add(
                     ArchivePageEvent.delete(
-                      path: widget.image.path,
-                      assetId: widget.image.assetId,
+                      images: [widget.image],
                     ),
                   );
                 },
-
                 trailingIcon: Icon(
                   Icons.delete_rounded,
                   color: context.colorScheme.error,
@@ -166,8 +202,8 @@ class _ArchivedTileState extends State<_ArchivedTile> {
 
     date += " at ${DateFormat("HH:mm").format(widget.image.date)}";
 
-    String visiblePath = widget.image.file.parent.path;
-    if (widget.image.isPrivateFolder) {
+    String visiblePath = widget.image.storagePath.file.parent.path;
+    if (widget.image.storagePath.isPrivateFolder) {
       visiblePath = visiblePath.split("encrypted").last;
       visiblePath = "../encrypted$visiblePath/${widget.image.name}";
     } else {
@@ -183,6 +219,8 @@ class _ArchivedTileState extends State<_ArchivedTile> {
           style: context.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         Expanded(
           child: Column(

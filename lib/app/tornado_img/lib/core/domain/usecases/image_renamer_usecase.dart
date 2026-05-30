@@ -3,20 +3,21 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
-class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
+class ImageRenamerUsecase extends EncrpytionUseCase<bool, ImageRenamerParams> {
   final StorageRepository storageRepo;
 
-  ImageDeleterUsecase({required this.storageRepo});
+  ImageRenamerUsecase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, bool>> call(
-    ImageDeleterParams params,
+    ImageRenamerParams params,
   ) async {
     try {
-      final result = await storageRepo.delete(
-        params.images.map((img) => img.storagePath).toList(),
+      final result = await storageRepo.rename(
+        params.path,
+        params.oldFileName,
+        params.newFileName,
       );
       return Right(result);
     } catch (e) {
@@ -26,8 +27,14 @@ class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
   }
 }
 
-class ImageDeleterParams {
-  final List<EncryptedImage> images;
+class ImageRenamerParams {
+  final String path;
+  final String oldFileName;
+  final String newFileName;
 
-  ImageDeleterParams({required this.images});
+  ImageRenamerParams({
+    required this.path,
+    required this.oldFileName,
+    required this.newFileName,
+  });
 }

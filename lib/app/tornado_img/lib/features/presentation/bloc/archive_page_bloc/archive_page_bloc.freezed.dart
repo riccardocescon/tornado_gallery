@@ -48,14 +48,17 @@ extension ArchivePageEventPatterns on ArchivePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _ArchivePageDelete value)?  delete,TResult Function( _ArchivePageEncryptAll value)?  encryptAll,TResult Function( _ArchivePageDecryptAll value)?  decryptAll,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _ImportImages value)?  importImages,TResult Function( _ArchivePageDelete value)?  delete,TResult Function( _ArchivePageEncryptAll value)?  encryptAll,TResult Function( _ArchivePageDecryptAll value)?  decryptAll,TResult Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult Function( _CancelSelectionMode value)?  cancelSelectionMode,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _ArchivePageDelete() when delete != null:
+return setup(_that);case _ImportImages() when importImages != null:
+return importImages(_that);case _ArchivePageDelete() when delete != null:
 return delete(_that);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll(_that);case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that);case _:
+return decryptAll(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
+return activateSelectionMode(_that);case _CancelSelectionMode() when cancelSelectionMode != null:
+return cancelSelectionMode(_that);case _:
   return orElse();
 
 }
@@ -73,14 +76,17 @@ return decryptAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _ArchivePageDelete value)  delete,required TResult Function( _ArchivePageEncryptAll value)  encryptAll,required TResult Function( _ArchivePageDecryptAll value)  decryptAll,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _ImportImages value)  importImages,required TResult Function( _ArchivePageDelete value)  delete,required TResult Function( _ArchivePageEncryptAll value)  encryptAll,required TResult Function( _ArchivePageDecryptAll value)  decryptAll,required TResult Function( _ActivateSelectionMode value)  activateSelectionMode,required TResult Function( _CancelSelectionMode value)  cancelSelectionMode,}){
 final _that = this;
 switch (_that) {
 case _Setup():
-return setup(_that);case _ArchivePageDelete():
+return setup(_that);case _ImportImages():
+return importImages(_that);case _ArchivePageDelete():
 return delete(_that);case _ArchivePageEncryptAll():
 return encryptAll(_that);case _ArchivePageDecryptAll():
-return decryptAll(_that);case _:
+return decryptAll(_that);case _ActivateSelectionMode():
+return activateSelectionMode(_that);case _CancelSelectionMode():
+return cancelSelectionMode(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -97,14 +103,17 @@ return decryptAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _ArchivePageDelete value)?  delete,TResult? Function( _ArchivePageEncryptAll value)?  encryptAll,TResult? Function( _ArchivePageDecryptAll value)?  decryptAll,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _ImportImages value)?  importImages,TResult? Function( _ArchivePageDelete value)?  delete,TResult? Function( _ArchivePageEncryptAll value)?  encryptAll,TResult? Function( _ArchivePageDecryptAll value)?  decryptAll,TResult? Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult? Function( _CancelSelectionMode value)?  cancelSelectionMode,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup(_that);case _ArchivePageDelete() when delete != null:
+return setup(_that);case _ImportImages() when importImages != null:
+return importImages(_that);case _ArchivePageDelete() when delete != null:
 return delete(_that);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll(_that);case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that);case _:
+return decryptAll(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
+return activateSelectionMode(_that);case _CancelSelectionMode() when cancelSelectionMode != null:
+return cancelSelectionMode(_that);case _:
   return null;
 
 }
@@ -121,13 +130,16 @@ return decryptAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( String path,  String? assetId)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,TResult Function()?  activateSelectionMode,TResult Function()?  cancelSelectionMode,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _ArchivePageDelete() when delete != null:
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll() when encryptAll != null:
+return setup();case _ImportImages() when importImages != null:
+return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete() when delete != null:
+return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that.passphrase);case _:
+return decryptAll(_that.passphrase);case _ActivateSelectionMode() when activateSelectionMode != null:
+return activateSelectionMode();case _CancelSelectionMode() when cancelSelectionMode != null:
+return cancelSelectionMode();case _:
   return orElse();
 
 }
@@ -145,13 +157,16 @@ return decryptAll(_that.passphrase);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( String path,  String? assetId)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,required TResult Function()  activateSelectionMode,required TResult Function()  cancelSelectionMode,}) {final _that = this;
 switch (_that) {
 case _Setup():
-return setup();case _ArchivePageDelete():
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll():
+return setup();case _ImportImages():
+return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete():
+return delete(_that.images);case _ArchivePageEncryptAll():
 return encryptAll();case _ArchivePageDecryptAll():
-return decryptAll(_that.passphrase);case _:
+return decryptAll(_that.passphrase);case _ActivateSelectionMode():
+return activateSelectionMode();case _CancelSelectionMode():
+return cancelSelectionMode();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -168,13 +183,16 @@ return decryptAll(_that.passphrase);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( String path,  String? assetId)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,TResult? Function()?  activateSelectionMode,TResult? Function()?  cancelSelectionMode,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
-return setup();case _ArchivePageDelete() when delete != null:
-return delete(_that.path,_that.assetId);case _ArchivePageEncryptAll() when encryptAll != null:
+return setup();case _ImportImages() when importImages != null:
+return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery);case _ArchivePageDelete() when delete != null:
+return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that.passphrase);case _:
+return decryptAll(_that.passphrase);case _ActivateSelectionMode() when activateSelectionMode != null:
+return activateSelectionMode();case _CancelSelectionMode() when cancelSelectionMode != null:
+return cancelSelectionMode();case _:
   return null;
 
 }
@@ -210,12 +228,86 @@ String toString() {
 /// @nodoc
 
 
-class _ArchivePageDelete extends ArchivePageEvent {
-  const _ArchivePageDelete({required this.path, this.assetId}): super._();
+class _ImportImages extends ArchivePageEvent {
+  const _ImportImages({required final  List<ImportImageAsset> assets, required this.saveToAppFolder, required this.saveToGallery}): _assets = assets,super._();
   
 
- final  String path;
- final  String? assetId;
+ final  List<ImportImageAsset> _assets;
+ List<ImportImageAsset> get assets {
+  if (_assets is EqualUnmodifiableListView) return _assets;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_assets);
+}
+
+ final  bool saveToAppFolder;
+ final  bool saveToGallery;
+
+/// Create a copy of ArchivePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ImportImagesCopyWith<_ImportImages> get copyWith => __$ImportImagesCopyWithImpl<_ImportImages>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'ArchivePageEvent.importImages(assets: $assets, saveToAppFolder: $saveToAppFolder, saveToGallery: $saveToGallery)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ImportImagesCopyWith<$Res> implements $ArchivePageEventCopyWith<$Res> {
+  factory _$ImportImagesCopyWith(_ImportImages value, $Res Function(_ImportImages) _then) = __$ImportImagesCopyWithImpl;
+@useResult
+$Res call({
+ List<ImportImageAsset> assets, bool saveToAppFolder, bool saveToGallery
+});
+
+
+
+
+}
+/// @nodoc
+class __$ImportImagesCopyWithImpl<$Res>
+    implements _$ImportImagesCopyWith<$Res> {
+  __$ImportImagesCopyWithImpl(this._self, this._then);
+
+  final _ImportImages _self;
+  final $Res Function(_ImportImages) _then;
+
+/// Create a copy of ArchivePageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? assets = null,Object? saveToAppFolder = null,Object? saveToGallery = null,}) {
+  return _then(_ImportImages(
+assets: null == assets ? _self._assets : assets // ignore: cast_nullable_to_non_nullable
+as List<ImportImageAsset>,saveToAppFolder: null == saveToAppFolder ? _self.saveToAppFolder : saveToAppFolder // ignore: cast_nullable_to_non_nullable
+as bool,saveToGallery: null == saveToGallery ? _self.saveToGallery : saveToGallery // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _ArchivePageDelete extends ArchivePageEvent {
+  const _ArchivePageDelete({required final  List<EncryptedImage> images}): _images = images,super._();
+  
+
+ final  List<EncryptedImage> _images;
+ List<EncryptedImage> get images {
+  if (_images is EqualUnmodifiableListView) return _images;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_images);
+}
+
 
 /// Create a copy of ArchivePageEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -229,7 +321,7 @@ _$ArchivePageDeleteCopyWith<_ArchivePageDelete> get copyWith => __$ArchivePageDe
 
 @override
 String toString() {
-  return 'ArchivePageEvent.delete(path: $path, assetId: $assetId)';
+  return 'ArchivePageEvent.delete(images: $images)';
 }
 
 
@@ -240,7 +332,7 @@ abstract mixin class _$ArchivePageDeleteCopyWith<$Res> implements $ArchivePageEv
   factory _$ArchivePageDeleteCopyWith(_ArchivePageDelete value, $Res Function(_ArchivePageDelete) _then) = __$ArchivePageDeleteCopyWithImpl;
 @useResult
 $Res call({
- String path, String? assetId
+ List<EncryptedImage> images
 });
 
 
@@ -257,11 +349,10 @@ class __$ArchivePageDeleteCopyWithImpl<$Res>
 
 /// Create a copy of ArchivePageEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? path = null,Object? assetId = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
   return _then(_ArchivePageDelete(
-path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String,assetId: freezed == assetId ? _self.assetId : assetId // ignore: cast_nullable_to_non_nullable
-as String?,
+images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
+as List<EncryptedImage>,
   ));
 }
 
@@ -353,6 +444,56 @@ as String,
 }
 
 /// @nodoc
+
+
+class _ActivateSelectionMode extends ArchivePageEvent {
+  const _ActivateSelectionMode(): super._();
+  
+
+
+
+
+
+
+
+
+@override
+String toString() {
+  return 'ArchivePageEvent.activateSelectionMode()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _CancelSelectionMode extends ArchivePageEvent {
+  const _CancelSelectionMode(): super._();
+  
+
+
+
+
+
+
+
+
+@override
+String toString() {
+  return 'ArchivePageEvent.cancelSelectionMode()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$ArchivePageState {
 
 
@@ -385,15 +526,17 @@ extension ArchivePageStatePatterns on ArchivePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _DecryptingAllUI value)?  decryptingAllUI,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Importing value)?  importing,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _DecryptingAllUI value)?  decryptingAllUI,TResult Function( _Imported value)?  imported,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Deleting() when deleting != null:
+return loading(_that);case _Importing() when importing != null:
+return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that);case _Failure() when failure != null:
+return decryptingAllUI(_that);case _Imported() when imported != null:
+return imported(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -412,15 +555,17 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _DecryptingAllUI value)  decryptingAllUI,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Importing value)  importing,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _DecryptingAllUI value)  decryptingAllUI,required TResult Function( _Imported value)  imported,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _Deleting():
+return loading(_that);case _Importing():
+return importing(_that);case _Deleting():
 return deleting(_that);case _UI():
 return ui(_that);case _DecryptingAllUI():
-return decryptingAllUI(_that);case _Failure():
+return decryptingAllUI(_that);case _Imported():
+return imported(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -438,15 +583,17 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _DecryptingAllUI value)?  decryptingAllUI,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Importing value)?  importing,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _DecryptingAllUI value)?  decryptingAllUI,TResult? Function( _Imported value)?  imported,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Deleting() when deleting != null:
+return loading(_that);case _Importing() when importing != null:
+return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that);case _Failure() when failure != null:
+return decryptingAllUI(_that);case _Imported() when imported != null:
+return imported(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -464,14 +611,16 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images)?  ui,TResult Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  importing,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images,  bool isSelectionMode)?  ui,TResult Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult Function()?  imported,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Deleting() when deleting != null:
+return loading();case _Importing() when importing != null:
+return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
-return ui(_that.images);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that.dearchivingState);case _Failure() when failure != null:
+return ui(_that.images,_that.isSelectionMode);case _DecryptingAllUI() when decryptingAllUI != null:
+return decryptingAllUI(_that.dearchivingState);case _Imported() when imported != null:
+return imported();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -490,14 +639,16 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images)  ui,required TResult Function( DearchivingState dearchivingState)  decryptingAllUI,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  importing,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images,  bool isSelectionMode)  ui,required TResult Function( DearchivingState dearchivingState)  decryptingAllUI,required TResult Function()  imported,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Deleting():
+return loading();case _Importing():
+return importing();case _Deleting():
 return deleting(_that.paths);case _UI():
-return ui(_that.images);case _DecryptingAllUI():
-return decryptingAllUI(_that.dearchivingState);case _Failure():
+return ui(_that.images,_that.isSelectionMode);case _DecryptingAllUI():
+return decryptingAllUI(_that.dearchivingState);case _Imported():
+return imported();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -515,14 +666,16 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images)?  ui,TResult? Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  importing,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images,  bool isSelectionMode)?  ui,TResult? Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult? Function()?  imported,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Deleting() when deleting != null:
+return loading();case _Importing() when importing != null:
+return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
-return ui(_that.images);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that.dearchivingState);case _Failure() when failure != null:
+return ui(_that.images,_that.isSelectionMode);case _DecryptingAllUI() when decryptingAllUI != null:
+return decryptingAllUI(_that.dearchivingState);case _Imported() when imported != null:
+return imported();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -557,6 +710,27 @@ class _Initial extends ArchivePageState {
 
 class _Loading extends ArchivePageState {
   const _Loading(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _Importing extends ArchivePageState {
+  const _Importing(): super._();
   
 
 
@@ -638,7 +812,7 @@ as List<String>,
 
 
 class _UI extends ArchivePageState {
-  const _UI({required final  List<EncryptedImage> images}): _images = images,super._();
+  const _UI({required final  List<EncryptedImage> images, this.isSelectionMode = false}): _images = images,super._();
   
 
  final  List<EncryptedImage> _images;
@@ -648,6 +822,7 @@ class _UI extends ArchivePageState {
   return EqualUnmodifiableListView(_images);
 }
 
+@JsonKey() final  bool isSelectionMode;
 
 /// Create a copy of ArchivePageState
 /// with the given fields replaced by the non-null parameter values.
@@ -668,7 +843,7 @@ abstract mixin class _$UICopyWith<$Res> implements $ArchivePageStateCopyWith<$Re
   factory _$UICopyWith(_UI value, $Res Function(_UI) _then) = __$UICopyWithImpl;
 @useResult
 $Res call({
- List<EncryptedImage> images
+ List<EncryptedImage> images, bool isSelectionMode
 });
 
 
@@ -685,10 +860,11 @@ class __$UICopyWithImpl<$Res>
 
 /// Create a copy of ArchivePageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? isSelectionMode = null,}) {
   return _then(_UI(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<EncryptedImage>,
+as List<EncryptedImage>,isSelectionMode: null == isSelectionMode ? _self.isSelectionMode : isSelectionMode // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -749,6 +925,27 @@ as DearchivingState,
 
 
 }
+
+/// @nodoc
+
+
+class _Imported extends ArchivePageState {
+  const _Imported(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
 
 /// @nodoc
 

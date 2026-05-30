@@ -4,28 +4,22 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
 class EncryptedImage with EquatableMixin {
-  final String path;
   final DateTime date;
   final BytesInfo encryptedInfo;
   final BytesInfo? decryptInfo;
-  final bool isPrivateFolder;
-  final String? assetId;
+  final StoragePath storagePath;
 
   bool get isDecrypted => decryptInfo != null;
 
-  File get file => File(path);
-
   EncryptedImage({
-    required this.path,
+    required this.storagePath,
     required this.date,
     required this.encryptedInfo,
-    required this.isPrivateFolder,
     this.decryptInfo,
-    this.assetId,
   });
 
   EncryptedImage copyWith({
-    String? path,
+    StoragePath? storagePath,
     DateTime? date,
     BytesInfo? encryptedInfo,
     BytesInfo? decryptInfo,
@@ -33,12 +27,10 @@ class EncryptedImage with EquatableMixin {
     String? assetId,
   }) {
     return EncryptedImage(
-      path: path ?? this.path,
+      storagePath: storagePath ?? this.storagePath.copyWith(),
       date: date ?? this.date,
       encryptedInfo: encryptedInfo ?? this.encryptedInfo.copyWith(),
       decryptInfo: decryptInfo ?? this.decryptInfo?.copyWith(),
-      isPrivateFolder: isPrivateFolder ?? this.isPrivateFolder,
-      assetId: assetId ?? this.assetId,
     );
   }
 
@@ -46,17 +38,15 @@ class EncryptedImage with EquatableMixin {
   /// Use this instead of [copyWith] when you want to clear optionalData by passing null
   EncryptedImage overrideWith({BytesInfo? decryptInfo}) {
     return EncryptedImage(
-      path: path,
+      storagePath: storagePath,
       date: date,
       encryptedInfo: encryptedInfo,
       decryptInfo: decryptInfo,
-      isPrivateFolder: isPrivateFolder,
-      assetId: assetId,
     );
   }
 
   String get name {
-    final raw = file.path.replaceAll("\\", "/").split('/').last;
+    final raw = storagePath.file.path.replaceAll("\\", "/").split('/').last;
     // Normalize double extension e.g. "188.png.png" -> "188.png"
     final lower = raw.toLowerCase();
     for (final ext in ['.png', '.jpg', '.jpeg']) {
@@ -69,12 +59,10 @@ class EncryptedImage with EquatableMixin {
 
   @override
   List<Object?> get props => [
-    path,
+    storagePath,
     date,
     encryptedInfo,
     decryptInfo,
-    isPrivateFolder,
-    assetId,
   ];
 }
 
@@ -90,4 +78,26 @@ class BytesInfo with EquatableMixin {
 
   @override
   List<Object?> get props => [hash];
+}
+
+class StoragePath {
+  final String path;
+  final String? assetId;
+  final bool isPrivateFolder;
+
+  File get file => File(path);
+
+  const StoragePath({
+    required this.path,
+    required this.isPrivateFolder,
+    required this.assetId,
+  });
+
+  StoragePath copyWith({String? path, String? assetId, bool? isPrivateFolder}) {
+    return StoragePath(
+      assetId: assetId ?? this.assetId,
+      isPrivateFolder: isPrivateFolder ?? this.isPrivateFolder,
+      path: path ?? this.path,
+    );
+  }
 }

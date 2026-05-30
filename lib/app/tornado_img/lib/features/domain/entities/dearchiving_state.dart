@@ -18,10 +18,10 @@ class DearchivingState with EquatableMixin {
   ];
 
   DearchivingStateType getState(String path) {
-    if (loadingImages.any((e) => e.file.path == path)) {
+    if (loadingImages.any((e) => e.storagePath.file.path == path)) {
       return DearchivingStateType.loading;
     }
-    if (dearchivedImages.any((e) => e.file.path == path)) {
+    if (dearchivedImages.any((e) => e.storagePath.file.path == path)) {
       return DearchivingStateType.dearchived;
     }
 

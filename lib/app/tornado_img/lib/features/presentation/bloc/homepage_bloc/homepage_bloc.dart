@@ -161,13 +161,13 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final totalBytes = subFolders.fold<int>(
       images.fold<int>(
         0,
-        (prev, image) => prev + image.file.lengthSync(),
+        (prev, image) => prev + image.storagePath.file.lengthSync(),
       ),
       (prev, folder) =>
           prev +
           folder.images.fold<int>(
             0,
-            (prev2, image) => prev2 + image.file.lengthSync(),
+            (prev2, image) => prev2 + image.storagePath.file.lengthSync(),
           ),
     );
 

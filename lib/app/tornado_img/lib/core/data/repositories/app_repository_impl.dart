@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:watcher/watcher.dart';
@@ -201,7 +203,6 @@ class AppRepositoryImpl implements AppRepository {
           path: path,
           encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
           date: date,
-          isPrivateFolder: rootFolder.isPrivateFolder,
         );
 
         // On macOS, FSEvents fires spurious CREATE events for already-existing
@@ -287,6 +288,8 @@ class AppRepositoryImpl implements AppRepository {
     String path,
     bool isPrivateFolder,
   ) async {
+    try {
+
     final folder = EncryptedFolder.empty(path, isPrivateFolder);
     final files = Directory(path).listSync();
     for (final fileSystem in files) {
@@ -297,10 +300,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         folder.images.add(
           EncryptedImage(
-            path: fileSystem.path,
+              storagePath: StoragePath(
+                path: fileSystem.path,
+                isPrivateFolder: isPrivateFolder,
+                assetId: null,
+              ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
-            date: date,
-            isPrivateFolder: isPrivateFolder,
+              date: date,
           ),
         );
       } else {
@@ -312,6 +318,23 @@ class AppRepositoryImpl implements AppRepository {
       }
     }
     return folder;
+    } catch (e) {
+      appLogger.logRepository(
+        'Error loading subfolder at $path',
+        error: e.toString(),
+      );
+
+      if (kDebugMode) {
+        log(
+          "---------------- DELETING BAD CREATED FOLDER: $path ----------------",
+        );
+        final file = File(path);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      }
+      return EncryptedFolder.empty(path, isPrivateFolder);
+    }
   }
 
   Future<EncryptedFolder> _scanFullFolderPrivate(String path) async {
@@ -326,10 +349,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         rootFolder.images.add(
           EncryptedImage(
-            path: fileSystem.path,
+            storagePath: StoragePath(
+              path: fileSystem.path,
+              isPrivateFolder: true,
+              assetId: null,
+            ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: date,
-            isPrivateFolder: true,
           ),
         );
       } else {
@@ -360,10 +386,13 @@ class AppRepositoryImpl implements AppRepository {
         final hash = ByteModeling.generateHash(bytes);
         rootFolder.images.add(
           EncryptedImage(
-            path: file.path,
+            storagePath: StoragePath(
+              path: file.path,
+              isPrivateFolder: false,
+              assetId: asset.id,
+            ),
             encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
             date: asset.createDateTime,
-            isPrivateFolder: false,
           ),
         );
       } catch (e) {

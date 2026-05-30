@@ -73,14 +73,16 @@ class StorageRepositoryImpl implements StorageRepository {
           final bytes = await file.readAsBytes();
 
           final encryptedImage = EncryptedImage(
-            path: file.path,
+            storagePath: StoragePath(
+              path: file.path,
+              isPrivateFolder: false,
+              assetId: asset.id,
+            ),
             date: asset.createDateTime,
             encryptedInfo: BytesInfo(
               bytes: bytes,
               hash: ByteModeling.generateHash(bytes),
             ),
-            isPrivateFolder: false,
-            assetId: asset.id,
           );
 
           return EncryptedStreamImage.image(
@@ -116,21 +118,55 @@ class StorageRepositoryImpl implements StorageRepository {
   }
 
   @override
-  Future<bool> delete(String path, {String? assetId}) async {
-    if (assetId != null) {
-      final deletes = await PhotoManager.editor.deleteWithIds([assetId]);
-      return deletes.isNotEmpty;
+  Future<bool> delete(List<StoragePath> images) async {
+    final galleryImages = images.where((img) => img.assetId != null).toList();
+    bool deleted = false;
+
+    if (galleryImages.isNotEmpty) {
+      final deletes = await PhotoManager.editor.deleteWithIds(
+        galleryImages.map((img) => img.assetId!).toList(),
+      );
+      deleted = deletes.isNotEmpty;
     }
 
-    final file = File(path);
-    if (await file.exists()) {
-      await file.delete();
-      return true;
+    final privateImages = images.where((img) => img.assetId == null).toList();
+    for (final image in privateImages) {
+      if (await image.file.exists()) {
+        await image.file.delete();
+        if (!deleted) deleted = true;
     } else {
       appLogger.logRepository(
         'File to delete',
-        error: 'File does not exist: $path',
+          error: 'File does not exist: ${image.path}',
+        );
+      }
+    }
+
+    return deleted;
+  }
+  
+  @override
+  Future<bool> rename(
+    String path,
+    String oldFileName,
+    String newFileName,
+  ) async {
+    final oldFile = File('$path/$oldFileName');
+    final newFile = File('$path/$newFileName');
+
+    if (!await oldFile.exists()) {
+      appLogger.logRepository(
+        'Rename failed: Original file does not exist',
+        error: 'File does not exist: ${oldFile.path}',
       );
+      return false;
+    }
+
+    try {
+      await oldFile.rename(newFile.path);
+      return true;
+    } catch (e) {
+      appLogger.logRepository('Error renaming file', error: e.toString());
       return false;
     }
   }

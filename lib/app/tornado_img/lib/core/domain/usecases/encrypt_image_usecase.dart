@@ -54,23 +54,33 @@ class EncryptImageUseCase
         album: Constants.appFolderName,
       );
 
+      
+      final isGalleryVisible = params.settings.galleryVisible;
+
       if (params.settings.deleteOriginals) {
-        storageRepo.delete(params.file.path, assetId: params.assetId);
+        storageRepo.delete([
+          StoragePath(
+            path: params.file.path,
+            isPrivateFolder: !isGalleryVisible,
+            assetId: params.assetId,
+          ),
+        ]);
       }
 
       final encryptedFile = File(
         '${params.settings.outputFolder}/$fileName',
       );
-      final isGalleryVisible = params.settings.galleryVisible;
       final encryptedImage = EncryptedImage(
+        storagePath: StoragePath(
+          isPrivateFolder: !isGalleryVisible,
         path: encryptedFile.path,
+          assetId: isGalleryVisible ? params.assetId : null,
+        ),
         encryptedInfo: BytesInfo(
           bytes: encoded,
           hash: ByteModeling.generateHash(encoded),
         ),
-        isPrivateFolder: !isGalleryVisible,
         date: DateTime.now(),
-        assetId: isGalleryVisible ? params.assetId : null,
       );
 
       return Right(encryptedImage);

@@ -1,19 +1,28 @@
-part of '../encrypted_image_page.dart';
+import 'dart:async';
+import 'dart:typed_data';
 
-class _FullscreenImageViewer extends StatefulWidget {
-  final List<EncryptedImage> images;
+import 'package:flutter/material.dart';
+
+class FullscreenImageViewer<T> extends StatefulWidget {
+  final List<T> images;
+  final Uint8List Function(T image) getBytes;
+  final String Function(T image) getFilePath;
   final int initialIndex;
 
-  const _FullscreenImageViewer({
+  const FullscreenImageViewer({
+    super.key,
     required this.images,
+    required this.getBytes,
+    required this.getFilePath,
     required this.initialIndex,
   });
 
   @override
-  State<_FullscreenImageViewer> createState() => _FullscreenImageViewerState();
+  State<FullscreenImageViewer<T>> createState() =>
+      _FullscreenImageViewerState<T>();
 }
 
-class _FullscreenImageViewerState extends State<_FullscreenImageViewer>
+class _FullscreenImageViewerState<T> extends State<FullscreenImageViewer<T>>
     with SingleTickerProviderStateMixin {
   late final PageController _pageController;
   late int _currentIndex;
@@ -39,6 +48,9 @@ class _FullscreenImageViewerState extends State<_FullscreenImageViewer>
     );
     _appBarOpacity = _appBarAnimController;
     _scheduleHide();
+    _isZoomed.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   void _scheduleHide() {
@@ -95,30 +107,25 @@ class _FullscreenImageViewerState extends State<_FullscreenImageViewer>
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: _onTap,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: _isZoomed,
-          builder: (context, isZoomed, _) {
-            return PageView.builder(
-              controller: _pageController,
-              physics:
-                  isZoomed
-                      ? const NeverScrollableScrollPhysics()
-                      : const PageScrollPhysics(),
-              itemCount: widget.images.length,
-              onPageChanged: (index) {
-                setState(() => _currentIndex = index);
-                _isZoomed.value = false;
-              },
-              itemBuilder: (context, index) {
-                final image = widget.images[index];
-                final bytes =
-                    image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;
-                return _ZoomablePage(
-                  key: ValueKey(image.path),
-                  bytes: bytes,
-                  onZoomChanged: (zoomed) => _isZoomed.value = zoomed,
-                );
-              },
+        child: PageView.builder(
+          controller: _pageController,
+          physics:
+              _isZoomed.value
+                  ? const NeverScrollableScrollPhysics()
+                  : const PageScrollPhysics(),
+          itemCount: widget.images.length,
+          onPageChanged: (index) {
+            setState(() => _currentIndex = index);
+            _isZoomed.value = false;
+          },
+          itemBuilder: (context, index) {
+            final image = widget.images[index];
+            final bytes = widget.getBytes(image);
+            final filePath = widget.getFilePath(image);
+            return _ZoomablePage(
+              key: ValueKey(filePath),
+              bytes: bytes,
+              onZoomChanged: (zoomed) => _isZoomed.value = zoomed,
             );
           },
         ),
@@ -211,7 +218,13 @@ class _ZoomablePageState extends State<_ZoomablePage>
         transformationController: _controller,
         minScale: 0.5,
         maxScale: 4.0,
-        child: Center(child: Image.memory(widget.bytes, fit: BoxFit.contain)),
+        child: Center(
+          child: Image.memory(
+            widget.bytes,
+            fit: BoxFit.contain,
+            gaplessPlayback: true,
+          ),
+        ),
       ),
     );
   }

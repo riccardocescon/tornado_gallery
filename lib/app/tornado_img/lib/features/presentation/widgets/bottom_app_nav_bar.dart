@@ -32,10 +32,12 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(
-          vertical: 32,
-          horizontal: 24,
-        ).copyWith(top: 12),
+        margin: EdgeInsets.only(
+          top: 12,
+          bottom: 12 + MediaQuery.of(context).padding.bottom,
+          left: 24,
+          right: 24,
+        ),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: context.colorScheme.surface,

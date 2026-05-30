@@ -6,12 +6,21 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
 
   const factory ArchivePageEvent.setup() = _Setup;
 
+  const factory ArchivePageEvent.importImages({
+    required List<ImportImageAsset> assets,
+    required bool saveToAppFolder,
+    required bool saveToGallery,
+  }) = _ImportImages;
+
   const factory ArchivePageEvent.delete({
-    required String path,
-    String? assetId,
+    required List<EncryptedImage> images,
   }) = _ArchivePageDelete;
 
   const factory ArchivePageEvent.encryptAll() = _ArchivePageEncryptAll;
   const factory ArchivePageEvent.decryptAll({required String passphrase}) =
       _ArchivePageDecryptAll;
+
+  const factory ArchivePageEvent.activateSelectionMode() =
+      _ActivateSelectionMode;
+  const factory ArchivePageEvent.cancelSelectionMode() = _CancelSelectionMode;
 }

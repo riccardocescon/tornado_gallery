@@ -8,10 +8,10 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
   const factory EncryptionPageState.loading() = _Loading;
   const factory EncryptionPageState.ui({
     required List<GalleryImage> images,
+    required String fileName,
     required String size,
     required String dateTime,
-  }) =
-      _UI;
+  }) = _UI;
   const factory EncryptionPageState.settingsUi({
     required EncryptionSettings settings,
   }) = _SettingsUI;
@@ -26,7 +26,13 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
   List<Object?> get props => when(
     initial: () => [],
     loading: () => [],
-    ui: (images, size, dateTime) => [images, size, dateTime],
+    ui:
+        (images, fileName, size, dateTime) => [
+          images,
+          fileName,
+          size,
+          dateTime,
+        ],
     settingsUi:
         (settings) => [settings],
     encrypting: (archivingState) => [archivingState],

@@ -5,6 +5,7 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
@@ -63,7 +64,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   PageTitle(
                     title: "Tornado Gallery",
-                    subtitle: "Visually encrypted your images for full privacy",
+                    subtitle:
+                        "Visually encrypting your images for full privacy",
                     icon: Icons.lock_rounded,
                   ),
                   UpdateAppCard(),
@@ -93,31 +95,23 @@ class _HomePageState extends State<HomePage> {
               buttonIcon: Icons.image_rounded,
               darker: true,
               onPressed: () async {
-                final permissionState =
-                    await PhotoManager.requestPermissionExtend();
-                if (!mounted) return;
-                if (!permissionState.isAuth && !permissionState.isLimited) {
-                  context.showSnackbar(
-                    "Permission to access photos was denied",
-                  );
-                  return;
-                }
-
-                final assets = await AssetPicker.pickAssets(
+                final assets = await PicturesProvider.pickImagesFromGallery(
                   context,
-                  pickerConfig: AssetPickerConfig(
-                    requestType: RequestType.image,
-                    maxAssets: 100,
-                  ),
                 );
-                if (!mounted) return;
-                if (assets?.isEmpty ?? true) {
-                  context.showSnackbar("No images selected");
-                  return;
-                }
 
-                context.read<HomepageBloc>().add(
-                  HomepageEvent.galleryAssetsSelected(imagesSelected: assets!),
+                assets.fold(
+                  (errMessage) {
+                    if (errMessage != null) {
+                      context.showSnackbar(errMessage);
+                    }
+                  },
+                  (assets) {
+                    context.read<HomepageBloc>().add(
+                      HomepageEvent.galleryAssetsSelected(
+                        imagesSelected: assets,
+                      ),
+                    );
+                  },
                 );
               },
             ),

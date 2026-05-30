@@ -22,10 +22,13 @@ class StorageRepositoryUtils {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
       final galleryImage = EncryptedImage(
-        path: file.path,
+        storagePath: StoragePath(
+          path: file.path,
+          isPrivateFolder: true,
+          assetId: null,
+        ),
         encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
         date: lastModified,
-        isPrivateFolder: true,
       );
       appLogger.logRepository('Found image: ${file.path}');
       return galleryImage;

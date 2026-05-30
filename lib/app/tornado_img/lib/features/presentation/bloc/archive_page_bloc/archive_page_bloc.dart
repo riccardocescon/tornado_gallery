@@ -3,12 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
+import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/features/domain/entities/import_image_asset.dart';
 
 part 'archive_page_bloc.freezed.dart';
 part 'archive_page_event.dart';
@@ -22,17 +28,22 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   bool isDecryptingAllImages = false;
   bool get hasAllDecrypted => images.every((img) => img.decryptInfo != null);
 
+  bool _isSelectionMode = false;
+
   final GalleryReaderUsecase galleryReaderUsecase;
   final ImageDeleterUsecase imageDeleterUsecase;
 
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
 
+  final ImageSaverUsecase imageSaverUseCase;
+
   ArchivePageBloc({
     required this.appBloc,
     required this.galleryBloc,
     required this.galleryReaderUsecase,
     required this.imageDeleterUsecase,
+    required this.imageSaverUseCase,
   })
     : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
@@ -56,12 +67,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 break;
               case EncryptedStreamImageType.updatedImage:
                 images.removeWhere(
-                  (img) => img.file.path == streamImage.image!.file.path,
+                  (img) =>
+                      img.storagePath.file.path ==
+                      streamImage.image!.storagePath.file.path,
                 );
                 images.add(streamImage.image!);
                 break;
               case EncryptedStreamImageType.deletedImage:
-                images.removeWhere((img) => img.file.path == streamImage.path);
+                images.removeWhere(
+                  (img) => img.storagePath.file.path == streamImage.path,
+                );
                 break;
             }
           },
@@ -76,26 +91,28 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         appState.maybeMap(
           addedGalleryImage: (value) {
             final alreadyExists = images.any(
-              (img) => img.file.path == value.image.file.path,
+              (img) =>
+                  img.storagePath.file.path ==
+                  value.image.storagePath.file.path,
             );
             if (!alreadyExists) {
               images.add(value.image);
               _emit(emit);
             } else {
               appLogger.logPageBloc(
-                'Image already exists in gallery, skipping add: ${value.image.file.path}',
+                'Image already exists in gallery, skipping add: ${value.image.storagePath.file.path}',
               );
             }
           },
           updatedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.file.path == value.image.file.path,
+              (img) => img.storagePath.file.path == value.image.storagePath.file.path,
             );
             if (index != -1) {
               images[index] = value.image;
             } else {
               appLogger.logPageBloc(
-                'Updated image not found in gallery, adding as new: ${value.image.file.path}',
+                'Updated image not found in gallery, adding as new: ${value.image.storagePath.file.path}',
               );
               images.add(value.image);
             }
@@ -108,7 +125,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           },
           removedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.file.path == value.path,
+              (img) => img.storagePath.file.path == value.path,
             );
 
             if (index != -1) {
@@ -134,10 +151,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       
     });
     on<_ArchivePageDelete>((event, emit) async {
-      deletingImagesQueue.add(event.path);
+      deletingImagesQueue.addAll(
+        event.images.map((img) => img.storagePath.path),
+      );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
       final result = await imageDeleterUsecase.call(
-        ImageDeleterParams(path: event.path, assetId: event.assetId),
+        ImageDeleterParams(images: event.images),
       );
 
       result.fold(
@@ -150,7 +169,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         },
         (deleted) {
           if (deleted) {
-            appBloc.add(AppEvent.removeEncryptedImage(path: event.path));
+            for (final image in event.images) {
+              appBloc.add(
+                AppEvent.removeEncryptedImage(path: image.storagePath.path),
+              );
+            }
           } else {
             _emit(emit);
           }
@@ -162,7 +185,10 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         final image = images[i].overrideWith(decryptInfo: null);
 
         appBloc.add(
-          AppEvent.setDecryptedInfo(path: image.path, decryptedInfo: null),
+          AppEvent.setDecryptedInfo(
+            path: image.storagePath.path,
+            decryptedInfo: null,
+          ),
         );
       }
       isDecryptingAllImages = false;
@@ -200,7 +226,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                   sortedImagesTable.entries.toList();
               for (final dearchivedImage in dearchivingState.dearchivedImages) {
                 final item = sortedImagesTableValues.firstWhere(
-                  (value) => value.value.path == dearchivedImage.path,
+                  (value) =>
+                      value.value.storagePath.path ==
+                      dearchivedImage.storagePath.path,
                 );
                 if (item.value.isDecrypted) continue;
 
@@ -230,16 +258,73 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       isDecryptingAllImages = false;
     });
+    on<_ImportImages>((event, emit) async {
+      emit(const ArchivePageState.importing());
+
+      for (final item in event.assets) {
+        final asset = item.asset;
+        final bytes = await asset.originBytes;
+        if (bytes == null) continue;
+
+        final fileName = '${item.name}.png';
+        final params =
+            event.saveToAppFolder
+                ? ImageSaverParams.appFolder(
+                  bytes: bytes,
+                  fileName: fileName,
+                  path: await GalleryPathProvider.getEncryptedFolderPath(),
+                )
+                : ImageSaverParams.gallery(
+                  bytes: bytes,
+                  fileName: fileName,
+                  album: Constants.appFolderName,
+                );
+        final result = await imageSaverUseCase.call(params);
+        if (result.isLeft()) {
+          appLogger.logPageBloc(
+            'Failed to import image: $fileName',
+            error: result.left.message,
+          );
+        } else {
+          final hash = ByteModeling.generateHash(bytes);
+          final rootDirPath =
+              event.saveToGallery
+                  ? await GalleryPathProvider.getPublicFolderPath()
+                  : await GalleryPathProvider.getEncryptedFolderPath();
+          final path = '$rootDirPath/$fileName';
+
+          final String? galleryAssetId =
+              event.saveToGallery
+                  ? await GalleryPathProvider.findGalleryAssetIdByName(fileName)
+                  : null;
+
+          final encryptedImage = EncryptedImage(
+            storagePath: StoragePath(
+              path: path,
+              isPrivateFolder: event.saveToAppFolder,
+              assetId: galleryAssetId,
+            ),
+            encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+            date: DateTime.now(),
+          );
+          appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
+        }
+      }
+
+      emit(const ArchivePageState.imported());
+    });
+    on<_ActivateSelectionMode>(_onActivateSelectionMode);
+    on<_CancelSelectionMode>(_onCancelSelectionMode);
   }
 
   List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
-    // currently not sxisting, so its sorted by last modified date
+    // currently not existing, so its sorted by last modified date
     final sorted = List<EncryptedImage>.from(images);
     sorted.sort((a, b) {
       DateTime getDate(EncryptedImage img) {
         try {
-          return img.file.lastModifiedSync();
+          return img.storagePath.file.lastModifiedSync();
         } catch (_) {
           return img.date;
         }
@@ -251,7 +336,27 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   }
 
   void _emit(Emitter<ArchivePageState> emit) {
+    emit(
+      ArchivePageState.ui(
+        images: sortedImages,
+        isSelectionMode: _isSelectionMode,
+      ),
+    );
+  }
 
-    emit(ArchivePageState.ui(images: sortedImages));
+  void _onActivateSelectionMode(
+    _ActivateSelectionMode event,
+    Emitter<ArchivePageState> emit,
+  ) {
+    _isSelectionMode = true;
+    _emit(emit);
+  }
+
+  void _onCancelSelectionMode(
+    _CancelSelectionMode event,
+    Emitter<ArchivePageState> emit,
+  ) {
+    _isSelectionMode = false;
+    _emit(emit);
   }
 }
