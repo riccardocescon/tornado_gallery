@@ -5,6 +5,7 @@ import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
@@ -153,10 +154,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
   bool _isSkipped(bool overrideImage, String? destinationPath, String imageId) {
     if (overrideImage) return false;
+    if (destinationPath == null || destinationPath.isEmpty) return false;
+
+    final safeStem = FileNameUtils.sanitizeFileStem(imageId);
 
     final encryptedImages = appBloc.encryptedImages;
     final exists = encryptedImages.any(
-      (img) => img.file.path == '$destinationPath/$imageId.png',
+      (img) => img.file.path == '$destinationPath/$safeStem.png',
     );
     return exists;
   }

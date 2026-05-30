@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:watcher/watcher.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
@@ -48,7 +49,7 @@ class AppRepositoryImpl implements AppRepository {
       // Folder may exist but have no images yet (just created).
       // Return an empty root so watchFolderChanges can be attached.
       final path = await GalleryPathProvider.getPublicFolderPath();
-      if (path == null) return null;
+      if (path == null || path.trim().isEmpty) return null;
       if (!await Directory(path).exists()) return null;
       final emptyFolder = EncryptedFolder.empty(path, false);
       _lookupTable.addAll(_buildFolderIndex(emptyFolder));
@@ -62,12 +63,31 @@ class AppRepositoryImpl implements AppRepository {
 
   @override
   Stream<void> watchFolderChanges(EncryptedFolder rootFolder) async* {
+    if (rootFolder.path.trim().isEmpty) {
+      appLogger.logPageBloc('Skipping folder watcher: empty folder path');
+      return;
+    }
+
     final encryptedDir = Directory(rootFolder.path);
+    if (!await encryptedDir.exists()) {
+      appLogger.logPageBloc(
+        'Skipping folder watcher: folder does not exist (${rootFolder.path})',
+      );
+      return;
+    }
+
+    final folderStream = DirectoryWatcher(encryptedDir.path).events;
+
     // On macOS/iOS, /var is a symlink to /private/var. FSEvents always delivers
     // resolved paths, but stored paths use the original (unresolved) form.
     // Resolve the root once and strip the resolved prefix from incoming events
     // so all lookups and stored paths remain consistent.
-    final resolvedRoot = await encryptedDir.resolveSymbolicLinks();
+    String resolvedRoot;
+    try {
+      resolvedRoot = await encryptedDir.resolveSymbolicLinks();
+    } on FileSystemException {
+      resolvedRoot = rootFolder.path;
+    }
     final originalRoot = rootFolder.path;
 
     String normalizePath(String p) {
@@ -77,23 +97,22 @@ class AppRepositoryImpl implements AppRepository {
       return p;
     }
 
-    final folderStream = encryptedDir.watch(
-      events: FileSystemEvent.create | FileSystemEvent.delete,
-      recursive: true,
-    );
-
     await _streamManagers[rootFolder.path]?.dispose();
     final sm = StreamManager.fromStream(folderStream);
     _streamManagers[rootFolder.path] = sm;
 
     try {
       await for (final event in sm.stream) {
+        if (event.type != ChangeType.ADD && event.type != ChangeType.REMOVE) {
+          continue;
+        }
+
         final path = normalizePath(event.path);
         appLogger.logPageBloc(
           "Received file system event: ${event.toString()}",
         );
 
-        if (event.type == FileSystemEvent.delete) {
+        if (event.type == ChangeType.REMOVE) {
           // On macOS, event.isDirectory is unreliable for delete events because
           // the file no longer exists. Use the lookup table instead: if the
           // path is a known folder, treat it as a folder delete; otherwise
@@ -125,7 +144,7 @@ class AppRepositoryImpl implements AppRepository {
         }
 
         final isDirectory =
-            event.isDirectory || !path.split('/').last.contains('.');
+            Directory(path).existsSync() || !path.split('/').last.contains('.');
         if (isDirectory) {
           final newFolder = await _scanFullFolderPrivate(path);
 
@@ -149,7 +168,18 @@ class AppRepositoryImpl implements AppRepository {
         }
 
         final parentPath = Directory(path).parent.path;
-        final parentFolder = _lookupTable[parentPath];
+        EncryptedFolder? parentFolder = _lookupTable[parentPath];
+        if (parentFolder == null) {
+          final recovered = await _recoverMissingParentFolder(
+            rootFolder: rootFolder,
+            parentPath: parentPath,
+            rootPath: originalRoot,
+          );
+          if (recovered) {
+            parentFolder = _lookupTable[parentPath];
+          }
+        }
+
         if (parentFolder == null) {
           appLogger.logPageBloc(
             'Failed to add new file',
@@ -403,6 +433,33 @@ class AppRepositoryImpl implements AppRepository {
     if (alreadyExists) return false;
 
     parent.subfolders.add(newFolder);
+    return true;
+  }
+
+  Future<bool> _recoverMissingParentFolder({
+    required EncryptedFolder rootFolder,
+    required String parentPath,
+    required String rootPath,
+  }) async {
+    // Watchers can emit file ADD before folder ADD. Rebuild and insert the
+    // missing parent so the file event can be processed in the same tick.
+    if (!parentPath.startsWith(rootPath)) return false;
+
+    final dir = Directory(parentPath);
+    if (!await dir.exists()) return false;
+
+    final recoveredFolder = await _scanFullFolderPrivate(parentPath);
+    final inserted = insertFolderFast(
+      rootFolder: rootFolder,
+      newFolder: recoveredFolder,
+    );
+
+    if (!inserted) {
+      return _lookupTable.containsKey(parentPath);
+    }
+
+    _lookupTable.addAll(_buildFolderIndex(recoveredFolder));
+    appLogger.logPageBloc('Recovered missing parent folder in lookup: $parentPath');
     return true;
   }
 }

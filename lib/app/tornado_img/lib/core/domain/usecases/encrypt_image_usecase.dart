@@ -7,6 +7,7 @@ import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
@@ -25,7 +26,8 @@ class EncryptImageUseCase
 
     try {
 
-      final fileName = '${params.fileId}.png';
+      final safeStem = FileNameUtils.sanitizeFileStem(params.fileId);
+      final fileName = '$safeStem.png';
 
       final decoded = await imageRepo.decode(params.file);
 
@@ -57,7 +59,7 @@ class EncryptImageUseCase
       }
 
       final encryptedFile = File(
-        '${params.settings.outputFolder}/${params.fileId}.png',
+        '${params.settings.outputFolder}/$fileName',
       );
       final isGalleryVisible = params.settings.galleryVisible;
       final encryptedImage = EncryptedImage(
