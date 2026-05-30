@@ -102,10 +102,23 @@ class AppRepositoryImpl implements AppRepository {
     await _streamManagers[rootFolder.path]?.dispose();
     final sm = StreamManager.fromStream(folderStream);
     _streamManagers[rootFolder.path] = sm;
+    final pendingRemovals = <String, DateTime>{};
+    const removeCoalesceWindow = Duration(milliseconds: 700);
 
     try {
       await for (final event in sm.stream) {
-        if (event.type != ChangeType.ADD && event.type != ChangeType.REMOVE) {
+        final flushed = _flushExpiredRemovals(
+          rootFolder: rootFolder,
+          pendingRemovals: pendingRemovals,
+          window: removeCoalesceWindow,
+        );
+        if (flushed) {
+          yield null;
+        }
+
+        if (event.type != ChangeType.ADD &&
+            event.type != ChangeType.REMOVE &&
+            event.type != ChangeType.MODIFY) {
           continue;
         }
 
@@ -114,35 +127,32 @@ class AppRepositoryImpl implements AppRepository {
           "Received file system event: ${event.toString()}",
         );
 
-        if (event.type == ChangeType.REMOVE) {
-          // On macOS, event.isDirectory is unreliable for delete events because
-          // the file no longer exists. Use the lookup table instead: if the
-          // path is a known folder, treat it as a folder delete; otherwise
-          // treat it as a file delete and look up the parent folder.
-          final folder = _lookupTable[path];
-          if (folder != null) {
-            _removeEncryptedFolder(rootFolder, folder);
-            _lookupTable.remove(path);
-            appLogger.logPageBloc(
-              'Folder deleted: $path, removed from lookup',
-            );
-          } else {
-            final parentPath = Directory(path).parent.path;
-            final parentFolder = _lookupTable[parentPath];
-            if (parentFolder != null) {
-              parentFolder.images.removeWhere((img) => img.path == path);
-              appLogger.logPageBloc(
-                'File deleted: $path, removed from parent folder in lookup',
-              );
-            } else {
-              appLogger.logPageBloc(
-                'Failed to delete item',
-                error: 'Path not found in lookup: $path',
-              );
-            }
-          }
-          yield null;
+        if (event.type == ChangeType.MODIFY) {
           continue;
+        }
+
+        if (event.type == ChangeType.REMOVE) {
+          // Watcher reports rename/move as REMOVE + ADD. Delay remove briefly
+          // so we can coalesce the pair and treat it as a move.
+          pendingRemovals[path] = DateTime.now();
+          continue;
+        }
+
+        final movedFrom = _takeMoveSourceCandidate(pendingRemovals, path);
+        if (movedFrom != null) {
+          final moved = await _applyMovePath(
+            rootFolder: rootFolder,
+            fromPath: movedFrom,
+            toPath: path,
+            rootPath: originalRoot,
+          );
+          if (moved) {
+            yield null;
+            continue;
+          }
+
+          // Fall back to normal remove+add behavior if this wasn't a true move.
+          _applyRemovePath(rootFolder, movedFrom);
         }
 
         final isDirectory =
@@ -200,7 +210,7 @@ class AppRepositoryImpl implements AppRepository {
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
         final newImage = EncryptedImage(
-          path: path,
+          storagePath: StoragePath(path: path, isPrivateFolder: rootFolder.isPrivateFolder, assetId: null),
           encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
           date: date,
         );
@@ -209,11 +219,17 @@ class AppRepositoryImpl implements AppRepository {
         // files when the watcher first starts (initial state replay). Only
         // notify listeners when the image is genuinely new to avoid triggering
         // a UI refresh for these no-op resync events.
-        final wasPresent = parentFolder.images.any((img) => img.path == path);
-        parentFolder.images.removeWhere((img) => img.path == path);
+        final wasPresent = parentFolder.images.any((img) => img.storagePath.path == path);
+        parentFolder.images.removeWhere((img) => img.storagePath.path == path);
         parentFolder.images.add(newImage);
         if (!wasPresent) {
           yield null;
+        }
+      }
+
+      if (pendingRemovals.isNotEmpty) {
+        for (final path in pendingRemovals.keys.toList()) {
+          _applyRemovePath(rootFolder, path);
         }
       }
     } finally {
@@ -422,6 +438,152 @@ class AppRepositoryImpl implements AppRepository {
     }
 
     return false;
+  }
+
+  bool _flushExpiredRemovals({
+    required EncryptedFolder rootFolder,
+    required Map<String, DateTime> pendingRemovals,
+    required Duration window,
+  }) {
+    final now = DateTime.now();
+    final expired = pendingRemovals.entries
+        .where((entry) => now.difference(entry.value) >= window)
+        .map((entry) => entry.key)
+        .toList();
+
+    var changed = false;
+    for (final path in expired) {
+      pendingRemovals.remove(path);
+      changed = _applyRemovePath(rootFolder, path) || changed;
+    }
+    return changed;
+  }
+
+  String? _takeMoveSourceCandidate(
+    Map<String, DateTime> pendingRemovals,
+    String addPath,
+  ) {
+    if (pendingRemovals.isEmpty) return null;
+
+    final addParent = Directory(addPath).parent.path;
+    final addName = addPath.split('/').last;
+    final addExt = addName.contains('.') ? addName.split('.').last : '';
+
+    String? bestPath;
+    var bestScore = 0;
+    for (final oldPath in pendingRemovals.keys) {
+      var score = 0;
+      final oldParent = Directory(oldPath).parent.path;
+      final oldName = oldPath.split('/').last;
+      final oldExt = oldName.contains('.') ? oldName.split('.').last : '';
+
+      if (oldParent == addParent) score += 3;
+      if (oldName == addName) score += 2;
+      if (oldExt.isNotEmpty && oldExt == addExt) score += 1;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestPath = oldPath;
+      }
+    }
+
+    if (bestPath == null || bestScore == 0) return null;
+    pendingRemovals.remove(bestPath);
+    return bestPath;
+  }
+
+  bool _applyRemovePath(EncryptedFolder rootFolder, String path) {
+    final folder = _lookupTable[path];
+    if (folder != null) {
+      _removeEncryptedFolder(rootFolder, folder);
+      _removeLookupBranch(path);
+      appLogger.logPageBloc('Folder deleted: $path, removed from lookup');
+      return true;
+    }
+
+    final parentPath = Directory(path).parent.path;
+    final parentFolder = _lookupTable[parentPath];
+    if (parentFolder != null) {
+      final hadImage = parentFolder.images.any(
+        (img) => img.storagePath.path == path,
+      );
+      if (hadImage) {
+        parentFolder.images.removeWhere((img) => img.storagePath.path == path);
+        appLogger.logPageBloc(
+          'File deleted: $path, removed from parent folder in lookup',
+        );
+        return true;
+      }
+    }
+
+    appLogger.logPageBloc(
+      'Failed to delete item',
+      error: 'Path not found in lookup: $path',
+    );
+    return false;
+  }
+
+  Future<bool> _applyMovePath({
+    required EncryptedFolder rootFolder,
+    required String fromPath,
+    required String toPath,
+    required String rootPath,
+  }) async {
+    final movedFolder = _lookupTable[fromPath];
+    if (movedFolder != null) {
+      _removeEncryptedFolder(rootFolder, movedFolder);
+      _removeLookupBranch(fromPath);
+
+      final rescanned = await _scanFullFolderPrivate(toPath);
+      final inserted = insertFolderFast(rootFolder: rootFolder, newFolder: rescanned);
+      if (!inserted) return false;
+
+      _lookupTable.addAll(_buildFolderIndex(rescanned));
+      appLogger.logPageBloc('Folder moved/renamed: $fromPath -> $toPath');
+      return true;
+    }
+
+    final fromParentPath = Directory(fromPath).parent.path;
+    final toParentPath = Directory(toPath).parent.path;
+    final fromParent = _lookupTable[fromParentPath];
+    if (fromParent == null) return false;
+
+    EncryptedFolder? toParent = _lookupTable[toParentPath];
+    if (toParent == null) {
+      final recovered = await _recoverMissingParentFolder(
+        rootFolder: rootFolder,
+        parentPath: toParentPath,
+        rootPath: rootPath,
+      );
+      if (recovered) {
+        toParent = _lookupTable[toParentPath];
+      }
+    }
+    if (toParent == null) return false;
+
+    final idx = fromParent.images.indexWhere(
+      (img) => img.storagePath.path == fromPath,
+    );
+    if (idx == -1) return false;
+
+    final movedImage = fromParent.images.removeAt(idx);
+    final updatedImage = movedImage.copyWith(
+      storagePath: movedImage.storagePath.copyWith(path: toPath),
+    );
+    toParent.images.removeWhere((img) => img.storagePath.path == toPath);
+    toParent.images.add(updatedImage);
+    appLogger.logPageBloc('File moved/renamed: $fromPath -> $toPath');
+    return true;
+  }
+
+  void _removeLookupBranch(String rootPath) {
+    final prefix = '$rootPath/';
+    final keysToRemove = _lookupTable.keys
+        .where((k) => k == rootPath || k.startsWith(prefix))
+        .toList();
+    for (final key in keysToRemove) {
+      _lookupTable.remove(key);
+    }
   }
 
   Map<String, EncryptedFolder> _buildFolderIndex(EncryptedFolder root) {

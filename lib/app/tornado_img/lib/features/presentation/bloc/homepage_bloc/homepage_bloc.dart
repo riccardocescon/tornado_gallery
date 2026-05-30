@@ -12,6 +12,7 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -158,18 +159,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       (previousValue, folder) => previousValue + folder.images.length,
     );
 
-    final totalBytes = subFolders.fold<int>(
-      images.fold<int>(
-        0,
-        (prev, image) => prev + image.storagePath.file.lengthSync(),
-      ),
-      (prev, folder) =>
-          prev +
-          folder.images.fold<int>(
-            0,
-            (prev2, image) => prev2 + image.storagePath.file.lengthSync(),
-          ),
-    );
+    final totalBytes = _sumImagesBytes(images) + _sumFoldersBytes(subFolders);
 
     final lastLoaded =
         images.isNotEmpty
@@ -187,5 +177,29 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
         archivingState: currentArchivingState,
       ),
     );
+  }
+
+  int _sumFoldersBytes(List<EncryptedFolder> folders) {
+    return folders.fold<int>(
+      0,
+      (total, folder) => total + _sumImagesBytes(folder.images),
+    );
+  }
+
+  int _sumImagesBytes(List<EncryptedImage> images) {
+    return images.fold<int>(
+      0,
+      (total, image) => total + _safeFileLength(image),
+    );
+  }
+
+  int _safeFileLength(EncryptedImage image) {
+    try {
+      final file = image.storagePath.file;
+      if (!file.existsSync()) return 0;
+      return file.lengthSync();
+    } catch (_) {
+      return 0;
+    }
   }
 }
