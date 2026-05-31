@@ -54,7 +54,7 @@ class AppRepositoryImpl implements AppRepository {
       // Return an empty root so watchFolderChanges can be attached.
       final path = await GalleryPathProvider.getPublicFolderPath();
       if (path == null || path.trim().isEmpty) return null;
-      if (!await Directory(path).exists()) return null;
+      if (!Platform.isIOS && !await Directory(path).exists()) return null;
       final emptyFolder = EncryptedFolder.empty(path, false);
       _lookupTable.addAll(_buildFolderIndex(emptyFolder));
       return emptyFolder;
@@ -69,6 +69,15 @@ class AppRepositoryImpl implements AppRepository {
   Stream<void> watchFolderChanges(EncryptedFolder rootFolder) async* {
     if (rootFolder.path.trim().isEmpty) {
       appLogger.logPageBloc('Skipping folder watcher: empty folder path');
+      return;
+    }
+
+    if (!rootFolder.isPrivateFolder &&
+        Platform.isIOS &&
+        GalleryPathProvider.isIosVirtualGalleryPath(rootFolder.path)) {
+      appLogger.logPageBloc(
+        'Skipping iOS public watcher: virtual album path (${rootFolder.path})',
+      );
       return;
     }
 

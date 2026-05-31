@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -36,6 +37,7 @@ enum Pages {
 
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
+  int _iosPublicRefreshToken = 0;
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
@@ -95,12 +97,19 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
               },
               encrypted: (value) {
                 final archive = value.archivingState;
+                final wasArchiving = currentArchivingState != null;
                 final completed =
                     archive.progress ==
                     archive.totalImages;
 
                 currentArchivingState = completed ? null : archive;
                 _emit(emit);
+
+                // On iOS the public gallery folder may not emit a reliable FS
+                // watcher event for the very first created asset.
+                if (completed && wasArchiving && Platform.isIOS) {
+                  _scheduleIosPublicSnapshotSync(emit);
+                }
               },
               orElse: () => null,
             );
@@ -111,8 +120,22 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
     on<_Refresh>((event, emit) async {
       await _repo.dispose();
+      await _folderStreamer.dispose();
       await _streamManager?.dispose();
       _streamManager = null;
+
+      // Force an immediate snapshot refresh so iOS Photos indexing delays
+      // can be recovered without waiting for watcher signals.
+      appEncryptedRootFolder = await _repo.loadRootFolder();
+      appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+      if (appPublicEncryptedRootFolder == null) {
+        final created = await _repo.createPublicFolder();
+        if (created) {
+          appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+        }
+      }
+      _emit(emit);
+
       add(const HomepageEvent.setup());
     });
 
@@ -200,6 +223,33 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       return file.lengthSync();
     } catch (_) {
       return 0;
+    }
+  }
+
+  void _scheduleIosPublicSnapshotSync(Emitter<HomepageState> emit) {
+    final token = ++_iosPublicRefreshToken;
+
+    void queueSync(Duration delay) {
+      Future.delayed(delay, () {
+        if (isClosed) return;
+        if (token != _iosPublicRefreshToken) return;
+        _syncPublicFolderSnapshot(emit);
+      });
+    }
+
+    queueSync(Duration.zero);
+  }
+
+  Future<void> _syncPublicFolderSnapshot(Emitter<HomepageState> emit) async {
+    try {
+      final publicFolder = await _repo.loadPublicRootFolder();
+      appPublicEncryptedRootFolder = publicFolder;
+      _emit(emit);
+    } catch (e) {
+      appLogger.logPageBloc(
+        'Failed to sync iOS public folder snapshot',
+        error: e.toString(),
+      );
     }
   }
 }

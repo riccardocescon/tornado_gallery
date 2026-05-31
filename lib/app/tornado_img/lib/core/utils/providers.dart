@@ -2,18 +2,23 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class GalleryPathProvider {
+  static const String _iosGalleryScheme = 'ios-gallery://';
+
+  static String _buildIosAlbumVirtualPath(AssetPathEntity album) {
+    final encodedName = Uri.encodeComponent(album.name);
+    return '$_iosGalleryScheme${album.id}/$encodedName';
+  }
 
   /// Ottiene tutte le immagini dell'app TornadoGallery (filtrate per nome)
   static Future<List<AssetEntity>> getImagesFromPublicGallery() async {
     try {
-      final mainAlbum = await getPublicFolder();
+      final mainAlbum = await getPublicFolder(requestIfNeeded: true);
       if (mainAlbum == null) return [];
 
       // Ottieni tutte le immagini dall'album principale
@@ -35,15 +40,49 @@ class GalleryPathProvider {
   }
 
   /// Returns the filesystem path for the public gallery folder, or null if
-  /// the platform does not expose a real path (e.g. iOS Photos library).
+  /// the platform does not expose a real path
   static Future<String?> getPublicFolderPath() async {
     if (Platform.isAndroid) {
       final extDir = await getExternalStorageDirectory();
       if (extDir == null) return null;
       final rootPath = extDir.path.split('/Android/').first;
       return '$rootPath/Pictures/${Constants.appFolderName}';
+    } else if (Platform.isIOS) {
+      try {
+        final album = await getPublicFolder(requestIfNeeded: true);
+        if (album == null) return null;
+
+        final assets = await album.getAssetListPaged(page: 0, size: 1);
+        if (assets.isEmpty) {
+          return _buildIosAlbumVirtualPath(album);
+        }
+
+        final asset = assets.first;
+        final file = await asset.originFile ?? await asset.file;
+        final parentPath = file?.parent.path;
+        if (parentPath != null && parentPath.trim().isNotEmpty) {
+          return parentPath;
+        }
+
+        final relativePath = asset.relativePath;
+        if (relativePath != null && relativePath.trim().isNotEmpty) {
+          return relativePath;
+        }
+
+        return _buildIosAlbumVirtualPath(album);
+      } catch (e) {
+        appLogger.logCore(
+          'Error resolving iOS public folder path',
+          error: e.toString(),
+        );
+      }
     }
     return null;
+  }
+
+  static bool isIosVirtualGalleryPath(String? path) {
+    if (path == null) return false;
+    return path.startsWith(_iosGalleryScheme);
   }
 
   static Future<AssetPathEntity?> getPublicFolder({
