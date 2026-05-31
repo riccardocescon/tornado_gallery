@@ -57,6 +57,32 @@ class EncryptedImage with EquatableMixin {
     return raw;
   }
 
+  int get safeSizeBytes {
+    final stats = _safeStats();
+    final size = stats?.size;
+    if (size != null && size >= 0) {
+      return size;
+    }
+    return encryptedInfo.bytes.length;
+  }
+
+  DateTime get safeCreatedAt {
+    final stats = _safeStats();
+    final changed = stats?.changed;
+    if (changed != null && changed.year > 1980) {
+      return changed;
+    }
+    return date;
+  }
+
+  FileStat? _safeStats() {
+    try {
+      return storagePath.file.statSync();
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   List<Object?> get props => [
     storagePath,

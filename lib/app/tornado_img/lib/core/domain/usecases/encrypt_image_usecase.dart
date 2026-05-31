@@ -9,6 +9,7 @@ import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 
@@ -57,6 +58,10 @@ class EncryptImageUseCase
 
       
       final isGalleryVisible = params.settings.galleryVisible;
+      final String? encryptedAssetId =
+          isGalleryVisible
+              ? await GalleryPathProvider.findMostRecentPublicAssetId()
+              : null;
 
       if (params.settings.deleteOriginals) {
         storageRepo.delete([
@@ -75,7 +80,7 @@ class EncryptImageUseCase
         storagePath: StoragePath(
           isPrivateFolder: !isGalleryVisible,
         path: encryptedFile.path,
-          assetId: isGalleryVisible ? params.assetId : null,
+          assetId: encryptedAssetId,
         ),
         encryptedInfo: BytesInfo(
           bytes: encoded,

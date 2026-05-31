@@ -170,8 +170,19 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         (deleted) {
           if (deleted) {
             for (final image in event.images) {
+              final resolvedPath = _resolveRemovalPath(image);
+
+              if (resolvedPath == null) {
+                appLogger.logPageBloc(
+                  'Delete succeeded but image path was not found in AppBloc',
+                  error:
+                      'path=${image.storagePath.path}, assetId=${image.storagePath.assetId}',
+                );
+                continue;
+              }
+
               appBloc.add(
-                AppEvent.removeEncryptedImage(path: image.storagePath.path),
+                AppEvent.removeEncryptedImage(path: resolvedPath),
               );
             }
           } else {
@@ -358,5 +369,20 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   ) {
     _isSelectionMode = false;
     _emit(emit);
+  }
+
+  String? _resolveRemovalPath(EncryptedImage image) {
+    final direct = appBloc.encryptedImages.firstWhereOrNull(
+      (img) => img.storagePath.path == image.storagePath.path,
+    );
+    if (direct != null) return direct.storagePath.path;
+
+    final assetId = image.storagePath.assetId;
+    if (assetId == null) return null;
+
+    final byAsset = appBloc.encryptedImages.firstWhereOrNull(
+      (img) => img.storagePath.assetId == assetId,
+    );
+    return byAsset?.storagePath.path;
   }
 }

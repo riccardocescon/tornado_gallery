@@ -38,6 +38,9 @@ enum Pages {
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
   bool _refreshInFlight = false;
+  final Map<String, EncryptedImage> _runtimeUpserts =
+      <String, EncryptedImage>{};
+  final Set<String> _runtimeRemovals = <String>{};
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
@@ -129,14 +132,20 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
           case _AppStream(:final appState):
             appState.maybeMap(
-              addedGalleryImage: (_) {
-                if (!_refreshInFlight) add(const HomepageEvent.refresh());
+              addedGalleryImage: (value) {
+                _runtimeRemovals.remove(value.image.storagePath.path);
+                _runtimeUpserts[value.image.storagePath.path] = value.image;
+                _emit(emit);
               },
-              updatedGalleryImage: (_) {
-                if (!_refreshInFlight) add(const HomepageEvent.refresh());
+              updatedGalleryImage: (value) {
+                _runtimeRemovals.remove(value.image.storagePath.path);
+                _runtimeUpserts[value.image.storagePath.path] = value.image;
+                _emit(emit);
               },
-              removedGalleryImage: (_) {
-                if (!_refreshInFlight) add(const HomepageEvent.refresh());
+              removedGalleryImage: (value) {
+                _runtimeUpserts.remove(value.path);
+                _runtimeRemovals.add(value.path);
+                _emit(emit);
               },
               orElse: () => null,
             );
@@ -164,6 +173,11 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
         }
       }
+
+      // Fresh repository snapshot is authoritative after a manual refresh.
+      _runtimeUpserts.clear();
+      _runtimeRemovals.clear();
+
       _emit(emit);
 
       add(const HomepageEvent.setup());
@@ -207,8 +221,19 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final subFolders =
         private.subfolders + (appPublicEncryptedRootFolder?.subfolders ?? []);
 
-    final images =
+    final baseImages =
         private.images + (appPublicEncryptedRootFolder?.images ?? []);
+
+    final mergedByPath = <String, EncryptedImage>{
+      for (final img in baseImages) img.storagePath.path: img,
+    };
+
+    for (final removedPath in _runtimeRemovals) {
+      mergedByPath.remove(removedPath);
+    }
+    mergedByPath.addAll(_runtimeUpserts);
+
+    final images = mergedByPath.values.toList();
 
     final totalImages = subFolders.fold<int>(
       images.length,

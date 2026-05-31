@@ -159,10 +159,23 @@ class StorageRepositoryImpl implements StorageRepository {
     bool deleted = false;
 
     if (galleryImages.isNotEmpty) {
-      final deletes = await PhotoManager.editor.deleteWithIds(
-        galleryImages.map((img) => img.assetId!).toList(),
-      );
-      deleted = deletes.isNotEmpty;
+      final ids = galleryImages.map((img) => img.assetId!).toList();
+      final deletedIds = await PhotoManager.editor.deleteWithIds(ids);
+
+      // iOS may occasionally return an empty deleted-id list even when the
+      // delete completed; confirm by checking whether assets still exist.
+      final deletedSet = deletedIds.toSet();
+      for (final id in ids) {
+        if (deletedSet.contains(id)) {
+          deleted = true;
+          continue;
+        }
+
+        final stillExists = await AssetEntity.fromId(id) != null;
+        if (!stillExists) {
+          deleted = true;
+        }
+      }
     }
 
     final privateImages = images.where((img) => img.assetId == null).toList();
@@ -215,11 +228,29 @@ class StorageRepositoryImpl implements StorageRepository {
 
         final recentAssetId = await GalleryPathProvider.findMostRecentPublicAssetId();
         if (recentAssetId != null) {
+          await PhotoManager.editor.deleteWithIds([assetId]);
+
+          // PhotoKit delete can complete asynchronously; verify before reporting success.
+          var oldStillExists = await _assetExistsById(assetId);
+          if (oldStillExists) {
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+            oldStillExists = await _assetExistsById(assetId);
+          }
+
+          if (oldStillExists) {
+            // Keep rename atomic: if old asset cannot be removed, rollback new one.
+            await PhotoManager.editor.deleteWithIds([recentAssetId]);
+            appLogger.logRepository(
+              'Rename failed: old gallery asset still exists after delete attempt',
+              error: 'oldAssetId: $assetId',
+            );
+            return const StorageRenameResult(success: false);
+          }
+
           await GalleryPathProvider.rememberPublicImageNameForAsset(
             assetId: recentAssetId,
             fileName: newFileName,
           );
-          await PhotoManager.editor.deleteWithIds([assetId]);
           return StorageRenameResult(success: true, newAssetId: recentAssetId);
         }
 
@@ -255,5 +286,10 @@ class StorageRepositoryImpl implements StorageRepository {
       appLogger.logRepository('Error renaming file', error: e.toString());
       return const StorageRenameResult(success: false);
     }
+  }
+
+  Future<bool> _assetExistsById(String assetId) async {
+    final entity = await AssetEntity.fromId(assetId);
+    return entity != null;
   }
 }
