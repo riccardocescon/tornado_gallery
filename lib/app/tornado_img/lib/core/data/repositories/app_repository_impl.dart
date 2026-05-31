@@ -428,6 +428,7 @@ class AppRepositoryImpl implements AppRepository {
   ) async {
     final firstFile = await assets.first.file;
     final absoluteFolderPath =
+        await GalleryPathProvider.getPublicFolderPath() ??
         firstFile?.parent.path ??
         assets.first.relativePath ??
         'Pictures/TornadoGallery';
@@ -440,10 +441,22 @@ class AppRepositoryImpl implements AppRepository {
 
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
+        final mappedByAssetId =
+          await GalleryPathProvider.resolvePublicImageNameByAssetId(asset.id);
+        final mappedFileName =
+          mappedByAssetId ??
+          await GalleryPathProvider.resolvePublicImageNameByHash(hash);
+        final displayFileName =
+            mappedFileName ??
+            await GalleryPathProvider.resolveAssetDisplayFileName(
+              asset,
+              fallbackFilePath: file.path,
+            );
+        final storagePath = '$absoluteFolderPath/$displayFileName';
         rootFolder.images.add(
           EncryptedImage(
             storagePath: StoragePath(
-              path: file.path,
+              path: storagePath,
               isPrivateFolder: false,
               assetId: asset.id,
             ),

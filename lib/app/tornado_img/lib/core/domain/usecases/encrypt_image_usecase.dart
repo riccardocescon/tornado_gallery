@@ -28,6 +28,7 @@ class EncryptImageUseCase
 
       final safeStem = FileNameUtils.sanitizeFileStem(params.fileId);
       final fileName = '$safeStem.png';
+      final saveName = params.settings.galleryVisible ? safeStem : fileName;
 
       final decoded = await imageRepo.decode(params.file);
 
@@ -49,7 +50,7 @@ class EncryptImageUseCase
 
       await storageRepo.save(
         bytes: encoded,
-        fileName: fileName,
+        fileName: saveName,
         path: params.settings.destinationPath,
         album: Constants.appFolderName,
       );

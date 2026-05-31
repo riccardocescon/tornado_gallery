@@ -4,6 +4,7 @@ import 'package:gal/gal.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -27,6 +28,20 @@ class StorageRepositoryImpl implements StorageRepository {
           bytes,
           name: fileName,
           album: album,
+        );
+
+        final recentAssetId = await GalleryPathProvider.findMostRecentPublicAssetId();
+        if (recentAssetId != null) {
+          await GalleryPathProvider.rememberPublicImageNameForAsset(
+            assetId: recentAssetId,
+            fileName: fileName,
+          );
+        }
+
+        final hash = ByteModeling.generateHash(bytes);
+        await GalleryPathProvider.rememberPublicImageName(
+          hash: hash,
+          fileName: fileName,
         );
         return;
       }
@@ -62,6 +77,9 @@ class StorageRepositoryImpl implements StorageRepository {
   Stream<EncryptedStreamImage> readPublicGalleryImages() async* {
     try {
       final assets = await GalleryPathProvider.getImagesFromPublicGallery();
+      final publicRootPath =
+          await GalleryPathProvider.getPublicFolderPath() ??
+          'Pictures/TornadoGallery';
 
       final fileStream = Stream.fromIterable(
         assets,
@@ -70,18 +88,36 @@ class StorageRepositoryImpl implements StorageRepository {
           final file = await asset.file;
           if (file == null) return null;
 
+          final displayFileName =
+              await GalleryPathProvider.resolveAssetDisplayFileName(
+                asset,
+                fallbackFilePath: file.path,
+              );
+          final storagePath = '$publicRootPath/$displayFileName';
+
           final bytes = await file.readAsBytes();
+          final hash = ByteModeling.generateHash(bytes);
+          final mappedByAssetId =
+              await GalleryPathProvider.resolvePublicImageNameByAssetId(
+                asset.id,
+              );
+          final mappedFileName =
+              mappedByAssetId ??
+              await GalleryPathProvider.resolvePublicImageNameByHash(hash);
 
           final encryptedImage = EncryptedImage(
             storagePath: StoragePath(
-              path: file.path,
+              path:
+                  mappedFileName == null
+                      ? storagePath
+                      : '$publicRootPath/$mappedFileName',
               isPrivateFolder: false,
               assetId: asset.id,
             ),
             date: asset.createDateTime,
             encryptedInfo: BytesInfo(
               bytes: bytes,
-              hash: ByteModeling.generateHash(bytes),
+              hash: hash,
             ),
           );
 
@@ -146,11 +182,61 @@ class StorageRepositoryImpl implements StorageRepository {
   }
   
   @override
-  Future<bool> rename(
+  Future<StorageRenameResult> rename(
     String path,
     String oldFileName,
     String newFileName,
+    {
+    String? assetId,
+    Uint8List? bytes,
+    String? album,
+  }
   ) async {
+    if (assetId != null) {
+      if (bytes == null) {
+        appLogger.logRepository(
+          'Rename failed: missing image bytes for gallery asset',
+          error: 'assetId: $assetId',
+        );
+        return const StorageRenameResult(success: false);
+      }
+
+      try {
+        final newStem = newFileName.contains('.')
+            ? newFileName.split('.').first
+            : newFileName;
+        final targetAlbum = album ?? Constants.appFolderName;
+
+        await Gal.putImageBytes(
+          bytes,
+          name: newStem,
+          album: targetAlbum,
+        );
+
+        final recentAssetId = await GalleryPathProvider.findMostRecentPublicAssetId();
+        if (recentAssetId != null) {
+          await GalleryPathProvider.rememberPublicImageNameForAsset(
+            assetId: recentAssetId,
+            fileName: newFileName,
+          );
+          await PhotoManager.editor.deleteWithIds([assetId]);
+          return StorageRenameResult(success: true, newAssetId: recentAssetId);
+        }
+
+        appLogger.logRepository(
+          'Rename warning: renamed asset saved but new asset id not found',
+          error: 'oldAssetId: $assetId',
+        );
+        return const StorageRenameResult(success: false);
+      } catch (e) {
+        appLogger.logRepository(
+          'Error renaming gallery asset',
+          error: e.toString(),
+        );
+        return const StorageRenameResult(success: false);
+      }
+    }
+
     final oldFile = File('$path/$oldFileName');
     final newFile = File('$path/$newFileName');
 
@@ -159,15 +245,15 @@ class StorageRepositoryImpl implements StorageRepository {
         'Rename failed: Original file does not exist',
         error: 'File does not exist: ${oldFile.path}',
       );
-      return false;
+      return const StorageRenameResult(success: false);
     }
 
     try {
       await oldFile.rename(newFile.path);
-      return true;
+      return const StorageRenameResult(success: true);
     } catch (e) {
       appLogger.logRepository('Error renaming file', error: e.toString());
-      return false;
+      return const StorageRenameResult(success: false);
     }
   }
 }

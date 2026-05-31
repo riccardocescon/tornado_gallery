@@ -6,6 +6,7 @@ import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 
@@ -127,19 +128,34 @@ class EncryptedImagePageBloc
           path: path,
           oldFileName: oldFileName,
           newFileName: '${event.newName}.$ext',
+          assetId: image.storagePath.assetId,
+          bytes: image.encryptedInfo.bytes,
+          album: Constants.appFolderName,
         ),
       );
 
       foRename.fold(
         (failure) =>
             emit(EncryptedImagePageState.failure(message: failure.message)),
-        (success) {
+        (result) {
+          if (!result.success) {
+            emit(
+              const EncryptedImagePageState.failure(
+                message: 'Unable to rename this image',
+              ),
+            );
+            return;
+          }
+
           appBloc.add(
             AppEvent.removeEncryptedImage(path: image.storagePath.path),
           );
           final newPath = '$path/${event.newName}.$ext';
           image = image.copyWith(
-            storagePath: image.storagePath.copyWith(path: newPath),
+            storagePath: image.storagePath.copyWith(
+              path: newPath,
+              assetId: result.newAssetId ?? image.storagePath.assetId,
+            ),
           );
           appBloc.add(AppEvent.addEncryptedImage(image: image));
           emit(const EncryptedImagePageState.imageRenamed());

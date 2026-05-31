@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -8,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
@@ -37,7 +37,7 @@ enum Pages {
 
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
-  int _iosPublicRefreshToken = 0;
+  bool _refreshInFlight = false;
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
@@ -75,7 +75,15 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           .startWith(getIt<GalleryBloc>().state)
           .map((s) => _GalleryStream(s));
 
-      final mergedStream = Rx.merge([taggedFolderStream, taggedGalleryStream]);
+      final taggedAppStream = getIt<AppBloc>().stream
+          .startWith(getIt<AppBloc>().state)
+          .map((s) => _AppStream(s));
+
+      final mergedStream = Rx.merge([
+        taggedFolderStream,
+        taggedGalleryStream,
+        taggedAppStream,
+      ]);
 
       _streamManager = StreamManager.fromStream(mergedStream);
 
@@ -102,14 +110,33 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
                     archive.progress ==
                     archive.totalImages;
 
+                appPublicEncryptedRootFolder =
+                    _folderStreamer.mergeArchivedPublicImages(
+                      currentPublicFolder: appPublicEncryptedRootFolder,
+                      archivedImages: archive.archivedImages,
+                    );
+
                 currentArchivingState = completed ? null : archive;
                 _emit(emit);
 
-                // On iOS the public gallery folder may not emit a reliable FS
-                // watcher event for the very first created asset.
-                if (completed && wasArchiving && Platform.isIOS) {
-                  _scheduleIosPublicSnapshotSync(emit);
+                if (completed && wasArchiving) {
+                  add(const HomepageEvent.refresh());
                 }
+              },
+              orElse: () => null,
+            );
+            break;
+
+          case _AppStream(:final appState):
+            appState.maybeMap(
+              addedGalleryImage: (_) {
+                if (!_refreshInFlight) add(const HomepageEvent.refresh());
+              },
+              updatedGalleryImage: (_) {
+                if (!_refreshInFlight) add(const HomepageEvent.refresh());
+              },
+              removedGalleryImage: (_) {
+                if (!_refreshInFlight) add(const HomepageEvent.refresh());
               },
               orElse: () => null,
             );
@@ -119,13 +146,16 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     });
 
     on<_Refresh>((event, emit) async {
+      if (_refreshInFlight) return;
+      _refreshInFlight = true;
+
+      try {
       await _repo.dispose();
       await _folderStreamer.dispose();
       await _streamManager?.dispose();
       _streamManager = null;
 
-      // Force an immediate snapshot refresh so iOS Photos indexing delays
-      // can be recovered without waiting for watcher signals.
+      // Force an immediate snapshot refresh to reconcile latest storage state.
       appEncryptedRootFolder = await _repo.loadRootFolder();
       appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
       if (appPublicEncryptedRootFolder == null) {
@@ -137,6 +167,9 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       _emit(emit);
 
       add(const HomepageEvent.setup());
+      } finally {
+        _refreshInFlight = false;
+      }
     });
 
     on<_GalleryAssetsSelected>((event, emit) async {
@@ -219,37 +252,10 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   int _safeFileLength(EncryptedImage image) {
     try {
       final file = image.storagePath.file;
-      if (!file.existsSync()) return 0;
+      if (!file.existsSync()) return image.encryptedInfo.bytes.length;
       return file.lengthSync();
     } catch (_) {
-      return 0;
-    }
-  }
-
-  void _scheduleIosPublicSnapshotSync(Emitter<HomepageState> emit) {
-    final token = ++_iosPublicRefreshToken;
-
-    void queueSync(Duration delay) {
-      Future.delayed(delay, () {
-        if (isClosed) return;
-        if (token != _iosPublicRefreshToken) return;
-        _syncPublicFolderSnapshot(emit);
-      });
-    }
-
-    queueSync(Duration.zero);
-  }
-
-  Future<void> _syncPublicFolderSnapshot(Emitter<HomepageState> emit) async {
-    try {
-      final publicFolder = await _repo.loadPublicRootFolder();
-      appPublicEncryptedRootFolder = publicFolder;
-      _emit(emit);
-    } catch (e) {
-      appLogger.logPageBloc(
-        'Failed to sync iOS public folder snapshot',
-        error: e.toString(),
-      );
+      return image.encryptedInfo.bytes.length;
     }
   }
 }

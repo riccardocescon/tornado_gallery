@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/widgets.dart';
@@ -148,6 +149,148 @@ class GalleryPathProvider {
       (a) => a.title != null && a.title!.startsWith(baseName),
     );
     return match?.id;
+  }
+
+  /// Resolves a stable display filename for a gallery asset.
+  ///
+  /// On iOS, `asset.file.path` can point to temporary exports with opaque
+  /// names; prefer PhotoKit title/original filename so UI names survive restarts.
+  static Future<String> resolveAssetDisplayFileName(
+    AssetEntity asset, {
+    String? fallbackFilePath,
+  }) async {
+    String? title = asset.title?.trim();
+
+    if (title == null || title.isEmpty) {
+      try {
+        title = (await asset.titleAsync).trim();
+      } catch (_) {
+        // Keep fallback behavior below when title fetch fails.
+      }
+    }
+
+    if ((title == null || title.isEmpty) &&
+        fallbackFilePath != null &&
+        fallbackFilePath.trim().isNotEmpty) {
+      title = fallbackFilePath.replaceAll('\\\\', '/').split('/').last;
+    }
+
+    title = (title ?? 'image').trim();
+    if (title.isEmpty) {
+      return 'image.png';
+    }
+
+    final fileLike = title.replaceAll('\\\\', '/').split('/').last;
+    if (!fileLike.contains('.')) {
+      return '$title.png';
+    }
+    return title;
+  }
+
+  static Future<void> rememberPublicImageName({
+    required String hash,
+    required String fileName,
+  }) async {
+    try {
+      final index = await _readPublicNameIndex();
+      index[hash] = _normalizeDisplayName(fileName);
+      await _writePublicNameIndex(index);
+    } catch (e) {
+      appLogger.logCore(
+        'Error saving public image name index',
+        error: e.toString(),
+      );
+    }
+  }
+
+  static Future<void> rememberPublicImageNameForAsset({
+    required String assetId,
+    required String fileName,
+  }) async {
+    try {
+      final index = await _readPublicNameIndex();
+      index['asset:$assetId'] = _normalizeDisplayName(fileName);
+      await _writePublicNameIndex(index);
+    } catch (e) {
+      appLogger.logCore(
+        'Error saving public image asset-name index',
+        error: e.toString(),
+      );
+    }
+  }
+
+  static Future<String?> resolvePublicImageNameByAssetId(String assetId) async {
+    try {
+      final index = await _readPublicNameIndex();
+      final value = index['asset:$assetId']?.trim();
+      if (value == null || value.isEmpty) return null;
+      return _normalizeDisplayName(value);
+    } catch (e) {
+      appLogger.logCore(
+        'Error reading public image asset-name index',
+        error: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  static Future<String?> resolvePublicImageNameByHash(String hash) async {
+    try {
+      final index = await _readPublicNameIndex();
+      final value = index[hash]?.trim();
+      if (value == null || value.isEmpty) return null;
+      return _normalizeDisplayName(value);
+    } catch (e) {
+      appLogger.logCore(
+        'Error reading public image name index',
+        error: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  static Future<String?> findMostRecentPublicAssetId() async {
+    final album = await getPublicFolder(requestIfNeeded: true);
+    if (album == null) return null;
+    final assets = await album.getAssetListPaged(page: 0, size: 1);
+    if (assets.isEmpty) return null;
+    return assets.first.id;
+  }
+
+  static Future<File> _publicNameIndexFile() async {
+    final root = await getApplicationDocumentsDirectory();
+    return File('${root.path}/.public_gallery_names.json');
+  }
+
+  static Future<Map<String, String>> _readPublicNameIndex() async {
+    final file = await _publicNameIndexFile();
+    if (!await file.exists()) return <String, String>{};
+
+    final raw = await file.readAsString();
+    if (raw.trim().isEmpty) return <String, String>{};
+
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return <String, String>{};
+
+    return decoded.map((key, value) => MapEntry('$key', '$value'));
+  }
+
+  static Future<void> _writePublicNameIndex(Map<String, String> index) async {
+    final file = await _publicNameIndexFile();
+    if (!await file.exists()) {
+      await file.create(recursive: true);
+    }
+    await file.writeAsString(jsonEncode(index));
+  }
+
+  static String _normalizeDisplayName(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return 'image.png';
+    final fileLike = trimmed.replaceAll('\\', '/').split('/').last;
+    if (!fileLike.contains('.')) {
+      return '$fileLike.png';
+    }
+    return fileLike;
   }
 
   /// Metodo legacy per compatibilità
