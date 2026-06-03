@@ -38,10 +38,12 @@ class _MultiImagesLayoutState extends State<_MultiImagesLayout> {
                     .round()
                     .clamp(0, widget.images.length - 1);
                 if (_currentIndex != index) {
-                  setState(() => _currentIndex = index);
-                  context.read<EncryptionPageBloc>().add(
-                    EncryptionPageEvent.selectImage(index: index),
-                  );
+                  final bloc = context.read<EncryptionPageBloc>();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    setState(() => _currentIndex = index);
+                    bloc.add(EncryptionPageEvent.selectImage(index: index));
+                  });
                 }
                 return false;
               },
