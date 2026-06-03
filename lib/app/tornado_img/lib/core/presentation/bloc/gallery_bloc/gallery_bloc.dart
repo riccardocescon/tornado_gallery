@@ -126,6 +126,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         DecryptImageParams(
           file: image.storagePath.file,
           password: event.password,
+          assetId: image.storagePath.assetId,
         ),
       );
 

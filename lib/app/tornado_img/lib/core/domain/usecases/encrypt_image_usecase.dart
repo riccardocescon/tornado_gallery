@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
@@ -31,7 +33,7 @@ class EncryptImageUseCase
       final fileName = '$safeStem.png';
       final saveName = params.settings.galleryVisible ? safeStem : fileName;
 
-      final decoded = await imageRepo.decode(params.file);
+      final decoded = await _decodeInput(params);
 
       if (decoded == null) {
         return Left(
@@ -94,6 +96,41 @@ class EncryptImageUseCase
       appLogger.logUsecase('Error encrypting image', error: e.toString());
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
+  }
+
+  Future<ImageData?> _decodeInput(EncryptImageParams params) async {
+    if (await params.file.exists()) {
+      try {
+        final decodedFromFile = await imageRepo.decode(params.file);
+        if (decodedFromFile != null) return decodedFromFile;
+      } on FileSystemException {
+        // iOS picker temp file can disappear between exists() and read.
+        // Fall back to PhotoManager asset bytes below.
+      }
+    }
+
+    final assetId = params.assetId;
+    if (assetId == null) {
+      return null;
+    }
+
+    final asset = await AssetEntity.fromId(assetId);
+    if (asset == null) {
+      return null;
+    }
+
+    final ext = params.file.path.split('.').last.toLowerCase();
+    final bytes = await asset.originBytes;
+    if (bytes != null) {
+      return imageRepo.decodeBytes(bytes, extension: ext);
+    }
+
+    final fallbackFile = await asset.originFile ?? await asset.file;
+    if (fallbackFile != null && await fallbackFile.exists()) {
+      return imageRepo.decode(fallbackFile);
+    }
+
+    return null;
   }
 }
 

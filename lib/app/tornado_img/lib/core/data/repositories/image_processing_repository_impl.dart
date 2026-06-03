@@ -38,6 +38,15 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
   Future<ImageData?> decode(File file) async {
     final bytes = await file.readAsBytes();
     final ext = file.path.split('.').last.toLowerCase();
+    return decodeBytes(bytes, extension: ext);
+  }
+
+  @override
+  Future<ImageData?> decodeBytes(
+    Uint8List bytes, {
+    required String extension,
+  }) async {
+    final ext = extension.toLowerCase();
     final decoded = await compute(_decodeImage, (bytes, ext));
     if (decoded == null) return null;
     return ImageModel.fromImg(decoded);
