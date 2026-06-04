@@ -441,7 +441,11 @@ class AppRepositoryImpl implements AppRepository {
 
         final bytes = await file.readAsBytes();
         final hash = ByteModeling.generateHash(bytes);
-        final mappedByAssetId =
+        String storagePath;
+        if (Platform.isAndroid) {
+          storagePath = '$absoluteFolderPath/${asset.title}';
+        } else if (Platform.isIOS) {
+          final mappedByAssetId =
           await GalleryPathProvider.resolvePublicImageNameByAssetId(asset.id);
         final mappedFileName =
           mappedByAssetId ??
@@ -452,7 +456,13 @@ class AppRepositoryImpl implements AppRepository {
               asset,
               fallbackFilePath: file.path,
             );
-        final storagePath = '$absoluteFolderPath/$displayFileName';
+          storagePath = '$absoluteFolderPath/$displayFileName';
+        } else {
+          throw UnsupportedError(
+            'Unsupported platform: ${Platform.operatingSystem}',
+          );
+        }
+       
         rootFolder.images.add(
           EncryptedImage(
             storagePath: StoragePath(

@@ -88,29 +88,36 @@ class StorageRepositoryImpl implements StorageRepository {
           final file = await asset.file;
           if (file == null) return null;
 
-          final displayFileName =
-              await GalleryPathProvider.resolveAssetDisplayFileName(
-                asset,
-                fallbackFilePath: file.path,
-              );
-          final storagePath = '$publicRootPath/$displayFileName';
-
           final bytes = await file.readAsBytes();
           final hash = ByteModeling.generateHash(bytes);
-          final mappedByAssetId =
-              await GalleryPathProvider.resolvePublicImageNameByAssetId(
-                asset.id,
-              );
-          final mappedFileName =
-              mappedByAssetId ??
-              await GalleryPathProvider.resolvePublicImageNameByHash(hash);
+
+          String storagePath;
+          if (Platform.isAndroid) {
+            storagePath = '$publicRootPath/${file.path.split('/').last}';
+          } else if (Platform.isIOS) {
+            final mappedByAssetId =
+                await GalleryPathProvider.resolvePublicImageNameByAssetId(
+                  asset.id,
+                );
+            final mappedFileName =
+                mappedByAssetId ??
+                await GalleryPathProvider.resolvePublicImageNameByHash(hash);
+            final displayFileName =
+                mappedFileName ??
+                await GalleryPathProvider.resolveAssetDisplayFileName(
+                  asset,
+                  fallbackFilePath: file.path,
+                );
+            storagePath = '$publicRootPath/$displayFileName';
+          } else {
+            throw UnsupportedError(
+              'Unsupported platform: ${Platform.operatingSystem}',
+            );
+          }
 
           final encryptedImage = EncryptedImage(
             storagePath: StoragePath(
-              path:
-                  mappedFileName == null
-                      ? storagePath
-                      : '$publicRootPath/$mappedFileName',
+              path: storagePath,
               isPrivateFolder: false,
               assetId: asset.id,
             ),
@@ -205,7 +212,7 @@ class StorageRepositoryImpl implements StorageRepository {
     String? album,
   }
   ) async {
-    if (assetId != null) {
+    if (assetId != null && Platform.isIOS) {
       if (bytes == null) {
         appLogger.logRepository(
           'Rename failed: missing image bytes for gallery asset',
