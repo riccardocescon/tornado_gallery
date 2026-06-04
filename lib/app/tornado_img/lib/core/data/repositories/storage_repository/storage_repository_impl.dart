@@ -30,19 +30,22 @@ class StorageRepositoryImpl implements StorageRepository {
           album: album,
         );
 
-        final recentAssetId = await GalleryPathProvider.findMostRecentPublicAssetId();
-        if (recentAssetId != null) {
-          await GalleryPathProvider.rememberPublicImageNameForAsset(
-            assetId: recentAssetId,
+        if (Platform.isIOS) {
+          final recentAssetId =
+              await GalleryPathProvider.findMostRecentPublicAssetId();
+          if (recentAssetId != null) {
+            await GalleryPathProvider.rememberPublicImageNameForAsset(
+              assetId: recentAssetId,
+              fileName: fileName,
+            );
+          }
+
+          final hash = ByteModeling.generateHash(bytes);
+          await GalleryPathProvider.rememberPublicImageName(
+            hash: hash,
             fileName: fileName,
           );
         }
-
-        final hash = ByteModeling.generateHash(bytes);
-        await GalleryPathProvider.rememberPublicImageName(
-          hash: hash,
-          fileName: fileName,
-        );
         return;
       }
       

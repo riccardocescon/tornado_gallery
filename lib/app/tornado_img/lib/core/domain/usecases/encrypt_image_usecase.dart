@@ -75,9 +75,13 @@ class EncryptImageUseCase
         ]);
       }
 
-      final encryptedFile = File(
-        '${params.settings.outputFolder}/$fileName',
-      );
+      String? outputFolder = params.settings.destinationPath;
+      outputFolder ??=
+          isGalleryVisible
+              ? await GalleryPathProvider.getPublicFolderPath()
+              : null;
+
+      final encryptedFile = File('$outputFolder/$fileName');
       final encryptedImage = EncryptedImage(
         storagePath: StoragePath(
           isPrivateFolder: !isGalleryVisible,
