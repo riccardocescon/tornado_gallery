@@ -165,7 +165,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       _streamManager = null;
 
       // Force an immediate snapshot refresh to reconcile latest storage state.
-      appEncryptedRootFolder = await _repo.loadRootFolder();
+        appEncryptedRootFolder = await _repo.loadPrivateRootFolder();
       appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
       if (appPublicEncryptedRootFolder == null) {
         final created = await _repo.createPublicFolder();

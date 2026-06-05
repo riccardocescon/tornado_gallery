@@ -16,16 +16,13 @@ class GalleryPathProvider {
     return '$_iosGalleryScheme${album.id}/$encodedName';
   }
 
-  /// Ottiene tutte le immagini dell'app TornadoGallery (filtrate per nome)
   static Future<List<AssetEntity>> getImagesFromPublicGallery() async {
     try {
       final mainAlbum = await getPublicFolder(requestIfNeeded: true);
       if (mainAlbum == null) return [];
 
-      // Ottieni tutte le immagini dall'album principale
       final allAssets = await mainAlbum.getAssetListPaged(page: 0, size: 10000);
 
-      // Filtra solo le immagini di TornadoGallery (che iniziano con il prefisso)
       final tornadoAssets = <AssetEntity>[];
       final validAssets = allAssets.where((e) => e.type == AssetType.image);
       tornadoAssets.addAll(validAssets);
@@ -48,7 +45,9 @@ class GalleryPathProvider {
       if (extDir == null) return null;
       final rootPath = extDir.path.split('/Android/').first;
       return '$rootPath/Pictures/${Constants.appFolderName}';
-    } else if (Platform.isIOS) {
+    }
+
+    if (Platform.isIOS) {
       try {
         final album = await getPublicFolder(requestIfNeeded: true);
         if (album == null) return null;
@@ -76,8 +75,11 @@ class GalleryPathProvider {
           'Error resolving iOS public folder path',
           error: e.toString(),
         );
+
+        return null;
       }
     }
+
     return null;
   }
 

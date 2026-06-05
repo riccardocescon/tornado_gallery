@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:tornado_img_app/core/data/repositories/app_repository_impl.dart';
+import 'package:tornado_img_app/core/data/repositories/app_repository/app_repository_impl.dart';
 
 class FakePathProviderPlatform extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
@@ -56,7 +56,7 @@ void main() {
     test(
       'adds a new folder to rootFolder when created and yields after insertion',
       () async {
-        final rootFolder = await repo.loadRootFolder();
+        final rootFolder = await repo.loadPrivateRootFolder();
 
         final completer = Completer<void>();
         late final StreamSubscription sub;
@@ -103,7 +103,7 @@ void main() {
         final albumDir = Directory('${encryptedDir.path}/album_images');
         await albumDir.create(recursive: true);
 
-        final rootFolder = await repo.loadRootFolder();
+        final rootFolder = await repo.loadPrivateRootFolder();
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
@@ -146,7 +146,7 @@ void main() {
         final imageFile = File(imagePath);
         await imageFile.writeAsBytes([1, 2, 3, 4]);
 
-        final rootFolder = await repo.loadRootFolder();
+        final rootFolder = await repo.loadPrivateRootFolder();
         final completer = Completer<void>();
         late final StreamSubscription sub;
 
