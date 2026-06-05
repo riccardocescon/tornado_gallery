@@ -3,10 +3,11 @@ import 'dart:typed_data';
 import 'package:gal/gal.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
 
@@ -32,16 +33,16 @@ class StorageRepositoryImpl implements StorageRepository {
 
         if (Platform.isIOS) {
           final recentAssetId =
-              await GalleryPathProvider.findMostRecentPublicAssetId();
+              await GalleryPathProvider.findMostRecentAssetId();
           if (recentAssetId != null) {
-            await GalleryPathProvider.rememberPublicImageNameForAsset(
+            await AssetNameIndex.saveByAssetId(
               assetId: recentAssetId,
               fileName: fileName,
             );
           }
 
           final hash = ByteModeling.generateHash(bytes);
-          await GalleryPathProvider.rememberPublicImageName(
+          await AssetNameIndex.saveByHash(
             hash: hash,
             fileName: fileName,
           );
@@ -79,7 +80,7 @@ class StorageRepositoryImpl implements StorageRepository {
   @override
   Stream<EncryptedStreamImage> readPublicGalleryImages() async* {
     try {
-      final assets = await GalleryPathProvider.getImagesFromPublicGallery();
+      final assets = await GalleryPathProvider.getPublicAssets();
       final publicRootPath =
           await GalleryPathProvider.getPublicFolderPath() ??
           'Pictures/TornadoGallery';
@@ -99,15 +100,15 @@ class StorageRepositoryImpl implements StorageRepository {
             storagePath = '$publicRootPath/${file.path.split('/').last}';
           } else if (Platform.isIOS) {
             final mappedByAssetId =
-                await GalleryPathProvider.resolvePublicImageNameByAssetId(
+                await AssetNameIndex.resolveByAssetId(
                   asset.id,
                 );
             final mappedFileName =
                 mappedByAssetId ??
-                await GalleryPathProvider.resolvePublicImageNameByHash(hash);
+                await AssetNameIndex.resolveByHash(hash);
             final displayFileName =
                 mappedFileName ??
-                await GalleryPathProvider.resolveAssetDisplayFileName(
+                await GalleryPathProvider.resolveAssetDisplayName(
                   asset,
                   fallbackFilePath: file.path,
                 );
@@ -236,7 +237,7 @@ class StorageRepositoryImpl implements StorageRepository {
           album: targetAlbum,
         );
 
-        final recentAssetId = await GalleryPathProvider.findMostRecentPublicAssetId();
+        final recentAssetId = await GalleryPathProvider.findMostRecentAssetId();
         if (recentAssetId != null) {
           await PhotoManager.editor.deleteWithIds([assetId]);
 
@@ -257,7 +258,7 @@ class StorageRepositoryImpl implements StorageRepository {
             return const StorageRenameResult(success: false);
           }
 
-          await GalleryPathProvider.rememberPublicImageNameForAsset(
+          await AssetNameIndex.saveByAssetId(
             assetId: recentAssetId,
             fileName: newFileName,
           );

@@ -78,10 +78,10 @@ class _ArchiveState extends StatelessWidget {
                     orElse: () => null,
                   );
 
-                  final folderAmount = state.maybeMap(
-                    galleryStatus: (value) => value.folderLoaded,
-                    orElse: () => null,
-                  );
+                  // final folderAmount = state.maybeMap(
+                  //   galleryStatus: (value) => value.folderLoaded,
+                  //   orElse: () => null,
+                  // );
 
                   final bytesAmount = state.maybeMap(
                     galleryStatus: (value) => value.bytesLoaded,

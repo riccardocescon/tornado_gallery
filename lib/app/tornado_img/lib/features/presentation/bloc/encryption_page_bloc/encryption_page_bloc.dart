@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
@@ -38,8 +38,11 @@ class EncryptionPageBloc
       // Preload data as soon as they are available
       _emitImageData(emit);
 
-      final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
-        galleryVisible: settings.galleryVisible,
+      final newOutputFolder =
+          settings.galleryVisible
+              ? null
+              : await GalleryPathProvider.getPrivateFolderPath(
+        
       );
       settings = settings.copyWith(outputFolder: _getUiPath(newOutputFolder));
       _emitSettings(emit);
@@ -53,8 +56,10 @@ class EncryptionPageBloc
     });
     on<_ToggleGalleryVisibility>((event, emit) async {
       final newGalleryVisible = !settings.galleryVisible;
-      final newOutputFolder = await GalleryPathProvider.getOutputFolderRoot(
-        galleryVisible: newGalleryVisible,
+      final newOutputFolder =
+          newGalleryVisible
+              ? null
+              : await GalleryPathProvider.getPrivateFolderPath(
       );
       settings = settings.copyWith(
         outputFolder: _getUiPath(newOutputFolder),

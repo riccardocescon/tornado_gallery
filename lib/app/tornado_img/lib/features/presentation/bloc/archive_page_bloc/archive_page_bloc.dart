@@ -8,8 +8,8 @@ import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
@@ -283,7 +283,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 ? ImageSaverParams.appFolder(
                   bytes: bytes,
                   fileName: fileName,
-                  path: await GalleryPathProvider.getEncryptedFolderPath(),
+                  path: await GalleryPathProvider.getPrivateFolderPath(),
                 )
                 : ImageSaverParams.gallery(
                   bytes: bytes,
@@ -301,12 +301,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           final rootDirPath =
               event.saveToGallery
                   ? await GalleryPathProvider.getPublicFolderPath()
-                  : await GalleryPathProvider.getEncryptedFolderPath();
+                  : await GalleryPathProvider.getPrivateFolderPath();
           final path = '$rootDirPath/$fileName';
 
           final String? galleryAssetId =
               event.saveToGallery
-                  ? await GalleryPathProvider.findGalleryAssetIdByName(fileName)
+                  ? await GalleryPathProvider.findAssetIdByName(fileName)
                   : null;
 
           final encryptedImage = EncryptedImage(
