@@ -5,7 +5,7 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
-import 'package:tornado_img_app/core/utils/pictures_provider.dart';
+import 'package:tornado_img_app/core/utils/picture_provider/pictures_provider.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
@@ -42,10 +42,7 @@ class _HomePageState extends State<HomePage> {
             context.showErrorSnackbar("Failed to load images");
           },
           galleryImages: (galleryImages) {
-            if (galleryImages.isEmpty) {
-              context.showSnackbar("No images selected");
-              return;
-            }
+            if (galleryImages.isEmpty) return;
 
             context.push("/encryption", extra: galleryImages);
           },

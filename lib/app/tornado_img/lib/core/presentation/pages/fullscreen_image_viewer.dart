@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class FullscreenImageViewer<T> extends StatefulWidget {
   final List<T> images;
   final Uint8List Function(T image) getBytes;
   final String Function(T image) getFilePath;
   final int initialIndex;
+  final VoidCallback? onDismiss;
 
   const FullscreenImageViewer({
     super.key,
@@ -15,6 +17,7 @@ class FullscreenImageViewer<T> extends StatefulWidget {
     required this.getBytes,
     required this.getFilePath,
     required this.initialIndex,
+    this.onDismiss,
   });
 
   @override
@@ -100,6 +103,10 @@ class _FullscreenImageViewerState<T> extends State<FullscreenImageViewer<T>>
           child: AppBar(
             backgroundColor: Colors.black54,
             foregroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: widget.onDismiss ?? () => context.pop(),
+            ),
             title: Text('${_currentIndex + 1} / ${widget.images.length}'),
           ),
         ),
