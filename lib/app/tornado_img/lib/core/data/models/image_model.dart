@@ -1,5 +1,5 @@
 import 'package:image/image.dart' as img;
-import '../../domain/entities/image_data.dart';
+import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 
 class ImageModel extends ImageData {
   const ImageModel({

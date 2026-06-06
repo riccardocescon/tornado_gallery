@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 
 class StorageRenameResult {
   final bool success;

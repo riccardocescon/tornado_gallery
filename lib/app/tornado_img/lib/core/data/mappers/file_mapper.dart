@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 /// Maps a [File] from the filesystem to an [EncryptedImage].
 /// Used exclusively for private (encrypted) folder files.

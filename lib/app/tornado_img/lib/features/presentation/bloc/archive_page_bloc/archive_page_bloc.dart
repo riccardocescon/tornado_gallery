@@ -11,10 +11,10 @@ import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
-import 'package:tornado_img_app/features/domain/entities/import_image_asset.dart';
+import 'package:tornado_img_app/core/domain/entities/dearchiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/domain/entities/import_image_asset.dart';
 
 part 'archive_page_bloc.freezed.dart';
 part 'archive_page_event.dart';

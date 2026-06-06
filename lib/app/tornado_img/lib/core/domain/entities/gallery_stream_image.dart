@@ -1,4 +1,4 @@
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 enum EncryptedStreamImageType { newImage, updatedImage, deletedImage }
 

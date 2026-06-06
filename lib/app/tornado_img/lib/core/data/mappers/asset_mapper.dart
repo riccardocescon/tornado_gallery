@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 /// Maps a [AssetEntity] from PhotoManager to an [EncryptedImage].
 /// Used exclusively for public gallery assets (both Android and iOS).

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/data/datasources/storage/public_storage_datasource.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
@@ -8,7 +7,6 @@ import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/extentions.dart';
 /// iOS implementation of [PublicStorageDatasource].
 ///
 /// Uses [PhotoManager] directly instead of [Gal] to avoid the double-asset bug.
@@ -45,11 +43,7 @@ Future<void> save({
     bytes,
     filename: fileName,
     title: fileName,
-  );
-  if (asset == null) {
-    throw StateError('IosPublicStorageDatasource: saveImage returned null');
-  }
-
+    );
   await PhotoManager.editor.copyAssetToPath(
     asset: asset,
     pathEntity: albumEntity,

@@ -8,7 +8,7 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 
 class _MockImageProcessingRepository extends Mock
     implements ImageProcessingRepository {}

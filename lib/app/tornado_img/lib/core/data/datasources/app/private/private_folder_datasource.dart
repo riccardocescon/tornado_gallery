@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/data/mappers/file_mapper.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/core/data/mappers/file_mapper.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:watcher/watcher.dart';
 
 /// Handles all I/O for the private (encrypted) folder inside the app sandbox.

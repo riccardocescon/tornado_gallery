@@ -1,5 +1,5 @@
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_entity.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 class EncryptedFolder with EncryptedEntity {
   final String path;

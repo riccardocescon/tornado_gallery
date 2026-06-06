@@ -1,6 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
 abstract class AppRepository {
   Future<EncryptedFolder> loadPrivateRootFolder();
