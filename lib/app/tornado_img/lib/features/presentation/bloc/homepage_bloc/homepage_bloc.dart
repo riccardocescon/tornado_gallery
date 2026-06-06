@@ -7,12 +7,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_entity.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:rxdart/rxdart.dart';
@@ -35,6 +37,10 @@ enum Pages {
 
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
+  bool _refreshInFlight = false;
+  final Map<String, EncryptedImage> _runtimeUpserts =
+      <String, EncryptedImage>{};
+  final Set<String> _runtimeRemovals = <String>{};
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
@@ -72,7 +78,15 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           .startWith(getIt<GalleryBloc>().state)
           .map((s) => _GalleryStream(s));
 
-      final mergedStream = Rx.merge([taggedFolderStream, taggedGalleryStream]);
+      final taggedAppStream = getIt<AppBloc>().stream
+          .startWith(getIt<AppBloc>().state)
+          .map((s) => _AppStream(s));
+
+      final mergedStream = Rx.merge([
+        taggedFolderStream,
+        taggedGalleryStream,
+        taggedAppStream,
+      ]);
 
       _streamManager = StreamManager.fromStream(mergedStream);
 
@@ -94,11 +108,57 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
               },
               encrypted: (value) {
                 final archive = value.archivingState;
+                final wasArchiving = currentArchivingState != null;
                 final completed =
                     archive.progress ==
                     archive.totalImages;
 
+                appPublicEncryptedRootFolder =
+                    _folderStreamer.mergeArchivedPublicImages(
+                      currentPublicFolder: appPublicEncryptedRootFolder,
+                      archivedImages: archive.archivedImages,
+                    );
+
                 currentArchivingState = completed ? null : archive;
+                _emit(emit);
+
+                if (completed && wasArchiving) {
+                  add(const HomepageEvent.refresh());
+                }
+              },
+              orElse: () => null,
+            );
+            break;
+
+          case _AppStream(:final appState):
+            appState.maybeMap(
+              addedGalleryImage: (value) {
+                _runtimeRemovals.remove(value.image.storagePath.path);
+                _runtimeUpserts[value.image.storagePath.path] = value.image;
+                _emit(emit);
+              },
+              updatedGalleryImage: (value) {
+                // Rimuovi il vecchio per qualsiasi forma di identificatore
+                _runtimeUpserts.removeWhere(
+                  (key, img) =>
+                      key == value.oldIdentifier ||
+                      img.storagePath.path == value.oldIdentifier ||
+                      img.storagePath.assetId == value.oldIdentifier,
+                );
+                _runtimeRemovals.add(value.oldIdentifier);
+
+                // Inserisci il nuovo con chiave stabile
+                final newKey = value.image.storagePath.assetId ?? value.image.storagePath.path;
+                _runtimeUpserts[newKey] = value.image;
+                _emit(emit);
+              },
+              removedGalleryImage: (value) {
+                _runtimeUpserts.removeWhere(
+                  (_, img) =>
+                      img.storagePath.path == value.path ||
+                      img.storagePath.assetId == value.path,
+                );
+                _runtimeRemovals.add(value.path);
                 _emit(emit);
               },
               orElse: () => null,
@@ -109,10 +169,35 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     });
 
     on<_Refresh>((event, emit) async {
+      if (_refreshInFlight) return;
+      _refreshInFlight = true;
+
+      try {
       await _repo.dispose();
+      await _folderStreamer.dispose();
       await _streamManager?.dispose();
       _streamManager = null;
+
+      // Force an immediate snapshot refresh to reconcile latest storage state.
+        appEncryptedRootFolder = await _repo.loadPrivateRootFolder();
+      appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+      if (appPublicEncryptedRootFolder == null) {
+        final created = await _repo.createPublicFolder();
+        if (created) {
+          appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+        }
+      }
+
+      // Fresh repository snapshot is authoritative after a manual refresh.
+      _runtimeUpserts.clear();
+      _runtimeRemovals.clear();
+
+      _emit(emit);
+
       add(const HomepageEvent.setup());
+      } finally {
+        _refreshInFlight = false;
+      }
     });
 
     on<_GalleryAssetsSelected>((event, emit) async {
@@ -150,26 +235,37 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final subFolders =
         private.subfolders + (appPublicEncryptedRootFolder?.subfolders ?? []);
 
-    final images =
+    final baseImages =
         private.images + (appPublicEncryptedRootFolder?.images ?? []);
+
+    final mergedByKey = <String, EncryptedImage>{};
+  for (final img in baseImages) {
+    final key = img.storagePath.assetId ?? img.storagePath.path;
+    mergedByKey[key] = img;
+  }
+
+  for (final removedKey in _runtimeRemovals) {
+    mergedByKey.removeWhere(
+      (key, img) =>
+          key == removedKey ||
+          img.storagePath.path == removedKey ||
+          img.storagePath.assetId == removedKey,
+    );
+  }
+
+  for (final entry in _runtimeUpserts.entries) {
+    final key = entry.value.storagePath.assetId ?? entry.key;
+    mergedByKey[key] = entry.value;
+  }
+
+  final images = mergedByKey.values.toList();
 
     final totalImages = subFolders.fold<int>(
       images.length,
       (previousValue, folder) => previousValue + folder.images.length,
     );
 
-    final totalBytes = subFolders.fold<int>(
-      images.fold<int>(
-        0,
-        (prev, image) => prev + image.storagePath.file.lengthSync(),
-      ),
-      (prev, folder) =>
-          prev +
-          folder.images.fold<int>(
-            0,
-            (prev2, image) => prev2 + image.storagePath.file.lengthSync(),
-          ),
-    );
+    final totalBytes = _sumImagesBytes(images) + _sumFoldersBytes(subFolders);
 
     final lastLoaded =
         images.isNotEmpty
@@ -187,5 +283,29 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
         archivingState: currentArchivingState,
       ),
     );
+  }
+
+  int _sumFoldersBytes(List<EncryptedFolder> folders) {
+    return folders.fold<int>(
+      0,
+      (total, folder) => total + _sumImagesBytes(folder.images),
+    );
+  }
+
+  int _sumImagesBytes(List<EncryptedImage> images) {
+    return images.fold<int>(
+      0,
+      (total, image) => total + _safeFileLength(image),
+    );
+  }
+
+  int _safeFileLength(EncryptedImage image) {
+    try {
+      final file = image.storagePath.file;
+      if (!file.existsSync()) return image.encryptedInfo.bytes.length;
+      return file.lengthSync();
+    } catch (_) {
+      return image.encryptedInfo.bytes.length;
+    }
   }
 }

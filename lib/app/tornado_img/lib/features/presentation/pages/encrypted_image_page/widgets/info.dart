@@ -13,8 +13,9 @@ class _InfoState extends State<_Info> {
 
   @override
   Widget build(BuildContext context) {
-    final stats = widget.image.storagePath.file.statSync();
-    final size = stats.size;
+    final size = widget.image.safeSizeBytes;
+    final createdAt = widget.image.safeCreatedAt;
+
     String sizeText;
     if (size < 1024) {
       sizeText = '$size bytes';
@@ -26,7 +27,7 @@ class _InfoState extends State<_Info> {
       sizeText = '${(size / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
     }
 
-    final created = DateFormat('yyyy-MM-dd HH:mm:ss').format(stats.changed);
+    final created = DateFormat('yyyy-MM-dd HH:mm:ss').format(createdAt);
 
     return _PageBackground(
       child: Column(
@@ -92,7 +93,7 @@ class _InfoState extends State<_Info> {
               _infoItem('Name', widget.image.name),
               _infoItem('Size', sizeText),
               _infoItem('Created', created),
-              _infoItem('Path', widget.image.storagePath.file.path),
+              _infoItem('Path', widget.image.storagePath.path),
             ],
           ),
         ],

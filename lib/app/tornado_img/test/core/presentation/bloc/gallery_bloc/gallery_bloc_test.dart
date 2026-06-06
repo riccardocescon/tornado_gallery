@@ -11,10 +11,10 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
 

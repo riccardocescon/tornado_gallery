@@ -6,7 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 class _MockStorageRepository extends Mock implements StorageRepository {}
 

@@ -5,13 +5,14 @@ import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/dearchiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/dearchiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
 
 part 'gallery_bloc.freezed.dart';
@@ -125,6 +126,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         DecryptImageParams(
           file: image.storagePath.file,
           password: event.password,
+          assetId: image.storagePath.assetId,
         ),
       );
 
@@ -158,10 +160,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
   bool _isSkipped(bool overrideImage, String? destinationPath, String imageId) {
     if (overrideImage) return false;
+    if (destinationPath == null || destinationPath.isEmpty) return false;
+
+    final safeStem = FileNameUtils.sanitizeFileStem(imageId);
 
     final encryptedImages = appBloc.encryptedImages;
     final exists = encryptedImages.any(
-      (img) => img.storagePath.file.path == '$destinationPath/$imageId.png',
+      (img) => img.storagePath.file.path == '$destinationPath/$safeStem.png',
     );
     return exists;
   }

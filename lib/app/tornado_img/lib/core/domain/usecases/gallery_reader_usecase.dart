@@ -3,9 +3,9 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 
 class GalleryReaderUsecase
     extends GalleryReaderUseCase<EncryptedStreamImage, void> {
@@ -20,7 +20,7 @@ class GalleryReaderUsecase
   ) async* {
     try {
       final privateFolderPath =
-          await GalleryPathProvider.getEncryptedFolderPath();
+          await GalleryPathProvider.getPrivateFolderPath();
       yield* storageRepo
           .readPrivateImages(privateFolderPath)
           .asyncMap((image) => Right(image));

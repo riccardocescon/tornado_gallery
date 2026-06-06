@@ -3,7 +3,7 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
   final StorageRepository storageRepo;

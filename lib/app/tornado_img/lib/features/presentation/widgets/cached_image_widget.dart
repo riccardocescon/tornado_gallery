@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tornado_img_app/app_style.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
 class CachedImageWidget extends StatefulWidget {
   const CachedImageWidget({

@@ -1,7 +1,14 @@
 import 'dart:typed_data';
 
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
+
+class StorageRenameResult {
+  final bool success;
+  final String? newAssetId;
+
+  const StorageRenameResult({required this.success, this.newAssetId});
+}
 
 abstract class StorageRepository {
   Future<void> save({
@@ -13,6 +20,13 @@ abstract class StorageRepository {
   Stream<EncryptedStreamImage> readPrivateImages(String path);
   Stream<EncryptedStreamImage> readPublicGalleryImages();
   Future<bool> imageExists(String path, String fileName);
-  Future<bool> rename(String path, String oldFileName, String newFileName);
+  Future<StorageRenameResult> rename(
+    String path,
+    String oldFileName,
+    String newFileName, {
+    String? assetId,
+    Uint8List? bytes,
+    String? album,
+  });
   Future<bool> delete(List<StoragePath> images);
 }
