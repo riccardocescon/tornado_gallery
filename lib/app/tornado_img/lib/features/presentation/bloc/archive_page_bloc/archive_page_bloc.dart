@@ -263,7 +263,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           },
           orElse: () => false,
         );
-        if (completed) return;
+        if (completed) break;
       }
 
       isDecryptingAllImages = false;
