@@ -65,7 +65,7 @@ class EncryptedImagePage extends StatelessWidget {
                     spacing: 16,
                     children: [
                       SizedBox(height: 300, child: _Image()),
-                      _titleRow(context, image),
+                      _titleRow(context, image.name),
                       _Info(image: image),
                       _Actions(image: image),
                       const SizedBox(height: 64),
@@ -81,8 +81,7 @@ class EncryptedImagePage extends StatelessWidget {
     );
   }
 
-  Widget _titleRow(BuildContext context, EncryptedImage image) {
-    final isDecrypted = image.decryptInfo != null;
+  Widget _titleRow(BuildContext context, String imageName) {
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,51 +93,8 @@ class EncryptedImagePage extends StatelessWidget {
             children: [
               ContainedItem.icon(icon: Icons.lock_rounded),
               Expanded(
-                child: Text(image.name, style: context.textTheme.headlineSmall),
+                child: Text(imageName, style: context.textTheme.headlineSmall),
               ),
-            ],
-          ),
-        ),
-        FilledButton(
-          onPressed:
-              isDecrypted
-                  ? () {
-                    context.read<EncryptedImagePageBloc>().add(
-                      const EncryptedImagePageEvent.restore(),
-                    );
-                  }
-                  : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: context.appColors.softBackground,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: AppStyle.detailsBorderRadius,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (isDecrypted)
-                Text(
-                  'Tap to restore',
-                  style: context.textTheme.labelSmall!.copyWith(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-              Row(
-                spacing: 4,
-                children: [
-                  Icon(
-                    isDecrypted ? Icons.lock_open_rounded : Icons.lock_rounded,
-                    color: context.colorScheme.onSurface,
-                  ),
-                  Text(
-                    isDecrypted ? 'Decrypted' : 'Encrypted',
-                    style: context.textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-             
             ],
           ),
         ),

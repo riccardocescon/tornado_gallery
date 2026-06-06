@@ -10,7 +10,6 @@ class _Info extends StatefulWidget {
 }
 
 class _InfoState extends State<_Info> {
-
   @override
   Widget build(BuildContext context) {
     final size = widget.image.safeSizeBytes;
@@ -33,49 +32,82 @@ class _InfoState extends State<_Info> {
       child: Column(
         spacing: 16,
         children: [
-          FilledButton(
-            onPressed: () {
-              context.read<EncryptedImagePageBloc>().add(
-                const EncryptedImagePageEvent.decrypt(),
+          BlocBuilder<EncryptedImagePageBloc, EncryptedImagePageState>(
+            buildWhen:
+                (previous, current) =>
+                    current.maybeMap(ui: (value) => true, orElse: () => false),
+            builder: (context, state) {
+              final image = state.maybeMap(
+                ui: (value) => value.image,
+                orElse: () => widget.image,
               );
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: context.appColors.softBackground,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: AppStyle.cardBorderRadius,
-              ),
-              overlayColor: context.colorScheme.primary.withValues(alpha: 0.1),
-            ),
-            child: Column(
-              spacing: 8,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+
+              final isDecrypted = image.decryptInfo != null;
+
+              return FilledButton(
+                onPressed: () {
+                  if (isDecrypted) {
+                    context.read<EncryptedImagePageBloc>().add(
+                      const EncryptedImagePageEvent.restore(),
+                    );
+                    return;
+                  }
+
+                  context.read<EncryptedImagePageBloc>().add(
+                    const EncryptedImagePageEvent.decrypt(),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.appColors.softBackground,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppStyle.cardBorderRadius,
+                  ),
+                  overlayColor: context.colorScheme.primary.withValues(
+                    alpha: 0.1,
+                  ),
+                ),
+                child: Column(
                   spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.remove_red_eye_rounded,
-                      color: context.colorScheme.onSurface,
-                      size: 28,
+                    Row(
+                      spacing: 8,
+                      children: [
+                        Icon(
+                          isDecrypted
+                              ? Icons.restore_rounded
+                              :
+                          Icons.remove_red_eye_rounded,
+                          color: context.colorScheme.onSurface,
+                          size: 28,
+                        ),
+                        Text(
+                          isDecrypted ? 'Restore Image' : 'Start Decryption',
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
-                      'Start Decryption',
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      isDecrypted
+                          ? 'Tap to restore the original image'
+                          : 'Enter the password, then tap to start the process',
+                      style: context.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  'Enter the password, then tap to start the process',
-                  style: context.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
           SizedBox(
             height: 48,
