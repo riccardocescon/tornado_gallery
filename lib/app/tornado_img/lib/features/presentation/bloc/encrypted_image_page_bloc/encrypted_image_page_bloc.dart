@@ -135,21 +135,15 @@ class EncryptedImagePageBloc
       );
 
       foRename.fold(
-        (failure) =>
-            emit(EncryptedImagePageState.failure(message: failure.message)),
+        (failure) => emit(EncryptedImagePageState.failure(message: failure.message)),
         (result) {
           if (!result.success) {
-            emit(
-              const EncryptedImagePageState.failure(
-                message: 'Unable to rename this image',
-              ),
-            );
+            emit(const EncryptedImagePageState.failure(message: 'Unable to rename this image'));
             return;
           }
 
-          appBloc.add(
-            AppEvent.removeEncryptedImage(path: image.storagePath.path),
-          );
+          final oldIdentifier = image.storagePath.assetId ?? image.storagePath.path;
+
           final newPath = '$path/${event.newName}.$ext';
           image = image.copyWith(
             storagePath: image.storagePath.copyWith(
@@ -157,7 +151,12 @@ class EncryptedImagePageBloc
               assetId: result.newAssetId ?? image.storagePath.assetId,
             ),
           );
-          appBloc.add(AppEvent.addEncryptedImage(image: image));
+
+          appBloc.add(AppEvent.updateEncryptedImage(
+            image: image,
+            oldIdentifier: oldIdentifier,
+          ));
+
           emit(const EncryptedImagePageState.imageRenamed());
           emit(EncryptedImagePageState.ui(image: image));
         },

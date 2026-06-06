@@ -11,7 +11,7 @@ import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
-import 'package:tornado_img_app/core/data/repositories/app_repository_impl.dart';
+import 'package:tornado_img_app/core/data/repositories/app_repository/app_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';

@@ -10,8 +10,8 @@ import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
 import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
 
@@ -62,7 +62,7 @@ class EncryptImageUseCase
       final isGalleryVisible = params.settings.galleryVisible;
       final String? encryptedAssetId =
           isGalleryVisible
-              ? await GalleryPathProvider.findMostRecentPublicAssetId()
+              ? await GalleryPathProvider.findMostRecentAssetId()
               : null;
 
       if (params.settings.deleteOriginals) {

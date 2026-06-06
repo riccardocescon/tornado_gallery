@@ -3,7 +3,7 @@ import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_fol
 import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
 
 abstract class AppRepository {
-  Future<EncryptedFolder> loadRootFolder();
+  Future<EncryptedFolder> loadPrivateRootFolder();
 
   Future<EncryptedFolder?> loadPublicRootFolder();
 

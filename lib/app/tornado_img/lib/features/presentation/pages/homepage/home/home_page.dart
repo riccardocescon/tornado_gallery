@@ -5,7 +5,7 @@ import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
-import 'package:tornado_img_app/core/utils/providers.dart';
+import 'package:tornado_img_app/core/utils/pictures_provider.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
@@ -13,7 +13,6 @@ import 'package:tornado_img_app/features/presentation/widgets/contained_item.dar
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
 import 'package:tornado_img_app/injection_container.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';

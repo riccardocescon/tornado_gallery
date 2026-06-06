@@ -19,7 +19,7 @@ class AppFolderStreamerUsecase {
 
   Stream<AppFolderState> call() async* {
     try {
-      final privateFolder = await appRepository.loadRootFolder();
+      final privateFolder = await appRepository.loadPrivateRootFolder();
       EncryptedFolder? publicFolder =
           await appRepository.loadPublicRootFolder();
 
