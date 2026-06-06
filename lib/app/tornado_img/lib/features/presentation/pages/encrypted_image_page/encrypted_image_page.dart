@@ -65,7 +65,7 @@ class EncryptedImagePage extends StatelessWidget {
                     spacing: 16,
                     children: [
                       SizedBox(height: 300, child: _Image()),
-                      _titleRow(context, image.name),
+                      _titleRow(context, image),
                       _Info(image: image),
                       _Actions(image: image),
                       const SizedBox(height: 64),
@@ -81,7 +81,7 @@ class EncryptedImagePage extends StatelessWidget {
     );
   }
 
-  Widget _titleRow(BuildContext context, String imageName) {
+  Widget _titleRow(BuildContext context, EncryptedImage image) {
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,9 +91,14 @@ class EncryptedImagePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8,
             children: [
-              ContainedItem.icon(icon: Icons.lock_rounded),
+              ContainedItem.icon(
+                icon:
+                    image.isDecrypted
+                        ? Icons.lock_open_rounded
+                        : Icons.lock_rounded,
+              ),
               Expanded(
-                child: Text(imageName, style: context.textTheme.headlineSmall),
+                child: Text(image.name, style: context.textTheme.headlineSmall),
               ),
             ],
           ),
