@@ -236,7 +236,9 @@ class _ArchivePageState extends State<ArchivePage> {
       buildWhen:
           (previous, current) => current.maybeWhen(
             ui: (images, isSelectionMode) => true,
-            decryptingAllUI: (dearchivingState) => true,
+            decryptingAllUI:
+                (dearchivingState) =>
+                    _lastUiImages.length == dearchivingState.totalImages,
             orElse: () => false,
           ),
       builder: (context, state) {
