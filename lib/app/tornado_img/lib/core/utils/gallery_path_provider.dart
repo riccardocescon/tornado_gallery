@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
@@ -127,21 +128,24 @@ class GalleryPathProvider {
 
   /// Returns all image assets from the app's public album.
   static Future<List<AssetEntity>> getPublicAssets({
-    bool requestIfNeeded = true,
-  }) async {
-    try {
-      final album = await getPublicAlbum(requestIfNeeded: requestIfNeeded);
-      if (album == null) return [];
-      final assets = await album.getAssetListPaged(page: 0, size: 10000);
-      return assets.where((e) => e.type == AssetType.image).toList();
-    } catch (e) {
-      appLogger.logCore(
-        'GalleryPathProvider: error reading assets',
-        error: e.toString(),
-      );
-      rethrow;
-    }
+  bool requestIfNeeded = true,
+}) async {
+  try {
+    final album = await getPublicAlbum(requestIfNeeded: requestIfNeeded);
+    if (album == null) return [];
+    final assets = await album.getAssetListPaged(page: 0, size: 10000);
+    
+    // PhotoKit returns multiple references to the same asset 
+    // (e.g., TornadoGallery + Recents). Deduplicate by ID.
+    final seen = <String>{};
+    return assets
+        .where((e) => e.type == AssetType.image && seen.add(e.id))
+        .toList();
+  } catch (e) {
+    appLogger.logCore('GalleryPathProvider: error reading assets', error: e.toString());
+    rethrow;
   }
+}
 
   // ── iOS virtual path helpers ────────────────────────────────────────────────
 

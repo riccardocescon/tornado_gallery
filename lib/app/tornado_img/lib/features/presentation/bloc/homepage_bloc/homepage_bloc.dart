@@ -138,12 +138,26 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
                 _emit(emit);
               },
               updatedGalleryImage: (value) {
-                _runtimeRemovals.remove(value.image.storagePath.path);
-                _runtimeUpserts[value.image.storagePath.path] = value.image;
+                // Rimuovi il vecchio per qualsiasi forma di identificatore
+                _runtimeUpserts.removeWhere(
+                  (key, img) =>
+                      key == value.oldIdentifier ||
+                      img.storagePath.path == value.oldIdentifier ||
+                      img.storagePath.assetId == value.oldIdentifier,
+                );
+                _runtimeRemovals.add(value.oldIdentifier);
+
+                // Inserisci il nuovo con chiave stabile
+                final newKey = value.image.storagePath.assetId ?? value.image.storagePath.path;
+                _runtimeUpserts[newKey] = value.image;
                 _emit(emit);
               },
               removedGalleryImage: (value) {
-                _runtimeUpserts.remove(value.path);
+                _runtimeUpserts.removeWhere(
+                  (_, img) =>
+                      img.storagePath.path == value.path ||
+                      img.storagePath.assetId == value.path,
+                );
                 _runtimeRemovals.add(value.path);
                 _emit(emit);
               },
@@ -224,16 +238,27 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final baseImages =
         private.images + (appPublicEncryptedRootFolder?.images ?? []);
 
-    final mergedByPath = <String, EncryptedImage>{
-      for (final img in baseImages) img.storagePath.path: img,
-    };
+    final mergedByKey = <String, EncryptedImage>{};
+  for (final img in baseImages) {
+    final key = img.storagePath.assetId ?? img.storagePath.path;
+    mergedByKey[key] = img;
+  }
 
-    for (final removedPath in _runtimeRemovals) {
-      mergedByPath.remove(removedPath);
-    }
-    mergedByPath.addAll(_runtimeUpserts);
+  for (final removedKey in _runtimeRemovals) {
+    mergedByKey.removeWhere(
+      (key, img) =>
+          key == removedKey ||
+          img.storagePath.path == removedKey ||
+          img.storagePath.assetId == removedKey,
+    );
+  }
 
-    final images = mergedByPath.values.toList();
+  for (final entry in _runtimeUpserts.entries) {
+    final key = entry.value.storagePath.assetId ?? entry.key;
+    mergedByKey[key] = entry.value;
+  }
+
+  final images = mergedByKey.values.toList();
 
     final totalImages = subFolders.fold<int>(
       images.length,

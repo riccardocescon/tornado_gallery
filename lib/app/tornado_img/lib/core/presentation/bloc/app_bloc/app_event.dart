@@ -6,6 +6,8 @@ abstract class AppEvent with _$AppEvent, EquatableMixin {
 
   const factory AppEvent.addEncryptedImage({required EncryptedImage image}) =
       _AddEncryptedImage;
+  const factory AppEvent.updateEncryptedImage({required EncryptedImage image, required String oldIdentifier}) =
+      _UpdateEncryptedImage;
 
   const factory AppEvent.removeEncryptedImage({required String path}) =
       _RemoveEncryptedImage;
@@ -18,6 +20,7 @@ abstract class AppEvent with _$AppEvent, EquatableMixin {
   @override
   List<Object?> get props => when(
     addEncryptedImage: (image) => [image],
+    updateEncryptedImage: (image, oldIdentifier) => [image, oldIdentifier],
     removeEncryptedImage: (path) => [path],
     setDecryptedInfo: (path, decryptedInfo) => [path, decryptedInfo],
   );

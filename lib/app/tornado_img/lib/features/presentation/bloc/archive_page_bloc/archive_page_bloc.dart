@@ -106,26 +106,29 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           },
           updatedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.storagePath.file.path == value.image.storagePath.file.path,
+              (img) =>
+                  img.storagePath.path == value.oldIdentifier ||
+                  img.storagePath.assetId == value.oldIdentifier ||
+                  img.storagePath.file.path == value.oldIdentifier,
             );
             if (index != -1) {
               images[index] = value.image;
             } else {
               appLogger.logPageBloc(
-                'Updated image not found in gallery, adding as new: ${value.image.storagePath.file.path}',
+                'Updated image not found, adding as new',
+                error: value.oldIdentifier,
               );
               images.add(value.image);
             }
-
-            // Prevent a UI build if all images are decrypting
-            // this would override the state and the loading indicator would never show
             if (isDecryptingAllImages) return;
-
             _emit(emit);
           },
           removedGalleryImage: (value) {
             final index = images.indexWhere(
-              (img) => img.storagePath.file.path == value.path,
+              (img) =>
+                  img.storagePath.path == value.path ||
+                  img.storagePath.assetId == value.path ||
+                  img.storagePath.file.path == value.path,
             );
 
             if (index != -1) {
@@ -133,11 +136,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               deletingImagesQueue.remove(value.path);
               _emit(emit);
               if (deletingImagesQueue.isNotEmpty) {
-                emit(
-                  ArchivePageState.deleting(
-                    paths: List.from(deletingImagesQueue),
-                  ),
-                );
+                emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
               }
             } else {
               appLogger.logPageBloc(
@@ -152,7 +151,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     });
     on<_ArchivePageDelete>((event, emit) async {
       deletingImagesQueue.addAll(
-        event.images.map((img) => img.storagePath.path),
+        event.images.map((img) => img.storagePath.assetId ?? img.storagePath.path),
       );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
       final result = await imageDeleterUsecase.call(
@@ -372,17 +371,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   }
 
   String? _resolveRemovalPath(EncryptedImage image) {
-    final direct = appBloc.encryptedImages.firstWhereOrNull(
-      (img) => img.storagePath.path == image.storagePath.path,
-    );
-    if (direct != null) return direct.storagePath.path;
+  // Preferisci assetId come identificatore stabile su iOS.
+  final assetId = image.storagePath.assetId;
+  if (assetId != null) return assetId;
 
-    final assetId = image.storagePath.assetId;
-    if (assetId == null) return null;
-
-    final byAsset = appBloc.encryptedImages.firstWhereOrNull(
-      (img) => img.storagePath.assetId == assetId,
-    );
-    return byAsset?.storagePath.path;
-  }
+  final direct = appBloc.encryptedImages.firstWhereOrNull(
+    (img) => img.storagePath.path == image.storagePath.path,
+  );
+  return direct?.storagePath.path;
+}
 }
