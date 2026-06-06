@@ -437,15 +437,19 @@ class _ArchiveState extends StatelessWidget {
   }
 
   Widget _usageBar(BuildContext context) {
-    return BlocBuilder<AppBloc, AppState>(
+    return BlocBuilder<HomepageBloc, HomepageState>(
       buildWhen:
           (previous, current) => current.maybeMap(
-            addedGalleryImage: (value) => true,
-            removedGalleryImage: (value) => true,
+            galleryStatus: (_) => true,
             orElse: () => false,
           ),
       builder: (context, state) {
-        final totalImages = getIt<AppBloc>().encryptedImages.length;
+
+        final totalImages = state.maybeMap(
+          galleryStatus: (value) => value.imagesLoaded,
+          orElse: () => getIt<AppBloc>().encryptedImages.length,
+        );
+
         final percentage =
             totalImages > 0
                 ? (totalImages / Constants.maxEncryptedImages).clamp(0, 1)
