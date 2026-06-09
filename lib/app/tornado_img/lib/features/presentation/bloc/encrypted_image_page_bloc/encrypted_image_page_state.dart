@@ -20,7 +20,7 @@ abstract class EncryptedImagePageState
     initial: (_) => [],
     loading: (_) => [],
     ui: (value) => [value.image],
-    imageSaved: (path) => [path],
+    imageSaved: (s) => [s.path],
     imageRenamed: (_) => [],
     failure: (value) => [value.message],
   );

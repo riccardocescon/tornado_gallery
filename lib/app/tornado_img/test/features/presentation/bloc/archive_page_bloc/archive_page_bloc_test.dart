@@ -183,6 +183,9 @@ void main() {
         when(
           () => mockImageDeleter.call(any()),
         ).thenAnswer((_) async => const Right(true));
+        when(() => mockAppBloc.encryptedImages).thenReturn([
+          _makeImage('/enc/img1.png'),
+        ]);
         return _makeBloc();
       },
       act: (b) async {
