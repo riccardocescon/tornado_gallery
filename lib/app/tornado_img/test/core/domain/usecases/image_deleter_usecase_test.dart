@@ -70,6 +70,26 @@ void main() {
       );
     });
 
+    test('passes all storagePaths in a single repo call for multi-image delete', () async {
+      when(
+        () => mockStorageRepo.delete(any()),
+      ).thenAnswer((_) async => true);
+
+      final image1 = _makeImage('/path/img1.png');
+      final image2 = _makeImage('/path/img2.png');
+      final image3 = _makeImage('/path/img3.png', assetId: 'asset_abc');
+
+      await useCase.call(ImageDeleterParams(images: [image1, image2, image3]));
+
+      verify(
+        () => mockStorageRepo.delete([
+          image1.storagePath,
+          image2.storagePath,
+          image3.storagePath,
+        ]),
+      ).called(1);
+    });
+
     test('returns Left(encryptionError) when storage throws', () async {
       when(
         () => mockStorageRepo.delete(any()),

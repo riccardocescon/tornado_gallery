@@ -58,6 +58,7 @@ void main() {
         ),
       ),
     );
+    registerFallbackValue(DecryptImageParams(file: tFile, password: ''));
   });
 
   setUp(() {
@@ -404,7 +405,7 @@ void main() {
     );
 
     blocTest<GalleryBloc, GalleryState>(
-      'skips existing images and encrypts new ones in a mixed batch',
+      'skips existing and encrypts new in mixed batch',
       build: () {
         final existingImage = EncryptedImage(
           storagePath: StoragePath(
@@ -467,6 +468,164 @@ void main() {
             ),
           ],
       verify: (_) => verify(() => mockEncryptionUseCase.call(any())).called(1),
+    );
+  });
+
+  group('GalleryEvent.decryptImages', () {
+    final tDecryptedInfo = BytesInfo(
+      bytes: Uint8List.fromList([5, 6, 7]),
+      hash: 'decrypted_hash',
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits [loadingDecryption, decrypted(initial), decrypted(success)] on success',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'secret',
+            ),
+          ),
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 1),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.loadingImages,
+                orElse: () => null,
+              ),
+              'initial: image in loadingImages',
+              hasLength(1),
+            ),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages,
+                orElse: () => null,
+              ),
+              'final: image moved to dearchived',
+              hasLength(1),
+            ),
+          ],
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits decrypted with failedImages when use case returns Left',
+      build: () {
+        when(() => mockDecryptUseCase.call(any())).thenAnswer(
+          (_) async => Left(EncryptionFailure.encryptionError('bad key')),
+        );
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'wrong',
+            ),
+          ),
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 1),
+            isA<GalleryState>(),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.failedImages,
+                orElse: () => null,
+              ),
+              'image in failedImages',
+              contains(tEncryptedImage),
+            ),
+          ],
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'passes correct file and password to decryptUseCase',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'mypass',
+            ),
+          ),
+      verify: (_) {
+        final captured =
+            verify(() => mockDecryptUseCase.call(captureAny())).captured;
+        final params = captured.first as DecryptImageParams;
+        expect(params.file.path, tEncryptedImage.storagePath.file.path);
+        expect(params.password, 'mypass');
+      },
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits progress states for each image in multi-image batch',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act: (b) {
+        final image2 = EncryptedImage(
+          storagePath: StoragePath(
+            path: 'enc2.png',
+            isPrivateFolder: true,
+            assetId: null,
+          ),
+          encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
+          date: DateTime(2024),
+        );
+        b.add(
+          GalleryEvent.decryptImages(
+            image: [tEncryptedImage, image2],
+            password: 'secret',
+          ),
+        );
+      },
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 2),
+            isA<GalleryState>(),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages.length,
+                orElse: () => 0,
+              ),
+              'one dearchived after first image',
+              equals(1),
+            ),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages.length,
+                orElse: () => 0,
+              ),
+              'two dearchived after second image',
+              equals(2),
+            ),
+          ],
     );
   });
 }

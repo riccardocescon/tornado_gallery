@@ -162,9 +162,11 @@ void main() {
     });
   });
 
-  test("Version Test", () {
-    final version = getVersion();
-    print('Tornado Crypto SDK Version: $version');
-    expect(version, isNotEmpty);
+  test('getVersion returns non-empty string', () {
+    expect(getVersion(), isNotEmpty);
+  });
+
+  test('sdkVersion and getVersion return same value', () {
+    expect(sdkVersion(), equals(getVersion()));
   });
 }

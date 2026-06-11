@@ -21,8 +21,8 @@ void main() {
   late _MockImageProcessingRepository mockImageRepo;
   late _MockStorageRepository mockStorageRepo;
   late EncryptImageUseCase useCase;
+  late File tFile;
 
-  final tFile = File('test.png');
   final tImageData = _FakeImageData();
   final tEncryptedData = _FakeImageData();
   final tEncoded = Uint8List.fromList([9, 8, 7]);
@@ -33,13 +33,21 @@ void main() {
     registerFallbackValue(Uint8List(0));
   });
 
-  setUp(() {
+  setUp(() async {
+    tFile = File(
+      '${Directory.systemTemp.path}/encrypt_test_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+    await tFile.create();
     mockImageRepo = _MockImageProcessingRepository();
     mockStorageRepo = _MockStorageRepository();
     useCase = EncryptImageUseCase(
       imageRepo: mockImageRepo,
       storageRepo: mockStorageRepo,
     );
+  });
+
+  tearDown(() async {
+    if (await tFile.exists()) await tFile.delete();
   });
 
   group('EncryptImageUseCase.call', () {
