@@ -460,36 +460,38 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     final safeName = FileNameUtils.sanitizeFileStem(event.newName);
     final newRel = parent.isEmpty ? safeName : '$parent/$safeName';
 
-    // Rewrite in-memory paths for affected private images so the tree updates
-    // immediately (no app restart). The gallery store keeps flat paths and is
-    // refreshed by the watcher/poller.
-    if (event.isPrivate) {
-      const marker = '/encrypted/';
-      final affected = images
-          .where(
-            (img) =>
-                img.storagePath.isPrivateFolder == event.isPrivate &&
-                (img.storeRelativeDir == oldRel ||
-                    img.storeRelativeDir.startsWith('$oldRel/')),
-          )
-          .toList();
-      for (final img in affected) {
-        final path = img.storagePath.path.replaceAll('\\', '/');
-        final mi = path.lastIndexOf(marker);
-        if (mi == -1) continue;
-        final head = path.substring(0, mi + marker.length);
-        final rest = path.substring(mi + marker.length); // oldRel/.../file
-        final newPath = head + newRel + rest.substring(oldRel.length);
-        final updated = img.copyWith(
-          storagePath: img.storagePath.copyWith(path: newPath),
-        );
-        appBloc.add(
-          AppEvent.updateEncryptedImage(
-            oldIdentifier: img.storagePath.path,
-            image: updated,
-          ),
-        );
-      }
+    // Rewrite in-memory paths for affected images so the tree updates
+    // immediately (no app restart). Applies to both stores: the private store
+    // is rooted at `/encrypted/`, the gallery at `/<appFolder>/`. Without this
+    // the stale old-path entries keep deriving the old folder while the watcher
+    // adds the renamed images, leaving both folders visible. The watcher dedups
+    // the renamed entries by file path, so no duplicates result.
+    final marker =
+        event.isPrivate ? '/encrypted/' : '/${Constants.appFolderName}/';
+    final affected = images
+        .where(
+          (img) =>
+              img.storagePath.isPrivateFolder == event.isPrivate &&
+              (img.storeRelativeDir == oldRel ||
+                  img.storeRelativeDir.startsWith('$oldRel/')),
+        )
+        .toList();
+    for (final img in affected) {
+      final path = img.storagePath.path.replaceAll('\\', '/');
+      final mi = path.lastIndexOf(marker);
+      if (mi == -1) continue;
+      final head = path.substring(0, mi + marker.length);
+      final rest = path.substring(mi + marker.length); // oldRel/.../file
+      final newPath = head + newRel + rest.substring(oldRel.length);
+      final updated = img.copyWith(
+        storagePath: img.storagePath.copyWith(path: newPath),
+      );
+      appBloc.add(
+        AppEvent.updateEncryptedImage(
+          oldIdentifier: img.storagePath.path,
+          image: updated,
+        ),
+      );
     }
 
     // Re-register in-session created folders (incl. empty ones) under the new
