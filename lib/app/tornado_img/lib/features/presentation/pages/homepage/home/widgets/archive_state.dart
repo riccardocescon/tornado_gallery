@@ -101,11 +101,7 @@ class _ArchiveState extends StatelessWidget {
                         Icons.folder_rounded,
                         amount?.toString(),
                         "encrypted files",
-                        () {
-                          context.read<HomepageBloc>().add(
-                            const HomepageEvent.setScreen(page: Pages.archive),
-                          );
-                        }
+                        () => _openArchive(context),
                       ),
                       Divider(
                         height: 2,
@@ -118,11 +114,7 @@ class _ArchiveState extends StatelessWidget {
                         Icons.archive_rounded,
                         folderAmount?.toString(),
                         "archives",
-                        () {
-                          context.read<HomepageBloc>().add(
-                            const HomepageEvent.setScreen(page: Pages.archive),
-                          );
-                        },
+                        () => _openArchive(context),
                       ),
                       Divider(
                         height: 2,
@@ -292,11 +284,7 @@ class _ArchiveState extends StatelessWidget {
 
   Widget _openArchiveButton(BuildContext context) {
     return FilledButton(
-      onPressed: () {
-        context.read<HomepageBloc>().add(
-          HomepageEvent.setScreen(page: Pages.archive),
-        );
-      },
+      onPressed: () => _openArchive(context),
       style: FilledButton.styleFrom(
         backgroundColor: context.appColors.softButton,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

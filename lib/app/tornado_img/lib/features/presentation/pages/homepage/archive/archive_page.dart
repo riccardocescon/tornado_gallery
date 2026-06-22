@@ -382,26 +382,117 @@ class _ArchivePageState extends State<ArchivePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: CustomScrollView(
-        cacheExtent: 800,
-        controller: _scrollController,
-        slivers: [
-          SliverToBoxAdapter(child: const SizedBox(height: 18)),
-          SliverToBoxAdapter(child: _header()),
-          SliverToBoxAdapter(child: _breadcrumb()),
-          SliverToBoxAdapter(child: const SizedBox(height: 16)),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              width: double.maxFinite,
-              child: Row(children: [_encryptedFiles()]),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _onBack();
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: CustomScrollView(
+              cacheExtent: 800,
+              controller: _scrollController,
+              slivers: [
+                SliverToBoxAdapter(child: const SizedBox(height: 18)),
+                SliverToBoxAdapter(child: _header()),
+                SliverToBoxAdapter(child: _breadcrumb()),
+                SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    width: double.maxFinite,
+                    child: Row(children: [_encryptedFiles()]),
+                  ),
+                ),
+                _folders(),
+                _images(),
+              ],
             ),
           ),
-          _folders(),
-          _images(),
-        ],
+        ),
+        floatingActionButton: _fab(),
       ),
+    );
+  }
+
+  void _onBack() {
+    final archiveBloc = context.read<ArchivePageBloc>();
+    final inSelection = archiveBloc.state.maybeMap(
+      ui: (s) => s.isSelectionMode,
+      orElse: () => false,
+    );
+    if (inSelection) {
+      _cancelSelection();
+      return;
+    }
+    final notAtRoot = archiveBloc.state.maybeMap(
+      ui: (s) => s.currentIsPrivate != null || s.currentPath.isNotEmpty,
+      orElse: () => false,
+    );
+    if (notAtRoot) {
+      archiveBloc.add(const ArchivePageEvent.goUp());
+      return;
+    }
+    context.pop();
+  }
+
+  Widget _fab() {
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen:
+          (previous, current) => current.maybeMap(
+            decryptingAllUI: (value) => true,
+            ui: (value) => true,
+            orElse: () => false,
+          ),
+      builder: (context, state) {
+        final archiveBloc = context.read<ArchivePageBloc>();
+        final isDecrypting = archiveBloc.isDecryptingAllImages;
+        final hasDecryptedAll = archiveBloc.hasAllDecrypted;
+
+        // No images at the current navigation level → nothing to
+        // decrypt/encrypt here, hide the FAB.
+        if (archiveBloc.currentFolderImages.isEmpty && !isDecrypting) {
+          return const SizedBox.shrink();
+        }
+
+        final isLoading = state.maybeMap(
+          decryptingAllUI:
+              (value) =>
+                  value.dearchivingState.totalImages !=
+                  value.dearchivingState.progress,
+          orElse: () => isDecrypting && !hasDecryptedAll,
+        );
+
+        if (isLoading) return const SizedBox.shrink();
+
+        return FloatingActionButton(
+          onPressed: () {
+            if (hasDecryptedAll) {
+              context.read<ArchivePageBloc>().add(
+                const ArchivePageEvent.encryptAll(),
+              );
+              return;
+            }
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder:
+                  (_) => UnlockAllBottomSheet(
+                    onUnlockAll: (passphrase) {
+                      context.read<ArchivePageBloc>().add(
+                        ArchivePageEvent.decryptAll(passphrase: passphrase),
+                      );
+                    },
+                  ),
+            );
+          },
+          child: Icon(
+            hasDecryptedAll ? Icons.lock_rounded : Icons.lock_open_rounded,
+          ),
+        );
+      },
     );
   }
 

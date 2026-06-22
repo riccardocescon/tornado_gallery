@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
-import 'package:tornado_img_app/features/presentation/pages/homepage/archive/archive_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/home/home_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/settings/settings_page.dart';
 import 'package:tornado_img_app/features/presentation/widgets/bottom_app_nav_bar.dart';
-import 'package:tornado_img_app/features/presentation/widgets/unlock_all_bottom_sheet.dart';
 
 class ShellHomepage extends StatefulWidget {
   const ShellHomepage({super.key});
@@ -17,7 +14,7 @@ class ShellHomepage extends StatefulWidget {
 }
 
 class _ShellHomepageState extends State<ShellHomepage> {
-  final pages = const [HomePage(), ArchivePage(), SettingsPage()];
+  final pages = const [HomePage(), SettingsPage()];
   late final PageController _pageController = PageController();
   DateTime? _lastBackPress;
 
@@ -30,25 +27,6 @@ class _ShellHomepageState extends State<ShellHomepage> {
   void _onPop() {
     final bloc = context.read<HomepageBloc>();
     if (bloc.currentPage != Pages.home) {
-      final archiveBloc = context.read<ArchivePageBloc>();
-      if (bloc.currentPage == Pages.archive) {
-        final inSelection = archiveBloc.state.maybeMap(
-          ui: (s) => s.isSelectionMode,
-          orElse: () => false,
-        );
-        if (inSelection) {
-          archiveBloc.add(const ArchivePageEvent.cancelSelectionMode());
-          return;
-        }
-        final notAtRoot = archiveBloc.state.maybeMap(
-          ui: (s) => s.currentIsPrivate != null || s.currentPath.isNotEmpty,
-          orElse: () => false,
-        );
-        if (notAtRoot) {
-          archiveBloc.add(const ArchivePageEvent.goUp());
-          return;
-        }
-      }
       bloc.add(const HomepageEvent.setScreen(page: Pages.home));
       return;
     }
@@ -98,93 +76,8 @@ class _ShellHomepageState extends State<ShellHomepage> {
             children: pages,
           ),
         ),
-        floatingActionButton: _fab(),
         bottomNavigationBar: BottomAppNavBar(),
       ),
-      ),
-    );
-  }
-
-  Widget _fab() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: BlocBuilder<HomepageBloc, HomepageState>(
-        buildWhen:
-            (previous, current) => current.maybeMap(
-              homepageSet: (value) => true,
-              orElse: () => false,
-            ),
-        builder: (context, state) {
-          return state.maybeMap(
-            orElse: () => const SizedBox.shrink(),
-            homepageSet: (value) {
-              if (value.page == Pages.archive) {
-                return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-                  buildWhen:
-                      (previous, current) => current.maybeMap(
-                        decryptingAllUI: (value) => true,
-                        ui: (value) => true,
-                        orElse: () => false,
-                      ),
-                  builder: (context, state) {
-                    final archiveBloc = context.read<ArchivePageBloc>();
-                    final isDecrypting = archiveBloc.isDecryptingAllImages;
-                    final hasDecryptedAll = archiveBloc.hasAllDecrypted;
-
-                    // No images at the current navigation level → nothing to
-                    // decrypt/encrypt here, hide the FAB.
-                    if (archiveBloc.currentFolderImages.isEmpty &&
-                        !isDecrypting) {
-                      return const SizedBox.shrink();
-                    }
-
-                    final isLoading = state.maybeMap(
-                      decryptingAllUI:
-                          (value) =>
-                              value.dearchivingState.totalImages !=
-                              value.dearchivingState.progress,
-                      orElse: () => isDecrypting && !hasDecryptedAll,
-                    );
-
-                    if (isLoading) return const SizedBox.shrink();
-
-                    return FloatingActionButton(
-                      onPressed: () {
-                        if (hasDecryptedAll) {
-                          context.read<ArchivePageBloc>().add(
-                            const ArchivePageEvent.encryptAll(),
-                          );
-                          return;
-                        }
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder:
-                              (_) => UnlockAllBottomSheet(
-                                onUnlockAll: (passphrase) {
-                                  context.read<ArchivePageBloc>().add(
-                                    ArchivePageEvent.decryptAll(
-                                      passphrase: passphrase,
-                                    ),
-                                  );
-                                },
-                              ),
-                        );
-                      },
-                      child: Icon(
-                        hasDecryptedAll
-                            ? Icons.lock_rounded
-                            : Icons.lock_open_rounded,
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          );
-        },
       ),
     );
   }

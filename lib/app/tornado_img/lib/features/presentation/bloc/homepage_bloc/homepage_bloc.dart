@@ -26,7 +26,6 @@ part 'homepage_bloc_utils.dart';
 
 enum Pages {
   home(icon: Icons.home, label: 'Home'),
-  archive(icon: Icons.lock_rounded, label: 'Archive'),
   settings(icon: Icons.settings, label: 'Settings');
 
   const Pages({required this.icon, required this.label});

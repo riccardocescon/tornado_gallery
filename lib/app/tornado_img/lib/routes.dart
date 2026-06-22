@@ -8,6 +8,7 @@ import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepag
 import 'package:tornado_img_app/features/presentation/pages/app_logger_page/app_logger_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encrypted_image_page/encrypted_image_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/encryption_page/encryption_page.dart';
+import 'package:tornado_img_app/features/presentation/pages/homepage/archive/archive_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/shell_homepage.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
@@ -52,6 +53,17 @@ GoRouter routes = GoRouter(
                       getIt<EncryptionPageBloc>()
                         ..add(EncryptionPageEvent.setup(images: images)),
               child: EncryptionPage(),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'archive',
+          name: 'archive',
+          builder: (context, state) {
+            final bloc = state.extra as ArchivePageBloc;
+            return BlocProvider.value(
+              value: bloc,
+              child: const ArchivePage(),
             );
           },
         ),
