@@ -5,6 +5,7 @@ import 'package:gal/gal.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/data/datasources/storage/public_storage_datasource.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
@@ -92,6 +93,26 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
   Future<bool> deleteFolder(String relativePath, List<String> assetIds) async {
     var ok = false;
     if (assetIds.isNotEmpty) ok = await delete(assetIds);
+
+    // dart:io cannot delete MediaStore-managed image files on scoped storage,
+    // which leaves the directory non-empty (errno 39) when [assetIds] does not
+    // cover every asset under the folder (e.g. subfolders or untracked images).
+    // Sweep MediaStore for all assets living under this folder tree and delete
+    // them via PhotoManager before removing the directory itself.
+    try {
+      final passed = assetIds.toSet();
+      final remaining =
+          (await _publicAssetIdsUnderFolder(relativePath))
+              .where((id) => !passed.contains(id))
+              .toList();
+      if (remaining.isNotEmpty && await delete(remaining)) ok = true;
+    } catch (e) {
+      appLogger.logRepository(
+        'AndroidPublicStorageDatasource.deleteFolder: asset sweep error',
+        error: e.toString(),
+      );
+    }
+
     try {
       final path = await GalleryPathProvider.getPublicFolderPath(
         relative: relativePath,
@@ -110,6 +131,74 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
       );
     }
     return ok;
+  }
+
+  /// Returns the MediaStore asset IDs of every image that lives under the
+  /// public folder identified by [relativePath] (including nested subfolders).
+  ///
+  /// Needed because MediaStore groups images by their on-disk bucket, so a
+  /// subfolder's assets are not part of the app's named album. Filtering the
+  /// "all" album by `relativePath` is the only reliable way to find them.
+  Future<List<String>> _publicAssetIdsUnderFolder(String relativePath) async {
+    final ids = <String>[];
+    try {
+      final permission = await PhotoManager.getPermissionState(
+        requestOption: PermissionRequestOption(),
+      );
+      if (permission == PermissionState.denied ||
+          permission == PermissionState.restricted) {
+        return ids;
+      }
+
+      final rel = relativePath
+          .replaceAll('\\', '/')
+          .split('/')
+          .where((p) => p.trim().isNotEmpty)
+          .join('/');
+      if (rel.isEmpty) return ids;
+
+      final target =
+          'Pictures/${Constants.appFolderName}/$rel'.toLowerCase();
+
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        hasAll: true,
+      );
+      AssetPathEntity? all;
+      for (final a in albums) {
+        if (a.isAll) {
+          all = a;
+          break;
+        }
+      }
+      if (all == null) return ids;
+
+      const pageSize = 500;
+      var page = 0;
+      while (true) {
+        final assets = await all.getAssetListPaged(page: page, size: pageSize);
+        if (assets.isEmpty) break;
+        for (final a in assets) {
+          var assetRel = (a.relativePath ?? '')
+              .replaceAll('\\', '/')
+              .toLowerCase();
+          if (assetRel.endsWith('/')) {
+            assetRel = assetRel.substring(0, assetRel.length - 1);
+          }
+          if (assetRel == target || assetRel.startsWith('$target/')) {
+            ids.add(a.id);
+          }
+        }
+        if (assets.length < pageSize) break;
+        page++;
+      }
+    } catch (e) {
+      appLogger.logRepository(
+        'AndroidPublicStorageDatasource._publicAssetIdsUnderFolder: error',
+        error: e.toString(),
+      );
+    }
+    return ids;
   }
 
   @override
