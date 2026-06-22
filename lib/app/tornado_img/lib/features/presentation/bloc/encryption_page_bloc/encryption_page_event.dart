@@ -20,9 +20,20 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
   const factory EncryptionPageEvent.toggleGalleryVisibility() =
       _ToggleGalleryVisibility;
 
+  /// Selects a private (encrypted store) destination folder. [relative] is the
+  /// folder path under the encrypted root ('' = root); [label] is shown in the
+  /// UI. Mirrors [setPublicAlbum] so the private store is relative-based too.
   const factory EncryptionPageEvent.setOutputFolder({
-    required String outputFolder,
+    required String relative,
+    required String label,
   }) = _SetOutputFolder;
+
+  /// Selects a public (gallery) destination folder. [relative] is the album
+  /// path under the public root ('' = root); [label] is shown in the UI.
+  const factory EncryptionPageEvent.setPublicAlbum({
+    required String relative,
+    required String label,
+  }) = _SetPublicAlbum;
 
   const factory EncryptionPageEvent.toggleOverrideImage() =
       _ToggleOverrideImage;

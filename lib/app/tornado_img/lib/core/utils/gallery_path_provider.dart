@@ -27,12 +27,13 @@ class GalleryPathProvider {
   /// On Android: `/sdcard/Pictures/<AppName>` (real path).
   /// On iOS: real DCIM parent path if assets exist, otherwise a virtual path.
   /// Returns null if the path cannot be resolved.
-  static Future<String?> getPublicFolderPath() async {
+  static Future<String?> getPublicFolderPath({String? relative}) async {
     if (Platform.isAndroid) {
       final extDir = await getExternalStorageDirectory();
       if (extDir == null) return null;
       final rootPath = extDir.path.split('/Android/').first;
-      return '$rootPath/Pictures/${Constants.appFolderName}';
+      final base = '$rootPath/Pictures/${Constants.appFolderName}';
+      return _joinRelative(base, relative);
     }
 
     if (Platform.isIOS) {
@@ -40,6 +41,16 @@ class GalleryPathProvider {
     }
 
     return null;
+  }
+
+  /// Builds the gallery album name for a folder identified by its [relative]
+  /// path under the root album. `Vacanze/Mare` ⇒ `TornadoGallery/Vacanze/Mare`.
+  /// A null/empty [relative] returns the root album name.
+  static String getPublicAlbumName(String? relative) {
+    final rel = _normalizeRelative(relative);
+    return rel.isEmpty
+        ? Constants.appFolderName
+        : '${Constants.appFolderName}/$rel';
   }
 
   static Future<String?> _resolveIosPublicPath() async {
@@ -77,14 +88,36 @@ class GalleryPathProvider {
   // ── Private folder path ─────────────────────────────────────────────────────
 
   /// Returns the absolute path to the private (encrypted) folder inside the app sandbox.
+  /// When [relative] is provided, resolves the nested subfolder under `encrypted/`.
   /// Creates the directory if it does not exist.
-  static Future<String> getPrivateFolderPath() async {
+  static Future<String> getPrivateFolderPath({String? relative}) async {
     final root = await getApplicationDocumentsDirectory();
-    final directory = Directory('${root.path}/encrypted');
+    final base = '${root.path}/encrypted';
+    final directory = Directory(_joinRelative(base, relative));
     if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
     return directory.path;
+  }
+
+  // ── Relative path helpers ─────────────────────────────────────────────────────
+
+  /// Normalizes a relative folder path: trims, swaps backslashes, strips
+  /// leading/trailing/duplicate slashes. Returns '' for null/empty input.
+  static String _normalizeRelative(String? relative) {
+    if (relative == null) return '';
+    final cleaned = relative
+        .replaceAll('\\', '/')
+        .split('/')
+        .where((part) => part.trim().isNotEmpty)
+        .join('/');
+    return cleaned;
+  }
+
+  /// Joins [base] with a normalized [relative] path.
+  static String _joinRelative(String base, String? relative) {
+    final rel = _normalizeRelative(relative);
+    return rel.isEmpty ? base : '$base/$rel';
   }
 
   // ── Album access ────────────────────────────────────────────────────────────
@@ -145,6 +178,69 @@ class GalleryPathProvider {
     rethrow;
   }
 }
+
+  /// Returns the [AssetPathEntity] whose name equals [albumName], creating it
+  /// via PhotoKit if it does not exist yet. iOS-only (album-per-folder model).
+  static Future<AssetPathEntity?> getOrCreatePublicAlbum(
+    String albumName,
+  ) async {
+    try {
+      final permission = await PhotoManager.requestPermissionExtend();
+      if (permission == PermissionState.denied ||
+          permission == PermissionState.restricted) {
+        appLogger.logCore(
+          'GalleryPathProvider: permission denied creating album "$albumName"',
+        );
+        return null;
+      }
+
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        hasAll: true,
+      );
+      final existing = albums.firstWhereOrNull((e) => e.name == albumName);
+      if (existing != null) return existing;
+
+      return await PhotoManager.editor.darwin.createAlbum(albumName);
+    } catch (e) {
+      appLogger.logCore(
+        'GalleryPathProvider: error creating album "$albumName"',
+        error: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  /// Lists gallery albums whose name starts with [prefix] (e.g.
+  /// `TornadoGallery/`). Used to reconstruct the iOS folder tree from the
+  /// album-name-as-path convention.
+  static Future<List<AssetPathEntity>> listPublicAlbumsUnder(
+    String prefix,
+  ) async {
+    try {
+      final permission = await PhotoManager.getPermissionState(
+        requestOption: PermissionRequestOption(),
+      );
+      if (permission == PermissionState.denied ||
+          permission == PermissionState.restricted) {
+        return [];
+      }
+
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        hasAll: true,
+      );
+      return albums
+          .where((e) => e.name == prefix || e.name.startsWith('$prefix/'))
+          .toList();
+    } catch (e) {
+      appLogger.logCore(
+        'GalleryPathProvider: error listing albums under "$prefix"',
+        error: e.toString(),
+      );
+      return [];
+    }
+  }
 
   // ── iOS virtual path helpers ────────────────────────────────────────────────
 

@@ -16,9 +16,12 @@ import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/arc
 import 'package:tornado_img_app/core/utils/file_name_validator.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
+import 'package:tornado_img_app/features/presentation/widgets/unlock_all_bottom_sheet.dart';
 
 part 'widgets/archived_tile.dart';
 part 'widgets/import_images_bottom_sheet.dart';
+part 'widgets/archive_folder_tile.dart';
+part 'widgets/move_target_sheet.dart';
 
 class ArchivePage extends StatefulWidget {
   const ArchivePage({super.key});
@@ -73,6 +76,191 @@ class _ArchivePageState extends State<ArchivePage> {
     _cancelSelection();
   }
 
+  // ── Folder actions ──────────────────────────────────────────────────────────
+
+  Future<void> _promptNewFolder() async {
+    final controller = TextEditingController();
+    // At the root (mixed view) the store is ambiguous, so let the user pick;
+    // inside a folder the store is fixed and no switch is shown.
+    final atRoot = context.read<ArchivePageBloc>().state.maybeMap(
+      ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
+      orElse: () => true,
+    );
+    bool isPrivate = true;
+
+    final result = await showDialog<(String, bool)>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text("New folder"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: "Folder name"),
+                onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
+              ),
+              if (atRoot) ...[
+                const SizedBox(height: 16),
+                SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(
+                      value: true,
+                      label: Text("Private"),
+                      icon: Icon(Icons.lock_outline_rounded),
+                    ),
+                    ButtonSegment(
+                      value: false,
+                      label: Text("Public"),
+                      icon: Icon(Icons.photo_library_outlined),
+                    ),
+                  ],
+                  selected: {isPrivate},
+                  onSelectionChanged: (s) =>
+                      setDialogState(() => isPrivate = s.first),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pop(ctx, (controller.text, isPrivate)),
+              child: const Text("Create"),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result != null && result.$1.trim().isNotEmpty && mounted) {
+      context.read<ArchivePageBloc>().add(
+        ArchivePageEvent.createFolder(
+          name: result.$1.trim(),
+          isPrivate: atRoot ? result.$2 : null,
+        ),
+      );
+    }
+  }
+
+  Future<void> _promptRenameFolder(ArchiveFolderView folder) async {
+    final controller = TextEditingController(text: folder.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Rename folder"),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: "Folder name"),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text("Rename"),
+          ),
+        ],
+      ),
+    );
+    if (name != null && name.trim().isNotEmpty && mounted) {
+      context.read<ArchivePageBloc>().add(
+        ArchivePageEvent.renameFolder(
+          relativePath: folder.relativePath,
+          isPrivate: folder.isPrivate,
+          newName: name.trim(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteFolder(ArchiveFolderView folder) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete "${folder.name}"?'),
+        content: Text(
+          folder.imageCount == 0
+              ? "This folder is empty."
+              : "This will permanently delete ${folder.imageCount} image(s) inside it.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.read<ArchivePageBloc>().add(
+        ArchivePageEvent.deleteFolder(
+          relativePath: folder.relativePath,
+          isPrivate: folder.isPrivate,
+        ),
+      );
+    }
+  }
+
+  void _decryptFolder(ArchiveFolderView folder) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => UnlockAllBottomSheet(
+        onUnlockAll: (passphrase) {
+          context.read<ArchivePageBloc>().add(
+            ArchivePageEvent.decryptFolder(
+              relativePath: folder.relativePath,
+              isPrivate: folder.isPrivate,
+              passphrase: passphrase,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _moveSelected() async {
+    final bloc = context.read<ArchivePageBloc>();
+    final selected = _lastUiImages
+        .where((img) => _selectedPaths.contains(img.storagePath.path))
+        .toList();
+    if (selected.isEmpty) return;
+
+    final isPrivate = selected.first.storagePath.isPrivateFolder;
+    final target = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _MoveTargetSheet(
+        allImages: bloc.images,
+        isPrivate: isPrivate,
+      ),
+    );
+    if (target != null && mounted) {
+      bloc.add(
+        ArchivePageEvent.moveImages(
+          images: selected,
+          targetRelativePath: target,
+        ),
+      );
+      _cancelSelection();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -110,114 +298,8 @@ class _ArchivePageState extends State<ArchivePage> {
         controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(child: const SizedBox(height: 18)),
-          SliverToBoxAdapter(
-            child: BlocBuilder<ArchivePageBloc, ArchivePageState>(
-              buildWhen:
-                  (previous, current) => current.maybeWhen(
-                    ui:
-                        (images, isSelectionMode) => previous.maybeWhen(
-                          ui: (_, prevMode) => prevMode != isSelectionMode,
-                          orElse: () => true,
-                        ),
-                    orElse: () => false,
-                  ),
-              builder: (context, state) {
-                final isSelectionMode = state.maybeWhen(
-                  ui: (_, mode) => mode,
-                  orElse: () => false,
-                );
-                return isSelectionMode
-                    ? Row(
-                      children: [
-                        TextButton(
-                          onPressed: _cancelSelection,
-                          child: const Text("Cancel"),
-                        ),
-                        const Spacer(),
-                        Text(
-                          "${_selectedPaths.length} selected",
-                          style: context.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed:
-                              _selectedPaths.isEmpty ? null : _deleteSelected,
-                          icon: Icon(
-                            Icons.delete_rounded,
-                            color:
-                                _selectedPaths.isEmpty
-                                    ? context.colorScheme.onSurface.withValues(
-                                      alpha: 0.3,
-                                    )
-                                    : context.colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    )
-                    : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: PageTitle(
-                            title: "Archive",
-                            subtitle: "View and manage your archived images",
-                            icon: Icons.archive,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            final assets =
-                                await PicturesProvider.pickImagesFromGallery(
-                                  context,
-                                );
-
-                            assets.fold(
-                              (errMessage) {
-                                if (errMessage != null) {
-                                  context.showSnackbar(errMessage);
-                                }
-                              },
-                              (data) {
-                                final assets =
-                                    data.map((e) {
-                                      final name = e.title ?? e.id;
-                                      final baseName = (name.contains('.')
-                                              ? name.split('.').first
-                                              : name)
-                                          .replaceAll(" ", "_");
-
-                                      return ImportImageAsset(
-                                        asset: e,
-                                        name: baseName,
-                                      );
-                                    }).toList(); 
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (_) {
-                                    return BlocProvider.value(
-                                      value: context.read<ArchivePageBloc>(),
-                                      child: _ImportImagesBottomSheet(
-                                        assets: assets,
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          icon: Icon(
-                            Icons.upload_file_rounded,
-                            color: context.colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    );
-              },
-            ),
-          ),
+          SliverToBoxAdapter(child: _header()),
+          SliverToBoxAdapter(child: _breadcrumb()),
           SliverToBoxAdapter(child: const SizedBox(height: 16)),
           SliverToBoxAdapter(
             child: SizedBox(
@@ -225,28 +307,219 @@ class _ArchivePageState extends State<ArchivePage> {
               child: Row(children: [_encryptedFiles()]),
             ),
           ),
+          _folders(),
           _images(),
         ],
       ),
     );
   }
 
+  Widget _header() {
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen: (previous, current) => current.maybeMap(
+        ui: (_) => true,
+        orElse: () => false,
+      ),
+      builder: (context, state) {
+        final isSelectionMode =
+            state.maybeMap(ui: (s) => s.isSelectionMode, orElse: () => false);
+
+        if (isSelectionMode) {
+          return Row(
+            children: [
+              TextButton(
+                onPressed: _cancelSelection,
+                child: const Text("Cancel"),
+              ),
+              const Spacer(),
+              Text(
+                "${_selectedPaths.length} selected",
+                style: context.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: _selectedPaths.isEmpty ? null : _moveSelected,
+                icon: Icon(
+                  Icons.drive_file_move_outline,
+                  color: _selectedPaths.isEmpty
+                      ? context.colorScheme.onSurface.withValues(alpha: 0.3)
+                      : context.colorScheme.onSurface,
+                ),
+              ),
+              IconButton(
+                onPressed: _selectedPaths.isEmpty ? null : _deleteSelected,
+                icon: Icon(
+                  Icons.delete_rounded,
+                  color: _selectedPaths.isEmpty
+                      ? context.colorScheme.onSurface.withValues(alpha: 0.3)
+                      : context.colorScheme.error,
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: PageTitle(
+                title: "Archive",
+                subtitle: "View and manage your archived images",
+                icon: Icons.archive,
+              ),
+            ),
+            IconButton(
+              tooltip: "New folder",
+              onPressed: _promptNewFolder,
+              icon: Icon(
+                Icons.create_new_folder_outlined,
+                color: context.colorScheme.onSurface,
+              ),
+            ),
+            IconButton(
+              tooltip: "Import",
+              onPressed: () => _onImport(context),
+              icon: Icon(
+                Icons.upload_file_rounded,
+                color: context.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _onImport(BuildContext context) async {
+    final assets = await PicturesProvider.pickImagesFromGallery(context);
+    if (!context.mounted) return;
+    assets.fold(
+      (errMessage) {
+        if (errMessage != null) context.showSnackbar(errMessage);
+      },
+      (data) {
+        final imported = data.map((e) {
+          final name = e.title ?? e.id;
+          final baseName =
+              (name.contains('.') ? name.split('.').first : name)
+                  .replaceAll(" ", "_");
+          return ImportImageAsset(asset: e, name: baseName);
+        }).toList();
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => BlocProvider.value(
+            value: context.read<ArchivePageBloc>(),
+            child: _ImportImagesBottomSheet(assets: imported),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _breadcrumb() {
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen: (previous, current) => current.maybeMap(
+        ui: (_) => true,
+        orElse: () => false,
+      ),
+      builder: (context, state) {
+        final breadcrumb =
+            state.maybeMap(ui: (s) => s.breadcrumb, orElse: () => <String>[]);
+        final atRoot = state.maybeMap(
+          ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
+          orElse: () => true,
+        );
+        if (atRoot) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(
+            children: [
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                onPressed: () => context
+                    .read<ArchivePageBloc>()
+                    .add(const ArchivePageEvent.goUp()),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+              Expanded(
+                child: Text(
+                  breadcrumb.isEmpty ? "/" : "/ ${breadcrumb.join(" / ")}",
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _folders() {
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen: (previous, current) => current.maybeMap(
+        ui: (_) => true,
+        orElse: () => false,
+      ),
+      builder: (context, state) {
+        final folders = state.maybeMap(
+          ui: (s) => s.folders,
+          orElse: () => <ArchiveFolderView>[],
+        );
+        if (folders.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+        return SliverList.builder(
+          itemCount: folders.length,
+          itemBuilder: (context, index) {
+            final folder = folders[index];
+            return _ArchiveFolderTile(
+              folder: folder,
+              onTap: () => context.read<ArchivePageBloc>().add(
+                ArchivePageEvent.enterFolder(
+                  relativePath: folder.relativePath,
+                  isPrivate: folder.isPrivate,
+                ),
+              ),
+              onRename: () => _promptRenameFolder(folder),
+              onDelete: () => _confirmDeleteFolder(folder),
+              onDecrypt: () => _decryptFolder(folder),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _images() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen:
-          (previous, current) => current.maybeWhen(
-            ui: (images, isSelectionMode) => true,
-            decryptingAllUI:
-                (dearchivingState) =>
-                    _lastUiImages.length == dearchivingState.totalImages,
-            orElse: () => false,
-          ),
+      buildWhen: (previous, current) => current.maybeMap(
+        ui: (_) => true,
+        decryptingAllUI: (s) =>
+            _lastUiImages.length == s.dearchivingState.totalImages,
+        orElse: () => false,
+      ),
       builder: (context, state) {
-        return state.maybeWhen(
-          ui: (images, isSelectionMode) {
+        return state.maybeMap(
+          ui: (s) {
+            final images = s.images;
             _lastUiImages = images;
             if (images.isEmpty) {
-              return SliverFillRemaining(child: _noImages());
+              return SliverToBoxAdapter(
+                child: s.folders.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 80),
+                        child: _noImages(),
+                      )
+                    : const SizedBox.shrink(),
+              );
             }
 
             return SliverList.builder(
@@ -258,10 +531,9 @@ class _ArchivePageState extends State<ArchivePage> {
                     _ArchivedTile(
                       image: image,
                       dearchivingStateType: null,
-                      isSelectionMode: isSelectionMode,
-                      isSelected: _selectedPaths.contains(
-                        image.storagePath.path,
-                      ),
+                      isSelectionMode: s.isSelectionMode,
+                      isSelected:
+                          _selectedPaths.contains(image.storagePath.path),
                       onToggleSelection:
                           () => _toggleSelection(image.storagePath.path),
                       onActivateSelection: () => _activateSelection(image),
@@ -277,7 +549,8 @@ class _ArchivePageState extends State<ArchivePage> {
               },
             );
           },
-          decryptingAllUI: (dearchivingState) {
+          decryptingAllUI: (s) {
+            final dearchivingState = s.dearchivingState;
             assert(_lastUiImages.length == dearchivingState.totalImages);
 
             return SliverList.builder(
@@ -288,11 +561,12 @@ class _ArchivePageState extends State<ArchivePage> {
                       e.storagePath.path ==
                       _lastUiImages[index].storagePath.path,
                 );
-                final state = dearchivingState.getState(image.storagePath.path);
+                final tileState =
+                    dearchivingState.getState(image.storagePath.path);
 
                 return Column(
                   children: [
-                    _ArchivedTile(image: image, dearchivingStateType: state),
+                    _ArchivedTile(image: image, dearchivingStateType: tileState),
                     if (index != _lastUiImages.length - 1)
                       Divider(
                         color: context.colorScheme.onSurface.withValues(
@@ -334,19 +608,14 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _encryptedFiles() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen:
-          (previous, current) => current.maybeWhen(
-            ui:
-                (images, isSelectionMode) => previous.maybeWhen(
-                  ui: (prevImages, _) => prevImages.length != images.length,
-                  orElse: () => true,
-                ),
-            orElse: () => false,
-          ),
+      buildWhen: (previous, current) => current.maybeMap(
+        ui: (_) => true,
+        orElse: () => false,
+      ),
       builder: (context, state) {
-        return state.maybeWhen(
-          ui: (images, _) {
-            final encryptedCount = images.length;
+        return state.maybeMap(
+          ui: (s) {
+            final encryptedCount = s.images.length;
             if (encryptedCount == 0) return const SizedBox();
 
             return Container(
@@ -358,10 +627,9 @@ class _ArchivePageState extends State<ArchivePage> {
               child: Text(
                 "$encryptedCount archived ${encryptedCount == 1 ? "file" : "files"}",
                 style: context.textTheme.labelMedium!.copyWith(
-                  color:
-                      context.isDarkMode
-                          ? context.colorScheme.onPrimary.withValues(alpha: 0.7)
-                          : context.colorScheme.primary,
+                  color: context.isDarkMode
+                      ? context.colorScheme.onPrimary.withValues(alpha: 0.7)
+                      : context.colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

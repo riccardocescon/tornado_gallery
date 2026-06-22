@@ -121,6 +121,58 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       }
     }
 
+    // Reconstruct the folder tree from the album-name-as-path convention:
+    // albums titled `TornadoGallery/<rel>` become nested subfolders.
+    await _attachSubfolders(folder);
+
     return folder;
+  }
+
+  Future<void> _attachSubfolders(EncryptedFolder root) async {
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(
+      Constants.appFolderName,
+    );
+
+    for (final album in albums) {
+      if (album.name == Constants.appFolderName) continue;
+      final relative = album.name.substring(Constants.appFolderName.length + 1);
+      final segments =
+          relative.split('/').where((s) => s.trim().isNotEmpty).toList();
+      if (segments.isEmpty) continue;
+
+      // Walk/create the node chain for this album path.
+      var current = root;
+      var cumulative = Constants.appFolderName;
+      for (final segment in segments) {
+        cumulative = '$cumulative/$segment';
+        final childPath = cumulative;
+        final child = current.subfolders.firstWhere(
+          (f) => f.name == segment,
+          orElse: () {
+            final created = EncryptedFolder.empty(childPath, false);
+            current.subfolders.add(created);
+            return created;
+          },
+        );
+        current = child;
+      }
+
+      // Map this album's assets into the leaf node.
+      try {
+        final assets = await album.getAssetListPaged(page: 0, size: 10000);
+        for (final asset in assets) {
+          final image = await AssetMapper.fromAsset(
+            asset: asset,
+            folderPath: current.path,
+          );
+          if (image != null) current.images.add(image);
+        }
+      } catch (e) {
+        appLogger.logPageBloc(
+          'IosPublicFolderDatasource: error mapping album ${album.name}',
+          error: e.toString(),
+        );
+      }
+    }
   }
 }

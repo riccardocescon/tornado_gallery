@@ -32,4 +32,27 @@ abstract class PublicStorageDatasource {
   ///
   /// Returns true if at least one asset was successfully deleted.
   Future<bool> delete(List<String> assetIds);
+
+  // ── Folder operations ───────────────────────────────────────────────────────
+  //
+  // Gallery folders are modelled as albums whose name is the folder path
+  // relative to the root album (e.g. `Vacanze/Mare`). On Android this maps to
+  // a real `Pictures/TornadoGallery/Vacanze/Mare` directory; on iOS to a
+  // PhotoKit album titled `TornadoGallery/Vacanze/Mare` (logical nesting).
+
+  /// Creates the gallery folder identified by [relativePath]. Returns false
+  /// if it already exists or on error.
+  Future<bool> createFolder(String relativePath);
+
+  /// Renames the gallery folder [oldRelativePath] to [newRelativePath].
+  Future<bool> renameFolder(String oldRelativePath, String newRelativePath);
+
+  /// Deletes the gallery folder at [relativePath]. [assetIds] are the IDs of
+  /// the assets it contains, removed from PhotoKit/MediaStore.
+  Future<bool> deleteFolder(String relativePath, List<String> assetIds);
+
+  /// Yields the relative paths of all gallery subfolders (relative to the root
+  /// album). On Android these map to real subdirectories; on iOS to PhotoKit
+  /// albums named `<root>/<relative>`.
+  Stream<String> listFolderPaths();
 }

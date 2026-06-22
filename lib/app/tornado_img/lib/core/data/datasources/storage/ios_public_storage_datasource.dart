@@ -116,6 +116,38 @@ Future<void> save({
   }
 
   @override
+  Future<bool> createFolder(String relativePath) async {
+    final albumName = GalleryPathProvider.getPublicAlbumName(relativePath);
+    final album = await GalleryPathProvider.getOrCreatePublicAlbum(albumName);
+    return album != null;
+  }
+
+  @override
+  Future<bool> renameFolder(
+    String oldRelativePath,
+    String newRelativePath,
+  ) async {
+    // PhotoKit has no album-rename API exposed by PhotoManager. Create the new
+    // album so future saves land correctly; existing assets stay in the old
+    // album until moved. Logged as a known limitation.
+    final created = await createFolder(newRelativePath);
+    appLogger.logRepository(
+      'IosPublicStorageDatasource.renameFolder: PhotoKit album rename is '
+      'best-effort; assets remain in old album until moved',
+      error: '$oldRelativePath -> $newRelativePath',
+    );
+    return created;
+  }
+
+  @override
+  Future<bool> deleteFolder(String relativePath, List<String> assetIds) async {
+    // Removing the contained assets is the meaningful operation; an empty
+    // PhotoKit album cannot be reliably deleted through PhotoManager.
+    if (assetIds.isEmpty) return true;
+    return delete(assetIds);
+  }
+
+  @override
   Future<bool> delete(List<String> assetIds) async {
     if (assetIds.isEmpty) return false;
 
@@ -141,6 +173,17 @@ Future<void> save({
         error: e.toString(),
       );
       return false;
+    }
+  }
+
+  @override
+  Stream<String> listFolderPaths() async* {
+    final rootAlbum = GalleryPathProvider.getPublicAlbumName('');
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(rootAlbum);
+    for (final album in albums) {
+      if (album.name == rootAlbum) continue;
+      final rel = album.name.substring(rootAlbum.length + 1);
+      if (rel.trim().isNotEmpty) yield rel;
     }
   }
 

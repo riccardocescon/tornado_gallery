@@ -8,7 +8,6 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
-import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
@@ -55,7 +54,9 @@ class EncryptImageUseCase
         bytes: encoded,
         fileName: saveName,
         path: params.settings.destinationPath,
-        album: Constants.appFolderName,
+        album: GalleryPathProvider.getPublicAlbumName(
+          params.settings.publicRelativeAlbum,
+        ),
       );
 
       
@@ -78,7 +79,9 @@ class EncryptImageUseCase
       String? outputFolder = params.settings.destinationPath;
       outputFolder ??=
           isGalleryVisible
-              ? await GalleryPathProvider.getPublicFolderPath()
+              ? await GalleryPathProvider.getPublicFolderPath(
+                relative: params.settings.publicRelativeAlbum,
+              )
               : null;
 
       final encryptedFile = File('$outputFolder/$fileName');

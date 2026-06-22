@@ -3,10 +3,14 @@ import 'package:tornado_img_app/core/data/repositories/image_processing_reposito
 import 'package:tornado_img_app/core/data/repositories/storage_repository/storage_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
+import 'package:tornado_img_app/core/domain/usecases/create_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/delete_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_deleter_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
@@ -44,6 +48,10 @@ void setupInjectionContainer() {
       galleryReaderUsecase: getIt(),
       imageDeleterUsecase: getIt(),
       imageSaverUseCase: getIt(),
+      createFolderUsecase: getIt(),
+      renameFolderUsecase: getIt(),
+      deleteFolderUsecase: getIt(),
+      moveImagesUsecase: getIt(),
     ),
   );
   getIt.registerFactory(
@@ -70,6 +78,10 @@ void setupInjectionContainer() {
   getIt.registerFactory(() => AppFolderStreamerUsecase(appRepository: getIt()));
   getIt.registerFactory(() => ImageSaverUsecase(storageRepo: getIt()));
   getIt.registerFactory(() => ImageRenamerUsecase(storageRepo: getIt()));
+  getIt.registerFactory(() => CreateFolderUsecase(storageRepo: getIt()));
+  getIt.registerFactory(() => RenameFolderUsecase(storageRepo: getIt()));
+  getIt.registerFactory(() => DeleteFolderUsecase(storageRepo: getIt()));
+  getIt.registerFactory(() => MoveImagesUsecase(storageRepo: getIt()));
 
   getIt.registerLazySingleton<StorageRepository>(() => StorageRepositoryImpl());
   getIt.registerLazySingleton<ImageProcessingRepository>(

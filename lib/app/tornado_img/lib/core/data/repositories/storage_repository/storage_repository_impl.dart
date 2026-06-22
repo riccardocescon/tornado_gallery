@@ -77,6 +77,15 @@ class StorageRepositoryImpl implements StorageRepository {
   @override
   Stream<EncryptedStreamImage> readPublicGalleryImages() async* {
     try {
+      if (Platform.isAndroid) {
+        // Android gallery folders are real subdirectories of the root album.
+        // PhotoKit's asset list only covers the root bucket, so walk the
+        // filesystem to also pick up images nested in subfolders and keep
+        // their real (nested) path — driving the archive folder tree.
+        yield* _readPublicImagesAndroid();
+        return;
+      }
+
       final assets = await GalleryPathProvider.getPublicAssets();
       final publicRootPath =
           await GalleryPathProvider.getPublicFolderPath() ??
@@ -94,6 +103,56 @@ class StorageRepositoryImpl implements StorageRepository {
         error: e.toString(),
       );
       // Permission denied or gallery unavailable — yield nothing.
+    }
+  }
+
+  Stream<EncryptedStreamImage> _readPublicImagesAndroid() async* {
+    final root = await GalleryPathProvider.getPublicFolderPath();
+    if (root == null) return;
+    final dir = Directory(root);
+    if (!await dir.exists()) return;
+
+    await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      if (entity is! File) continue;
+      final image = await _fileToPublicImage(File(entity.path));
+      if (image == null) continue;
+      yield EncryptedStreamImage.image(
+        image: image,
+        type: EncryptedStreamImageType.newImage,
+      );
+    }
+  }
+
+  static const _publicImageExtensions = {'png', 'jpg', 'jpeg'};
+
+  Future<EncryptedImage?> _fileToPublicImage(File file) async {
+    final ext = file.path.split('.').last.toLowerCase();
+    if (!_publicImageExtensions.contains(ext)) return null;
+
+    try {
+      final bytes = await file.readAsBytes();
+      final hash = ByteModeling.generateHash(bytes);
+      final fileName = file.path.replaceAll('\\', '/').split('/').last;
+      // Best-effort asset ID for later deletion via MediaStore.
+      final assetId = await GalleryPathProvider.findAssetIdByName(fileName);
+
+      return EncryptedImage(
+        // Keep the real, nested filesystem path so [storeRelativeDir] resolves
+        // the subfolder the image lives in.
+        storagePath: StoragePath(
+          path: file.path,
+          isPrivateFolder: false,
+          assetId: assetId,
+        ),
+        encryptedInfo: BytesInfo(bytes: bytes, hash: hash),
+        date: await file.lastModified(),
+      );
+    } catch (e) {
+      appLogger.logRepository(
+        'StorageRepositoryImpl: error reading public file ${file.path}',
+        error: e.toString(),
+      );
+      return null;
     }
   }
 
@@ -154,6 +213,113 @@ class StorageRepositoryImpl implements StorageRepository {
       path: path,
       oldFileName: oldFileName,
       newFileName: newFileName,
+    );
+  }
+
+  // ── Folder operations ─────────────────────────────────────────────────────────
+
+  @override
+  Future<bool> createFolder({
+    required bool isPrivate,
+    required String relativePath,
+  }) async {
+    if (isPrivate) {
+      final base = await GalleryPathProvider.getPrivateFolderPath();
+      return _private.createFolder('$base/$relativePath');
+    }
+    return _publicDatasource.createFolder(relativePath);
+  }
+
+  @override
+  Future<bool> renameFolder({
+    required bool isPrivate,
+    required String oldRelativePath,
+    required String newRelativePath,
+  }) async {
+    if (isPrivate) {
+      final base = await GalleryPathProvider.getPrivateFolderPath();
+      return _private.renameFolder(
+        '$base/$oldRelativePath',
+        '$base/$newRelativePath',
+      );
+    }
+    return _publicDatasource.renameFolder(oldRelativePath, newRelativePath);
+  }
+
+  @override
+  Future<bool> deleteFolder({
+    required bool isPrivate,
+    required String relativePath,
+    required List<StoragePath> contained,
+  }) async {
+    if (isPrivate) {
+      final base = await GalleryPathProvider.getPrivateFolderPath();
+      return _private.deleteFolder('$base/$relativePath');
+    }
+    final assetIds =
+        contained.map((p) => p.assetId).whereType<String>().toList();
+    return _publicDatasource.deleteFolder(relativePath, assetIds);
+  }
+
+  @override
+  Stream<String> readPrivateFolderPaths(String rootPath) {
+    final dir = Directory(rootPath);
+    if (!dir.existsSync()) return const Stream<String>.empty();
+    return _private.listSubdirectories(dir);
+  }
+
+  @override
+  Stream<String> readPublicFolderPaths() => _publicDatasource.listFolderPaths();
+
+  @override
+  Future<StorageMoveResult> moveImages({
+    required List<EncryptedImage> images,
+    required String targetRelativePath,
+  }) async {
+    final movedPrivate = <String, String>{};
+    var anySuccess = false;
+
+    for (final image in images) {
+      final storage = image.storagePath;
+      final fileName = image.name;
+
+      if (storage.isPrivateFolder) {
+        final base = await GalleryPathProvider.getPrivateFolderPath();
+        final targetDir =
+            targetRelativePath.isEmpty ? base : '$base/$targetRelativePath';
+        final newPath = '$targetDir/$fileName';
+        if (newPath == storage.path) continue;
+        final result = await _private.moveFile(storage.path, newPath);
+        if (result != null) {
+          movedPrivate[storage.path] = result;
+          anySuccess = true;
+        }
+      } else {
+        // Gallery: copy bytes into the target album, then delete the original.
+        final assetId = storage.assetId;
+        if (assetId == null) continue;
+        try {
+          final albumName =
+              GalleryPathProvider.getPublicAlbumName(targetRelativePath);
+          await _publicDatasource.save(
+            fileName: fileName.split('.').first,
+            album: albumName,
+            bytes: image.encryptedInfo.bytes,
+          );
+          await _publicDatasource.delete([assetId]);
+          anySuccess = true;
+        } catch (e) {
+          appLogger.logRepository(
+            'StorageRepositoryImpl.moveImages: gallery move failed',
+            error: e.toString(),
+          );
+        }
+      }
+    }
+
+    return StorageMoveResult(
+      success: anySuccess,
+      movedPrivatePaths: movedPrivate,
     );
   }
 

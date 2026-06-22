@@ -31,13 +31,23 @@ class _ShellHomepageState extends State<ShellHomepage> {
     final bloc = context.read<HomepageBloc>();
     if (bloc.currentPage != Pages.home) {
       final archiveBloc = context.read<ArchivePageBloc>();
-      if (bloc.currentPage == Pages.archive &&
-          archiveBloc.state.maybeWhen(
-            ui: (_, isSelectionMode) => isSelectionMode,
-            orElse: () => false,
-          )) {
-        archiveBloc.add(const ArchivePageEvent.cancelSelectionMode());
-        return;
+      if (bloc.currentPage == Pages.archive) {
+        final inSelection = archiveBloc.state.maybeMap(
+          ui: (s) => s.isSelectionMode,
+          orElse: () => false,
+        );
+        if (inSelection) {
+          archiveBloc.add(const ArchivePageEvent.cancelSelectionMode());
+          return;
+        }
+        final notAtRoot = archiveBloc.state.maybeMap(
+          ui: (s) => s.currentIsPrivate != null || s.currentPath.isNotEmpty,
+          orElse: () => false,
+        );
+        if (notAtRoot) {
+          archiveBloc.add(const ArchivePageEvent.goUp());
+          return;
+        }
       }
       bloc.add(const HomepageEvent.setScreen(page: Pages.home));
       return;
@@ -117,10 +127,16 @@ class _ShellHomepageState extends State<ShellHomepage> {
                         orElse: () => false,
                       ),
                   builder: (context, state) {
-                    final isDecrypting =
-                        context.read<ArchivePageBloc>().isDecryptingAllImages;
-                    final hasDecryptedAll =
-                        context.read<ArchivePageBloc>().hasAllDecrypted;
+                    final archiveBloc = context.read<ArchivePageBloc>();
+                    final isDecrypting = archiveBloc.isDecryptingAllImages;
+                    final hasDecryptedAll = archiveBloc.hasAllDecrypted;
+
+                    // No images at the current navigation level → nothing to
+                    // decrypt/encrypt here, hide the FAB.
+                    if (archiveBloc.currentFolderImages.isEmpty &&
+                        !isDecrypting) {
+                      return const SizedBox.shrink();
+                    }
 
                     final isLoading = state.maybeMap(
                       decryptingAllUI:

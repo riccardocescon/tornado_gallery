@@ -23,4 +23,40 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
   const factory ArchivePageEvent.activateSelectionMode() =
       _ActivateSelectionMode;
   const factory ArchivePageEvent.cancelSelectionMode() = _CancelSelectionMode;
+
+  // ── Folder navigation & management ──────────────────────────────────────────
+
+  const factory ArchivePageEvent.enterFolder({
+    required String relativePath,
+    required bool isPrivate,
+  }) = _EnterFolder;
+
+  const factory ArchivePageEvent.goUp() = _GoUp;
+
+  const factory ArchivePageEvent.createFolder({
+    required String name,
+    bool? isPrivate,
+  }) = _CreateFolder;
+
+  const factory ArchivePageEvent.renameFolder({
+    required String relativePath,
+    required bool isPrivate,
+    required String newName,
+  }) = _RenameFolder;
+
+  const factory ArchivePageEvent.deleteFolder({
+    required String relativePath,
+    required bool isPrivate,
+  }) = _DeleteFolder;
+
+  const factory ArchivePageEvent.moveImages({
+    required List<EncryptedImage> images,
+    required String targetRelativePath,
+  }) = _MoveImages;
+
+  const factory ArchivePageEvent.decryptFolder({
+    required String relativePath,
+    required bool isPrivate,
+    required String passphrase,
+  }) = _DecryptFolder;
 }
