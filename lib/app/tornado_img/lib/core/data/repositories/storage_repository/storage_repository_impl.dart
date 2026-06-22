@@ -294,8 +294,23 @@ class StorageRepositoryImpl implements StorageRepository {
           movedPrivate[storage.path] = result;
           anySuccess = true;
         }
+      } else if (Platform.isAndroid) {
+        // Android public gallery is a real filesystem path (same as folder
+        // ops), so move the file directly. iOS assets have no path and must go
+        // through the assetId save+delete flow below.
+        final base = await GalleryPathProvider.getPublicFolderPath();
+        if (base == null) continue;
+        final targetDir =
+            targetRelativePath.isEmpty ? base : '$base/$targetRelativePath';
+        final newPath = '$targetDir/$fileName';
+        if (newPath == storage.path) continue;
+        final result = await _private.moveFile(storage.path, newPath);
+        if (result != null) {
+          movedPrivate[storage.path] = result;
+          anySuccess = true;
+        }
       } else {
-        // Gallery: copy bytes into the target album, then delete the original.
+        // iOS: copy bytes into the target album, then delete the original.
         final assetId = storage.assetId;
         if (assetId == null) continue;
         try {

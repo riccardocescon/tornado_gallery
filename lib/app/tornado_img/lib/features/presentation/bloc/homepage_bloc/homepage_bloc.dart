@@ -42,6 +42,13 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       <String, EncryptedImage>{};
   final Set<String> _runtimeRemovals = <String>{};
 
+  // Folder create/delete made on the archive page. The filesystem watcher does
+  // not reliably emit events for empty directories, so these runtime deltas
+  // keep the folder count exact without a full disk rescan. Keys are deduped
+  // against the in-memory tree at count time to avoid double counting.
+  final Set<String> _runtimeFolderCreations = <String>{};
+  final Set<String> _runtimeFolderRemovals = <String>{};
+
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
 
@@ -161,6 +168,22 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
                 _runtimeRemovals.add(value.path);
                 _emit(emit);
               },
+              folderCreated: (value) {
+                final key = _folderKey(value.isPrivate, value.relativePath);
+                _runtimeFolderRemovals.remove(key);
+                _runtimeFolderCreations.add(key);
+                _emit(emit);
+              },
+              folderDeleted: (value) {
+                final key = _folderKey(value.isPrivate, value.relativePath);
+                // Deleting a folder removes its whole subtree, so drop any
+                // in-session creations under it too.
+                _runtimeFolderCreations.removeWhere(
+                  (k) => k == key || k.startsWith('$key/'),
+                );
+                _runtimeFolderRemovals.add(key);
+                _emit(emit);
+              },
               orElse: () => null,
             );
             break;
@@ -191,6 +214,8 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       // Fresh repository snapshot is authoritative after a manual refresh.
       _runtimeUpserts.clear();
       _runtimeRemovals.clear();
+      _runtimeFolderCreations.clear();
+      _runtimeFolderRemovals.clear();
 
       _emit(emit);
 
@@ -277,12 +302,60 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     emit(
       HomepageState.galleryStatus(
         imagesLoaded: totalImages,
-        folderLoaded: private.subfolders.length + 1,
+        folderLoaded: _countFolders(private, appPublicEncryptedRootFolder),
         bytesLoaded: totalBytes,
         lastLoaded: lastLoaded,
         archivingState: currentArchivingState,
       ),
     );
+  }
+
+  /// Total folder count across the private and public trees, reconciled with
+  /// the runtime create/delete deltas the filesystem watcher cannot see (empty
+  /// directories). Pure in-memory — no disk access.
+  int _countFolders(EncryptedFolder private, EncryptedFolder? public) {
+    final treeKeys = <String>{};
+    _collectFolderKeys(private, private.path, true, treeKeys);
+    if (public != null) {
+      _collectFolderKeys(public, public.path, false, treeKeys);
+    }
+
+    var count = treeKeys.length;
+    for (final key in _runtimeFolderCreations) {
+      if (!treeKeys.contains(key)) count++;
+    }
+    // A removed folder takes its whole subtree with it: subtract every tree
+    // folder that equals or lives under a removed path.
+    for (final treeKey in treeKeys) {
+      final removed = _runtimeFolderRemovals.any(
+        (r) => treeKey == r || treeKey.startsWith('$r/'),
+      );
+      if (removed) count--;
+    }
+    return count;
+  }
+
+  void _collectFolderKeys(
+    EncryptedFolder folder,
+    String rootPath,
+    bool isPrivate,
+    Set<String> out,
+  ) {
+    for (final sub in folder.subfolders) {
+      out.add(_folderKey(isPrivate, _relativeTo(rootPath, sub.path)));
+      _collectFolderKeys(sub, rootPath, isPrivate, out);
+    }
+  }
+
+  String _folderKey(bool isPrivate, String relativePath) =>
+      '${isPrivate ? 1 : 0}:$relativePath';
+
+  String _relativeTo(String rootPath, String path) {
+    var root = rootPath.replaceAll('\\', '/');
+    var p = path.replaceAll('\\', '/');
+    if (p.startsWith(root)) p = p.substring(root.length);
+    if (p.startsWith('/')) p = p.substring(1);
+    return p;
   }
 
   int _sumFoldersBytes(List<EncryptedFolder> folders) {

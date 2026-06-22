@@ -91,51 +91,142 @@ class _ArchivePageState extends State<ArchivePage> {
     final result = await showDialog<(String, bool)>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text("New folder"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: controller,
-                autofocus: true,
-                decoration: const InputDecoration(labelText: "Folder name"),
-                onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
-              ),
-              if (atRoot) ...[
-                const SizedBox(height: 16),
-                SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(
-                      value: true,
-                      label: Text("Private"),
-                      icon: Icon(Icons.lock_outline_rounded),
+        builder: (ctx, setDialogState) => Dialog(
+          backgroundColor: ctx.colorScheme.surface,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppStyle.cardBorderRadius,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    ContainedItem.icon(
+                      icon: Icons.create_new_folder_outlined,
+                      backgroundColor: ctx.colorScheme.primary.withValues(
+                        alpha: 0.12,
+                      ),
+                      iconColor: ctx.colorScheme.primary,
                     ),
-                    ButtonSegment(
-                      value: false,
-                      label: Text("Public"),
-                      icon: Icon(Icons.photo_library_outlined),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "New folder",
+                            style: ctx.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Organize your archived images",
+                            style: ctx.textTheme.bodySmall?.copyWith(
+                              color: ctx.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                  selected: {isPrivate},
-                  onSelectionChanged: (s) =>
-                      setDialogState(() => isPrivate = s.first),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    hintText: "Folder name",
+                    prefixIcon: const Icon(Icons.folder_outlined),
+                    filled: true,
+                    fillColor: ctx.appColors.softBackground.withValues(
+                      alpha: 0.5,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: AppStyle.detailsBorderRadius,
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: AppStyle.detailsBorderRadius,
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: AppStyle.detailsBorderRadius,
+                      borderSide: BorderSide(
+                        color: ctx.colorScheme.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                  onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
+                ),
+                if (atRoot) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(
+                          value: true,
+                          label: Text("Private"),
+                          icon: Icon(Icons.lock_outline_rounded),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          label: Text("Public"),
+                          icon: Icon(Icons.photo_library_outlined),
+                        ),
+                      ],
+                      selected: {isPrivate},
+                      onSelectionChanged: (s) =>
+                          setDialogState(() => isPrivate = s.first),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () =>
+                            Navigator.pop(ctx, (controller.text, isPrivate)),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppStyle.detailsBorderRadius,
+                          ),
+                        ),
+                        icon: const Icon(Icons.check_rounded, size: 20),
+                        label: const Text("Create"),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.pop(ctx, (controller.text, isPrivate)),
-              child: const Text("Create"),
-            ),
-          ],
         ),
       ),
     );

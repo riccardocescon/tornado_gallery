@@ -112,21 +112,13 @@ class _OutputFolderBottomSheet extends StatefulWidget {
 }
 
 class _OutputFolderBottomSheetState extends State<_OutputFolderBottomSheet> {
-  String? _root;
   List<String> _relativeFolders = [];
   bool _loading = true;
-  final _newFolderController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _load();
-  }
-
-  @override
-  void dispose() {
-    _newFolderController.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -141,7 +133,6 @@ class _OutputFolderBottomSheetState extends State<_OutputFolderBottomSheet> {
 
   Future<Set<String>> _loadPrivate() async {
     final root = await GalleryPathProvider.getPrivateFolderPath();
-    _root = root;
     final relatives = <String>{};
     try {
       final dir = Directory(root);
@@ -218,15 +209,6 @@ class _OutputFolderBottomSheetState extends State<_OutputFolderBottomSheet> {
     );
   }
 
-  void _createAndSelect() {
-    final name = FileNameUtils.sanitizeFileStem(_newFolderController.text);
-    if (name.isEmpty) return;
-    if (widget.isPrivate && _root == null) return;
-    // The folder is created lazily on save (private dir recursively, public
-    // album by the gallery save), so just return the chosen path.
-    Navigator.pop(context, _selectionFor(name));
-  }
-
   @override
   Widget build(BuildContext context) {
     final rootTitle = widget.isPrivate ? "Root (encrypted)" : "Root (gallery)";
@@ -274,29 +256,6 @@ class _OutputFolderBottomSheetState extends State<_OutputFolderBottomSheet> {
                   ),
                 ),
               ),
-            const Divider(),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _newFolderController,
-                    decoration: const InputDecoration(
-                      labelText: "New folder name",
-                    ),
-                    onSubmitted: (_) => _createAndSelect(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 100,
-                  child: ElevatedButton(
-                    onPressed: _createAndSelect,
-
-                    child: const Text("Create"),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

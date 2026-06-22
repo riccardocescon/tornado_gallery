@@ -78,10 +78,10 @@ class _ArchiveState extends StatelessWidget {
                     orElse: () => null,
                   );
 
-                  // final folderAmount = state.maybeMap(
-                  //   galleryStatus: (value) => value.folderLoaded,
-                  //   orElse: () => null,
-                  // );
+                  final folderAmount = state.maybeMap(
+                    galleryStatus: (value) => value.folderLoaded,
+                    orElse: () => null,
+                  );
 
                   final bytesAmount = state.maybeMap(
                     galleryStatus: (value) => value.bytesLoaded,
@@ -113,25 +113,23 @@ class _ArchiveState extends StatelessWidget {
                           alpha: 0.2,
                         ),
                       ),
-                      // TODO: uncomment when folder support is added
-                      // _item(
-                      //   context,
-                      //   Icons.archive_rounded,
-                      //   folderAmount?.toString(),
-                      //   "archives",
-                      //   () {
-                      //     context.showSnackbar(
-                      //       "Feature coming soon",
-                      //       duration: const Duration(seconds: 1),
-                      //     );
-                      //   },
-                      // ),
-                      // Divider(
-                      //   height: 2,
-                      //   color: context.colorScheme.onSurface.withValues(
-                      //     alpha: 0.2,
-                      //   ),
-                      // ),
+                      _item(
+                        context,
+                        Icons.archive_rounded,
+                        folderAmount?.toString(),
+                        "archives",
+                        () {
+                          context.read<HomepageBloc>().add(
+                            const HomepageEvent.setScreen(page: Pages.archive),
+                          );
+                        },
+                      ),
+                      Divider(
+                        height: 2,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.2,
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: _byteProtectedItem(

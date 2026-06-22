@@ -434,6 +434,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         final rel =
             _currentPath.isEmpty ? safeName : '$_currentPath/$safeName';
         _createdFolders.add((isPrivate: isPrivate, relativePath: rel));
+        appBloc.add(
+          AppEvent.folderCreated(isPrivate: isPrivate, relativePath: rel),
+        );
         _emit(emit);
       },
     );
@@ -515,6 +518,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     }
     _createdFolders.add((isPrivate: event.isPrivate, relativePath: newRel));
 
+    appBloc.add(
+      AppEvent.folderDeleted(isPrivate: event.isPrivate, relativePath: oldRel),
+    );
+    appBloc.add(
+      AppEvent.folderCreated(isPrivate: event.isPrivate, relativePath: newRel),
+    );
+
     _emit(emit);
   }
 
@@ -549,6 +559,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               f.isPrivate == event.isPrivate &&
               (f.relativePath == event.relativePath ||
                   f.relativePath.startsWith('${event.relativePath}/')),
+        );
+        appBloc.add(
+          AppEvent.folderDeleted(
+            isPrivate: event.isPrivate,
+            relativePath: event.relativePath,
+          ),
         );
         _emit(emit);
       },
