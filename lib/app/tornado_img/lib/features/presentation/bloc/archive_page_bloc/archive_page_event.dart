@@ -10,6 +10,7 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
     required List<ImportImageAsset> assets,
     required bool saveToAppFolder,
     required bool saveToGallery,
+    @Default('') String targetRelativePath,
   }) = _ImportImages;
 
   const factory ArchivePageEvent.delete({

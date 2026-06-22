@@ -81,6 +81,23 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
   bool saveToAppFolder = true;
   bool saveToGallery = false;
 
+  /// When the archive view is inside a folder, imports go straight into that
+  /// folder and its store, so the App-folder/Gallery choice is hidden.
+  bool get _inFolder {
+    final bloc = context.read<ArchivePageBloc>();
+    return bloc.currentPath.trim().isNotEmpty && bloc.currentIsPrivate != null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bloc = context.read<ArchivePageBloc>();
+    if (bloc.currentPath.trim().isNotEmpty && bloc.currentIsPrivate != null) {
+      saveToAppFolder = bloc.currentIsPrivate!;
+      saveToGallery = !bloc.currentIsPrivate!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomSheet(
@@ -140,38 +157,47 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
                     errorStyle: TextStyle(color: context.colorScheme.error),
                   ),
               ),
-              _option(
-                icon: Icons.folder_rounded,
-                title: "Save to App folder",
-                subtitle: "Private folder, only accessible by the app",
-                trailing: Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: saveToAppFolder,
-                    onChanged:
-                        (val) => setState(() {
-                          saveToAppFolder = val;
-                          saveToGallery = !val;
-                        }),
+              if (_inFolder)
+                _option(
+                  icon: Icons.folder_rounded,
+                  title: "Save to this folder",
+                  subtitle: context.read<ArchivePageBloc>().currentPath,
+                  trailing: const SizedBox.shrink(),
+                )
+              else ...[
+                _option(
+                  icon: Icons.folder_rounded,
+                  title: "Save to App folder",
+                  subtitle: "Private folder, only accessible by the app",
+                  trailing: Transform.scale(
+                    scale: 0.8,
+                    child: Switch(
+                      value: saveToAppFolder,
+                      onChanged:
+                          (val) => setState(() {
+                            saveToAppFolder = val;
+                            saveToGallery = !val;
+                          }),
+                    ),
                   ),
                 ),
-              ),
-              _option(
-                icon: Icons.photo_library_outlined,
-                title: "Save to Gallery",
-                subtitle: "Public folder, accessible on the gallery",
-                trailing: Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: saveToGallery,
-                    onChanged:
-                        (val) => setState(() {
-                          saveToGallery = val;
-                          saveToAppFolder = !val;
-                        }),
+                _option(
+                  icon: Icons.photo_library_outlined,
+                  title: "Save to Gallery",
+                  subtitle: "Public folder, accessible on the gallery",
+                  trailing: Transform.scale(
+                    scale: 0.8,
+                    child: Switch(
+                      value: saveToGallery,
+                      onChanged:
+                          (val) => setState(() {
+                            saveToGallery = val;
+                            saveToAppFolder = !val;
+                          }),
+                    ),
                   ),
                 ),
-              ),
+              ],
               ElevatedButton(
                   onPressed:
                       _canImport
@@ -185,11 +211,14 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
                                     name: customName,
                                   );
                                 }).toList();
+                            final bloc = context.read<ArchivePageBloc>();
                             context.read<ArchivePageBloc>().add(
                               ArchivePageEvent.importImages(
                                 assets: updatedAssets,
                                 saveToAppFolder: saveToAppFolder,
                                 saveToGallery: saveToGallery,
+                                targetRelativePath:
+                                    _inFolder ? bloc.currentPath : '',
                               ),
                             );
                             context.pop();

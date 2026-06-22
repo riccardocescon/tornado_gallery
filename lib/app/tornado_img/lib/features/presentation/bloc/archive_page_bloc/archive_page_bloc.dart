@@ -63,6 +63,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   String _currentPath = '';
   bool? _currentIsPrivate;
 
+  /// Folder the archive view is currently inside ('' == root).
+  String get currentPath => _currentPath;
+
+  /// Store of the folder currently entered, or null at the root (mixed view).
+  bool? get currentIsPrivate => _currentIsPrivate;
+
   /// Folders created in-session that may still be empty, so they show up
   /// before any image lives in them.
   final Set<FolderKey> _createdFolders = <FolderKey>{};
@@ -326,6 +332,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     on<_ImportImages>((event, emit) async {
       emit(const ArchivePageState.importing());
 
+      final rel = event.targetRelativePath;
+      final hasRel = rel.trim().isNotEmpty;
+
       for (final item in event.assets) {
         final asset = item.asset;
         final bytes = await asset.originBytes;
@@ -337,12 +346,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 ? ImageSaverParams.appFolder(
                   bytes: bytes,
                   fileName: fileName,
-                  path: await GalleryPathProvider.getPrivateFolderPath(),
+                  path: hasRel
+                      ? '${await GalleryPathProvider.getPrivateFolderPath()}/$rel'
+                      : await GalleryPathProvider.getPrivateFolderPath(),
                 )
                 : ImageSaverParams.gallery(
                   bytes: bytes,
                   fileName: fileName,
-                  album: Constants.appFolderName,
+                  album: hasRel
+                      ? '${Constants.appFolderName}/$rel'
+                      : Constants.appFolderName,
                 );
         final result = await imageSaverUseCase.call(params);
         if (result.isLeft()) {
@@ -356,7 +369,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               event.saveToGallery
                   ? await GalleryPathProvider.getPublicFolderPath()
                   : await GalleryPathProvider.getPrivateFolderPath();
-          final path = '$rootDirPath/$fileName';
+          final path =
+              hasRel ? '$rootDirPath/$rel/$fileName' : '$rootDirPath/$fileName';
 
           final String? galleryAssetId =
               event.saveToGallery
