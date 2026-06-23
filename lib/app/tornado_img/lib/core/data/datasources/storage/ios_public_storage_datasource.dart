@@ -32,9 +32,7 @@ Future<void> save({
   required String album,
   required Uint8List bytes,
 }) async {
-  final albumEntity = await GalleryPathProvider.getPublicAlbum(
-    requestIfNeeded: true,
-  );
+  final albumEntity = await GalleryPathProvider.getOrCreatePublicAlbum(album);
   if (albumEntity == null) {
     throw StateError('IosPublicStorageDatasource: album "$album" not found');
   }
@@ -74,7 +72,7 @@ Future<void> save({
 
       await save(fileName: newStem, album: album, bytes: bytes);
 
-      final newAssetId = await GalleryPathProvider.findMostRecentAssetId();
+      final newAssetId = await GalleryPathProvider.findMostRecentAssetId(albumName: album);
       if (newAssetId == null) {
         appLogger.logRepository(
           'IosPublicStorageDatasource.rename: new asset id not found after save',

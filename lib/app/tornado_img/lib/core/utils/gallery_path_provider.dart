@@ -299,9 +299,12 @@ class GalleryPathProvider {
     return match?.id;
   }
 
-  /// Returns the asset ID of the most recently added image in the public album.
-  static Future<String?> findMostRecentAssetId() async {
-    final album = await getPublicAlbum(requestIfNeeded: true);
+  /// Returns the asset ID of the most recently added image in [albumName].
+  /// Falls back to the root app album when [albumName] is null.
+  static Future<String?> findMostRecentAssetId({String? albumName}) async {
+    final album = albumName != null
+        ? await getOrCreatePublicAlbum(albumName)
+        : await getPublicAlbum(requestIfNeeded: true);
     if (album == null) return null;
     final assets = await album.getAssetListPaged(page: 0, size: 1);
     if (assets.isEmpty) return null;
