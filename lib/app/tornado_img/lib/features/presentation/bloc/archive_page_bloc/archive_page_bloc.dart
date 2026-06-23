@@ -562,6 +562,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       (failure) => emit(ArchivePageState.failure(message: failure.message)),
       (_) {
         for (final img in contained) {
+          images.removeWhere(
+            (i) =>
+                i.storagePath.path == img.storagePath.path ||
+                (img.storagePath.assetId != null &&
+                    i.storagePath.assetId == img.storagePath.assetId),
+          );
           appBloc.add(
             AppEvent.removeEncryptedImage(
               path: img.storagePath.assetId ?? img.storagePath.path,

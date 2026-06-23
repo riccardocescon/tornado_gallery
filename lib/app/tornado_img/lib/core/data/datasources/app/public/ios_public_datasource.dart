@@ -54,27 +54,23 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
 
     if (path == null || path.trim().isEmpty) return null;
 
-    if (assets.isEmpty) {
-      // Album exists but has no images yet — return empty root so the
-      // watcher (poller) can attach and detect the first image.
-      return EncryptedFolder.empty(path, false);
-    }
-
     return _buildFolder(assets, path);
   }
 
   @override
   Stream<void> watchFolder(EncryptedFolder rootFolder) async* {
-    // Seed the initial known asset ID set so the first poll does not
-    // immediately emit a spurious change.
+    // Seed the initial known state so the first poll does not emit spuriously.
     var knownIds = await _currentAssetIds();
+    var knownAlbums = await _currentAlbumNames();
 
     while (true) {
       await Future.delayed(_pollInterval);
 
       Set<String> currentIds;
+      Set<String> currentAlbums;
       try {
         currentIds = await _currentAssetIds();
+        currentAlbums = await _currentAlbumNames();
       } catch (e) {
         appLogger.logPageBloc(
           'IosPublicFolderDatasource: polling error',
@@ -84,8 +80,11 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       }
 
       if (currentIds.length != knownIds.length ||
-          !currentIds.containsAll(knownIds)) {
+          !currentIds.containsAll(knownIds) ||
+          currentAlbums.length != knownAlbums.length ||
+          !currentAlbums.containsAll(knownAlbums)) {
         knownIds = currentIds;
+        knownAlbums = currentAlbums;
         yield null;
       }
     }
@@ -98,6 +97,13 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       requestIfNeeded: false,
     );
     return {for (final a in assets) a.id};
+  }
+
+  Future<Set<String>> _currentAlbumNames() async {
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(
+      Constants.appFolderName,
+    );
+    return {for (final a in albums) a.name};
   }
 
   Future<EncryptedFolder> _buildFolder(

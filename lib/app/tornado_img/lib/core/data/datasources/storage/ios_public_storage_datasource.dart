@@ -140,10 +140,23 @@ Future<void> save({
 
   @override
   Future<bool> deleteFolder(String relativePath, List<String> assetIds) async {
-    // Removing the contained assets is the meaningful operation; an empty
-    // PhotoKit album cannot be reliably deleted through PhotoManager.
-    if (assetIds.isEmpty) return true;
-    return delete(assetIds);
+    final assetsDeleted = assetIds.isEmpty || await delete(assetIds);
+
+    // Delete the PhotoKit albums for the folder and any sub-albums.
+    final albumPrefix = GalleryPathProvider.getPublicAlbumName(relativePath);
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(albumPrefix);
+    for (final album in albums) {
+      try {
+        await PhotoManager.editor.darwin.deletePath(album);
+      } catch (e) {
+        appLogger.logRepository(
+          'IosPublicStorageDatasource.deleteFolder: album delete failed',
+          error: '${album.name}: $e',
+        );
+      }
+    }
+
+    return assetsDeleted;
   }
 
   @override
