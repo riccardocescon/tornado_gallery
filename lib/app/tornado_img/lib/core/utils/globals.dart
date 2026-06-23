@@ -9,9 +9,5 @@ late Upgrader upgrader;
 Future<void> initializeGlobals() async {
   packageInfo = await PackageInfo.fromPlatform();
   appLogger = AppLogger();
-  upgrader = Upgrader(
-    // debugDisplayAlways: true,
-    // debugLogging: true,
-  );
-  await upgrader.initialize();
+  upgrader = Upgrader();
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/home/home_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/settings/settings_page.dart';
@@ -17,6 +18,12 @@ class _ShellHomepageState extends State<ShellHomepage> {
   final pages = const [HomePage(), SettingsPage()];
   late final PageController _pageController = PageController();
   DateTime? _lastBackPress;
+
+  @override
+  void initState() {
+    super.initState();
+    upgrader.initialize();
+  }
 
   @override
   void dispose() {

@@ -7,10 +7,7 @@ class UpdateAppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!upgrader.isUpdateAvailable()) {
-      return const SizedBox();
-    }
-
+    if (!upgrader.isUpdateAvailable()) return const SizedBox.shrink();
     return SizedBox(
       width: double.maxFinite,
       child: FilledButton(
@@ -26,7 +23,7 @@ class UpdateAppCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.update, color: context.colorScheme.onPrimaryContainer),
-            Flexible(
+            const Flexible(
               child: Text(
                 "New version available! Tap to update",
                 softWrap: true,
