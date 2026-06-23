@@ -37,20 +37,21 @@ Future<void> save({
     throw StateError('IosPublicStorageDatasource: album "$album" not found');
   }
 
-  final asset = await PhotoManager.editor.saveImage(
+  final recentsAsset = await PhotoManager.editor.saveImage(
     bytes,
     filename: fileName,
     title: fileName,
-    );
-  await PhotoManager.editor.copyAssetToPath(
-    asset: asset,
+  );
+  final albumAsset = await PhotoManager.editor.copyAssetToPath(
+    asset: recentsAsset,
     pathEntity: albumEntity,
   );
 
-  await AssetNameIndex.saveByAssetId(
-    assetId: asset.id,
-    fileName: fileName,
-  );
+  // Delete the Recents copy so the image lives only in the target album.
+  await PhotoManager.editor.deleteWithIds([recentsAsset.id]);
+
+  final resolvedId = albumAsset.id;
+  await AssetNameIndex.saveByAssetId(assetId: resolvedId, fileName: fileName);
   await AssetNameIndex.saveByHash(
     hash: ByteModeling.generateHash(bytes),
     fileName: fileName,

@@ -339,6 +339,7 @@ class _ArchivePageState extends State<ArchivePage> {
       builder: (_) => _MoveTargetSheet(
         allImages: bloc.images,
         isPrivate: isPrivate,
+        extraFolders: bloc.folderRelativePaths(isPrivate: isPrivate),
       ),
     );
     if (target != null && mounted) {

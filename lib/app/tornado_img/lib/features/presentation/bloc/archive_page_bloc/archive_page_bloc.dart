@@ -663,6 +663,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _emit(emit);
   }
 
+  List<String> folderRelativePaths({required bool isPrivate}) => _createdFolders
+      .where((f) => f.isPrivate == isPrivate)
+      .map((f) => f.relativePath)
+      .toList();
+
   List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
     // currently not existing, so its sorted by last modified date

@@ -8,6 +8,7 @@ import 'package:tornado_img_app/core/data/datasources/storage/public_storage_dat
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -86,16 +87,29 @@ class StorageRepositoryImpl implements StorageRepository {
         return;
       }
 
-      final assets = await GalleryPathProvider.getPublicAssets();
-      final publicRootPath =
-          await GalleryPathProvider.getPublicFolderPath() ??
-          'Pictures/TornadoGallery';
-
-      await for (final result in Stream.fromIterable(assets)
-          .asyncMap((asset) => _mapPublicAsset(asset, publicRootPath))
-          .where((r) => r != null)
-          .cast<EncryptedStreamImage>()) {
-        yield result;
+      // Read per-album so each asset gets the correct virtual path matching
+      // the TornadoGallery/<subfolder> convention used by _attachSubfolders.
+      // Deeper albums first so each asset is assigned its most-specific path.
+      final allAlbums = await GalleryPathProvider.listPublicAlbumsUnder(
+        Constants.appFolderName,
+      );
+      allAlbums.sort((a, b) => b.name.length.compareTo(a.name.length));
+      final seen = <String>{};
+      for (final album in allAlbums) {
+        try {
+          final albumAssets =
+              await album.getAssetListPaged(page: 0, size: 10000);
+          for (final asset in albumAssets) {
+            if (!seen.add(asset.id)) continue;
+            final result = await _mapPublicAsset(asset, album.name);
+            if (result != null) yield result;
+          }
+        } catch (e) {
+          appLogger.logRepository(
+            'StorageRepositoryImpl.readPublicGalleryImages: ${album.name} error',
+            error: e.toString(),
+          );
+        }
       }
     } catch (e) {
       appLogger.logRepository(
@@ -322,6 +336,9 @@ class StorageRepositoryImpl implements StorageRepository {
             bytes: image.encryptedInfo.bytes,
           );
           await _publicDatasource.delete([assetId]);
+          // Map old virtual path → new virtual path so the caller can update
+          // the in-memory model without waiting for the next poll cycle.
+          movedPrivate[storage.path] = '$albumName/$fileName';
           anySuccess = true;
         } catch (e) {
           appLogger.logRepository(

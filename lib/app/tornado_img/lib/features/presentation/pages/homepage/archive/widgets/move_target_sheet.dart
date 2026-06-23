@@ -7,10 +7,15 @@ class _MoveTargetSheet extends StatelessWidget {
   const _MoveTargetSheet({
     required this.allImages,
     required this.isPrivate,
+    this.extraFolders = const [],
   });
 
   final List<EncryptedImage> allImages;
   final bool isPrivate;
+
+  /// Pre-computed folder relative paths from the bloc's created-folder set.
+  /// Used on iOS where public images don't carry nested paths.
+  final List<String> extraFolders;
 
   List<String> _folderPaths() {
     final paths = <String>{};
@@ -19,6 +24,12 @@ class _MoveTargetSheet extends StatelessWidget {
       final dir = img.storeRelativeDir;
       if (dir.isEmpty) continue;
       final parts = dir.split('/');
+      for (var i = 1; i <= parts.length; i++) {
+        paths.add(parts.take(i).join('/'));
+      }
+    }
+    for (final rel in extraFolders) {
+      final parts = rel.split('/');
       for (var i = 1; i <= parts.length; i++) {
         paths.add(parts.take(i).join('/'));
       }
