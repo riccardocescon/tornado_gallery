@@ -382,38 +382,50 @@ class _ArchivePageState extends State<ArchivePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _onBack();
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: CustomScrollView(
-              cacheExtent: 800,
-              controller: _scrollController,
-              slivers: [
-                SliverToBoxAdapter(child: const SizedBox(height: 18)),
-                SliverToBoxAdapter(child: _header()),
-                SliverToBoxAdapter(child: _breadcrumb()),
-                SliverToBoxAdapter(child: const SizedBox(height: 16)),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    width: double.maxFinite,
-                    child: Row(children: [_encryptedFiles()]),
-                  ),
+    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
+      buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),
+      builder: (context, state) {
+        final canPop = state.maybeMap(
+          ui: (s) =>
+              !s.isSelectionMode &&
+              s.currentIsPrivate == null &&
+              s.currentPath.isEmpty,
+          orElse: () => false,
+        );
+        return PopScope(
+          canPop: canPop,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            _onBack();
+          },
+          child: Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: CustomScrollView(
+                  cacheExtent: 800,
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(child: const SizedBox(height: 18)),
+                    SliverToBoxAdapter(child: _header()),
+                    SliverToBoxAdapter(child: _breadcrumb()),
+                    SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        width: double.maxFinite,
+                        child: Row(children: [_encryptedFiles()]),
+                      ),
+                    ),
+                    _folders(),
+                    _images(),
+                  ],
                 ),
-                _folders(),
-                _images(),
-              ],
+              ),
             ),
+            floatingActionButton: _fab(),
           ),
-        ),
-        floatingActionButton: _fab(),
-      ),
+        );
+      },
     );
   }
 
@@ -505,6 +517,10 @@ class _ArchivePageState extends State<ArchivePage> {
       builder: (context, state) {
         final isSelectionMode =
             state.maybeMap(ui: (s) => s.isSelectionMode, orElse: () => false);
+        final atRoot = state.maybeMap(
+          ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
+          orElse: () => false,
+        );
 
         if (isSelectionMode) {
           return Row(
@@ -546,6 +562,11 @@ class _ArchivePageState extends State<ArchivePage> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (atRoot)
+              IconButton(
+                onPressed: _onBack,
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              ),
             Expanded(
               child: PageTitle(
                 title: "Archive",
