@@ -25,27 +25,29 @@ class _ActionCard extends StatelessWidget {
         darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
 
     final foregroundButtonColor =
-        darker
-            ? context.colorScheme.primaryContainer
-            : context.colorScheme.onSurface;
+        darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
 
+    final ext = context.appColors;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color:
-              darker
-                  ? context.colorScheme.primaryContainer
-                  : context.colorScheme.surface,
+          color: darker ? null : context.colorScheme.surface,
+          gradient: darker
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [ext.heroGradientStart, ext.heroGradientEnd],
+                )
+              : null,
           borderRadius: AppStyle.cardBorderRadius,
-          border:
-              darker
-                  ? null
-                  : Border.all(
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                  ),
+          border: darker
+              ? Border.all(color: context.theme.dividerColor)
+              : Border.all(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                ),
         ),
         child: Column(
           spacing: 8,
@@ -54,11 +56,7 @@ class _ActionCard extends StatelessWidget {
             ContainedItem.icon(
               icon: icon,
               backgroundColor:
-                  darker
-                      ? context.colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.1,
-                      )
-                      : context.appColors.softBackground,
+                  darker ? ext.accentSubtle : context.appColors.softBackground,
               iconColor: foregroundColor,
             ),
             Expanded(
@@ -88,7 +86,7 @@ class _ActionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       darker
-                          ? context.colorScheme.onPrimary
+                          ? context.colorScheme.primary
                           : context.appColors.softButton,
                   borderRadius:
                       AppStyle.cardBorderRadius - BorderRadius.circular(8),
