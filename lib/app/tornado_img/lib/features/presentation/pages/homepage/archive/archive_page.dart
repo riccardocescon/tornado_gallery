@@ -34,6 +34,7 @@ class _ArchivePageState extends State<ArchivePage> {
   final ScrollController _scrollController = ScrollController();
   static double _savedScrollOffset = 0;
   List<EncryptedImage> _lastUiImages = [];
+  double? _dragStartX;
 
   final Set<String> _selectedPaths = {};
 
@@ -393,13 +394,24 @@ class _ArchivePageState extends State<ArchivePage> {
               s.currentPath.isEmpty,
           orElse: () => false,
         );
-        return PopScope(
-          canPop: canPop,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            _onBack();
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: (d) => _dragStartX = d.globalPosition.dx,
+          onHorizontalDragEnd: (d) {
+            if (!canPop &&
+                (_dragStartX ?? double.infinity) < 50 &&
+                (d.primaryVelocity ?? 0) > 100) {
+              _onBack();
+            }
+            _dragStartX = null;
           },
-          child: Scaffold(
+          child: PopScope(
+            canPop: canPop,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              _onBack();
+            },
+            child: Scaffold(
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -424,6 +436,7 @@ class _ArchivePageState extends State<ArchivePage> {
               ),
             ),
             floatingActionButton: _fab(),
+          ),
           ),
         );
       },
@@ -563,11 +576,6 @@ class _ArchivePageState extends State<ArchivePage> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (atRoot)
-              IconButton(
-                onPressed: _onBack,
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              ),
             Expanded(
               child: PageTitle(
                 title: "Archive",
@@ -575,6 +583,10 @@ class _ArchivePageState extends State<ArchivePage> {
                 icon: Icons.archive,
               ),
             ),
+              IconButton(
+                onPressed: _onBack,
+                icon: const Icon(Icons.drive_folder_upload_rounded),
+              ),
             IconButton(
               tooltip: "New folder",
               onPressed: _promptNewFolder,
@@ -641,25 +653,12 @@ class _ArchivePageState extends State<ArchivePage> {
 
         return Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Row(
-            children: [
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                onPressed: () => context
-                    .read<ArchivePageBloc>()
-                    .add(const ArchivePageEvent.goUp()),
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-              Expanded(
-                child: Text(
-                  breadcrumb.isEmpty ? "/" : "/ ${breadcrumb.join(" / ")}",
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            breadcrumb.isEmpty ? "/" : "/ ${breadcrumb.join(" / ")}",
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         );
       },
