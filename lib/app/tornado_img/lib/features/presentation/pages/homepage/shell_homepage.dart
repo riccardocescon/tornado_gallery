@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tornado_img_app/core/data/whats_new_service.dart';
+import 'package:tornado_img_app/core/presentation/widgets/whats_new_dialog.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/home/home_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/settings/settings_page.dart';
@@ -23,6 +26,15 @@ class _ShellHomepageState extends State<ShellHomepage> {
   void initState() {
     super.initState();
     upgrader.initialize();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final service = getIt<WhatsNewService>();
+      final version = packageInfo.version;
+      if (service.shouldShow(version) && mounted) {
+        WhatsNewDialog.show(context);
+      }
+      service.markShown(version);
+    });
   }
 
   @override

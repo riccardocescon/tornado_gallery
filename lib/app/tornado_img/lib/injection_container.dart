@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:tornado_img_app/core/data/repositories/image_processing_repository_impl.dart';
+import 'package:tornado_img_app/core/data/whats_new_service.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/data/repositories/storage_repository/storage_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
@@ -90,4 +92,5 @@ void setupInjectionContainer() {
   getIt.registerFactory<AppRepository>(() => AppRepositoryImpl());
 
   getIt.registerLazySingleton(() => ThemeNotifier());
+  getIt.registerLazySingleton(() => WhatsNewService(prefs));
 }
