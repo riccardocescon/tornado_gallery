@@ -14,6 +14,13 @@ class GalleryReaderUsecase
 
   GalleryReaderUsecase({required this.imageRepo, required this.storageRepo});
 
+  Stream<String> readPrivateFolderPaths() async* {
+    final path = await GalleryPathProvider.getPrivateFolderPath();
+    yield* storageRepo.readPrivateFolderPaths(path);
+  }
+
+  Stream<String> readPublicFolderPaths() => storageRepo.readPublicFolderPaths();
+
   @override
   Stream<Either<DecryptionFailure, EncryptedStreamImage>> call(
     void params,

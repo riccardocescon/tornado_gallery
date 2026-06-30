@@ -11,11 +11,23 @@ abstract class AppState with _$AppState, EquatableMixin {
       _Updated;
   const factory AppState.removedGalleryImage({required String path}) = _Removed;
 
+  const factory AppState.folderCreated({
+    required bool isPrivate,
+    required String relativePath,
+  }) = _FolderCreatedState;
+
+  const factory AppState.folderDeleted({
+    required bool isPrivate,
+    required String relativePath,
+  }) = _FolderDeletedState;
+
   @override
   List<Object?> get props => maybeWhen(
     addedGalleryImage: (image) => [image],
     updatedGalleryImage: (image, oldIdentifier) => [image, oldIdentifier],
     removedGalleryImage: (path) => [path],
+    folderCreated: (isPrivate, relativePath) => [isPrivate, relativePath],
+    folderDeleted: (isPrivate, relativePath) => [isPrivate, relativePath],
     orElse: () => [],
   );
 }

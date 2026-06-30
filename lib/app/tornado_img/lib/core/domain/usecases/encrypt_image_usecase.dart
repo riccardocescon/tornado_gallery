@@ -8,7 +8,6 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
-import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
@@ -55,14 +54,21 @@ class EncryptImageUseCase
         bytes: encoded,
         fileName: saveName,
         path: params.settings.destinationPath,
-        album: Constants.appFolderName,
+        album: GalleryPathProvider.getPublicAlbumName(
+          params.settings.publicRelativeAlbum,
+        ),
       );
 
       
       final isGalleryVisible = params.settings.galleryVisible;
+      final String albumName = GalleryPathProvider.getPublicAlbumName(
+        params.settings.publicRelativeAlbum,
+      );
       final String? encryptedAssetId =
           isGalleryVisible
-              ? await GalleryPathProvider.findMostRecentAssetId()
+              ? await GalleryPathProvider.findMostRecentAssetId(
+                  albumName: albumName,
+                )
               : null;
 
       if (params.settings.deleteOriginals) {
@@ -76,10 +82,17 @@ class EncryptImageUseCase
       }
 
       String? outputFolder = params.settings.destinationPath;
-      outputFolder ??=
-          isGalleryVisible
-              ? await GalleryPathProvider.getPublicFolderPath()
-              : null;
+      if (outputFolder == null && isGalleryVisible) {
+        // On iOS there's no stable filesystem path for PhotoKit albums.
+        // Use the album name as a virtual path so storeRelativeDir resolves
+        // the subfolder correctly (matches how IosPublicFolderDatasource
+        // assigns paths in _attachSubfolders on reload).
+        outputFolder = Platform.isIOS
+            ? albumName
+            : await GalleryPathProvider.getPublicFolderPath(
+                relative: params.settings.publicRelativeAlbum,
+              );
+      }
 
       final encryptedFile = File('$outputFolder/$fileName');
       final encryptedImage = EncryptedImage(

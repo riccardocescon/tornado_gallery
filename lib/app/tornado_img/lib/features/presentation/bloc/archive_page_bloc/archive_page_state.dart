@@ -11,6 +11,10 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
       _Deleting;
   const factory ArchivePageState.ui({
     required List<EncryptedImage> images,
+    @Default(<ArchiveFolderView>[]) List<ArchiveFolderView> folders,
+    @Default(<String>[]) List<String> breadcrumb,
+    @Default('') String currentPath,
+    bool? currentIsPrivate,
     @Default(false) bool isSelectionMode,
   }) = _UI;
   const factory ArchivePageState.decryptingAllUI({
@@ -24,7 +28,10 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     initial: () => [],
     loading: () => [],
     deleting: (paths) => [paths],
-    ui: (images, isSelectionMode) => [images, isSelectionMode],
+    ui: (images, folders, breadcrumb, currentPath, currentIsPrivate,
+            isSelectionMode) =>
+        [images, folders, breadcrumb, currentPath, currentIsPrivate,
+          isSelectionMode],
     importing: () => [],
     imported: () => [],
     decryptingAllUI: (dearchivingState) => [dearchivingState],

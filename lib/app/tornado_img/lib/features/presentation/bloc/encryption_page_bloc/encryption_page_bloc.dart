@@ -38,13 +38,11 @@ class EncryptionPageBloc
       // Preload data as soon as they are available
       _emitImageData(emit);
 
-      final newOutputFolder =
-          settings.galleryVisible
-              ? null
-              : await GalleryPathProvider.getPrivateFolderPath(
-        
+      settings = settings.copyWith(
+        privateRelativeFolder: '',
+        outputFolder:
+            settings.galleryVisible ? 'Device Gallery' : _privateLabel(''),
       );
-      settings = settings.copyWith(outputFolder: _getUiPath(newOutputFolder));
       _emitSettings(emit);
     });
     on<_SetPassword>((event, emit) async {
@@ -56,19 +54,26 @@ class EncryptionPageBloc
     });
     on<_ToggleGalleryVisibility>((event, emit) async {
       final newGalleryVisible = !settings.galleryVisible;
-      final newOutputFolder =
-          newGalleryVisible
-              ? null
-              : await GalleryPathProvider.getPrivateFolderPath(
-      );
       settings = settings.copyWith(
-        outputFolder: _getUiPath(newOutputFolder),
         galleryVisible: newGalleryVisible,
+        privateRelativeFolder: '',
+        publicRelativeAlbum: '',
+        outputFolder: newGalleryVisible ? 'Device Gallery' : _privateLabel(''),
       );
       _emitSettings(emit);
     });
     on<_SetOutputFolder>((event, emit) async {
-      settings = settings.copyWith(outputFolder: event.outputFolder);
+      settings = settings.copyWith(
+        privateRelativeFolder: event.relative,
+        outputFolder: event.label,
+      );
+      _emitSettings(emit);
+    });
+    on<_SetPublicAlbum>((event, emit) async {
+      settings = settings.copyWith(
+        publicRelativeAlbum: event.relative,
+        outputFolder: event.label,
+      );
       _emitSettings(emit);
     });
     on<_ToggleOverrideImage>((event, emit) async {
@@ -115,6 +120,19 @@ class EncryptionPageBloc
 
       final archivedImages = <String>[];
 
+      // Resolve the relative private folder to an absolute destination for this
+      // run only. State keeps the relative path (consistent with the archive
+      // page); the absolute path is materialised fresh here so it never goes
+      // stale (e.g. iOS container path changes between launches).
+      final runSettings =
+          settings.galleryVisible
+              ? settings
+              : settings.copyWith(
+                outputFolder: await GalleryPathProvider.getPrivateFolderPath(
+                  relative: settings.privateRelativeFolder,
+                ),
+              );
+
       galleryBloc.add(
         GalleryEvent.encryptImages(
           images: Map.fromEntries(
@@ -126,7 +144,7 @@ class EncryptionPageBloc
             ),
           ),
           password: password,
-          settings: settings,
+          settings: runSettings,
         ),
       );
       await for (final state in galleryBloc.stream) {
@@ -156,7 +174,9 @@ class EncryptionPageBloc
     });
   }
 
-  String _getUiPath(String? path) => path ?? "Device Gallery";
+  /// UI label for a private destination identified by its [relative] path.
+  String _privateLabel(String relative) =>
+      relative.isEmpty ? 'Root (encrypted)' : relative;
 
   void _syncNewArchivedImages(
     List<EncryptedImage> newlyArchived,

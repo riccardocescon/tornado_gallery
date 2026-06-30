@@ -95,6 +95,101 @@ class PrivateStorageDatasource {
     }
   }
 
+  // ── Folder operations ─────────────────────────────────────────────────────────
+
+  /// Creates the directory at [path] (recursively). Returns false if it
+  /// already exists or on error.
+  Future<bool> createFolder(String path) async {
+    try {
+      final dir = Directory(path);
+      if (await dir.exists()) {
+        appLogger.logRepository(
+          'PrivateStorageDatasource.createFolder: already exists',
+          error: path,
+        );
+        return false;
+      }
+      await dir.create(recursive: true);
+      return true;
+    } catch (e) {
+      appLogger.logRepository(
+        'PrivateStorageDatasource.createFolder: error',
+        error: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  /// Renames the directory [oldPath] to [newPath]. Returns false if the
+  /// target already exists or on error.
+  Future<bool> renameFolder(String oldPath, String newPath) async {
+    try {
+      final dir = Directory(oldPath);
+      if (!await dir.exists()) return false;
+      if (await Directory(newPath).exists()) {
+        appLogger.logRepository(
+          'PrivateStorageDatasource.renameFolder: target exists',
+          error: newPath,
+        );
+        return false;
+      }
+      await dir.rename(newPath);
+      return true;
+    } catch (e) {
+      appLogger.logRepository(
+        'PrivateStorageDatasource.renameFolder: error',
+        error: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  /// Deletes the directory at [path] recursively. Returns false on error.
+  Future<bool> deleteFolder(String path) async {
+    try {
+      final dir = Directory(path);
+      if (!await dir.exists()) return false;
+      await dir.delete(recursive: true);
+      return true;
+    } catch (e) {
+      appLogger.logRepository(
+        'PrivateStorageDatasource.deleteFolder: error',
+        error: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  /// Moves the file at [oldPath] to [newPath], creating parent dirs as needed.
+  /// Returns the new path on success, null on failure.
+  Future<String?> moveFile(String oldPath, String newPath) async {
+    try {
+      final file = File(oldPath);
+      if (!await file.exists()) return null;
+      await Directory(File(newPath).parent.path).create(recursive: true);
+      final moved = await file.rename(newPath);
+      return moved.path;
+    } catch (e) {
+      appLogger.logRepository(
+        'PrivateStorageDatasource.moveFile: error',
+        error: e.toString(),
+      );
+      return null;
+    }
+  }
+
+  // ── Directory listing ───────────────────────────────────────────────────────
+
+  /// Yields relative paths of all subdirectories under [dir] (recursive).
+  Stream<String> listSubdirectories(Directory dir) async* {
+    final rootPath = dir.path.replaceAll('\\', '/');
+    await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      if (entity is! Directory) continue;
+      final p = entity.path.replaceAll('\\', '/');
+      if (p.startsWith('$rootPath/')) yield p.substring(rootPath.length + 1);
+    }
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   Future<EncryptedImage?> _fileToImage(File file) async {

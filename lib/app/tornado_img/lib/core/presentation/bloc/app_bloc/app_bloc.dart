@@ -67,5 +67,21 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       );
       emit(AppState.updatedGalleryImage(image: encryptedImages[index], oldIdentifier: event.path));
     });
+    on<_FolderCreated>((event, emit) {
+      emit(
+        AppState.folderCreated(
+          isPrivate: event.isPrivate,
+          relativePath: event.relativePath,
+        ),
+      );
+    });
+    on<_FolderDeleted>((event, emit) {
+      emit(
+        AppState.folderDeleted(
+          isPrivate: event.isPrivate,
+          relativePath: event.relativePath,
+        ),
+      );
+    });
   }
 }

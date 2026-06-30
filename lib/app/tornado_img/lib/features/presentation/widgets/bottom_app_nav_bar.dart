@@ -67,7 +67,7 @@ class _BottomAppNavBarState extends State<BottomAppNavBar> {
         child: Container(
           height: 32,
           decoration: BoxDecoration(
-            color: context.colorScheme.primaryContainer,
+            color: context.colorScheme.primary,
             borderRadius: AppStyle.cardBorderRadius,
           ),
         ),
