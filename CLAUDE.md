@@ -43,9 +43,12 @@ melos exec --flutter --no-private --ignore="*crypto*" -- flutter build apk
 melos exec --flutter --no-private --ignore="*crypto*" -- flutter build ios
 ```
 
-The crypto package native binary is compiled separately:
-- Windows: `lib/packages/tornado_img_crypto/scripts/build_release.ps1`
-- Unix: `lib/packages/tornado_img_crypto/scripts/build_release.sh`
+The crypto package native binary is compiled separately (see `lib/packages/tornado_img_crypto/CLAUDE.md` for full build prerequisites):
+- Windows: `lib/packages/tornado_img_crypto/scripts/build_windows.bat`
+- iOS/macOS: `lib/packages/tornado_img_crypto/scripts/build_ios.sh`
+- C++ engine test/deploy: `lib/cpp/scripts/build_test_deploy.ps1`
+
+The C++ source lives at `lib/cpp/src/` (shared across platforms). Per `README.md` it is excluded from the public repo, but is present in this working tree. Deep docs: `lib/cpp/CLAUDE.md`.
 
 ## Architecture
 

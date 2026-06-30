@@ -89,144 +89,147 @@ class _ArchivePageState extends State<ArchivePage> {
     );
     bool isPrivate = true;
 
-    final result = await showDialog<(String, bool)>(
+    final result = await showModalBottomSheet<(String, bool)>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: context.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: AppStyle.cardBorderRadius.topLeft),
+      ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => Dialog(
-          backgroundColor: ctx.colorScheme.surface,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppStyle.cardBorderRadius,
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            24,
+            24,
+            24 + MediaQuery.viewInsetsOf(ctx).bottom,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    ContainedItem.icon(
-                      icon: Icons.create_new_folder_outlined,
-                      backgroundColor: ctx.colorScheme.primary.withValues(
-                        alpha: 0.12,
-                      ),
-                      iconColor: ctx.colorScheme.primary,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  ContainedItem.icon(
+                    icon: Icons.create_new_folder_outlined,
+                    backgroundColor: ctx.colorScheme.primary.withValues(
+                      alpha: 0.12,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "New folder",
-                            style: ctx.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "Organize your archived images",
-                            style: ctx.textTheme.bodySmall?.copyWith(
-                              color: ctx.colorScheme.onSurface.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: "Folder name",
-                    prefixIcon: const Icon(Icons.folder_outlined),
-                    filled: true,
-                    fillColor: ctx.appColors.softBackground.withValues(
-                      alpha: 0.5,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: AppStyle.detailsBorderRadius,
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: AppStyle.detailsBorderRadius,
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: AppStyle.detailsBorderRadius,
-                      borderSide: BorderSide(
-                        color: ctx.colorScheme.primary,
-                        width: 1.5,
-                      ),
-                    ),
+                    iconColor: ctx.colorScheme.primary,
                   ),
-                  onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
-                ),
-                if (atRoot) ...[
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: SegmentedButton<bool>(
-                      segments: const [
-                        ButtonSegment(
-                          value: true,
-                          label: Text("Private"),
-                          icon: Icon(Icons.lock_outline_rounded),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "New folder",
+                          style: ctx.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        ButtonSegment(
-                          value: false,
-                          label: Text("Public"),
-                          icon: Icon(Icons.photo_library_outlined),
+                        const SizedBox(height: 2),
+                        Text(
+                          "Organize your archived images",
+                          style: ctx.textTheme.bodySmall?.copyWith(
+                            color: ctx.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
                         ),
                       ],
-                      selected: {isPrivate},
-                      onSelectionChanged: (s) =>
-                          setDialogState(() => isPrivate = s.first),
                     ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text("Cancel"),
-                      ),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: "Folder name",
+                  prefixIcon: const Icon(Icons.folder_outlined),
+                  filled: true,
+                  fillColor: ctx.appColors.softBackground.withValues(
+                    alpha: 0.5,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: AppStyle.detailsBorderRadius,
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: AppStyle.detailsBorderRadius,
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: AppStyle.detailsBorderRadius,
+                    borderSide: BorderSide(
+                      color: ctx.colorScheme.primary,
+                      width: 1.5,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () =>
-                            Navigator.pop(ctx, (controller.text, isPrivate)),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppStyle.detailsBorderRadius,
-                          ),
-                        ),
-                        icon: const Icon(Icons.check_rounded, size: 20),
-                        label: const Text("Create"),
+                  ),
+                ),
+                onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
+              ),
+              if (atRoot) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: true,
+                        label: Text("Private"),
+                        icon: Icon(Icons.lock_outline_rounded),
                       ),
-                    ),
-                  ],
+                      ButtonSegment(
+                        value: false,
+                        label: Text("Public"),
+                        icon: Icon(Icons.photo_library_outlined),
+                      ),
+                    ],
+                    selected: {isPrivate},
+                    onSelectionChanged: (s) =>
+                        setSheetState(() => isPrivate = s.first),
+                  ),
                 ),
               ],
-            ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Cancel"),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          Navigator.pop(ctx, (controller.text, isPrivate)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppStyle.detailsBorderRadius,
+                        ),
+                      ),
+                      icon: const Icon(Icons.check_rounded, size: 20),
+                      label: const Text("Create"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

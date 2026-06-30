@@ -1,4 +1,4 @@
 class Constants {
   static const String appFolderName = "TornadoGallery";
-  static const int maxEncryptedImages = 50;
+  static const int maxEncryptedImages = 20;
 }
