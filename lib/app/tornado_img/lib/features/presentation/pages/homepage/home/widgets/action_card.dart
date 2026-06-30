@@ -25,7 +25,7 @@ class _ActionCard extends StatelessWidget {
         darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
 
     final foregroundButtonColor =
-        darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
+        darker ? context.colorScheme.primary : context.colorScheme.onSurface;
 
     final ext = context.appColors;
     return GestureDetector(
@@ -86,7 +86,7 @@ class _ActionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       darker
-                          ? context.colorScheme.primary
+                          ? context.colorScheme.onPrimary
                           : context.appColors.softButton,
                   borderRadius:
                       AppStyle.cardBorderRadius - BorderRadius.circular(8),

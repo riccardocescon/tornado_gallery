@@ -16,14 +16,16 @@ class UpdateAppCard extends StatelessWidget {
           backgroundColor: context.colorScheme.primaryContainer.withValues(
             alpha: 0.6,
           ),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           foregroundColor: context.colorScheme.onPrimaryContainer,
+          
         ),
         child: Row(
           spacing: 12,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.update, color: context.colorScheme.onPrimaryContainer),
-            const Flexible(
+            Flexible(
               child: Text(
                 "New version available! Tap to update",
                 softWrap: true,
