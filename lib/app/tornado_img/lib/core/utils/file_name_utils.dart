@@ -7,8 +7,7 @@ class FileNameUtils {
   /// Returns the lower-cased text after the last `.` in [path], without the
   /// leading dot. Mirrors the existing `split('.').last.toLowerCase()` usage
   /// (if there is no `.`, the whole string is returned).
-  static String extensionOf(String path) =>
-      path.split('.').last.toLowerCase();
+  static String extensionOf(String path) => path.split('.').last.toLowerCase();
 
   static String sanitizeFileStem(String raw) {
     final trimmed = raw.trim();

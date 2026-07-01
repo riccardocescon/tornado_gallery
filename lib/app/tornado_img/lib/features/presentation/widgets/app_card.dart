@@ -22,15 +22,16 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colorScheme.surfaceContainerLow,
         borderRadius: AppStyle.cardBorderRadius,
-        boxShadow: context.isDarkMode
-            ? null
-            : [
-                BoxShadow(
-                  color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+        boxShadow:
+            context.isDarkMode
+                ? null
+                : [
+                  BoxShadow(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
       ),
       child: child,
     );
