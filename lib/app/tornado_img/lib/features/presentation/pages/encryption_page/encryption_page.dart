@@ -9,8 +9,10 @@ import 'package:tornado_img_app/core/presentation/pages/fullscreen_image_viewer.
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
+import 'package:tornado_img_app/features/presentation/widgets/app_card.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';

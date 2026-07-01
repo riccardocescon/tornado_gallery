@@ -12,24 +12,7 @@ class _ImagesPreviewCard extends StatelessWidget {
       builder: (context, state) {
         return state.maybeMap(
           ui: (value) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerLow,
-                borderRadius: AppStyle.cardBorderRadius,
-                boxShadow:
-                    context.isDarkMode
-                        ? null
-                        : [
-                          BoxShadow(
-                            color: context.colorScheme.onSurface.withValues(
-                              alpha: 0.1,
-                            ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-              ),
+            return AppCard(
               child: Column(
                 spacing: 12,
                 children: [
