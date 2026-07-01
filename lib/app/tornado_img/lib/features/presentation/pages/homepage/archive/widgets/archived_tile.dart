@@ -71,7 +71,7 @@ class _ArchivedTileState extends State<_ArchivedTile> {
         } else {
           child = FilledButton(
             onPressed: () {
-              context.push('./encrypted_image_page', extra: widget.image);
+              context.pushNamed(Routes.encryptedImagePage, extra: widget.image);
             },
             onLongPress: widget.onActivateSelection,
             style: FilledButton.styleFrom(

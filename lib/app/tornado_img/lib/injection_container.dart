@@ -28,6 +28,15 @@ import 'package:tornado_img_app/theme/theme_notifier.dart';
 
 GetIt getIt = GetIt.instance;
 
+/// Registration lifetimes:
+///
+/// - **Lazy singletons** for app-wide, long-lived collaborators that must share
+///   one instance: the canonical stores/blocs ([AppBloc], [GalleryBloc],
+///   [HomepageBloc]), the stateless use cases, and the repositories.
+/// - **Factories** for per-screen blocs ([EncryptionPageBloc],
+///   [ArchivePageBloc], [EncryptedImagePageBloc]) so each page/route gets a
+///   fresh instance (and multiple instances can coexist), plus the cheap
+///   per-call use cases they depend on.
 void setupInjectionContainer() {
   getIt.registerLazySingleton(() => AppBloc());
   getIt.registerLazySingleton(

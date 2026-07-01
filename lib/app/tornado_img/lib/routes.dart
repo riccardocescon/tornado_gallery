@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/utils/routes.dart' as r;
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
@@ -13,18 +15,18 @@ import 'package:tornado_img_app/features/presentation/pages/homepage/shell_homep
 import 'package:tornado_img_app/injection_container.dart';
 
 GoRouter routes = GoRouter(
-  initialLocation: '/',
+  initialLocation: r.Routes.homePath,
   routes: [
     GoRoute(
-      path: '/logger',
-      name: 'logger',
+      path: r.Routes.loggerPath,
+      name: r.Routes.logger,
       builder: (context, state) {
         return const AppLoggerPage();
       },
     ),
     GoRoute(
-      path: '/',
-      name: 'home',
+      path: r.Routes.homePath,
+      name: r.Routes.home,
       builder: (context, state) {
         return MultiBlocProvider(
           providers: [
@@ -42,10 +44,10 @@ GoRouter routes = GoRouter(
       },
       routes: [
         GoRoute(
-          path: 'encryption',
-          name: 'encryption',
+          path: r.Routes.encryptionPath,
+          name: r.Routes.encryption,
           builder: (context, state) {
-            final images = state.extra as dynamic;
+            final images = state.extra as List<GalleryImage>;
 
             return BlocProvider(
               create:
@@ -57,8 +59,8 @@ GoRouter routes = GoRouter(
           },
         ),
         GoRoute(
-          path: 'archive',
-          name: 'archive',
+          path: r.Routes.archivePath,
+          name: r.Routes.archive,
           builder: (context, state) {
             final bloc = state.extra as ArchivePageBloc;
             return BlocProvider.value(
@@ -68,8 +70,8 @@ GoRouter routes = GoRouter(
           },
         ),
         GoRoute(
-          path: 'encrypted_image_page',
-          name: 'encrypted_image_page',
+          path: r.Routes.encryptedImagePagePath,
+          name: r.Routes.encryptedImagePage,
           builder: (context, state) {
             final image = state.extra as EncryptedImage;
 
