@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Persists a local JSON index that maps asset IDs and content hashes to
@@ -94,7 +95,7 @@ class AssetNameIndex {
   static String _normalize(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return 'image.png';
-    final fileLike = trimmed.replaceAll('\\', '/').split('/').last;
+    final fileLike = FileNameUtils.basename(trimmed);
     return fileLike.contains('.') ? fileLike : '$fileLike.png';
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 
@@ -276,13 +277,13 @@ class GalleryPathProvider {
     if ((title == null || title.isEmpty) &&
         fallbackFilePath != null &&
         fallbackFilePath.trim().isNotEmpty) {
-      title = fallbackFilePath.replaceAll('\\', '/').split('/').last;
+      title = FileNameUtils.basename(fallbackFilePath);
     }
 
     title = (title ?? 'image').trim();
     if (title.isEmpty) return 'image.png';
 
-    final fileLike = title.replaceAll('\\', '/').split('/').last;
+    final fileLike = FileNameUtils.basename(title);
     return fileLike.contains('.') ? fileLike : '$fileLike.png';
   }
 

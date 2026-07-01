@@ -4,6 +4,7 @@ import 'package:image/image.dart' as img;
 import 'package:tornado_img_app/core/data/models/image_model.dart';
 import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_crypto/tornado_img_crypto.dart';
 
@@ -36,7 +37,7 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
   @override
   Future<ImageData?> decode(File file) async {
     final bytes = await file.readAsBytes();
-    final ext = file.path.split('.').last.toLowerCase();
+    final ext = FileNameUtils.extensionOf(file.path);
     return decodeBytes(bytes, extension: ext);
   }
 

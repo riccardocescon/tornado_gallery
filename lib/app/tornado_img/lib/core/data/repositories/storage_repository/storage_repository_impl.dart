@@ -9,6 +9,7 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -137,16 +138,14 @@ class StorageRepositoryImpl implements StorageRepository {
     }
   }
 
-  static const _publicImageExtensions = {'png', 'jpg', 'jpeg'};
-
   Future<EncryptedImage?> _fileToPublicImage(File file) async {
-    final ext = file.path.split('.').last.toLowerCase();
-    if (!_publicImageExtensions.contains(ext)) return null;
+    final ext = FileNameUtils.extensionOf(file.path);
+    if (!Constants.imageExtensions.contains(ext)) return null;
 
     try {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
-      final fileName = file.path.replaceAll('\\', '/').split('/').last;
+      final fileName = FileNameUtils.basename(file.path);
       // Best-effort asset ID for later deletion via MediaStore.
       final assetId = await GalleryPathProvider.findAssetIdByName(fileName);
 

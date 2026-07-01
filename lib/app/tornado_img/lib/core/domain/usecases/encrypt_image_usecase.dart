@@ -136,7 +136,7 @@ class EncryptImageUseCase
       return null;
     }
 
-    final ext = params.file.path.split('.').last.toLowerCase();
+    final ext = FileNameUtils.extensionOf(params.file.path);
     final bytes = await asset.originBytes;
     if (bytes != null) {
       return imageRepo.decodeBytes(bytes, extension: ext);

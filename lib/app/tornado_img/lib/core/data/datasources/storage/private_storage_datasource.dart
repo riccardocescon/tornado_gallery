@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
@@ -12,8 +14,6 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 /// mapping now live here alongside write and delete operations so all
 /// private filesystem logic is in one place.
 class PrivateStorageDatasource {
-  static const _supportedExtensions = {'png', 'jpg', 'jpeg'};
-
   // ── Read ────────────────────────────────────────────────────────────────────
 
   /// Recursively yields every supported image file under [dir] as an
@@ -193,8 +193,8 @@ class PrivateStorageDatasource {
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   Future<EncryptedImage?> _fileToImage(File file) async {
-    final ext = file.path.split('.').last.toLowerCase();
-    if (!_supportedExtensions.contains(ext)) {
+    final ext = FileNameUtils.extensionOf(file.path);
+    if (!Constants.imageExtensions.contains(ext)) {
       appLogger.logRepository('PrivateStorageDatasource: unsupported file skipped: ${file.path}');
       return null;
     }

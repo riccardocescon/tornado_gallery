@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 
 class EncryptedImage with EquatableMixin {
   final DateTime date;
@@ -47,10 +48,10 @@ class EncryptedImage with EquatableMixin {
   }
 
   String get name {
-    final raw = storagePath.file.path.replaceAll("\\", "/").split('/').last;
+    final raw = FileNameUtils.basename(storagePath.file.path);
     // Normalize double extension e.g. "188.png.png" -> "188.png"
     final lower = raw.toLowerCase();
-    for (final ext in ['.png', '.jpg', '.jpeg']) {
+    for (final ext in Constants.imageExtensions.map((e) => '.$e')) {
       if (lower.endsWith('$ext$ext')) {
         return raw.substring(0, raw.length - ext.length);
       }

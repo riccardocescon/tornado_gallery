@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 /// Maps a [AssetEntity] from PhotoManager to an [EncryptedImage].
@@ -26,7 +27,7 @@ class AssetMapper {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
       final filePath =
-          '$folderPath${Platform.pathSeparator}${file.path.split(Platform.pathSeparator).last}';
+          '$folderPath${Platform.pathSeparator}${FileNameUtils.basename(file.path)}';
 
       return EncryptedImage(
         storagePath: StoragePath(

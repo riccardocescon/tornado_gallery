@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/data/mappers/file_mapper.dart';
@@ -47,7 +48,7 @@ class PrivateFolderDatasource {
     }
 
     for (final entry in entries) {
-      final name = entry.path.split(Platform.pathSeparator).last;
+      final name = FileNameUtils.basename(entry.path);
       final isFile = name.contains('.');
 
       if (isFile) {
