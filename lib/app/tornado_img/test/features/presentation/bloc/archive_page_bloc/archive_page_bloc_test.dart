@@ -105,6 +105,9 @@ void main() {
     when(
       () => mockGalleryReader.readPrivateFolderPaths(),
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockGalleryReader.readPublicFolderPaths(),
+    ).thenAnswer((_) => const Stream.empty());
   });
 
   ArchivePageBloc _makeBloc() => ArchivePageBloc(
