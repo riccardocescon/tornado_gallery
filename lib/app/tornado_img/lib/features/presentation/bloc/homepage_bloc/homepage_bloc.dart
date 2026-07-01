@@ -52,7 +52,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   Pages currentPage = Pages.home;
 
   final AppRepository _repo;
-  final AppFolderStreamerUsecase _folderStreamer;
+  final AppFolderStreamerUseCase _folderStreamer;
 
   EncryptedFolder? appEncryptedRootFolder;
   EncryptedFolder? appPublicEncryptedRootFolder;
@@ -67,7 +67,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
   HomepageBloc({
     required AppRepository appRepository,
-    required AppFolderStreamerUsecase folderStreamer,
+    required AppFolderStreamerUseCase folderStreamer,
   }) : _repo = appRepository,
        _folderStreamer = folderStreamer,
        super(const HomepageState.initial()) {

@@ -73,35 +73,35 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   /// before any image lives in them.
   final Set<FolderKey> _createdFolders = <FolderKey>{};
 
-  final GalleryReaderUsecase galleryReaderUsecase;
-  final ImageDeleterUsecase imageDeleterUsecase;
+  final GalleryReaderUseCase galleryReaderUseCase;
+  final ImageDeleterUseCase imageDeleterUseCase;
 
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
 
-  final ImageSaverUsecase imageSaverUseCase;
-  final CreateFolderUsecase createFolderUsecase;
-  final RenameFolderUsecase renameFolderUsecase;
-  final DeleteFolderUsecase deleteFolderUsecase;
-  final MoveImagesUsecase moveImagesUsecase;
+  final ImageSaverUseCase imageSaverUseCase;
+  final CreateFolderUseCase createFolderUseCase;
+  final RenameFolderUseCase renameFolderUseCase;
+  final DeleteFolderUseCase deleteFolderUseCase;
+  final MoveImagesUseCase moveImagesUseCase;
 
   ArchivePageBloc({
     required this.appBloc,
     required this.galleryBloc,
-    required this.galleryReaderUsecase,
-    required this.imageDeleterUsecase,
+    required this.galleryReaderUseCase,
+    required this.imageDeleterUseCase,
     required this.imageSaverUseCase,
-    required this.createFolderUsecase,
-    required this.renameFolderUsecase,
-    required this.deleteFolderUsecase,
-    required this.moveImagesUsecase,
+    required this.createFolderUseCase,
+    required this.renameFolderUseCase,
+    required this.deleteFolderUseCase,
+    required this.moveImagesUseCase,
   })
     : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const ArchivePageState.loading());
 
       bool hasFailure = false;
-      final galleryStream = galleryReaderUsecase.call(null);
+      final galleryStream = galleryReaderUseCase.call(null);
       await for (final result in galleryStream) {
         result.fold(
           (failure) {
@@ -134,11 +134,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
       }
 
-      await for (final rel in galleryReaderUsecase.readPrivateFolderPaths()) {
+      await for (final rel in galleryReaderUseCase.readPrivateFolderPaths()) {
         _createdFolders.add((isPrivate: true, relativePath: rel));
       }
 
-      await for (final rel in galleryReaderUsecase.readPublicFolderPaths()) {
+      await for (final rel in galleryReaderUseCase.readPublicFolderPaths()) {
         _createdFolders.add((isPrivate: false, relativePath: rel));
       }
 
@@ -213,7 +213,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         event.images.map((img) => img.storagePath.assetId ?? img.storagePath.path),
       );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
-      final result = await imageDeleterUsecase.call(
+      final result = await imageDeleterUseCase.call(
         ImageDeleterParams(images: event.images),
       );
 
@@ -434,7 +434,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     // Inside a folder the store is fixed; at the root (mixed view) the user
     // picks it explicitly via [event.isPrivate], defaulting to private.
     final isPrivate = event.isPrivate ?? _currentIsPrivate ?? true;
-    final result = await createFolderUsecase.call(
+    final result = await createFolderUseCase.call(
       CreateFolderParams(
         parentRelativePath: _currentPath,
         name: event.name,
@@ -460,7 +460,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _RenameFolder event,
     Emitter<ArchivePageState> emit,
   ) async {
-    final result = await renameFolderUsecase.call(
+    final result = await renameFolderUseCase.call(
       RenameFolderParams(
         relativePath: event.relativePath,
         newName: event.newName,
@@ -551,7 +551,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       isPrivate: event.isPrivate,
       relativePath: event.relativePath,
     );
-    final result = await deleteFolderUsecase.call(
+    final result = await deleteFolderUseCase.call(
       DeleteFolderParams(
         relativePath: event.relativePath,
         isPrivate: event.isPrivate,
@@ -595,7 +595,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _MoveImages event,
     Emitter<ArchivePageState> emit,
   ) async {
-    final result = await moveImagesUsecase.call(
+    final result = await moveImagesUseCase.call(
       MoveImagesParams(
         images: event.images,
         targetRelativePath: event.targetRelativePath,

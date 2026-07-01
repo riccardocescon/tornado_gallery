@@ -10,12 +10,12 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 typedef AppFolderState =
     (EncryptedFolder privateFolder, EncryptedFolder? publicFolder);
 
-class AppFolderStreamerUsecase {
+class AppFolderStreamerUseCase {
   final AppRepository appRepository;
 
   StreamManager? _streamManager;
 
-  AppFolderStreamerUsecase({required this.appRepository});
+  AppFolderStreamerUseCase({required this.appRepository});
 
   Stream<AppFolderState> call() async* {
     try {

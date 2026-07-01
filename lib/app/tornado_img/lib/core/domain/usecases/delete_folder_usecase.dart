@@ -6,10 +6,10 @@ import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Deletes the folder at [DeleteFolderParams.relativePath] and its contents.
-class DeleteFolderUsecase extends EncrpytionUseCase<bool, DeleteFolderParams> {
+class DeleteFolderUseCase extends EncryptionUseCase<bool, DeleteFolderParams> {
   final StorageRepository storageRepo;
 
-  DeleteFolderUsecase({required this.storageRepo});
+  DeleteFolderUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, bool>> call(

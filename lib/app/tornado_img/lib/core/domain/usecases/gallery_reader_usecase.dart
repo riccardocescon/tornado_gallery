@@ -7,12 +7,12 @@ import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 
-class GalleryReaderUsecase
-    extends GalleryReaderUseCase<EncryptedStreamImage, void> {
+class GalleryReaderUseCase
+    extends StreamUseCase<EncryptedStreamImage, void> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
-  GalleryReaderUsecase({required this.imageRepo, required this.storageRepo});
+  GalleryReaderUseCase({required this.imageRepo, required this.storageRepo});
 
   Stream<String> readPrivateFolderPaths() async* {
     final path = await GalleryPathProvider.getPrivateFolderPath();

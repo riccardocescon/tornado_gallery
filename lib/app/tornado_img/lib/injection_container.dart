@@ -47,21 +47,21 @@ void setupInjectionContainer() {
     () => ArchivePageBloc(
       appBloc: getIt(),
       galleryBloc: getIt(),
-      galleryReaderUsecase: getIt(),
-      imageDeleterUsecase: getIt(),
+      galleryReaderUseCase: getIt(),
+      imageDeleterUseCase: getIt(),
       imageSaverUseCase: getIt(),
-      createFolderUsecase: getIt(),
-      renameFolderUsecase: getIt(),
-      deleteFolderUsecase: getIt(),
-      moveImagesUsecase: getIt(),
+      createFolderUseCase: getIt(),
+      renameFolderUseCase: getIt(),
+      deleteFolderUseCase: getIt(),
+      moveImagesUseCase: getIt(),
     ),
   );
   getIt.registerFactory(
     () => EncryptedImagePageBloc(
       appBloc: getIt(),
       galleryBloc: getIt(),
-      imageSaverUsecase: getIt(),
-      imageRenamerUsecase: getIt(),
+      imageSaverUseCase: getIt(),
+      imageRenamerUseCase: getIt(),
     ),
   );
 
@@ -71,19 +71,19 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton<DecryptImageUseCase>(
     () => DecryptImageUseCase(imageRepo: getIt(), storageRepo: getIt()),
   );
-  getIt.registerLazySingleton<GalleryReaderUsecase>(
-    () => GalleryReaderUsecase(imageRepo: getIt(), storageRepo: getIt()),
+  getIt.registerLazySingleton<GalleryReaderUseCase>(
+    () => GalleryReaderUseCase(imageRepo: getIt(), storageRepo: getIt()),
   );
-  getIt.registerLazySingleton<ImageDeleterUsecase>(
-    () => ImageDeleterUsecase(storageRepo: getIt()),
+  getIt.registerLazySingleton<ImageDeleterUseCase>(
+    () => ImageDeleterUseCase(storageRepo: getIt()),
   );
-  getIt.registerFactory(() => AppFolderStreamerUsecase(appRepository: getIt()));
-  getIt.registerFactory(() => ImageSaverUsecase(storageRepo: getIt()));
-  getIt.registerFactory(() => ImageRenamerUsecase(storageRepo: getIt()));
-  getIt.registerFactory(() => CreateFolderUsecase(storageRepo: getIt()));
-  getIt.registerFactory(() => RenameFolderUsecase(storageRepo: getIt()));
-  getIt.registerFactory(() => DeleteFolderUsecase(storageRepo: getIt()));
-  getIt.registerFactory(() => MoveImagesUsecase(storageRepo: getIt()));
+  getIt.registerFactory(() => AppFolderStreamerUseCase(appRepository: getIt()));
+  getIt.registerFactory(() => ImageSaverUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => ImageRenamerUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => CreateFolderUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => RenameFolderUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => DeleteFolderUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => MoveImagesUseCase(storageRepo: getIt()));
 
   getIt.registerLazySingleton<StorageRepository>(() => StorageRepositoryImpl());
   getIt.registerLazySingleton<ImageProcessingRepository>(

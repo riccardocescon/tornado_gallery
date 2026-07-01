@@ -70,7 +70,7 @@ class _ImagesPreviewCard extends StatelessWidget {
                 borderRadius: AppStyle.cardBorderRadius,
               ),
               child: Text(
-                'Encprytion completed successfully!',
+                'Encryption completed successfully!',
                 style: context.textTheme.bodySmall?.copyWith(
                   color: context.appColors.success,
                   fontWeight: FontWeight.w500,

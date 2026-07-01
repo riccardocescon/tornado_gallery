@@ -17,13 +17,13 @@ EncryptedImage _img(String path) => EncryptedImage(
 
 void main() {
   late _MockStorageRepository repo;
-  late MoveImagesUsecase useCase;
+  late MoveImagesUseCase useCase;
 
   setUpAll(() => registerFallbackValue(<EncryptedImage>[]));
 
   setUp(() {
     repo = _MockStorageRepository();
-    useCase = MoveImagesUsecase(storageRepo: repo);
+    useCase = MoveImagesUseCase(storageRepo: repo);
   });
 
   test('moves images and returns the StorageMoveResult', () async {

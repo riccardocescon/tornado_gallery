@@ -18,19 +18,19 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 
-class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUsecase {}
+class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUseCase {}
 
-class _MockImageDeleterUsecase extends Mock implements ImageDeleterUsecase {}
+class _MockImageDeleterUsecase extends Mock implements ImageDeleterUseCase {}
 
-class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
+class _MockImageSaverUsecase extends Mock implements ImageSaverUseCase {}
 
-class _MockCreateFolderUsecase extends Mock implements CreateFolderUsecase {}
+class _MockCreateFolderUsecase extends Mock implements CreateFolderUseCase {}
 
-class _MockRenameFolderUsecase extends Mock implements RenameFolderUsecase {}
+class _MockRenameFolderUsecase extends Mock implements RenameFolderUseCase {}
 
-class _MockDeleteFolderUsecase extends Mock implements DeleteFolderUsecase {}
+class _MockDeleteFolderUsecase extends Mock implements DeleteFolderUseCase {}
 
-class _MockMoveImagesUsecase extends Mock implements MoveImagesUsecase {}
+class _MockMoveImagesUsecase extends Mock implements MoveImagesUseCase {}
 
 class _MockAppBloc extends Mock implements AppBloc {}
 
@@ -113,13 +113,13 @@ void main() {
   ArchivePageBloc _makeBloc() => ArchivePageBloc(
     appBloc: mockAppBloc,
     galleryBloc: mockGalleryBloc,
-    galleryReaderUsecase: mockGalleryReader,
-    imageDeleterUsecase: mockImageDeleter,
+    galleryReaderUseCase: mockGalleryReader,
+    imageDeleterUseCase: mockImageDeleter,
     imageSaverUseCase: mockImageSaver,
-    createFolderUsecase: mockCreateFolder,
-    renameFolderUsecase: mockRenameFolder,
-    deleteFolderUsecase: mockDeleteFolder,
-    moveImagesUsecase: mockMoveImages,
+    createFolderUseCase: mockCreateFolder,
+    renameFolderUseCase: mockRenameFolder,
+    deleteFolderUseCase: mockDeleteFolder,
+    moveImagesUseCase: mockMoveImages,
   );
 
   test('initial state is ArchivePageState.initial', () {

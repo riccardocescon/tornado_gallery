@@ -15,7 +15,7 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 
 class EncryptImageUseCase
-    extends EncrpytionUseCase<EncryptedImage, EncryptImageParams> {
+    extends EncryptionUseCase<EncryptedImage, EncryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 

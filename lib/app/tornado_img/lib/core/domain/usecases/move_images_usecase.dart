@@ -9,11 +9,11 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 ///
 /// Returns the [StorageMoveResult] so the caller can update the in-memory
 /// model with the new private paths.
-class MoveImagesUsecase
-    extends EncrpytionUseCase<StorageMoveResult, MoveImagesParams> {
+class MoveImagesUseCase
+    extends EncryptionUseCase<StorageMoveResult, MoveImagesParams> {
   final StorageRepository storageRepo;
 
-  MoveImagesUsecase({required this.storageRepo});
+  MoveImagesUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, StorageMoveResult>> call(

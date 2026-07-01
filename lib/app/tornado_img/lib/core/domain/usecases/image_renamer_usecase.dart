@@ -6,11 +6,11 @@ import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
-class ImageRenamerUsecase
-  extends EncrpytionUseCase<StorageRenameResult, ImageRenamerParams> {
+class ImageRenamerUseCase
+  extends EncryptionUseCase<StorageRenameResult, ImageRenamerParams> {
   final StorageRepository storageRepo;
 
-  ImageRenamerUsecase({required this.storageRepo});
+  ImageRenamerUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, StorageRenameResult>> call(
@@ -27,7 +27,7 @@ class ImageRenamerUsecase
       );
       return Right(result);
     } catch (e) {
-      appLogger.logUsecase('Error deleting image', error: e.toString());
+      appLogger.logUsecase('Error renaming image', error: e.toString());
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }

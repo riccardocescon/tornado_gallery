@@ -5,10 +5,10 @@ import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
-class ImageDeleterUsecase extends EncrpytionUseCase<bool, ImageDeleterParams> {
+class ImageDeleterUseCase extends EncryptionUseCase<bool, ImageDeleterParams> {
   final StorageRepository storageRepo;
 
-  ImageDeleterUsecase({required this.storageRepo});
+  ImageDeleterUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, bool>> call(

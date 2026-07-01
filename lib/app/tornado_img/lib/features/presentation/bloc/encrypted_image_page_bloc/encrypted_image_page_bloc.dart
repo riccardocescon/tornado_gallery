@@ -23,8 +23,8 @@ class EncryptedImagePageBloc
 
   late AppBloc appBloc;
   late GalleryBloc galleryBloc;
-  final ImageSaverUsecase imageSaverUsecase;
-  final ImageRenamerUsecase imageRenamerUsecase;
+  final ImageSaverUseCase imageSaverUseCase;
+  final ImageRenamerUseCase imageRenamerUseCase;
 
   @override
   Future<void> close() {
@@ -35,8 +35,8 @@ class EncryptedImagePageBloc
   EncryptedImagePageBloc({
     required this.appBloc,
     required this.galleryBloc,
-    required this.imageSaverUsecase,
-    required this.imageRenamerUsecase,
+    required this.imageSaverUseCase,
+    required this.imageRenamerUseCase,
   })
     : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
@@ -123,7 +123,7 @@ class EncryptedImagePageBloc
       final ext = oldFileName.split('.').last;
       final path = parts.join('/');
 
-      final foRename = await imageRenamerUsecase.call(
+      final foRename = await imageRenamerUseCase.call(
         ImageRenamerParams(
           path: path,
           oldFileName: oldFileName,
@@ -164,7 +164,7 @@ class EncryptedImagePageBloc
     });
     on<_SaveImage>((event, emit) async {
       final bytes = image.decryptInfo?.bytes ?? image.encryptedInfo.bytes;
-      final foSave = await imageSaverUsecase.call(
+      final foSave = await imageSaverUseCase.call(
         ImageSaverParams.gallery(bytes: bytes, fileName: image.name),
       );
       foSave.fold(

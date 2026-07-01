@@ -10,7 +10,7 @@ class _MockStorageRepository extends Mock implements StorageRepository {}
 
 void main() {
   late _MockStorageRepository mockStorageRepo;
-  late ImageSaverUsecase useCase;
+  late ImageSaverUseCase useCase;
 
   final tBytes = Uint8List.fromList([1, 2, 3]);
 
@@ -20,10 +20,10 @@ void main() {
 
   setUp(() {
     mockStorageRepo = _MockStorageRepository();
-    useCase = ImageSaverUsecase(storageRepo: mockStorageRepo);
+    useCase = ImageSaverUseCase(storageRepo: mockStorageRepo);
   });
 
-  group('ImageSaverUsecase.call', () {
+  group('ImageSaverUseCase.call', () {
     test('returns Right(null) when storage saves successfully', () async {
       when(
         () => mockStorageRepo.save(

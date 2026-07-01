@@ -7,10 +7,10 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Creates a folder named [CreateFolderParams.name] under
 /// [CreateFolderParams.parentRelativePath] in the private store or gallery.
-class CreateFolderUsecase extends EncrpytionUseCase<bool, CreateFolderParams> {
+class CreateFolderUseCase extends EncryptionUseCase<bool, CreateFolderParams> {
   final StorageRepository storageRepo;
 
-  CreateFolderUsecase({required this.storageRepo});
+  CreateFolderUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, bool>> call(

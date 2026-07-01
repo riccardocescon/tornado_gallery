@@ -7,10 +7,10 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Renames the folder at [RenameFolderParams.relativePath] to a sibling with
 /// the new name, keeping its parent path unchanged.
-class RenameFolderUsecase extends EncrpytionUseCase<bool, RenameFolderParams> {
+class RenameFolderUseCase extends EncryptionUseCase<bool, RenameFolderParams> {
   final StorageRepository storageRepo;
 
-  RenameFolderUsecase({required this.storageRepo});
+  RenameFolderUseCase({required this.storageRepo});
 
   @override
   Future<Either<EncryptionFailure, bool>> call(

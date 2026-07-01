@@ -12,7 +12,7 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 class DecryptImageUseCase
-    extends EncrpytionUseCase<BytesInfo, DecryptImageParams> {
+    extends EncryptionUseCase<BytesInfo, DecryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 

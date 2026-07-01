@@ -171,7 +171,7 @@ class EncryptionPage extends StatelessWidget {
                               )
                               : const Icon(Icons.lock_rounded, size: 18),
                           Text(
-                            isEncrypting ? "Encrpyting..." : "Encrypt Images",
+                            isEncrypting ? "Encrypting..." : "Encrypt Images",
                             style: context.textTheme.labelLarge,
                           ),
                         ],

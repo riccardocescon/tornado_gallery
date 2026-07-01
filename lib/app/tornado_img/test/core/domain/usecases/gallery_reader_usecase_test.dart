@@ -44,7 +44,7 @@ void main() {
 
   late _MockImageProcessingRepository mockImageRepo;
   late _MockStorageRepository mockStorageRepo;
-  late GalleryReaderUsecase useCase;
+  late GalleryReaderUseCase useCase;
   late Directory tempDir;
 
   setUp(() async {
@@ -53,7 +53,7 @@ void main() {
 
     mockImageRepo = _MockImageProcessingRepository();
     mockStorageRepo = _MockStorageRepository();
-    useCase = GalleryReaderUsecase(
+    useCase = GalleryReaderUseCase(
       imageRepo: mockImageRepo,
       storageRepo: mockStorageRepo,
     );
@@ -65,7 +65,7 @@ void main() {
     }
   });
 
-  group('GalleryReaderUsecase.call', () {
+  group('GalleryReaderUseCase.call', () {
     test('yields Right for each private image', () async {
       final img1 = _makeStreamImage('/enc/img1.png');
       final img2 = _makeStreamImage('/enc/img2.png');

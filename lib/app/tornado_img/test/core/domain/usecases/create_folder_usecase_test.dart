@@ -8,11 +8,11 @@ class _MockStorageRepository extends Mock implements StorageRepository {}
 
 void main() {
   late _MockStorageRepository repo;
-  late CreateFolderUsecase useCase;
+  late CreateFolderUseCase useCase;
 
   setUp(() {
     repo = _MockStorageRepository();
-    useCase = CreateFolderUsecase(storageRepo: repo);
+    useCase = CreateFolderUseCase(storageRepo: repo);
   });
 
   test('creates folder at parent/name and returns Right(true)', () async {
