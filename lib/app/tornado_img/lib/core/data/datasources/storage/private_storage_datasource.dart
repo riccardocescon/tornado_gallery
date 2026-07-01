@@ -53,8 +53,9 @@ class PrivateStorageDatasource {
         await file.delete();
         deleted = true;
       } else {
-        appLogger.logRepository(
+        appLogger.log(
           'PrivateStorageDatasource.delete: file not found',
+          LogLayer.repository,
           error: path,
         );
       }
@@ -76,8 +77,9 @@ class PrivateStorageDatasource {
     final newFile = File('$path/$newFileName');
 
     if (!await oldFile.exists()) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.rename: source file not found',
+        LogLayer.repository,
         error: oldFile.path,
       );
       return const StorageRenameResult(success: false);
@@ -87,8 +89,9 @@ class PrivateStorageDatasource {
       await oldFile.rename(newFile.path);
       return const StorageRenameResult(success: true);
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.rename: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return const StorageRenameResult(success: false);
@@ -103,8 +106,9 @@ class PrivateStorageDatasource {
     try {
       final dir = Directory(path);
       if (await dir.exists()) {
-        appLogger.logRepository(
+        appLogger.log(
           'PrivateStorageDatasource.createFolder: already exists',
+          LogLayer.repository,
           error: path,
         );
         return false;
@@ -112,8 +116,9 @@ class PrivateStorageDatasource {
       await dir.create(recursive: true);
       return true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.createFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;
@@ -127,8 +132,9 @@ class PrivateStorageDatasource {
       final dir = Directory(oldPath);
       if (!await dir.exists()) return false;
       if (await Directory(newPath).exists()) {
-        appLogger.logRepository(
+        appLogger.log(
           'PrivateStorageDatasource.renameFolder: target exists',
+          LogLayer.repository,
           error: newPath,
         );
         return false;
@@ -136,8 +142,9 @@ class PrivateStorageDatasource {
       await dir.rename(newPath);
       return true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.renameFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;
@@ -152,8 +159,9 @@ class PrivateStorageDatasource {
       await dir.delete(recursive: true);
       return true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.deleteFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;
@@ -170,8 +178,9 @@ class PrivateStorageDatasource {
       final moved = await file.rename(newPath);
       return moved.path;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource.moveFile: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return null;
@@ -195,7 +204,10 @@ class PrivateStorageDatasource {
   Future<EncryptedImage?> _fileToImage(File file) async {
     final ext = FileNameUtils.extensionOf(file.path);
     if (!Constants.imageExtensions.contains(ext)) {
-      appLogger.logRepository('PrivateStorageDatasource: unsupported file skipped: ${file.path}');
+      appLogger.log(
+        'PrivateStorageDatasource: unsupported file skipped: ${file.path}',
+        LogLayer.repository,
+      );
       return null;
     }
 
@@ -204,7 +216,10 @@ class PrivateStorageDatasource {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
 
-      appLogger.logRepository('PrivateStorageDatasource: loaded ${file.path}');
+      appLogger.log(
+        'PrivateStorageDatasource: loaded ${file.path}',
+        LogLayer.repository,
+      );
       return EncryptedImage(
         storagePath: StoragePath(
           path: file.path,
@@ -215,8 +230,9 @@ class PrivateStorageDatasource {
         date: lastModified,
       );
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateStorageDatasource: error reading file ${file.path}',
+        LogLayer.repository,
         error: e.toString(),
       );
       return null;

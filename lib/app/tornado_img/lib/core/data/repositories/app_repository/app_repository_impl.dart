@@ -15,9 +15,10 @@ part 'app_repository_impl_lookup.dart';
 
 class AppRepositoryImpl implements AppRepository {
   AppRepositoryImpl()
-      : _publicDatasource = Platform.isIOS
-            ? IosPublicFolderDatasource()
-            : AndroidPublicFolderDatasource();
+    : _publicDatasource =
+          Platform.isIOS
+              ? IosPublicFolderDatasource()
+              : AndroidPublicFolderDatasource();
 
   final PrivateFolderDatasource _privateDatasource = PrivateFolderDatasource();
   final PublicFolderDatasource _publicDatasource;
@@ -82,16 +83,18 @@ class AppRepositoryImpl implements AppRepository {
         // Strip the extension suffix that photo_manager appends to the id
         // on some Android versions (e.g. "12345.jpg" → "12345").
         final rawId = asset.id;
-        final cleanId = rawId.contains('.')
-            ? rawId.substring(0, rawId.lastIndexOf('.'))
-            : rawId;
+        final cleanId =
+            rawId.contains('.')
+                ? rawId.substring(0, rawId.lastIndexOf('.'))
+                : rawId;
 
         images.add(
           GalleryImage(id: cleanId, file: file, date: asset.createDateTime),
         );
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'AppRepositoryImpl: error mapping asset ${asset.id}',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
       }

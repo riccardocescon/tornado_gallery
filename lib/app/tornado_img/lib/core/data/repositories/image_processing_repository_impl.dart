@@ -26,11 +26,11 @@ Uint8List _encodeImage(ImageModel model) {
 }
 
 class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
-
   ImageProcessingRepositoryImpl() {
     final packageVersion = sdkVersion();
-    appLogger.logRepository(
+    appLogger.log(
       "ImageProcessingRepositoryImpl initialized with TornadoImgCrypto version: $packageVersion",
+      LogLayer.repository,
     );
   }
 
@@ -72,5 +72,4 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
     final model = image as ImageModel;
     return await compute(_encodeImage, model);
   }
-
 }

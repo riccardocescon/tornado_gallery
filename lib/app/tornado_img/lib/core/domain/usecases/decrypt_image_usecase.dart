@@ -49,7 +49,11 @@ class DecryptImageUseCase
 
       return Right(bytesInfo);
     } catch (e) {
-      appLogger.logUsecase('Error decrypting image', error: e.toString());
+      appLogger.log(
+        'Error decrypting image',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }

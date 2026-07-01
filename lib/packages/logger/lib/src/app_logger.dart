@@ -1,37 +1,19 @@
-import 'dart:developer';
+import 'dart:developer' as developer;
 
 class AppLogger {
   bool showPrints = false;
   final int maxLogs = 1000;
   final List<AppLog> _logs = [];
 
-  void logUi(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.ui)
-          : _addErrorLog(message, error, LogLayer.ui);
-  void logPageBloc(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.pageBloc)
-          : _addErrorLog(message, error, LogLayer.pageBloc);
-  void logBloc(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.bloc)
-          : _addErrorLog(message, error, LogLayer.bloc);
-  void logRepository(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.repository)
-          : _addErrorLog(message, error, LogLayer.repository);
-  void logUsecase(String message, {String? error}) => error == null
-      ? _addLog(message, LogLayer.usecase)
-      : _addErrorLog(message, error, LogLayer.usecase);
-  void logApi(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.api)
-          : _addErrorLog(message, error, LogLayer.api);
-  void logCore(String message, {String? error}) =>
-      error == null
-          ? _addLog(message, LogLayer.core)
-          : _addErrorLog(message, error, LogLayer.core);
+  /// Records [message] under [layer]. Pass [error] to record it as an error
+  /// log (with a stack trace) instead of a plain log.
+  ///
+  /// This single entry point replaces the former per-layer `logUi`/`logBloc`/…
+  /// convenience methods. It calls straight into [_addLog]/[_addErrorLog] so
+  /// the caller location captured by [AppLog] is unaffected.
+  void log(String message, LogLayer layer, {String? error}) => error == null
+      ? _addLog(message, layer)
+      : _addErrorLog(message, error, layer);
 
   List<AppLog> get allLogs => List.unmodifiable(_logs);
 
@@ -41,7 +23,7 @@ class AppLogger {
     }
     _logs.add(AppLog.log(message, layer));
 
-    if (showPrints) log('[${layer.name.toUpperCase()}] $message');
+    if (showPrints) developer.log('[${layer.name.toUpperCase()}] $message');
   }
 
   void _addErrorLog(String message, Object error, LogLayer layer) {
@@ -50,7 +32,7 @@ class AppLogger {
     }
     _logs.add(AppLog.error(message, error, layer));
 
-    log(
+    developer.log(
       '[ERROR] [${layer.name.toUpperCase()}] $message - Error: $error',
       stackTrace: StackTrace.current,
     );

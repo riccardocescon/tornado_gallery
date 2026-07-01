@@ -25,9 +25,7 @@ class EncryptImageUseCase
   Future<Either<EncryptionFailure, EncryptedImage>> call(
     EncryptImageParams params,
   ) async {
-
     try {
-
       final safeStem = FileNameUtils.sanitizeFileStem(params.fileId);
       final fileName = '$safeStem.png';
       final saveName = params.settings.galleryVisible ? safeStem : fileName;
@@ -59,7 +57,6 @@ class EncryptImageUseCase
         ),
       );
 
-      
       final isGalleryVisible = params.settings.galleryVisible;
       final String albumName = GalleryPathProvider.getPublicAlbumName(
         params.settings.publicRelativeAlbum,
@@ -67,8 +64,8 @@ class EncryptImageUseCase
       final String? encryptedAssetId =
           isGalleryVisible
               ? await GalleryPathProvider.findMostRecentAssetId(
-                  albumName: albumName,
-                )
+                albumName: albumName,
+              )
               : null;
 
       if (params.settings.deleteOriginals) {
@@ -87,18 +84,19 @@ class EncryptImageUseCase
         // Use the album name as a virtual path so storeRelativeDir resolves
         // the subfolder correctly (matches how IosPublicFolderDatasource
         // assigns paths in _attachSubfolders on reload).
-        outputFolder = Platform.isIOS
-            ? albumName
-            : await GalleryPathProvider.getPublicFolderPath(
-                relative: params.settings.publicRelativeAlbum,
-              );
+        outputFolder =
+            Platform.isIOS
+                ? albumName
+                : await GalleryPathProvider.getPublicFolderPath(
+                  relative: params.settings.publicRelativeAlbum,
+                );
       }
 
       final encryptedFile = File('$outputFolder/$fileName');
       final encryptedImage = EncryptedImage(
         storagePath: StoragePath(
           isPrivateFolder: !isGalleryVisible,
-        path: encryptedFile.path,
+          path: encryptedFile.path,
           assetId: encryptedAssetId,
         ),
         encryptedInfo: BytesInfo(
@@ -110,7 +108,11 @@ class EncryptImageUseCase
 
       return Right(encryptedImage);
     } catch (e) {
-      appLogger.logUsecase('Error encrypting image', error: e.toString());
+      appLogger.log(
+        'Error encrypting image',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }

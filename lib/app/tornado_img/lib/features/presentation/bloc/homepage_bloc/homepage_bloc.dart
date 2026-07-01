@@ -115,12 +115,10 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
               encrypted: (value) {
                 final archive = value.archivingState;
                 final wasArchiving = currentArchivingState != null;
-                final completed =
-                    archive.progress ==
-                    archive.totalImages;
+                final completed = archive.progress == archive.totalImages;
 
-                appPublicEncryptedRootFolder =
-                    _folderStreamer.mergeArchivedPublicImages(
+                appPublicEncryptedRootFolder = _folderStreamer
+                    .mergeArchivedPublicImages(
                       currentPublicFolder: appPublicEncryptedRootFolder,
                       archivedImages: archive.archivedImages,
                     );
@@ -154,7 +152,9 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
                 _runtimeRemovals.add(value.oldIdentifier);
 
                 // Inserisci il nuovo con chiave stabile
-                final newKey = value.image.storagePath.assetId ?? value.image.storagePath.path;
+                final newKey =
+                    value.image.storagePath.assetId ??
+                    value.image.storagePath.path;
                 _runtimeUpserts[newKey] = value.image;
                 _emit(emit);
               },
@@ -195,30 +195,30 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
       _refreshInFlight = true;
 
       try {
-      await _repo.dispose();
-      await _folderStreamer.dispose();
-      await _streamManager?.dispose();
-      _streamManager = null;
+        await _repo.dispose();
+        await _folderStreamer.dispose();
+        await _streamManager?.dispose();
+        _streamManager = null;
 
-      // Force an immediate snapshot refresh to reconcile latest storage state.
+        // Force an immediate snapshot refresh to reconcile latest storage state.
         appEncryptedRootFolder = await _repo.loadPrivateRootFolder();
-      appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
-      if (appPublicEncryptedRootFolder == null) {
-        final created = await _repo.createPublicFolder();
-        if (created) {
-          appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+        appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+        if (appPublicEncryptedRootFolder == null) {
+          final created = await _repo.createPublicFolder();
+          if (created) {
+            appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+          }
         }
-      }
 
-      // Fresh repository snapshot is authoritative after a manual refresh.
-      _runtimeUpserts.clear();
-      _runtimeRemovals.clear();
-      _runtimeFolderCreations.clear();
-      _runtimeFolderRemovals.clear();
+        // Fresh repository snapshot is authoritative after a manual refresh.
+        _runtimeUpserts.clear();
+        _runtimeRemovals.clear();
+        _runtimeFolderCreations.clear();
+        _runtimeFolderRemovals.clear();
 
-      _emit(emit);
+        _emit(emit);
 
-      add(const HomepageEvent.setup());
+        add(const HomepageEvent.setup());
       } finally {
         _refreshInFlight = false;
       }
@@ -236,8 +236,9 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           HomepageState.galleryImages(imagesLoaded: List.of(selectedImages)),
         );
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'Error opening gallery with photo_manager picker',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
         emit(HomepageState.failure(message: e.toString()));
@@ -263,26 +264,26 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
         private.images + (appPublicEncryptedRootFolder?.images ?? []);
 
     final mergedByKey = <String, EncryptedImage>{};
-  for (final img in baseImages) {
-    final key = img.storagePath.assetId ?? img.storagePath.path;
-    mergedByKey[key] = img;
-  }
+    for (final img in baseImages) {
+      final key = img.storagePath.assetId ?? img.storagePath.path;
+      mergedByKey[key] = img;
+    }
 
-  for (final removedKey in _runtimeRemovals) {
-    mergedByKey.removeWhere(
-      (key, img) =>
-          key == removedKey ||
-          img.storagePath.path == removedKey ||
-          img.storagePath.assetId == removedKey,
-    );
-  }
+    for (final removedKey in _runtimeRemovals) {
+      mergedByKey.removeWhere(
+        (key, img) =>
+            key == removedKey ||
+            img.storagePath.path == removedKey ||
+            img.storagePath.assetId == removedKey,
+      );
+    }
 
-  for (final entry in _runtimeUpserts.entries) {
-    final key = entry.value.storagePath.assetId ?? entry.key;
-    mergedByKey[key] = entry.value;
-  }
+    for (final entry in _runtimeUpserts.entries) {
+      final key = entry.value.storagePath.assetId ?? entry.key;
+      mergedByKey[key] = entry.value;
+    }
 
-  final images = mergedByKey.values.toList();
+    final images = mergedByKey.values.toList();
 
     final totalImages = subFolders.fold<int>(
       images.length,

@@ -26,7 +26,11 @@ class AssetNameIndex {
       index[hash] = _normalize(fileName);
       await _write(index);
     } catch (e) {
-      appLogger.logCore('AssetNameIndex: error saving by hash', error: e.toString());
+      appLogger.log(
+        'AssetNameIndex: error saving by hash',
+        LogLayer.core,
+        error: e.toString(),
+      );
     }
   }
 
@@ -39,7 +43,11 @@ class AssetNameIndex {
       index['asset:$assetId'] = _normalize(fileName);
       await _write(index);
     } catch (e) {
-      appLogger.logCore('AssetNameIndex: error saving by assetId', error: e.toString());
+      appLogger.log(
+        'AssetNameIndex: error saving by assetId',
+        LogLayer.core,
+        error: e.toString(),
+      );
     }
   }
 
@@ -52,7 +60,11 @@ class AssetNameIndex {
       if (value == null || value.isEmpty) return null;
       return _normalize(value);
     } catch (e) {
-      appLogger.logCore('AssetNameIndex: error reading by assetId', error: e.toString());
+      appLogger.log(
+        'AssetNameIndex: error reading by assetId',
+        LogLayer.core,
+        error: e.toString(),
+      );
       return null;
     }
   }
@@ -64,7 +76,11 @@ class AssetNameIndex {
       if (value == null || value.isEmpty) return null;
       return _normalize(value);
     } catch (e) {
-      appLogger.logCore('AssetNameIndex: error reading by hash', error: e.toString());
+      appLogger.log(
+        'AssetNameIndex: error reading by hash',
+        LogLayer.core,
+        error: e.toString(),
+      );
       return null;
     }
   }

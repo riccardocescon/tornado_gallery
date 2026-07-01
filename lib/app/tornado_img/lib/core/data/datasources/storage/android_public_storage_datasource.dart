@@ -34,8 +34,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
     // PrivateStorageDatasource via the File API. This method is only called
     // for iOS PhotoKit assets (assetId != null on iOS only).
     // If this is ever reached on Android, log and return failure.
-    appLogger.logRepository(
+    appLogger.log(
       'AndroidPublicStorageDatasource.rename: unexpected call on Android',
+      LogLayer.repository,
       error: 'assetId: $assetId',
     );
     return const StorageRenameResult(success: false);
@@ -53,8 +54,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
       await dir.create(recursive: true);
       return true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource.createFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;
@@ -81,8 +83,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
       await dir.rename(newPath);
       return true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource.renameFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;
@@ -102,13 +105,14 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
     try {
       final passed = assetIds.toSet();
       final remaining =
-          (await _publicAssetIdsUnderFolder(relativePath))
-              .where((id) => !passed.contains(id))
-              .toList();
+          (await _publicAssetIdsUnderFolder(
+            relativePath,
+          )).where((id) => !passed.contains(id)).toList();
       if (remaining.isNotEmpty && await delete(remaining)) ok = true;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource.deleteFolder: asset sweep error',
+        LogLayer.repository,
         error: e.toString(),
       );
     }
@@ -125,8 +129,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
         }
       }
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource.deleteFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
     }
@@ -157,8 +162,7 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
           .join('/');
       if (rel.isEmpty) return ids;
 
-      final target =
-          'Pictures/${Constants.appFolderName}/$rel'.toLowerCase();
+      final target = 'Pictures/${Constants.appFolderName}/$rel'.toLowerCase();
 
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
@@ -179,9 +183,8 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
         final assets = await all.getAssetListPaged(page: page, size: pageSize);
         if (assets.isEmpty) break;
         for (final a in assets) {
-          var assetRel = (a.relativePath ?? '')
-              .replaceAll('\\', '/')
-              .toLowerCase();
+          var assetRel =
+              (a.relativePath ?? '').replaceAll('\\', '/').toLowerCase();
           if (assetRel.endsWith('/')) {
             assetRel = assetRel.substring(0, assetRel.length - 1);
           }
@@ -193,8 +196,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
         page++;
       }
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource._publicAssetIdsUnderFolder: error',
+        LogLayer.repository,
         error: e.toString(),
       );
     }
@@ -210,14 +214,18 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
 
     final rootPath = root.replaceAll('\\', '/');
     try {
-      await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      await for (final entity in dir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is! Directory) continue;
         final p = entity.path.replaceAll('\\', '/');
         if (p.startsWith('$rootPath/')) yield p.substring(rootPath.length + 1);
       }
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource.listFolderPaths: error',
+        LogLayer.repository,
         error: e.toString(),
       );
     }
@@ -244,8 +252,9 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
 
       return success;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'AndroidPublicStorageDatasource: error deleting assets',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;

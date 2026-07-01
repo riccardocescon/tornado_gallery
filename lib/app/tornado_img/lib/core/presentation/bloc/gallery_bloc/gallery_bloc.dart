@@ -13,7 +13,6 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
-
 part 'gallery_bloc.freezed.dart';
 part 'gallery_event.dart';
 part 'gallery_state.dart';
@@ -24,13 +23,11 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
   final AppBloc appBloc;
 
-
   GalleryBloc({
     required this.encryptUseCase,
     required this.decryptUseCase,
     required this.appBloc,
-  })
-    : super(const GalleryState.initial()) {
+  }) : super(const GalleryState.initial()) {
     on<_EncryptImages>(_onEncryptImages);
     on<_DecryptImages>(_onDecryptImages);
   }
@@ -57,33 +54,35 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
       if (skipped) {
         skippedImages.add(image);
-        appLogger.logBloc(
+        appLogger.log(
           'Encryption skipped for ${image.file.path}: File already exists and override is disabled',
+          LogLayer.bloc,
         );
       } else {
         final result = await encryptUseCase.call(
-        EncryptImageParams(
-          file: image.file,
-          password: event.password,
+          EncryptImageParams(
+            file: image.file,
+            password: event.password,
             fileId: filename ?? image.id,
-          settings: event.settings,
+            settings: event.settings,
             assetId: image.id,
-        ),
-      );
+          ),
+        );
 
-      result.fold(
-        (error) {
-          failed.add(image);
-          appLogger.logBloc(
-            'Encryption failed for ${image.file.path}',
-            error: error.message,
-          );
-        },
+        result.fold(
+          (error) {
+            failed.add(image);
+            appLogger.log(
+              'Encryption failed for ${image.file.path}',
+              LogLayer.bloc,
+              error: error.message,
+            );
+          },
           (encryptedImage) {
             encrypted.add(encryptedImage);
             appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
           },
-      );
+        );
       }
 
       final archivingState = ArchivingState(
@@ -92,9 +91,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
         skippedImages: List<GalleryImage>.from(skippedImages),
         totalImages: event.images.length,
       );
-      emit(
-        GalleryState.encrypted(archivingState: archivingState)
-      );
+      emit(GalleryState.encrypted(archivingState: archivingState));
     }
   }
 
@@ -169,5 +166,4 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     );
     return exists;
   }
-  
 }

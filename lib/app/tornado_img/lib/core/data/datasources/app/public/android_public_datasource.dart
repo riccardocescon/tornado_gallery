@@ -26,8 +26,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
       await Directory(path).create(recursive: true);
       return true;
     } catch (e) {
-      appLogger.logUsecase(
+      appLogger.log(
         'AndroidPublicFolderDatasource: error creating folder',
+        LogLayer.usecase,
         error: e.toString(),
       );
       return false;
@@ -93,8 +94,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
         );
         if (image != null) folder.images.add(image);
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'AndroidPublicFolderDatasource: error mapping asset ${asset.id}',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
       }
@@ -157,8 +159,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
         date: await file.lastModified(),
       );
     } catch (e) {
-      appLogger.logPageBloc(
+      appLogger.log(
         'AndroidPublicFolderDatasource: error reading subfolder file ${file.path}',
+        LogLayer.pageBloc,
         error: e.toString(),
       );
       return null;

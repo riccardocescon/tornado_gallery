@@ -18,13 +18,18 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       );
       if (update != -1) {
         encryptedImages[update] = event.image;
-        emit(AppState.updatedGalleryImage(image: event.image, oldIdentifier: event.image.storagePath.file.path));
+        emit(
+          AppState.updatedGalleryImage(
+            image: event.image,
+            oldIdentifier: event.image.storagePath.file.path,
+          ),
+        );
       } else {
         encryptedImages.add(event.image);
         emit(AppState.addedGalleryImage(image: event.image));
       }
     });
-   on<_UpdateEncryptedImage>((event, emit) {
+    on<_UpdateEncryptedImage>((event, emit) {
       final index = encryptedImages.indexWhere(
         (img) =>
             img.storagePath.path == event.oldIdentifier ||
@@ -33,16 +38,22 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       );
 
       if (index == -1) {
-        appLogger.logBloc(
+        appLogger.log(
           'UpdateEncryptedImage failed: Image not found',
+          LogLayer.bloc,
           error: event.oldIdentifier,
-        );    
+        );
         return;
       }
 
       encryptedImages[index] = event.image;
-      emit(AppState.updatedGalleryImage(image: event.image, oldIdentifier: event.oldIdentifier));
-    }); 
+      emit(
+        AppState.updatedGalleryImage(
+          image: event.image,
+          oldIdentifier: event.oldIdentifier,
+        ),
+      );
+    });
     on<_RemoveEncryptedImage>((event, emit) {
       encryptedImages.removeWhere(
         (img) => img.storagePath.file.path == event.path,
@@ -54,8 +65,9 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         (img) => img.storagePath.file.path == event.path,
       );
       if (index == -1) {
-        appLogger.logBloc(
+        appLogger.log(
           'SetDecryptedInfo failed: Image not found',
+          LogLayer.bloc,
           error: event.path,
         );
         return;
@@ -65,7 +77,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       encryptedImages[index] = image.copyWithDecryptInfo(
         decryptInfo: event.decryptedInfo,
       );
-      emit(AppState.updatedGalleryImage(image: encryptedImages[index], oldIdentifier: event.path));
+      emit(
+        AppState.updatedGalleryImage(
+          image: encryptedImages[index],
+          oldIdentifier: event.path,
+        ),
+      );
     });
     on<_FolderCreated>((event, emit) {
       emit(

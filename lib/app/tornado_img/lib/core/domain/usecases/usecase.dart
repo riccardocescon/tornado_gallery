@@ -18,7 +18,7 @@ abstract class EncryptionUseCase<T, Params> {
     try {
       return await body();
     } catch (e) {
-      appLogger.logUsecase(errorLog, error: e.toString());
+      appLogger.log(errorLog, LogLayer.usecase, error: e.toString());
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }

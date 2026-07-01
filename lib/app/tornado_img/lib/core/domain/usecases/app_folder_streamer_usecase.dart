@@ -44,12 +44,17 @@ class AppFolderStreamerUseCase {
       ]);
       _streamManager = StreamManager.fromStream(merged);
 
-      await for (final _ in _streamManager!.stream
-          .debounceTime(const Duration(milliseconds: 200))) {
+      await for (final _ in _streamManager!.stream.debounceTime(
+        const Duration(milliseconds: 200),
+      )) {
         yield (privateFolder, publicFolder);
       }
     } catch (e) {
-      appLogger.logUsecase('Error streaming app folders', error: e.toString());
+      appLogger.log(
+        'Error streaming app folders',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
     }
   }
 
@@ -61,9 +66,10 @@ class AppFolderStreamerUseCase {
     required EncryptedFolder? currentPublicFolder,
     required List<EncryptedImage> archivedImages,
   }) {
-    final publicImages = archivedImages
-        .where((img) => !img.storagePath.isPrivateFolder)
-        .toList();
+    final publicImages =
+        archivedImages
+            .where((img) => !img.storagePath.isPrivateFolder)
+            .toList();
     if (publicImages.isEmpty) return currentPublicFolder;
 
     final root =
@@ -77,8 +83,8 @@ class AppFolderStreamerUseCase {
       mergedByPath[img.storagePath.path] = img;
     }
 
-    final mergedImages = mergedByPath.values.toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final mergedImages =
+        mergedByPath.values.toList()..sort((a, b) => b.date.compareTo(a.date));
 
     return root.copyWith(images: mergedImages);
   }

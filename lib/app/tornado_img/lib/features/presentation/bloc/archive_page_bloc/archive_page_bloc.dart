@@ -95,8 +95,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     required this.renameFolderUseCase,
     required this.deleteFolderUseCase,
     required this.moveImagesUseCase,
-  })
-    : super(const ArchivePageState.initial()) {
+  }) : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const ArchivePageState.loading());
 
@@ -158,8 +157,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               images.add(value.image);
               _emit(emit);
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Image already exists in gallery, skipping add: ${value.image.storagePath.file.path}',
+                LogLayer.pageBloc,
               );
             }
           },
@@ -173,8 +173,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             if (index != -1) {
               images[index] = value.image;
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Updated image not found, adding as new',
+                LogLayer.pageBloc,
                 error: value.oldIdentifier,
               );
               images.add(value.image);
@@ -195,22 +196,28 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               deletingImagesQueue.remove(value.path);
               _emit(emit);
               if (deletingImagesQueue.isNotEmpty) {
-                emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
+                emit(
+                  ArchivePageState.deleting(
+                    paths: List.from(deletingImagesQueue),
+                  ),
+                );
               }
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Removed image not found in gallery, skipping remove: ${value.path}',
+                LogLayer.pageBloc,
               );
             }
           },
           orElse: () {},
         );
       }
-      
     });
     on<_ArchivePageDelete>((event, emit) async {
       deletingImagesQueue.addAll(
-        event.images.map((img) => img.storagePath.assetId ?? img.storagePath.path),
+        event.images.map(
+          (img) => img.storagePath.assetId ?? img.storagePath.path,
+        ),
       );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
       final result = await imageDeleterUseCase.call(
@@ -219,8 +226,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       result.fold(
         (failure) {
-          appLogger.logPageBloc(
+          appLogger.log(
             'Failed to delete image',
+            LogLayer.pageBloc,
             error: failure.message,
           );
           emit(ArchivePageState.failure(message: failure.message));
@@ -231,17 +239,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               final resolvedPath = _resolveRemovalPath(image);
 
               if (resolvedPath == null) {
-                appLogger.logPageBloc(
+                appLogger.log(
                   'Delete succeeded but image path was not found in AppBloc',
+                  LogLayer.pageBloc,
                   error:
                       'path=${image.storagePath.path}, assetId=${image.storagePath.assetId}',
                 );
                 continue;
               }
 
-              appBloc.add(
-                AppEvent.removeEncryptedImage(path: resolvedPath),
-              );
+              appBloc.add(AppEvent.removeEncryptedImage(path: resolvedPath));
             }
           } else {
             _emit(emit);
@@ -262,12 +269,12 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       _emit(emit);
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
-
       final scopedPaths =
           currentFolderImages.map((i) => i.storagePath.path).toSet();
-      final sortedImages = this.sortedImages
-          .where((img) => scopedPaths.contains(img.storagePath.path))
-          .toList();
+      final sortedImages =
+          this.sortedImages
+              .where((img) => scopedPaths.contains(img.storagePath.path))
+              .toList();
       final sortedImagesTable = {
         for (int i = 0; i < sortedImages.length; i++) i: sortedImages[i],
       };
@@ -346,21 +353,24 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 ? ImageSaverParams.appFolder(
                   bytes: bytes,
                   fileName: fileName,
-                  path: hasRel
-                      ? '${await GalleryPathProvider.getPrivateFolderPath()}/$rel'
-                      : await GalleryPathProvider.getPrivateFolderPath(),
+                  path:
+                      hasRel
+                          ? '${await GalleryPathProvider.getPrivateFolderPath()}/$rel'
+                          : await GalleryPathProvider.getPrivateFolderPath(),
                 )
                 : ImageSaverParams.gallery(
                   bytes: bytes,
                   fileName: fileName,
-                  album: hasRel
-                      ? '${Constants.appFolderName}/$rel'
-                      : Constants.appFolderName,
+                  album:
+                      hasRel
+                          ? '${Constants.appFolderName}/$rel'
+                          : Constants.appFolderName,
                 );
         final result = await imageSaverUseCase.call(params);
         if (result.isLeft()) {
-          appLogger.logPageBloc(
+          appLogger.log(
             'Failed to import image: $fileName',
+            LogLayer.pageBloc,
             error: result.left.message,
           );
         } else {
@@ -445,8 +455,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       (failure) => emit(ArchivePageState.failure(message: failure.message)),
       (_) {
         final safeName = FileNameUtils.sanitizeFileStem(event.name);
-        final rel =
-            _currentPath.isEmpty ? safeName : '$_currentPath/$safeName';
+        final rel = _currentPath.isEmpty ? safeName : '$_currentPath/$safeName';
         _createdFolders.add((isPrivate: isPrivate, relativePath: rel));
         appBloc.add(
           AppEvent.folderCreated(isPrivate: isPrivate, relativePath: rel),
@@ -485,14 +494,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     // the renamed entries by file path, so no duplicates result.
     final marker =
         event.isPrivate ? '/encrypted/' : '/${Constants.appFolderName}/';
-    final affected = images
-        .where(
-          (img) =>
-              img.storagePath.isPrivateFolder == event.isPrivate &&
-              (img.storeRelativeDir == oldRel ||
-                  img.storeRelativeDir.startsWith('$oldRel/')),
-        )
-        .toList();
+    final affected =
+        images
+            .where(
+              (img) =>
+                  img.storagePath.isPrivateFolder == event.isPrivate &&
+                  (img.storeRelativeDir == oldRel ||
+                      img.storeRelativeDir.startsWith('$oldRel/')),
+            )
+            .toList();
     for (final img in affected) {
       final path = img.storagePath.path.replaceAll('\\', '/');
       final mi = path.lastIndexOf(marker);
@@ -513,14 +523,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
     // Re-register in-session created folders (incl. empty ones) under the new
     // name so they stay visible after the rename.
-    final renamedCreated = _createdFolders
-        .where(
-          (f) =>
-              f.isPrivate == event.isPrivate &&
-              (f.relativePath == oldRel ||
-                  f.relativePath.startsWith('$oldRel/')),
-        )
-        .toList();
+    final renamedCreated =
+        _createdFolders
+            .where(
+              (f) =>
+                  f.isPrivate == event.isPrivate &&
+                  (f.relativePath == oldRel ||
+                      f.relativePath.startsWith('$oldRel/')),
+            )
+            .toList();
     _createdFolders.removeWhere(
       (f) =>
           f.isPrivate == event.isPrivate &&
@@ -669,10 +680,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _emit(emit);
   }
 
-  List<String> folderRelativePaths({required bool isPrivate}) => _createdFolders
-      .where((f) => f.isPrivate == isPrivate)
-      .map((f) => f.relativePath)
-      .toList();
+  List<String> folderRelativePaths({required bool isPrivate}) =>
+      _createdFolders
+          .where((f) => f.isPrivate == isPrivate)
+          .map((f) => f.relativePath)
+          .toList();
 
   List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
@@ -704,9 +716,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       isPrivate: _currentIsPrivate,
       currentPath: _currentPath,
     );
-    final breadcrumb = _currentPath.isEmpty
-        ? const <String>[]
-        : _currentPath.split('/');
+    final breadcrumb =
+        _currentPath.isEmpty ? const <String>[] : _currentPath.split('/');
 
     emit(
       ArchivePageState.ui(
@@ -737,13 +748,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   }
 
   String? _resolveRemovalPath(EncryptedImage image) {
-  // Preferisci assetId come identificatore stabile su iOS.
-  final assetId = image.storagePath.assetId;
-  if (assetId != null) return assetId;
+    // Preferisci assetId come identificatore stabile su iOS.
+    final assetId = image.storagePath.assetId;
+    if (assetId != null) return assetId;
 
-  final direct = appBloc.encryptedImages.firstWhereOrNull(
-    (img) => img.storagePath.path == image.storagePath.path,
-  );
-  return direct?.storagePath.path;
-}
+    final direct = appBloc.encryptedImages.firstWhereOrNull(
+      (img) => img.storagePath.path == image.storagePath.path,
+    );
+    return direct?.storagePath.path;
+  }
 }
