@@ -29,4 +29,59 @@ abstract class StorageRepository {
     String? album,
   });
   Future<bool> delete(List<StoragePath> images);
+
+  // ── Folder operations ───────────────────────────────────────────────────────
+  //
+  // [relativePath] is the folder path relative to the store root (the private
+  // `encrypted/` dir, or the gallery root album). Empty string == root.
+
+  /// Creates the folder [relativePath] in the private store or gallery.
+  Future<bool> createFolder({
+    required bool isPrivate,
+    required String relativePath,
+  });
+
+  /// Renames folder [oldRelativePath] to [newRelativePath].
+  Future<bool> renameFolder({
+    required bool isPrivate,
+    required String oldRelativePath,
+    required String newRelativePath,
+  });
+
+  /// Deletes folder [relativePath]. [contained] are the storage paths of the
+  /// images within it (used to remove gallery assets).
+  Future<bool> deleteFolder({
+    required bool isPrivate,
+    required String relativePath,
+    required List<StoragePath> contained,
+  });
+
+  /// Yields relative paths of all subdirectories inside [rootPath].
+  Stream<String> readPrivateFolderPaths(String rootPath);
+
+  /// Yields relative paths of all public gallery subfolders (relative to the
+  /// public root album). Used to surface folders that may still be empty.
+  Stream<String> readPublicFolderPaths();
+
+  /// Moves [images] into the folder [targetRelativePath]. Returns the moved
+  /// images' new [StoragePath]s (private store only; gallery moves are
+  /// reported via [StorageMoveResult]).
+  Future<StorageMoveResult> moveImages({
+    required List<EncryptedImage> images,
+    required String targetRelativePath,
+  });
+}
+
+/// Outcome of a [StorageRepository.moveImages] call.
+class StorageMoveResult {
+  final bool success;
+
+  /// New storage paths for successfully moved private images, keyed by their
+  /// original absolute path.
+  final Map<String, String> movedPrivatePaths;
+
+  const StorageMoveResult({
+    required this.success,
+    this.movedPrivatePaths = const {},
+  });
 }

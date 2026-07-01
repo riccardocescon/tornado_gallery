@@ -1,5 +1,6 @@
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_entity.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 
 class EncryptedFolder with EncryptedEntity {
   final String path;
@@ -15,6 +16,17 @@ class EncryptedFolder with EncryptedEntity {
     return Uri.encodeComponent(fullPath);
   }
 
+  /// Folder path relative to its store root, used to address the folder in
+  /// repository/usecase calls. Private store is rooted at `encrypted/`,
+  /// the gallery at the `TornadoGallery` root album. Returns '' for the root.
+  String get storeRelativePath {
+    final marker = isPrivateFolder ? 'encrypted' : Constants.appFolderName;
+    final parts = path.replaceAll('\\', '/').split('/');
+    final idx = parts.lastIndexOf(marker);
+    if (idx == -1) return '';
+    return parts.skip(idx + 1).where((p) => p.trim().isNotEmpty).join('/');
+  }
+
   EncryptedFolder({
     required this.images,
     required this.path,
@@ -23,11 +35,14 @@ class EncryptedFolder with EncryptedEntity {
   }) : subfolders = subfolders ?? [];
 
   @override
-  EncryptedFolder copyWith({List<EncryptedImage>? images}) {
+  EncryptedFolder copyWith({
+    List<EncryptedImage>? images,
+    List<EncryptedFolder>? subfolders,
+  }) {
     return EncryptedFolder(
       images: images ?? this.images,
       path: path,
-      subfolders: subfolders,
+      subfolders: subfolders ?? this.subfolders,
       isPrivateFolder: isPrivateFolder,
     );
   }

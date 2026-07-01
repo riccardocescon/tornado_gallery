@@ -17,11 +17,23 @@ abstract class AppEvent with _$AppEvent, EquatableMixin {
     required BytesInfo? decryptedInfo,
   }) = _SetDecryptedInfo;
 
+  const factory AppEvent.folderCreated({
+    required bool isPrivate,
+    required String relativePath,
+  }) = _FolderCreated;
+
+  const factory AppEvent.folderDeleted({
+    required bool isPrivate,
+    required String relativePath,
+  }) = _FolderDeleted;
+
   @override
   List<Object?> get props => when(
     addEncryptedImage: (image) => [image],
     updateEncryptedImage: (image, oldIdentifier) => [image, oldIdentifier],
     removeEncryptedImage: (path) => [path],
     setDecryptedInfo: (path, decryptedInfo) => [path, decryptedInfo],
+    folderCreated: (isPrivate, relativePath) => [isPrivate, relativePath],
+    folderDeleted: (isPrivate, relativePath) => [isPrivate, relativePath],
   );
 }

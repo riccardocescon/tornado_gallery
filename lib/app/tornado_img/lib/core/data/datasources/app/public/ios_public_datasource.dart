@@ -54,27 +54,23 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
 
     if (path == null || path.trim().isEmpty) return null;
 
-    if (assets.isEmpty) {
-      // Album exists but has no images yet — return empty root so the
-      // watcher (poller) can attach and detect the first image.
-      return EncryptedFolder.empty(path, false);
-    }
-
     return _buildFolder(assets, path);
   }
 
   @override
   Stream<void> watchFolder(EncryptedFolder rootFolder) async* {
-    // Seed the initial known asset ID set so the first poll does not
-    // immediately emit a spurious change.
+    // Seed the initial known state so the first poll does not emit spuriously.
     var knownIds = await _currentAssetIds();
+    var knownAlbums = await _currentAlbumNames();
 
     while (true) {
       await Future.delayed(_pollInterval);
 
       Set<String> currentIds;
+      Set<String> currentAlbums;
       try {
         currentIds = await _currentAssetIds();
+        currentAlbums = await _currentAlbumNames();
       } catch (e) {
         appLogger.logPageBloc(
           'IosPublicFolderDatasource: polling error',
@@ -84,8 +80,11 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       }
 
       if (currentIds.length != knownIds.length ||
-          !currentIds.containsAll(knownIds)) {
+          !currentIds.containsAll(knownIds) ||
+          currentAlbums.length != knownAlbums.length ||
+          !currentAlbums.containsAll(knownAlbums)) {
         knownIds = currentIds;
+        knownAlbums = currentAlbums;
         yield null;
       }
     }
@@ -98,6 +97,13 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       requestIfNeeded: false,
     );
     return {for (final a in assets) a.id};
+  }
+
+  Future<Set<String>> _currentAlbumNames() async {
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(
+      Constants.appFolderName,
+    );
+    return {for (final a in albums) a.name};
   }
 
   Future<EncryptedFolder> _buildFolder(
@@ -121,6 +127,58 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       }
     }
 
+    // Reconstruct the folder tree from the album-name-as-path convention:
+    // albums titled `TornadoGallery/<rel>` become nested subfolders.
+    await _attachSubfolders(folder);
+
     return folder;
+  }
+
+  Future<void> _attachSubfolders(EncryptedFolder root) async {
+    final albums = await GalleryPathProvider.listPublicAlbumsUnder(
+      Constants.appFolderName,
+    );
+
+    for (final album in albums) {
+      if (album.name == Constants.appFolderName) continue;
+      final relative = album.name.substring(Constants.appFolderName.length + 1);
+      final segments =
+          relative.split('/').where((s) => s.trim().isNotEmpty).toList();
+      if (segments.isEmpty) continue;
+
+      // Walk/create the node chain for this album path.
+      var current = root;
+      var cumulative = Constants.appFolderName;
+      for (final segment in segments) {
+        cumulative = '$cumulative/$segment';
+        final childPath = cumulative;
+        final child = current.subfolders.firstWhere(
+          (f) => f.name == segment,
+          orElse: () {
+            final created = EncryptedFolder.empty(childPath, false);
+            current.subfolders.add(created);
+            return created;
+          },
+        );
+        current = child;
+      }
+
+      // Map this album's assets into the leaf node.
+      try {
+        final assets = await album.getAssetListPaged(page: 0, size: 10000);
+        for (final asset in assets) {
+          final image = await AssetMapper.fromAsset(
+            asset: asset,
+            folderPath: current.path,
+          );
+          if (image != null) current.images.add(image);
+        }
+      } catch (e) {
+        appLogger.logPageBloc(
+          'IosPublicFolderDatasource: error mapping album ${album.name}',
+          error: e.toString(),
+        );
+      }
+    }
   }
 }

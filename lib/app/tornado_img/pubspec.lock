@@ -242,7 +242,7 @@ packages:
     source: hosted
     version: "1.5.0"
   device_preview_plus:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: device_preview_plus
       sha256: "3234ce62984519fc734a9b2e7d4543a7d6c7dbc61f6f07f0f4c808dbc9878f55"

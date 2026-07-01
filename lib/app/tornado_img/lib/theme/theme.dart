@@ -15,18 +15,28 @@ class AppColors {
   static const Color lightBorder = Color(0xFFE2E7F0);
 
   static const Color lightTextPrimary = Color(0xFF162033);
-  static const Color lightTextSecondary = Color(0xFF6E7A8C);
+  static const Color lightTextSecondary = Color(0xFF5C6877);
   static const Color lightIcon = Color(0xFF4D5A6D);
 
-  // Dark theme
-  static const Color darkBackground = Color(0xFF0B1220);
-  static const Color darkSurface = Color(0xFF121A2A);
-  static const Color darkSurfaceAlt = Color(0xFF1F2431);
-  static const Color darkBorder = Color(0xFF253149);
+  // Dark theme — "Refined Navy"
+  static const Color darkBackground = Color(0xFF0A111E);
+  static const Color darkSurface = Color(0xFF141E32);
+  static const Color darkSurfaceAlt = Color(0xFF1E2B45);
+  static const Color darkBorder = Color(0xFF2B3B59);
 
-  static const Color darkTextPrimary = Color(0xFFF3F6FB);
-  static const Color darkTextSecondary = Color(0xFFA7B3C5);
-  static const Color darkIcon = Color(0xFFC2CCDA);
+  static const Color darkTextPrimary = Color(0xFFF2F6FC);
+  static const Color darkTextSecondary = Color(0xFF9DB0CC);
+  static const Color darkIcon = Color(0xFFC5D2E4);
+
+  // Dark accent — bright, high-contrast blue used for ALL primary actions
+  // in dark mode (buttons, FAB, active nav, toggles, progress, links).
+  // White bold label on this blue passes WCAG AA for large/bold text.
+  static const Color darkAccent = Color(0xFF3B82F6);
+  static const Color darkAccentHover = Color(0xFF5C97F8);
+  static const Color darkAccentContainer = Color(0xFF1B2E4D);
+  // Highlighted "hero" cards (e.g. Select Photo) — subtle navy gradient.
+  static const Color darkHeroStart = Color(0xFF22427E);
+  static const Color darkHeroEnd = Color(0xFF15243F);
 
   // Status
   static const Color success = Color(0xFF2E8B57);
@@ -64,7 +74,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.lightBackground,
       primaryColor: AppColors.primary,
 
-      splashColor: AppColors.primary.withOpacity(0.06),
+      splashColor: AppColors.primary.withValues(alpha: 0.06),
       highlightColor: Colors.transparent,
       dividerColor: AppColors.lightBorder,
 
@@ -352,6 +362,11 @@ class AppTheme {
           success: AppColors.success,
           successContainer: AppColors.success.withValues(alpha: 0.1),
           scaffoldBackground: AppColors.lightBackground,
+          accent: AppColors.primary,
+          onAccent: Colors.white,
+          accentSubtle: AppColors.primary.withValues(alpha: 0.08),
+          heroGradientStart: AppColors.primary,
+          heroGradientEnd: AppColors.primaryDark,
         ),
       ],
     );
@@ -360,18 +375,22 @@ class AppTheme {
   static ThemeData _buildDarkTheme() {
     var colorScheme = ColorScheme(
       brightness: Brightness.dark,
-      primary: AppColors.primarySoft,
-      primaryContainer: Color(0xFF142742),
+      primary: AppColors.darkAccent,
+      primaryContainer: AppColors.darkAccentContainer,
       onPrimary: Colors.white,
-      secondary: AppColors.primary,
+      onPrimaryContainer: AppColors.darkTextPrimary,
+      secondary: AppColors.darkAccent,
       onSecondary: Colors.white,
+      secondaryContainer: AppColors.darkSurfaceAlt,
       error: AppColors.error,
       errorContainer: AppColors.error.withValues(alpha: 0.1),
       onError: Colors.white,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
-      surfaceContainerHighest: Color(0xFF2A3140),
-      tertiary: Colors.blue.shade300,
+      onSurfaceVariant: AppColors.darkTextSecondary,
+      surfaceContainerHighest: AppColors.darkSurfaceAlt,
+      outline: AppColors.darkBorder,
+      tertiary: AppColors.darkAccent,
     );
 
     return ThemeData(
@@ -379,9 +398,9 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.darkBackground,
-      primaryColor: AppColors.primarySoft,
+      primaryColor: AppColors.darkAccent,
 
-      splashColor: Colors.white.withOpacity(0.04),
+      splashColor: AppColors.darkAccent.withValues(alpha: 0.10),
       highlightColor: Colors.transparent,
       dividerColor: AppColors.darkBorder,
 
@@ -498,7 +517,7 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(
-            color: AppColors.primarySoft,
+            color: AppColors.darkAccent,
             width: 1.4,
           ),
         ),
@@ -515,9 +534,9 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.primarySoft,
+          backgroundColor: AppColors.darkAccent,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.darkBorder,
+          disabledBackgroundColor: AppColors.darkSurfaceAlt,
           disabledForegroundColor: AppColors.darkTextSecondary,
           minimumSize: const Size.fromHeight(54),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -543,7 +562,7 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primarySoft,
+          foregroundColor: AppColors.darkAccent,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -554,8 +573,8 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.darkSurfaceAlt,
         disabledColor: AppColors.darkBorder,
-        selectedColor: AppColors.primarySoft,
-        secondarySelectedColor: AppColors.primarySoft,
+        selectedColor: AppColors.darkAccent,
+        secondarySelectedColor: AppColors.darkAccent,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         labelStyle: const TextStyle(
           color: AppColors.darkTextPrimary,
@@ -576,7 +595,7 @@ class AppTheme {
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         elevation: 0,
         backgroundColor: AppColors.darkSurface,
-        selectedItemColor: AppColors.primarySoft,
+        selectedItemColor: AppColors.darkAccent,
         unselectedItemColor: AppColors.darkTextSecondary,
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
@@ -599,7 +618,7 @@ class AppTheme {
             return const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.primarySoft,
+              color: AppColors.darkAccent,
             );
           }
           return const TextStyle(
@@ -617,7 +636,7 @@ class AppTheme {
             size: 22,
           );
         }),
-        indicatorColor: AppColors.primarySoft,
+        indicatorColor: AppColors.darkAccent,
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -635,15 +654,16 @@ class AppTheme {
           return AppColors.darkTextPrimary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected))
-            return AppColors.primarySoft;
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.darkAccent;
+          }
           return AppColors.darkBorder;
         }),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
 
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.primarySoft,
+        color: AppColors.darkAccent,
         linearTrackColor: AppColors.darkBorder,
         circularTrackColor: AppColors.darkBorder,
       ),
@@ -656,7 +676,7 @@ class AppTheme {
 
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.darkSurfaceAlt,
         contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
@@ -668,6 +688,11 @@ class AppTheme {
           success: AppColors.success,
           successContainer: AppColors.success.withValues(alpha: 0.1),
           scaffoldBackground: AppColors.darkBackground,
+          accent: AppColors.darkAccent,
+          onAccent: Colors.white,
+          accentSubtle: AppColors.darkAccent.withValues(alpha: 0.16),
+          heroGradientStart: AppColors.darkHeroStart,
+          heroGradientEnd: AppColors.darkHeroEnd,
         ),
       ],
     );

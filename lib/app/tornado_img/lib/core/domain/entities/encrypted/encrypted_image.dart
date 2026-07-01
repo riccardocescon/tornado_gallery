@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 
 class EncryptedImage with EquatableMixin {
   final DateTime date;
@@ -55,6 +56,18 @@ class EncryptedImage with EquatableMixin {
       }
     }
     return raw;
+  }
+
+  /// Directory of this image relative to its store root ('' for the root).
+  /// Private store is rooted at `encrypted/`, the gallery at `TornadoGallery`.
+  String get storeRelativeDir {
+    final marker =
+        storagePath.isPrivateFolder ? 'encrypted' : Constants.appFolderName;
+    final parts = storagePath.path.replaceAll('\\', '/').split('/');
+    final idx = parts.lastIndexOf(marker);
+    if (idx == -1 || idx + 1 >= parts.length) return '';
+    final after = parts.skip(idx + 1).toList()..removeLast(); // drop filename
+    return after.where((p) => p.trim().isNotEmpty).join('/');
   }
 
   int get safeSizeBytes {

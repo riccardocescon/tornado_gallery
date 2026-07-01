@@ -38,7 +38,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 	</dict>
-	<key>NSCameraUsageDescription</key>
+<key>NSCameraUsageDescription</key>
 	<string>Camera access is required to capture photos for encryption.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Permission required to save decrypted images to your photo library.</string>

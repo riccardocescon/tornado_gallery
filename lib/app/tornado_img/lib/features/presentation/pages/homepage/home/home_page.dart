@@ -8,6 +8,7 @@ import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/picture_provider/pictures_provider.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepage_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
@@ -16,6 +17,13 @@ import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/action_card.dart';
 part 'widgets/archive_state.dart';
+
+/// Pushes the archive as a full-screen route, reusing the existing
+/// [ArchivePageBloc] from the shell so its state (folder navigation, loaded
+/// images) is preserved across opens.
+void _openArchive(BuildContext context) {
+  context.pushNamed('archive', extra: context.read<ArchivePageBloc>());
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -120,11 +128,7 @@ class _HomePageState extends State<HomePage> {
               buttonText: "Open archive",
               buttonIcon: Icons.lock_rounded,
               darker: false,
-              onPressed: () {
-                context.read<HomepageBloc>().add(
-                  HomepageEvent.setScreen(page: Pages.archive),
-                );
-              },
+              onPressed: () => _openArchive(context),
             ),
           ),
         ],
