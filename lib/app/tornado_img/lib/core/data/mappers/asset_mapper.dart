@@ -26,7 +26,7 @@ class AssetMapper {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
       final filePath =
-          '${folderPath}${Platform.pathSeparator}${file.path.split(Platform.pathSeparator).last}';
+          '$folderPath${Platform.pathSeparator}${file.path.split(Platform.pathSeparator).last}';
 
       return EncryptedImage(
         storagePath: StoragePath(

@@ -62,7 +62,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       }
 
       final image = encryptedImages[index];
-      encryptedImages[index] = image.overrideWith(
+      encryptedImages[index] = image.copyWithDecryptInfo(
         decryptInfo: event.decryptedInfo,
       );
       emit(AppState.updatedGalleryImage(image: encryptedImages[index], oldIdentifier: event.path));

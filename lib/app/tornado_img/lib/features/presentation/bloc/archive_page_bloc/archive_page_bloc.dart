@@ -303,7 +303,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 );
                 if (item.value.isDecrypted) continue;
 
-                sortedImagesTable[item.key] = item.value.overrideWith(
+                sortedImagesTable[item.key] = item.value.copyWithDecryptInfo(
                   decryptInfo: dearchivedImage.decryptInfo,
                 );
               }

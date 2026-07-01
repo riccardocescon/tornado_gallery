@@ -110,7 +110,7 @@ void main() {
     ).thenAnswer((_) => const Stream.empty());
   });
 
-  ArchivePageBloc _makeBloc() => ArchivePageBloc(
+  ArchivePageBloc makeBloc() => ArchivePageBloc(
     appBloc: mockAppBloc,
     galleryBloc: mockGalleryBloc,
     galleryReaderUseCase: mockGalleryReader,
@@ -127,7 +127,7 @@ void main() {
       () => mockGalleryReader.call(null),
     ).thenAnswer((_) => const Stream.empty());
 
-    final bloc = _makeBloc();
+    final bloc = makeBloc();
     expect(bloc.state, const ArchivePageState.initial());
     bloc.close();
   });
@@ -145,7 +145,7 @@ void main() {
             Right(_makeStreamImage('/enc/img2.png')),
           ]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -167,7 +167,7 @@ void main() {
             Left(DecryptionFailure.decryptionError('read failed')),
           ]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -185,7 +185,7 @@ void main() {
         when(
           () => mockGalleryReader.call(null),
         ).thenAnswer((_) => const Stream.empty());
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -206,7 +206,7 @@ void main() {
           (_) =>
               Stream.fromIterable([Right(_makeStreamImage('/enc/img1.png'))]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       verify: (_) {
@@ -231,7 +231,7 @@ void main() {
         when(() => mockAppBloc.encryptedImages).thenReturn([
           _makeImage('/enc/img1.png'),
         ]);
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -266,7 +266,7 @@ void main() {
         when(() => mockImageDeleter.call(any())).thenAnswer(
           (_) async => Left(EncryptionFailure.encryptionError('cannot delete')),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -313,7 +313,7 @@ void main() {
       'root level shows top folder Vacanze and only root images',
       build: () {
         seedNested();
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       verify: (_) {},
@@ -343,7 +343,7 @@ void main() {
       'entering Vacanze shows nested folder Mare, its image and breadcrumb',
       build: () {
         seedNested();
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -394,7 +394,7 @@ void main() {
         when(
           () => mockCreateFolder.call(any()),
         ).thenAnswer((_) async => const Right(true));
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -429,7 +429,7 @@ void main() {
         when(
           () => mockRenameFolder.call(any()),
         ).thenAnswer((_) async => const Right(true));
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -470,7 +470,7 @@ void main() {
       'decryptFolder dispatches GalleryEvent.decryptImages for nested images',
       build: () {
         seedNested();
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());

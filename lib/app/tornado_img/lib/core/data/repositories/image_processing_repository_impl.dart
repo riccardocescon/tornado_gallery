@@ -27,7 +27,7 @@ Uint8List _encodeImage(ImageModel model) {
 class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
 
   ImageProcessingRepositoryImpl() {
-    final packageVersion = getVersion();
+    final packageVersion = sdkVersion();
     appLogger.logRepository(
       "ImageProcessingRepositoryImpl initialized with TornadoImgCrypto version: $packageVersion",
     );

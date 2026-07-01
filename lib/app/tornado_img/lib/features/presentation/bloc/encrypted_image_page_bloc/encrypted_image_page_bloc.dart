@@ -95,12 +95,6 @@ class EncryptedImagePageBloc
             }
             return decryptedImage != null;
           },
-          decryptionFailure: (value) {
-            emit(
-              EncryptedImagePageState.failure(message: value.failure.message),
-            );
-            return true;
-          },
           orElse: () => false,
         );
 
@@ -109,7 +103,7 @@ class EncryptedImagePageBloc
       
     });
     on<_Restore>((event, emit) {
-      image = image.overrideWith(decryptInfo: null);
+      image = image.copyWithDecryptInfo(decryptInfo: null);
       appBloc.add(
         AppEvent.setDecryptedInfo(path: image.storagePath.path, decryptedInfo: null),
       );

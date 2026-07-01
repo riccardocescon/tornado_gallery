@@ -534,10 +534,6 @@ class _ArchivePageState extends State<ArchivePage> {
       builder: (context, state) {
         final isSelectionMode =
             state.maybeMap(ui: (s) => s.isSelectionMode, orElse: () => false);
-        final atRoot = state.maybeMap(
-          ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
-          orElse: () => false,
-        );
 
         if (isSelectionMode) {
           return Row(

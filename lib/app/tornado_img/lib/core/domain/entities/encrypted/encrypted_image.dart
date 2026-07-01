@@ -37,7 +37,7 @@ class EncryptedImage with EquatableMixin {
 
   /// Returns a copy of this [EncryptedImage] with the provided optional values
   /// Use this instead of [copyWith] when you want to clear optionalData by passing null
-  EncryptedImage overrideWith({BytesInfo? decryptInfo}) {
+  EncryptedImage copyWithDecryptInfo({BytesInfo? decryptInfo}) {
     return EncryptedImage(
       storagePath: storagePath,
       date: date,

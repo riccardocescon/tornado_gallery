@@ -483,7 +483,9 @@ class PrivateFolderDatasource {
     final map = <String, EncryptedFolder>{};
     void visit(EncryptedFolder folder) {
       map[folder.path] = folder;
-      for (final child in folder.subfolders) visit(child);
+      for (final child in folder.subfolders) {
+        visit(child);
+      }
     }
 
     visit(root);
