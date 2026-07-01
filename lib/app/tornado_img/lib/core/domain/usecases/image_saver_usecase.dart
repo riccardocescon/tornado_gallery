@@ -4,7 +4,6 @@ import 'package:dartz/dartz.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/core/utils/globals.dart';
 
 class ImageSaverUseCase extends EncryptionUseCase<void, ImageSaverParams> {
   final StorageRepository storageRepo;
@@ -12,9 +11,8 @@ class ImageSaverUseCase extends EncryptionUseCase<void, ImageSaverParams> {
   ImageSaverUseCase({required this.storageRepo});
 
   @override
-  Future<Either<EncryptionFailure, void>> call(ImageSaverParams params) async {
-    try {
-
+  Future<Either<EncryptionFailure, void>> call(ImageSaverParams params) {
+    return guardEither('Error saving image', () async {
       // For the private folder, the name must contain the extension, but for the gallery, it must not
       final fixedFileName =
           params.path != null
@@ -28,10 +26,7 @@ class ImageSaverUseCase extends EncryptionUseCase<void, ImageSaverParams> {
         album: params.album,
       );
       return const Right(null);
-    } catch (e) {
-      appLogger.logUsecase('Error saving image', error: e.toString());
-      return Left(EncryptionFailure.encryptionError(e.toString()));
-    }
+    });
   }
 }
 

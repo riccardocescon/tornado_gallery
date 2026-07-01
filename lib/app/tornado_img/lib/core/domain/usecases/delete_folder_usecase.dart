@@ -3,7 +3,6 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Deletes the folder at [DeleteFolderParams.relativePath] and its contents.
 class DeleteFolderUseCase extends EncryptionUseCase<bool, DeleteFolderParams> {
@@ -12,15 +11,13 @@ class DeleteFolderUseCase extends EncryptionUseCase<bool, DeleteFolderParams> {
   DeleteFolderUseCase({required this.storageRepo});
 
   @override
-  Future<Either<EncryptionFailure, bool>> call(
-    DeleteFolderParams params,
-  ) async {
-    final relativePath = params.relativePath.trim();
-    if (relativePath.isEmpty) {
-      return Left(EncryptionFailure.encryptionError('Cannot delete root'));
-    }
+  Future<Either<EncryptionFailure, bool>> call(DeleteFolderParams params) {
+    return guardEither('Error deleting folder', () async {
+      final relativePath = params.relativePath.trim();
+      if (relativePath.isEmpty) {
+        return Left(EncryptionFailure.encryptionError('Cannot delete root'));
+      }
 
-    try {
       final ok = await storageRepo.deleteFolder(
         isPrivate: params.isPrivate,
         relativePath: relativePath,
@@ -32,10 +29,7 @@ class DeleteFolderUseCase extends EncryptionUseCase<bool, DeleteFolderParams> {
         );
       }
       return const Right(true);
-    } catch (e) {
-      appLogger.logUsecase('Error deleting folder', error: e.toString());
-      return Left(EncryptionFailure.encryptionError(e.toString()));
-    }
+    });
   }
 }
 

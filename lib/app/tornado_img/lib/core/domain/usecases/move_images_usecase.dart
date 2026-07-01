@@ -3,7 +3,6 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Moves the given images into the folder [MoveImagesParams.targetRelativePath].
 ///
@@ -18,12 +17,12 @@ class MoveImagesUseCase
   @override
   Future<Either<EncryptionFailure, StorageMoveResult>> call(
     MoveImagesParams params,
-  ) async {
-    if (params.images.isEmpty) {
-      return const Right(StorageMoveResult(success: false));
-    }
+  ) {
+    return guardEither('Error moving images', () async {
+      if (params.images.isEmpty) {
+        return const Right(StorageMoveResult(success: false));
+      }
 
-    try {
       final result = await storageRepo.moveImages(
         images: params.images,
         targetRelativePath: params.targetRelativePath,
@@ -32,10 +31,7 @@ class MoveImagesUseCase
         return Left(EncryptionFailure.encryptionError('No images were moved'));
       }
       return Right(result);
-    } catch (e) {
-      appLogger.logUsecase('Error moving images', error: e.toString());
-      return Left(EncryptionFailure.encryptionError(e.toString()));
-    }
+    });
   }
 }
 
