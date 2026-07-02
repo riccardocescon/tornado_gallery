@@ -51,10 +51,7 @@ class _MoveTargetSheet extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Move to",
-                style: context.textTheme.titleMedium,
-              ),
+              child: Text("Move to", style: context.textTheme.titleMedium),
             ),
             const SizedBox(height: 8),
             Flexible(

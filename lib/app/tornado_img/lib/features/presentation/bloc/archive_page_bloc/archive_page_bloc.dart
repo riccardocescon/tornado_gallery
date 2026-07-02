@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
 import 'package:tornado_img_app/core/domain/usecases/create_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/delete_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
@@ -9,7 +12,6 @@ import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
-import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
@@ -29,8 +31,6 @@ part 'archive_page_bloc_utils.dart';
 class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final images = <EncryptedImage>[];
   final deletingImagesQueue = <String>[];
-
-  bool isDecryptingAllImages = false;
 
   /// Images the decrypt FAB acts on: at the root (mixed view) only the images
   /// directly at root level of both stores; inside a folder, that folder and
@@ -69,6 +69,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   /// Store of the folder currently entered, or null at the root (mixed view).
   bool? get currentIsPrivate => _currentIsPrivate;
 
+  /// Decrypt-job key for the folder currently entered. At the root (mixed view,
+  /// [_currentIsPrivate] == null) a dedicated `'root'` key is used.
+  String get _currentFolderKey =>
+      _currentIsPrivate == null
+          ? 'root'
+          : DecryptJobManager.keyFor(
+            isPrivate: _currentIsPrivate!,
+            relativePath: _currentPath,
+          );
+
   /// Whether the archive is currently in multi-select mode. Exposed so the view
   /// can decide back-navigation without depending on the transient emitted
   /// state (which may briefly be non-`ui` mid-operation).
@@ -82,7 +92,10 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final ImageDeleterUseCase imageDeleterUseCase;
 
   final AppBloc appBloc;
-  final GalleryBloc galleryBloc;
+  final DecryptJobManager decryptJobManager;
+
+  /// Live subscription to background decrypt progress; re-emits the view on tick.
+  StreamSubscription<void>? _decryptSub;
 
   final ImageSaverUseCase imageSaverUseCase;
   final CreateFolderUseCase createFolderUseCase;
@@ -92,7 +105,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
   ArchivePageBloc({
     required this.appBloc,
-    required this.galleryBloc,
+    required this.decryptJobManager,
     required this.galleryReaderUseCase,
     required this.imageDeleterUseCase,
     required this.imageSaverUseCase,
@@ -185,7 +198,6 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               );
               images.add(value.image);
             }
-            if (isDecryptingAllImages) return;
             _emit(emit);
           },
           removedGalleryImage: (value) {
@@ -262,6 +274,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       );
     });
     on<_ArchivePageEncryptAll>((event, emit) async {
+      // Stop any background decrypt for this folder before re-locking.
+      decryptJobManager.cancel(_currentFolderKey);
       for (final image in currentFolderImages) {
         appBloc.add(
           AppEvent.setDecryptedInfo(
@@ -270,79 +284,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           ),
         );
       }
-      isDecryptingAllImages = false;
       _emit(emit);
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
-      final scopedPaths =
-          currentFolderImages.map((i) => i.storagePath.path).toSet();
-      final sortedImages =
-          this.sortedImages
-              .where((img) => scopedPaths.contains(img.storagePath.path))
-              .toList();
-      final sortedImagesTable = {
-        for (int i = 0; i < sortedImages.length; i++) i: sortedImages[i],
-      };
-      sortedImages.removeWhere((img) => img.decryptInfo != null);
-      bool hasRemovedImages =
-          sortedImages.length != sortedImagesTable.keys.length;
-
-      galleryBloc.add(
-        GalleryEvent.decryptImages(
-          image: sortedImages,
-          password: event.passphrase,
-        ),
+      // Kick off a background job for the current folder and return at once; the
+      // manager decrypts off-loop (in parallel with other folders) and progress
+      // flows back via the [decryptJobManager.updates] subscription.
+      decryptJobManager.start(
+        key: _currentFolderKey,
+        images: currentFolderImages,
+        password: event.passphrase,
       );
-
-      isDecryptingAllImages = true;
-
-      await for (final state in galleryBloc.stream) {
-        final completed = state.maybeMap(
-          decrypted: (value) {
-            var dearchivingState = value.dearchivingState;
-
-            final completed =
-                dearchivingState.progress == dearchivingState.totalImages;
-
-            if (hasRemovedImages) {
-              final sortedImagesTableValues =
-                  sortedImagesTable.entries.toList();
-              for (final dearchivedImage in dearchivingState.dearchivedImages) {
-                final item = sortedImagesTableValues.firstWhere(
-                  (value) =>
-                      value.value.storagePath.path ==
-                      dearchivedImage.storagePath.path,
-                );
-                if (item.value.isDecrypted) continue;
-
-                sortedImagesTable[item.key] = item.value.copyWithDecryptInfo(
-                  decryptInfo: dearchivedImage.decryptInfo,
-                );
-              }
-
-              dearchivingState = dearchivingState.copyWith(
-                totalImages: sortedImagesTable.length,
-                dearchivedImages: sortedImagesTable.values.toList(),
-              );
-            }
-
-            emit(
-              ArchivePageState.decryptingAllUI(
-                dearchivingState: dearchivingState,
-              ),
-            );
-
-            return completed;
-          },
-          orElse: () => false,
-        );
-        if (completed) break;
-      }
-
-      isDecryptingAllImages = false;
-      // Return to a browsable `ui` state so back-navigation and the FAB read a
-      // fresh state instead of resting in `decryptingAllUI` (mirrors
-      // [_onDecryptFolder]).
       _emit(emit);
     });
     on<_ImportImages>((event, emit) async {
@@ -421,6 +373,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     on<_DeleteFolder>(_onDeleteFolder);
     on<_MoveImages>(_onMoveImages);
     on<_DecryptFolder>(_onDecryptFolder);
+
+    // Background decrypt progress → refresh the view (folder tiles + FAB).
+    _decryptSub = decryptJobManager.updates.listen(
+      (_) => add(const ArchivePageEvent.refreshView()),
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _decryptSub?.cancel();
+    return super.close();
   }
 
   // ── Folder navigation ───────────────────────────────────────────────────────
@@ -646,47 +609,23 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     );
   }
 
-  Future<void> _onDecryptFolder(
-    _DecryptFolder event,
-    Emitter<ArchivePageState> emit,
-  ) async {
+  void _onDecryptFolder(_DecryptFolder event, Emitter<ArchivePageState> emit) {
     final folderImages = ArchiveTreeUtils.imagesUnder(
       images,
       isPrivate: event.isPrivate,
       relativePath: event.relativePath,
-    )..removeWhere((img) => img.decryptInfo != null);
-
-    if (folderImages.isEmpty) {
-      _emit(emit);
-      return;
-    }
-
-    galleryBloc.add(
-      GalleryEvent.decryptImages(
-        image: folderImages,
-        password: event.passphrase,
-      ),
     );
 
-    isDecryptingAllImages = true;
-
-    await for (final state in galleryBloc.stream) {
-      final completed = state.maybeMap(
-        decrypted: (value) {
-          final dearchivingState = value.dearchivingState;
-          emit(
-            ArchivePageState.decryptingAllUI(
-              dearchivingState: dearchivingState,
-            ),
-          );
-          return dearchivingState.progress == dearchivingState.totalImages;
-        },
-        orElse: () => false,
-      );
-      if (completed) break;
-    }
-
-    isDecryptingAllImages = false;
+    // Background job keyed by this folder so it runs in parallel with others
+    // and survives navigating away.
+    decryptJobManager.start(
+      key: DecryptJobManager.keyFor(
+        isPrivate: event.isPrivate,
+        relativePath: event.relativePath,
+      ),
+      images: folderImages,
+      password: event.passphrase,
+    );
     _emit(emit);
   }
 
@@ -725,6 +664,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       _createdFolders,
       isPrivate: _currentIsPrivate,
       currentPath: _currentPath,
+      jobFor:
+          (isPrivate, relativePath) => decryptJobManager.jobState(
+            DecryptJobManager.keyFor(
+              isPrivate: isPrivate,
+              relativePath: relativePath,
+            ),
+          ),
     );
     final breadcrumb =
         _currentPath.isEmpty ? const <String>[] : _currentPath.split('/');
@@ -737,6 +683,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         currentPath: _currentPath,
         currentIsPrivate: _currentIsPrivate,
         isSelectionMode: _isSelectionMode,
+        activeJob: decryptJobManager.jobState(_currentFolderKey),
       ),
     );
   }

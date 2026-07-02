@@ -20,6 +20,7 @@ import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc
 import 'package:tornado_img_app/core/data/repositories/app_repository/app_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
+import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
@@ -49,13 +50,16 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton(
     () => HomepageBloc(appRepository: getIt(), folderStreamer: getIt()),
   );
+  getIt.registerLazySingleton(
+    () => DecryptJobManager(decryptUseCase: getIt(), appBloc: getIt()),
+  );
   getIt.registerFactory(
     () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
   );
   getIt.registerFactory(
     () => ArchivePageBloc(
       appBloc: getIt(),
-      galleryBloc: getIt(),
+      decryptJobManager: getIt(),
       galleryReaderUseCase: getIt(),
       imageDeleterUseCase: getIt(),
       imageSaverUseCase: getIt(),

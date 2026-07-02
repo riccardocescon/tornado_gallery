@@ -1002,7 +1002,7 @@ extension ArchivePageStatePatterns on ArchivePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Importing value)?  importing,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _DecryptingAllUI value)?  decryptingAllUI,TResult Function( _Imported value)?  imported,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Importing value)?  importing,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _Imported value)?  imported,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -1010,8 +1010,7 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Importing() when importing != null:
 return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
-return ui(_that);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that);case _Imported() when imported != null:
+return ui(_that);case _Imported() when imported != null:
 return imported(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
@@ -1031,7 +1030,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Importing value)  importing,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _DecryptingAllUI value)  decryptingAllUI,required TResult Function( _Imported value)  imported,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Importing value)  importing,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _Imported value)  imported,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -1039,8 +1038,7 @@ return initial(_that);case _Loading():
 return loading(_that);case _Importing():
 return importing(_that);case _Deleting():
 return deleting(_that);case _UI():
-return ui(_that);case _DecryptingAllUI():
-return decryptingAllUI(_that);case _Imported():
+return ui(_that);case _Imported():
 return imported(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
@@ -1059,7 +1057,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Importing value)?  importing,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _DecryptingAllUI value)?  decryptingAllUI,TResult? Function( _Imported value)?  imported,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Importing value)?  importing,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _Imported value)?  imported,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -1067,8 +1065,7 @@ return initial(_that);case _Loading() when loading != null:
 return loading(_that);case _Importing() when importing != null:
 return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
-return ui(_that);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that);case _Imported() when imported != null:
+return ui(_that);case _Imported() when imported != null:
 return imported(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
@@ -1087,15 +1084,14 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  importing,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode)?  ui,TResult Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult Function()?  imported,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  importing,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult Function()?  imported,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Importing() when importing != null:
 return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
-return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that.dearchivingState);case _Imported() when imported != null:
+return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported() when imported != null:
 return imported();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
@@ -1115,15 +1111,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  importing,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode)  ui,required TResult Function( DearchivingState dearchivingState)  decryptingAllUI,required TResult Function()  imported,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  importing,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)  ui,required TResult Function()  imported,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Importing():
 return importing();case _Deleting():
 return deleting(_that.paths);case _UI():
-return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode);case _DecryptingAllUI():
-return decryptingAllUI(_that.dearchivingState);case _Imported():
+return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported():
 return imported();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -1142,15 +1137,14 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  importing,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode)?  ui,TResult? Function( DearchivingState dearchivingState)?  decryptingAllUI,TResult? Function()?  imported,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  importing,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult? Function()?  imported,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Importing() when importing != null:
 return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
-return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode);case _DecryptingAllUI() when decryptingAllUI != null:
-return decryptingAllUI(_that.dearchivingState);case _Imported() when imported != null:
+return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported() when imported != null:
 return imported();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
@@ -1288,7 +1282,7 @@ as List<String>,
 
 
 class _UI extends ArchivePageState {
-  const _UI({required final  List<EncryptedImage> images, final  List<ArchiveFolderView> folders = const <ArchiveFolderView>[], final  List<String> breadcrumb = const <String>[], this.currentPath = '', this.currentIsPrivate, this.isSelectionMode = false}): _images = images,_folders = folders,_breadcrumb = breadcrumb,super._();
+  const _UI({required final  List<EncryptedImage> images, final  List<ArchiveFolderView> folders = const <ArchiveFolderView>[], final  List<String> breadcrumb = const <String>[], this.currentPath = '', this.currentIsPrivate, this.isSelectionMode = false, this.activeJob}): _images = images,_folders = folders,_breadcrumb = breadcrumb,super._();
   
 
  final  List<EncryptedImage> _images;
@@ -1315,6 +1309,7 @@ class _UI extends ArchivePageState {
 @JsonKey() final  String currentPath;
  final  bool? currentIsPrivate;
 @JsonKey() final  bool isSelectionMode;
+ final  DearchivingState? activeJob;
 
 /// Create a copy of ArchivePageState
 /// with the given fields replaced by the non-null parameter values.
@@ -1335,7 +1330,7 @@ abstract mixin class _$UICopyWith<$Res> implements $ArchivePageStateCopyWith<$Re
   factory _$UICopyWith(_UI value, $Res Function(_UI) _then) = __$UICopyWithImpl;
 @useResult
 $Res call({
- List<EncryptedImage> images, List<ArchiveFolderView> folders, List<String> breadcrumb, String currentPath, bool? currentIsPrivate, bool isSelectionMode
+ List<EncryptedImage> images, List<ArchiveFolderView> folders, List<String> breadcrumb, String currentPath, bool? currentIsPrivate, bool isSelectionMode, DearchivingState? activeJob
 });
 
 
@@ -1352,7 +1347,7 @@ class __$UICopyWithImpl<$Res>
 
 /// Create a copy of ArchivePageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? folders = null,Object? breadcrumb = null,Object? currentPath = null,Object? currentIsPrivate = freezed,Object? isSelectionMode = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? folders = null,Object? breadcrumb = null,Object? currentPath = null,Object? currentIsPrivate = freezed,Object? isSelectionMode = null,Object? activeJob = freezed,}) {
   return _then(_UI(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
 as List<EncryptedImage>,folders: null == folders ? _self._folders : folders // ignore: cast_nullable_to_non_nullable
@@ -1360,62 +1355,8 @@ as List<ArchiveFolderView>,breadcrumb: null == breadcrumb ? _self._breadcrumb : 
 as List<String>,currentPath: null == currentPath ? _self.currentPath : currentPath // ignore: cast_nullable_to_non_nullable
 as String,currentIsPrivate: freezed == currentIsPrivate ? _self.currentIsPrivate : currentIsPrivate // ignore: cast_nullable_to_non_nullable
 as bool?,isSelectionMode: null == isSelectionMode ? _self.isSelectionMode : isSelectionMode // ignore: cast_nullable_to_non_nullable
-as bool,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _DecryptingAllUI extends ArchivePageState {
-  const _DecryptingAllUI({required this.dearchivingState}): super._();
-  
-
- final  DearchivingState dearchivingState;
-
-/// Create a copy of ArchivePageState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$DecryptingAllUICopyWith<_DecryptingAllUI> get copyWith => __$DecryptingAllUICopyWithImpl<_DecryptingAllUI>(this, _$identity);
-
-
-
-
-
-
-
-}
-
-/// @nodoc
-abstract mixin class _$DecryptingAllUICopyWith<$Res> implements $ArchivePageStateCopyWith<$Res> {
-  factory _$DecryptingAllUICopyWith(_DecryptingAllUI value, $Res Function(_DecryptingAllUI) _then) = __$DecryptingAllUICopyWithImpl;
-@useResult
-$Res call({
- DearchivingState dearchivingState
-});
-
-
-
-
-}
-/// @nodoc
-class __$DecryptingAllUICopyWithImpl<$Res>
-    implements _$DecryptingAllUICopyWith<$Res> {
-  __$DecryptingAllUICopyWithImpl(this._self, this._then);
-
-  final _DecryptingAllUI _self;
-  final $Res Function(_DecryptingAllUI) _then;
-
-/// Create a copy of ArchivePageState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? dearchivingState = null,}) {
-  return _then(_DecryptingAllUI(
-dearchivingState: null == dearchivingState ? _self.dearchivingState : dearchivingState // ignore: cast_nullable_to_non_nullable
-as DearchivingState,
+as bool,activeJob: freezed == activeJob ? _self.activeJob : activeJob // ignore: cast_nullable_to_non_nullable
+as DearchivingState?,
   ));
 }
 

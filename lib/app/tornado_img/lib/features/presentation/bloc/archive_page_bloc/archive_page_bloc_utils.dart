@@ -15,15 +15,30 @@ class ArchiveFolderView extends Equatable {
   /// Number of images contained, recursively.
   final int imageCount;
 
+  /// Background-decrypt progress for this folder, or null when no job is running.
+  final int? decryptDone;
+  final int? decryptTotal;
+
+  bool get isDecrypting => decryptTotal != null;
+
   const ArchiveFolderView({
     required this.name,
     required this.relativePath,
     required this.isPrivate,
     required this.imageCount,
+    this.decryptDone,
+    this.decryptTotal,
   });
 
   @override
-  List<Object?> get props => [name, relativePath, isPrivate, imageCount];
+  List<Object?> get props => [
+    name,
+    relativePath,
+    isPrivate,
+    imageCount,
+    decryptDone,
+    decryptTotal,
+  ];
 }
 
 /// Pure helpers that derive the navigable folder tree from a flat image list
@@ -52,6 +67,7 @@ class ArchiveTreeUtils {
     Set<FolderKey> createdFolders, {
     required bool? isPrivate,
     required String currentPath,
+    DearchivingState? Function(bool isPrivate, String relativePath)? jobFor,
   }) {
     // Every folder path that exists, expanded to include intermediate
     // ancestors so a deep-only image still surfaces its parent folders.
@@ -83,31 +99,38 @@ class ArchiveTreeUtils {
         childRel = dir.relativePath.split('/').first;
       } else {
         if (!dir.relativePath.startsWith('$currentPath/')) continue;
-        final next = dir.relativePath
-            .substring(currentPath.length + 1)
-            .split('/')
-            .first;
+        final next =
+            dir.relativePath.substring(currentPath.length + 1).split('/').first;
         childRel = '$currentPath/$next';
       }
       final key = '${dir.isPrivate ? 'P' : 'G'}:$childRel';
       children[key] = (isPrivate: dir.isPrivate, relativePath: childRel);
     }
 
-    final views = children.values.map((child) {
-      final count = all.where((img) {
-        if (img.storagePath.isPrivateFolder != child.isPrivate) return false;
-        final d = img.storeRelativeDir;
-        return d == child.relativePath ||
-            d.startsWith('${child.relativePath}/');
-      }).length;
-      return ArchiveFolderView(
-        name: child.relativePath.split('/').last,
-        relativePath: child.relativePath,
-        isPrivate: child.isPrivate,
-        imageCount: count,
-      );
-    }).toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final views =
+        children.values.map((child) {
+            final count =
+                all.where((img) {
+                  if (img.storagePath.isPrivateFolder != child.isPrivate) {
+                    return false;
+                  }
+                  final d = img.storeRelativeDir;
+                  return d == child.relativePath ||
+                      d.startsWith('${child.relativePath}/');
+                }).length;
+            final job = jobFor?.call(child.isPrivate, child.relativePath);
+            return ArchiveFolderView(
+              name: child.relativePath.split('/').last,
+              relativePath: child.relativePath,
+              isPrivate: child.isPrivate,
+              imageCount: count,
+              decryptDone: job?.progress,
+              decryptTotal: job?.totalImages,
+            );
+          }).toList()
+          ..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
 
     return views;
   }
