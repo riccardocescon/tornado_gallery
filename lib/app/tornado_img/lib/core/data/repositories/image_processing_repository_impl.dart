@@ -18,7 +18,35 @@ Future<Uint8List> _encrypt(_Task task) {
 img.Image? _decodeImage((Uint8List, String) args) {
   final bytes = args.$1;
   final ext = args.$2;
-  return img.decodeNamedImage('file.$ext', bytes);
+
+  // Content-based detection first. Web-downloaded images often carry a wrong or
+  // misleading extension (e.g. a WebP/AVIF served as .jpg). Extension-based
+  // decoding then picks the wrong decoder and throws
+  // "ImageException: Start Of Image marker not found" (JPEG SOI 0xFFD8 missing).
+  final format = img.findFormatForData(bytes);
+  if (format != img.ImageFormat.invalid) {
+    try {
+      final decoded = img.decodeImage(bytes);
+      if (decoded != null) return decoded;
+    } catch (_) {
+      // Fall through to extension-based decoding below.
+    }
+  }
+
+  // Fallback: extension-based decoder for formats content detection missed.
+  try {
+    return img.decodeNamedImage('file.$ext', bytes);
+  } catch (_) {
+    return null;
+  }
+}
+
+String _magicHead(Uint8List bytes) {
+  final n = bytes.length < 16 ? bytes.length : 16;
+  return bytes
+      .sublist(0, n)
+      .map((b) => b.toRadixString(16).padLeft(2, '0'))
+      .join(' ');
 }
 
 Uint8List _encodeImage(ImageModel model) {
@@ -48,7 +76,17 @@ class ImageProcessingRepositoryImpl implements ImageProcessingRepository {
   }) async {
     final ext = extension.toLowerCase();
     final decoded = await compute(_decodeImage, (bytes, ext));
-    if (decoded == null) return null;
+    if (decoded == null) {
+      // Unsupported/undecodable input (e.g. HEIC/AVIF, or corrupt data).
+      // Log magic bytes + detected format so the case can be diagnosed.
+      appLogger.log(
+        'Image decode failed — ext="$ext", '
+        'detectedFormat=${img.findFormatForData(bytes)}, '
+        'size=${bytes.length}, head=[${_magicHead(bytes)}]',
+        LogLayer.repository,
+      );
+      return null;
+    }
     return ImageModel.fromImg(decoded);
   }
 
