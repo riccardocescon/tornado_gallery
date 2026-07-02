@@ -474,6 +474,79 @@ void main() {
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(
+      'deleteFolder removes the folder optimistically before the delete '
+      'usecase resolves',
+      build: () {
+        seedNested();
+        // Slow delete: the folder must already be gone from the emitted ui
+        // before this completes.
+        when(() => mockDeleteFolder.call(any())).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 60));
+          return const Right(true);
+        });
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(
+          const ArchivePageEvent.deleteFolder(
+            relativePath: 'Vacanze',
+            isPrivate: true,
+          ),
+        );
+        // Sample the state while the delete usecase is still running.
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      },
+      verify: (bloc) {
+        final folderNames = bloc.state.maybeMap(
+          ui: (u) => u.folders.map((f) => f.name).toList(),
+          orElse: () => <String>['<not-ui>'],
+        );
+        expect(folderNames, isNot(contains('Vacanze')));
+      },
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
+      'deleteFolder rolls the folder back and surfaces failure when the '
+      'delete usecase returns Left',
+      build: () {
+        seedNested();
+        when(() => mockDeleteFolder.call(any())).thenAnswer(
+          (_) async => Left(EncryptionFailure.encryptionError('disk error')),
+        );
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(
+          const ArchivePageEvent.deleteFolder(
+            relativePath: 'Vacanze',
+            isPrivate: true,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+      },
+      verify: (bloc) {
+        // Final emitted state restores the folder (rollback re-emits ui).
+        final folderNames = bloc.state.maybeMap(
+          ui: (u) => u.folders.map((f) => f.name).toList(),
+          orElse: () => <String>['<not-ui>'],
+        );
+        expect(folderNames, contains('Vacanze'));
+        // Images under the folder are back in the in-memory model.
+        expect(
+          bloc.images.map((i) => i.storagePath.path),
+          containsAll(<String>[
+            '/app/encrypted/Vacanze/a.png',
+            '/app/encrypted/Vacanze/Mare/b.png',
+          ]),
+        );
+      },
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
       'decryptFolder starts a background job for the folder',
       build: () {
         seedNested();

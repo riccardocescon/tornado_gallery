@@ -535,6 +535,50 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       isPrivate: event.isPrivate,
       relativePath: event.relativePath,
     );
+
+    // Snapshot for rollback: the Android public delete sweeps MediaStore and
+    // can take seconds. Awaiting it before touching the view froze the folder
+    // on screen until completion (only a restart showed it gone). Instead
+    // remove optimistically, run the delete in the background, and restore the
+    // snapshot if it fails.
+    final removedImages = List<EncryptedImage>.from(contained);
+    final removedFolders =
+        _createdFolders
+            .where(
+              (f) =>
+                  f.isPrivate == event.isPrivate &&
+                  (f.relativePath == event.relativePath ||
+                      f.relativePath.startsWith('${event.relativePath}/')),
+            )
+            .toList();
+
+    for (final img in removedImages) {
+      images.removeWhere(
+        (i) =>
+            i.storagePath.path == img.storagePath.path ||
+            (img.storagePath.assetId != null &&
+                i.storagePath.assetId == img.storagePath.assetId),
+      );
+      appBloc.add(
+        AppEvent.removeEncryptedImage(
+          path: img.storagePath.assetId ?? img.storagePath.path,
+        ),
+      );
+    }
+    _createdFolders.removeWhere(
+      (f) =>
+          f.isPrivate == event.isPrivate &&
+          (f.relativePath == event.relativePath ||
+              f.relativePath.startsWith('${event.relativePath}/')),
+    );
+    appBloc.add(
+      AppEvent.folderDeleted(
+        isPrivate: event.isPrivate,
+        relativePath: event.relativePath,
+      ),
+    );
+    _emit(emit);
+
     final result = await deleteFolderUseCase.call(
       DeleteFolderParams(
         relativePath: event.relativePath,
@@ -543,35 +587,25 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       ),
     );
     result.fold(
-      (failure) => emit(ArchivePageState.failure(message: failure.message)),
-      (_) {
-        for (final img in contained) {
-          images.removeWhere(
-            (i) =>
-                i.storagePath.path == img.storagePath.path ||
-                (img.storagePath.assetId != null &&
-                    i.storagePath.assetId == img.storagePath.assetId),
-          );
-          appBloc.add(
-            AppEvent.removeEncryptedImage(
-              path: img.storagePath.assetId ?? img.storagePath.path,
-            ),
-          );
+      (failure) {
+        // Rollback: restore the removed images and folders, then surface the
+        // failure. `failure` only triggers a snackbar in the view; the trailing
+        // `_emit` re-renders the restored `ui` state so the folder reappears.
+        images.addAll(removedImages);
+        for (final img in removedImages) {
+          appBloc.add(AppEvent.addEncryptedImage(image: img));
         }
-        _createdFolders.removeWhere(
-          (f) =>
-              f.isPrivate == event.isPrivate &&
-              (f.relativePath == event.relativePath ||
-                  f.relativePath.startsWith('${event.relativePath}/')),
-        );
+        _createdFolders.addAll(removedFolders);
         appBloc.add(
-          AppEvent.folderDeleted(
+          AppEvent.folderCreated(
             isPrivate: event.isPrivate,
             relativePath: event.relativePath,
           ),
         );
+        emit(ArchivePageState.failure(message: failure.message));
         _emit(emit);
       },
+      (_) {},
     );
   }
 

@@ -97,36 +97,55 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
     var ok = false;
     if (assetIds.isNotEmpty) ok = await delete(assetIds);
 
+    final path = await GalleryPathProvider.getPublicFolderPath(
+      relative: relativePath,
+    );
+    final dir = path == null ? null : Directory(path);
+
+    // Fast path: once the tracked assets are gone, a flat folder is already
+    // empty and needs no MediaStore sweep. The sweep below scans the entire
+    // gallery (every image, paged) which is slow on large galleries, so only
+    // run it when the directory still holds content — nested subfolders or
+    // images not tracked by the app.
+    var needsSweep = true;
+    if (dir != null) {
+      try {
+        if (!await dir.exists()) {
+          needsSweep = false;
+        } else if (await dir.list(followLinks: false).isEmpty) {
+          needsSweep = false;
+        }
+      } catch (_) {
+        // Fall back to sweeping if the directory can't be listed.
+      }
+    }
+
     // dart:io cannot delete MediaStore-managed image files on scoped storage,
     // which leaves the directory non-empty (errno 39) when [assetIds] does not
     // cover every asset under the folder (e.g. subfolders or untracked images).
     // Sweep MediaStore for all assets living under this folder tree and delete
     // them via PhotoManager before removing the directory itself.
-    try {
-      final passed = assetIds.toSet();
-      final remaining =
-          (await _publicAssetIdsUnderFolder(
-            relativePath,
-          )).where((id) => !passed.contains(id)).toList();
-      if (remaining.isNotEmpty && await delete(remaining)) ok = true;
-    } catch (e) {
-      appLogger.log(
-        'AndroidPublicStorageDatasource.deleteFolder: asset sweep error',
-        LogLayer.repository,
-        error: e.toString(),
-      );
+    if (needsSweep) {
+      try {
+        final passed = assetIds.toSet();
+        final remaining =
+            (await _publicAssetIdsUnderFolder(
+              relativePath,
+            )).where((id) => !passed.contains(id)).toList();
+        if (remaining.isNotEmpty && await delete(remaining)) ok = true;
+      } catch (e) {
+        appLogger.log(
+          'AndroidPublicStorageDatasource.deleteFolder: asset sweep error',
+          LogLayer.repository,
+          error: e.toString(),
+        );
+      }
     }
 
     try {
-      final path = await GalleryPathProvider.getPublicFolderPath(
-        relative: relativePath,
-      );
-      if (path != null) {
-        final dir = Directory(path);
-        if (await dir.exists()) {
-          await dir.delete(recursive: true);
-          ok = true;
-        }
+      if (dir != null && await dir.exists()) {
+        await dir.delete(recursive: true);
+        ok = true;
       }
     } catch (e) {
       appLogger.log(
