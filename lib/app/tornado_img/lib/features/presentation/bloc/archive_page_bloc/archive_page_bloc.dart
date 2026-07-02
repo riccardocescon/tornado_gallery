@@ -69,6 +69,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   /// Store of the folder currently entered, or null at the root (mixed view).
   bool? get currentIsPrivate => _currentIsPrivate;
 
+  /// Whether the archive is currently in multi-select mode. Exposed so the view
+  /// can decide back-navigation without depending on the transient emitted
+  /// state (which may briefly be non-`ui` mid-operation).
+  bool get isSelectionMode => _isSelectionMode;
+
   /// Folders created in-session that may still be empty, so they show up
   /// before any image lives in them.
   final Set<FolderKey> _createdFolders = <FolderKey>{};
@@ -335,6 +340,10 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       }
 
       isDecryptingAllImages = false;
+      // Return to a browsable `ui` state so back-navigation and the FAB read a
+      // fresh state instead of resting in `decryptingAllUI` (mirrors
+      // [_onDecryptFolder]).
+      _emit(emit);
     });
     on<_ImportImages>((event, emit) async {
       emit(const ArchivePageState.importing());
@@ -402,6 +411,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       emit(const ArchivePageState.imported());
     });
+    on<_RefreshView>(_onRefreshView);
     on<_ActivateSelectionMode>(_onActivateSelectionMode);
     on<_CancelSelectionMode>(_onCancelSelectionMode);
     on<_EnterFolder>(_onEnterFolder);
@@ -729,6 +739,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         isSelectionMode: _isSelectionMode,
       ),
     );
+  }
+
+  /// Re-derives the browsable `ui` state from the bloc's retained data. Used
+  /// when the page is re-opened while the bloc is resting in a terminal state
+  /// (e.g. a `failure` from a folder op) so the archive never renders blank.
+  void _onRefreshView(_RefreshView event, Emitter<ArchivePageState> emit) {
+    _emit(emit);
   }
 
   void _onActivateSelectionMode(

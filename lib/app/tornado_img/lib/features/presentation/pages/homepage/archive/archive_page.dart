@@ -365,9 +365,19 @@ class _ArchivePageState extends State<ArchivePage> {
       _savedScrollOffset = _scrollController.offset;
     });
 
+    final archiveBloc = context.read<ArchivePageBloc>();
+
+    // The bloc is preserved across archive opens. If it was left resting in a
+    // terminal `failure` state (e.g. a rejected duplicate-folder create), the
+    // `ui`-only BlocBuilders would render blank on this fresh mount — re-emit
+    // the browsable state from retained data.
+    archiveBloc.state.mapOrNull(
+      failure: (_) => archiveBloc.add(const ArchivePageEvent.refreshView()),
+    );
+
     // Set _lastUiImages if the latest state was dearchiving all
     // so it can show the deachivedAll icons correctly
-    context.read<ArchivePageBloc>().state.mapOrNull(
+    archiveBloc.state.mapOrNull(
       decryptingAllUI:
           (value) => _lastUiImages = value.dearchivingState.allImages,
     );
@@ -388,16 +398,19 @@ class _ArchivePageState extends State<ArchivePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),
-      builder: (context, state) {
-        final canPop = state.maybeMap(
-          ui: (s) =>
-              !s.isSelectionMode &&
-              s.currentIsPrivate == null &&
-              s.currentPath.isEmpty,
-          orElse: () => false,
-        );
+    return BlocListener<ArchivePageBloc, ArchivePageState>(
+      listenWhen: (p, c) => c.maybeMap(failure: (_) => true, orElse: () => false),
+      listener: (context, state) {
+        state.mapOrNull(failure: (f) => context.showSnackbar(f.message));
+      },
+      child: BlocBuilder<ArchivePageBloc, ArchivePageState>(
+        buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),
+        builder: (context, state) {
+        final archiveBloc = context.read<ArchivePageBloc>();
+        final canPop =
+            !archiveBloc.isSelectionMode &&
+            archiveBloc.currentIsPrivate == null &&
+            archiveBloc.currentPath.isEmpty;
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onHorizontalDragStart: (d) => _dragStartX = d.globalPosition.dx,
@@ -443,24 +456,23 @@ class _ArchivePageState extends State<ArchivePage> {
           ),
           ),
         );
-      },
+        },
+      ),
     );
   }
 
   void _onBack() {
     final archiveBloc = context.read<ArchivePageBloc>();
-    final inSelection = archiveBloc.state.maybeMap(
-      ui: (s) => s.isSelectionMode,
-      orElse: () => false,
-    );
-    if (inSelection) {
+    // Read the canonical navigation getters, not the emitted state: mid-operation
+    // the state can briefly be non-`ui` (e.g. `decryptingAllUI`), which would
+    // otherwise make back exit the archive instead of going up one folder.
+    if (archiveBloc.isSelectionMode) {
       _cancelSelection();
       return;
     }
-    final notAtRoot = archiveBloc.state.maybeMap(
-      ui: (s) => s.currentIsPrivate != null || s.currentPath.isNotEmpty,
-      orElse: () => false,
-    );
+    final notAtRoot =
+        archiveBloc.currentIsPrivate != null ||
+        archiveBloc.currentPath.isNotEmpty;
     if (notAtRoot) {
       archiveBloc.add(const ArchivePageEvent.goUp());
       return;

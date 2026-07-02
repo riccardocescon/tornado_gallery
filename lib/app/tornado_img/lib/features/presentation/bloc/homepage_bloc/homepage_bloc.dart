@@ -257,18 +257,15 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final private = appEncryptedRootFolder;
     if (private == null) return;
 
-    final subFolders =
-        private.subfolders + (appPublicEncryptedRootFolder?.subfolders ?? []);
-
-    final baseImages =
-        private.images + (appPublicEncryptedRootFolder?.images ?? []);
-
+    // Every image across both stores, at any depth, deduped by stable key. The
+    // whole tree is the source of truth here — a nested image must be counted
+    // exactly once, not once flat and once via its subfolder.
     final mergedByKey = <String, EncryptedImage>{};
-    for (final img in baseImages) {
-      final key = img.storagePath.assetId ?? img.storagePath.path;
-      mergedByKey[key] = img;
-    }
+    _collectImages(private, mergedByKey);
+    final public = appPublicEncryptedRootFolder;
+    if (public != null) _collectImages(public, mergedByKey);
 
+    // Reconcile with runtime deltas the folder-tree snapshot hasn't caught yet.
     for (final removedKey in _runtimeRemovals) {
       mergedByKey.removeWhere(
         (key, img) =>
@@ -285,12 +282,9 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
     final images = mergedByKey.values.toList();
 
-    final totalImages = subFolders.fold<int>(
-      images.length,
-      (previousValue, folder) => previousValue + folder.images.length,
-    );
+    final totalImages = images.length;
 
-    final totalBytes = _sumImagesBytes(images) + _sumFoldersBytes(subFolders);
+    final totalBytes = _sumImagesBytes(images);
 
     final lastLoaded =
         images.isNotEmpty
@@ -335,6 +329,18 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     return count;
   }
 
+  /// Collects every image in [folder] and its subfolders, keyed by the stable
+  /// identifier (`assetId ?? path`) so the same physical image never appears
+  /// twice in the count.
+  void _collectImages(EncryptedFolder folder, Map<String, EncryptedImage> out) {
+    for (final img in folder.images) {
+      out[img.storagePath.assetId ?? img.storagePath.path] = img;
+    }
+    for (final sub in folder.subfolders) {
+      _collectImages(sub, out);
+    }
+  }
+
   void _collectFolderKeys(
     EncryptedFolder folder,
     String rootPath,
@@ -356,13 +362,6 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     if (p.startsWith(root)) p = p.substring(root.length);
     if (p.startsWith('/')) p = p.substring(1);
     return p;
-  }
-
-  int _sumFoldersBytes(List<EncryptedFolder> folders) {
-    return folders.fold<int>(
-      0,
-      (total, folder) => total + _sumImagesBytes(folder.images),
-    );
   }
 
   int _sumImagesBytes(List<EncryptedImage> images) {

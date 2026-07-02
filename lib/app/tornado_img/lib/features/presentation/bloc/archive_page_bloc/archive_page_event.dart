@@ -21,6 +21,10 @@ abstract class ArchivePageEvent with _$ArchivePageEvent {
   const factory ArchivePageEvent.decryptAll({required String passphrase}) =
       _ArchivePageDecryptAll;
 
+  /// Re-emits the browsable `ui` state from retained data. Dispatched when the
+  /// page re-opens while the bloc rests in a terminal state (e.g. `failure`).
+  const factory ArchivePageEvent.refreshView() = _RefreshView;
+
   const factory ArchivePageEvent.activateSelectionMode() =
       _ActivateSelectionMode;
   const factory ArchivePageEvent.cancelSelectionMode() = _CancelSelectionMode;

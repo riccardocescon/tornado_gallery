@@ -48,7 +48,7 @@ extension ArchivePageEventPatterns on ArchivePageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _ImportImages value)?  importImages,TResult Function( _ArchivePageDelete value)?  delete,TResult Function( _ArchivePageEncryptAll value)?  encryptAll,TResult Function( _ArchivePageDecryptAll value)?  decryptAll,TResult Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult Function( _CancelSelectionMode value)?  cancelSelectionMode,TResult Function( _EnterFolder value)?  enterFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _CreateFolder value)?  createFolder,TResult Function( _RenameFolder value)?  renameFolder,TResult Function( _DeleteFolder value)?  deleteFolder,TResult Function( _MoveImages value)?  moveImages,TResult Function( _DecryptFolder value)?  decryptFolder,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _ImportImages value)?  importImages,TResult Function( _ArchivePageDelete value)?  delete,TResult Function( _ArchivePageEncryptAll value)?  encryptAll,TResult Function( _ArchivePageDecryptAll value)?  decryptAll,TResult Function( _RefreshView value)?  refreshView,TResult Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult Function( _CancelSelectionMode value)?  cancelSelectionMode,TResult Function( _EnterFolder value)?  enterFolder,TResult Function( _GoUp value)?  goUp,TResult Function( _CreateFolder value)?  createFolder,TResult Function( _RenameFolder value)?  renameFolder,TResult Function( _DeleteFolder value)?  deleteFolder,TResult Function( _MoveImages value)?  moveImages,TResult Function( _DecryptFolder value)?  decryptFolder,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
@@ -56,7 +56,8 @@ return setup(_that);case _ImportImages() when importImages != null:
 return importImages(_that);case _ArchivePageDelete() when delete != null:
 return delete(_that);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll(_that);case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
+return decryptAll(_that);case _RefreshView() when refreshView != null:
+return refreshView(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
 return activateSelectionMode(_that);case _CancelSelectionMode() when cancelSelectionMode != null:
 return cancelSelectionMode(_that);case _EnterFolder() when enterFolder != null:
 return enterFolder(_that);case _GoUp() when goUp != null:
@@ -83,7 +84,7 @@ return decryptFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _ImportImages value)  importImages,required TResult Function( _ArchivePageDelete value)  delete,required TResult Function( _ArchivePageEncryptAll value)  encryptAll,required TResult Function( _ArchivePageDecryptAll value)  decryptAll,required TResult Function( _ActivateSelectionMode value)  activateSelectionMode,required TResult Function( _CancelSelectionMode value)  cancelSelectionMode,required TResult Function( _EnterFolder value)  enterFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _CreateFolder value)  createFolder,required TResult Function( _RenameFolder value)  renameFolder,required TResult Function( _DeleteFolder value)  deleteFolder,required TResult Function( _MoveImages value)  moveImages,required TResult Function( _DecryptFolder value)  decryptFolder,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _ImportImages value)  importImages,required TResult Function( _ArchivePageDelete value)  delete,required TResult Function( _ArchivePageEncryptAll value)  encryptAll,required TResult Function( _ArchivePageDecryptAll value)  decryptAll,required TResult Function( _RefreshView value)  refreshView,required TResult Function( _ActivateSelectionMode value)  activateSelectionMode,required TResult Function( _CancelSelectionMode value)  cancelSelectionMode,required TResult Function( _EnterFolder value)  enterFolder,required TResult Function( _GoUp value)  goUp,required TResult Function( _CreateFolder value)  createFolder,required TResult Function( _RenameFolder value)  renameFolder,required TResult Function( _DeleteFolder value)  deleteFolder,required TResult Function( _MoveImages value)  moveImages,required TResult Function( _DecryptFolder value)  decryptFolder,}){
 final _that = this;
 switch (_that) {
 case _Setup():
@@ -91,7 +92,8 @@ return setup(_that);case _ImportImages():
 return importImages(_that);case _ArchivePageDelete():
 return delete(_that);case _ArchivePageEncryptAll():
 return encryptAll(_that);case _ArchivePageDecryptAll():
-return decryptAll(_that);case _ActivateSelectionMode():
+return decryptAll(_that);case _RefreshView():
+return refreshView(_that);case _ActivateSelectionMode():
 return activateSelectionMode(_that);case _CancelSelectionMode():
 return cancelSelectionMode(_that);case _EnterFolder():
 return enterFolder(_that);case _GoUp():
@@ -117,7 +119,7 @@ return decryptFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _ImportImages value)?  importImages,TResult? Function( _ArchivePageDelete value)?  delete,TResult? Function( _ArchivePageEncryptAll value)?  encryptAll,TResult? Function( _ArchivePageDecryptAll value)?  decryptAll,TResult? Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult? Function( _CancelSelectionMode value)?  cancelSelectionMode,TResult? Function( _EnterFolder value)?  enterFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _CreateFolder value)?  createFolder,TResult? Function( _RenameFolder value)?  renameFolder,TResult? Function( _DeleteFolder value)?  deleteFolder,TResult? Function( _MoveImages value)?  moveImages,TResult? Function( _DecryptFolder value)?  decryptFolder,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _ImportImages value)?  importImages,TResult? Function( _ArchivePageDelete value)?  delete,TResult? Function( _ArchivePageEncryptAll value)?  encryptAll,TResult? Function( _ArchivePageDecryptAll value)?  decryptAll,TResult? Function( _RefreshView value)?  refreshView,TResult? Function( _ActivateSelectionMode value)?  activateSelectionMode,TResult? Function( _CancelSelectionMode value)?  cancelSelectionMode,TResult? Function( _EnterFolder value)?  enterFolder,TResult? Function( _GoUp value)?  goUp,TResult? Function( _CreateFolder value)?  createFolder,TResult? Function( _RenameFolder value)?  renameFolder,TResult? Function( _DeleteFolder value)?  deleteFolder,TResult? Function( _MoveImages value)?  moveImages,TResult? Function( _DecryptFolder value)?  decryptFolder,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
@@ -125,7 +127,8 @@ return setup(_that);case _ImportImages() when importImages != null:
 return importImages(_that);case _ArchivePageDelete() when delete != null:
 return delete(_that);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll(_that);case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
+return decryptAll(_that);case _RefreshView() when refreshView != null:
+return refreshView(_that);case _ActivateSelectionMode() when activateSelectionMode != null:
 return activateSelectionMode(_that);case _CancelSelectionMode() when cancelSelectionMode != null:
 return cancelSelectionMode(_that);case _EnterFolder() when enterFolder != null:
 return enterFolder(_that);case _GoUp() when goUp != null:
@@ -151,14 +154,15 @@ return decryptFolder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,TResult Function()?  activateSelectionMode,TResult Function()?  cancelSelectionMode,TResult Function( String relativePath,  bool isPrivate)?  enterFolder,TResult Function()?  goUp,TResult Function( String name,  bool? isPrivate)?  createFolder,TResult Function( String relativePath,  bool isPrivate,  String newName)?  renameFolder,TResult Function( String relativePath,  bool isPrivate)?  deleteFolder,TResult Function( List<EncryptedImage> images,  String targetRelativePath)?  moveImages,TResult Function( String relativePath,  bool isPrivate,  String passphrase)?  decryptFolder,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  setup,TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)?  importImages,TResult Function( List<EncryptedImage> images)?  delete,TResult Function()?  encryptAll,TResult Function( String passphrase)?  decryptAll,TResult Function()?  refreshView,TResult Function()?  activateSelectionMode,TResult Function()?  cancelSelectionMode,TResult Function( String relativePath,  bool isPrivate)?  enterFolder,TResult Function()?  goUp,TResult Function( String name,  bool? isPrivate)?  createFolder,TResult Function( String relativePath,  bool isPrivate,  String newName)?  renameFolder,TResult Function( String relativePath,  bool isPrivate)?  deleteFolder,TResult Function( List<EncryptedImage> images,  String targetRelativePath)?  moveImages,TResult Function( String relativePath,  bool isPrivate,  String passphrase)?  decryptFolder,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery,_that.targetRelativePath);case _ArchivePageDelete() when delete != null:
 return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that.passphrase);case _ActivateSelectionMode() when activateSelectionMode != null:
+return decryptAll(_that.passphrase);case _RefreshView() when refreshView != null:
+return refreshView();case _ActivateSelectionMode() when activateSelectionMode != null:
 return activateSelectionMode();case _CancelSelectionMode() when cancelSelectionMode != null:
 return cancelSelectionMode();case _EnterFolder() when enterFolder != null:
 return enterFolder(_that.relativePath,_that.isPrivate);case _GoUp() when goUp != null:
@@ -185,14 +189,15 @@ return decryptFolder(_that.relativePath,_that.isPrivate,_that.passphrase);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,required TResult Function()  activateSelectionMode,required TResult Function()  cancelSelectionMode,required TResult Function( String relativePath,  bool isPrivate)  enterFolder,required TResult Function()  goUp,required TResult Function( String name,  bool? isPrivate)  createFolder,required TResult Function( String relativePath,  bool isPrivate,  String newName)  renameFolder,required TResult Function( String relativePath,  bool isPrivate)  deleteFolder,required TResult Function( List<EncryptedImage> images,  String targetRelativePath)  moveImages,required TResult Function( String relativePath,  bool isPrivate,  String passphrase)  decryptFolder,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  setup,required TResult Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)  importImages,required TResult Function( List<EncryptedImage> images)  delete,required TResult Function()  encryptAll,required TResult Function( String passphrase)  decryptAll,required TResult Function()  refreshView,required TResult Function()  activateSelectionMode,required TResult Function()  cancelSelectionMode,required TResult Function( String relativePath,  bool isPrivate)  enterFolder,required TResult Function()  goUp,required TResult Function( String name,  bool? isPrivate)  createFolder,required TResult Function( String relativePath,  bool isPrivate,  String newName)  renameFolder,required TResult Function( String relativePath,  bool isPrivate)  deleteFolder,required TResult Function( List<EncryptedImage> images,  String targetRelativePath)  moveImages,required TResult Function( String relativePath,  bool isPrivate,  String passphrase)  decryptFolder,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup();case _ImportImages():
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery,_that.targetRelativePath);case _ArchivePageDelete():
 return delete(_that.images);case _ArchivePageEncryptAll():
 return encryptAll();case _ArchivePageDecryptAll():
-return decryptAll(_that.passphrase);case _ActivateSelectionMode():
+return decryptAll(_that.passphrase);case _RefreshView():
+return refreshView();case _ActivateSelectionMode():
 return activateSelectionMode();case _CancelSelectionMode():
 return cancelSelectionMode();case _EnterFolder():
 return enterFolder(_that.relativePath,_that.isPrivate);case _GoUp():
@@ -218,14 +223,15 @@ return decryptFolder(_that.relativePath,_that.isPrivate,_that.passphrase);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,TResult? Function()?  activateSelectionMode,TResult? Function()?  cancelSelectionMode,TResult? Function( String relativePath,  bool isPrivate)?  enterFolder,TResult? Function()?  goUp,TResult? Function( String name,  bool? isPrivate)?  createFolder,TResult? Function( String relativePath,  bool isPrivate,  String newName)?  renameFolder,TResult? Function( String relativePath,  bool isPrivate)?  deleteFolder,TResult? Function( List<EncryptedImage> images,  String targetRelativePath)?  moveImages,TResult? Function( String relativePath,  bool isPrivate,  String passphrase)?  decryptFolder,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  setup,TResult? Function( List<ImportImageAsset> assets,  bool saveToAppFolder,  bool saveToGallery,  String targetRelativePath)?  importImages,TResult? Function( List<EncryptedImage> images)?  delete,TResult? Function()?  encryptAll,TResult? Function( String passphrase)?  decryptAll,TResult? Function()?  refreshView,TResult? Function()?  activateSelectionMode,TResult? Function()?  cancelSelectionMode,TResult? Function( String relativePath,  bool isPrivate)?  enterFolder,TResult? Function()?  goUp,TResult? Function( String name,  bool? isPrivate)?  createFolder,TResult? Function( String relativePath,  bool isPrivate,  String newName)?  renameFolder,TResult? Function( String relativePath,  bool isPrivate)?  deleteFolder,TResult? Function( List<EncryptedImage> images,  String targetRelativePath)?  moveImages,TResult? Function( String relativePath,  bool isPrivate,  String passphrase)?  decryptFolder,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup();case _ImportImages() when importImages != null:
 return importImages(_that.assets,_that.saveToAppFolder,_that.saveToGallery,_that.targetRelativePath);case _ArchivePageDelete() when delete != null:
 return delete(_that.images);case _ArchivePageEncryptAll() when encryptAll != null:
 return encryptAll();case _ArchivePageDecryptAll() when decryptAll != null:
-return decryptAll(_that.passphrase);case _ActivateSelectionMode() when activateSelectionMode != null:
+return decryptAll(_that.passphrase);case _RefreshView() when refreshView != null:
+return refreshView();case _ActivateSelectionMode() when activateSelectionMode != null:
 return activateSelectionMode();case _CancelSelectionMode() when cancelSelectionMode != null:
 return cancelSelectionMode();case _EnterFolder() when enterFolder != null:
 return enterFolder(_that.relativePath,_that.isPrivate);case _GoUp() when goUp != null:
@@ -486,6 +492,31 @@ as String,
 
 
 }
+
+/// @nodoc
+
+
+class _RefreshView extends ArchivePageEvent {
+  const _RefreshView(): super._();
+  
+
+
+
+
+
+
+
+
+@override
+String toString() {
+  return 'ArchivePageEvent.refreshView()';
+}
+
+
+}
+
+
+
 
 /// @nodoc
 
