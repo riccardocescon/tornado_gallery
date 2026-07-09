@@ -21,22 +21,7 @@ class _OptionsCard extends StatelessWidget {
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerLow,
-            borderRadius: AppStyle.cardBorderRadius,
-            boxShadow:
-                context.isDarkMode
-                    ? null
-                    : [
-              BoxShadow(
-                color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+        AppCard(
           child: Column(
             children: [
               OptionItem.trailing(
@@ -44,29 +29,9 @@ class _OptionsCard extends StatelessWidget {
                 title: "Gallery visibility",
                 subtitle:
                     "Allow encrypted images to be saved in public gallery",
-                trailing: BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-                  buildWhen:
-                      (previous, current) => current.maybeMap(
-                        settingsUi: (state) => true,
-                        orElse: () => false,
-                      ),
-                  builder: (context, state) {
-                    final galleryVisibility = state.maybeMap(
-                      settingsUi: (state) => state.settings.galleryVisible,
-                      orElse: () => false,
-                    );
-                    return Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: galleryVisibility,
-                        onChanged: (_) {
-                          context.read<EncryptionPageBloc>().add(
-                            const EncryptionPageEvent.toggleGalleryVisibility(),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                trailing: _SettingToggle(
+                  selector: (settings) => settings.galleryVisible,
+                  event: const EncryptionPageEvent.toggleGalleryVisibility(),
                 ),
               ),
               _divisor(context),
@@ -77,29 +42,9 @@ class _OptionsCard extends StatelessWidget {
                 title: "Override image",
                 subtitle:
                     "Allow override in case of existing image with the same name in output folder",
-                trailing: BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-                  buildWhen:
-                      (previous, current) => current.maybeMap(
-                        settingsUi: (state) => true,
-                        orElse: () => false,
-                      ),
-                  builder: (context, state) {
-                    final galleryVisibility = state.maybeMap(
-                      settingsUi: (state) => state.settings.overrideImage,
-                      orElse: () => false,
-                    );
-                    return Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: galleryVisibility,
-                        onChanged: (_) {
-                          context.read<EncryptionPageBloc>().add(
-                            const EncryptionPageEvent.toggleOverrideImage(),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                trailing: _SettingToggle(
+                  selector: (settings) => settings.overrideImage,
+                  event: const EncryptionPageEvent.toggleOverrideImage(),
                 ),
               ),
               _divisor(context),
@@ -107,29 +52,9 @@ class _OptionsCard extends StatelessWidget {
                 icon: Icons.delete_outline_rounded,
                 title: "Delete Originals",
                 subtitle: "Permanently delete original images after encryption",
-                trailing: BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-                  buildWhen:
-                      (previous, current) => current.maybeMap(
-                        settingsUi: (state) => true,
-                        orElse: () => false,
-                      ),
-                  builder: (context, state) {
-                    final deleteOriginals = state.maybeMap(
-                      settingsUi: (state) => state.settings.deleteOriginals,
-                      orElse: () => false,
-                    );
-                    return Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: deleteOriginals,
-                        onChanged: (_) {
-                          context.read<EncryptionPageBloc>().add(
-                            const EncryptionPageEvent.toggleDeleteOriginals(),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                trailing: _SettingToggle(
+                  selector: (settings) => settings.deleteOriginals,
+                  event: const EncryptionPageEvent.toggleDeleteOriginals(),
                 ),
               ),
             ],
@@ -144,6 +69,40 @@ class _OptionsCard extends StatelessWidget {
       height: 1,
       margin: const EdgeInsets.symmetric(vertical: 12),
       color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+    );
+  }
+}
+
+/// A single settings toggle wired to [EncryptionPageBloc].
+///
+/// [selector] reads the current value from [EncryptionSettings]; [event] is
+/// dispatched when the switch is flipped. Replaces the three identical
+/// gallery-visibility / override-image / delete-originals switches.
+class _SettingToggle extends StatelessWidget {
+  const _SettingToggle({required this.selector, required this.event});
+
+  final bool Function(EncryptionSettings settings) selector;
+  final EncryptionPageEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
+      buildWhen: (previous, current) =>
+          current.maybeMap(settingsUi: (state) => true, orElse: () => false),
+      builder: (context, state) {
+        final value = state.maybeMap(
+          settingsUi: (state) => selector(state.settings),
+          orElse: () => false,
+        );
+        return Transform.scale(
+          scale: 0.8,
+          child: Switch(
+            value: value,
+            onChanged: (_) =>
+                context.read<EncryptionPageBloc>().add(event),
+          ),
+        );
+      },
     );
   }
 }

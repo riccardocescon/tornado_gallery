@@ -10,12 +10,12 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 typedef AppFolderState =
     (EncryptedFolder privateFolder, EncryptedFolder? publicFolder);
 
-class AppFolderStreamerUsecase {
+class AppFolderStreamerUseCase {
   final AppRepository appRepository;
 
   StreamManager? _streamManager;
 
-  AppFolderStreamerUsecase({required this.appRepository});
+  AppFolderStreamerUseCase({required this.appRepository});
 
   Stream<AppFolderState> call() async* {
     try {
@@ -44,12 +44,17 @@ class AppFolderStreamerUsecase {
       ]);
       _streamManager = StreamManager.fromStream(merged);
 
-      await for (final _ in _streamManager!.stream
-          .debounceTime(const Duration(milliseconds: 200))) {
+      await for (final _ in _streamManager!.stream.debounceTime(
+        const Duration(milliseconds: 200),
+      )) {
         yield (privateFolder, publicFolder);
       }
     } catch (e) {
-      appLogger.logUsecase('Error streaming app folders', error: e.toString());
+      appLogger.log(
+        'Error streaming app folders',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
     }
   }
 
@@ -61,9 +66,10 @@ class AppFolderStreamerUsecase {
     required EncryptedFolder? currentPublicFolder,
     required List<EncryptedImage> archivedImages,
   }) {
-    final publicImages = archivedImages
-        .where((img) => !img.storagePath.isPrivateFolder)
-        .toList();
+    final publicImages =
+        archivedImages
+            .where((img) => !img.storagePath.isPrivateFolder)
+            .toList();
     if (publicImages.isEmpty) return currentPublicFolder;
 
     final root =
@@ -77,8 +83,8 @@ class AppFolderStreamerUsecase {
       mergedByPath[img.storagePath.path] = img;
     }
 
-    final mergedImages = mergedByPath.values.toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final mergedImages =
+        mergedByPath.values.toList()..sort((a, b) => b.date.compareTo(a.date));
 
     return root.copyWith(images: mergedImages);
   }

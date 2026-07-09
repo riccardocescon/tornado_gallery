@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/utils/picture_provider/pictures_provider.dart';
+import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/core/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -94,145 +95,156 @@ class _ArchivePageState extends State<ArchivePage> {
       isScrollControlled: true,
       backgroundColor: context.colorScheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: AppStyle.cardBorderRadius.topLeft),
+        borderRadius: BorderRadius.vertical(
+          top: AppStyle.cardBorderRadius.topLeft,
+        ),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            24,
-            24,
-            24,
-            24 + MediaQuery.viewInsetsOf(ctx).bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  ContainedItem.icon(
-                    icon: Icons.create_new_folder_outlined,
-                    backgroundColor: ctx.colorScheme.primary.withValues(
-                      alpha: 0.12,
-                    ),
-                    iconColor: ctx.colorScheme.primary,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setSheetState) => Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    24,
+                    24,
+                    24 + MediaQuery.viewInsetsOf(ctx).bottom,
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "New folder",
-                          style: ctx.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          ContainedItem.icon(
+                            icon: Icons.create_new_folder_outlined,
+                            backgroundColor: ctx.colorScheme.primary.withValues(
+                              alpha: 0.12,
+                            ),
+                            iconColor: ctx.colorScheme.primary,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "Organize your archived images",
-                          style: ctx.textTheme.bodySmall?.copyWith(
-                            color: ctx.colorScheme.onSurface.withValues(
-                              alpha: 0.6,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "New folder",
+                                  style: ctx.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Organize your archived images",
+                                  style: ctx.textTheme.bodySmall?.copyWith(
+                                    color: ctx.colorScheme.onSurface.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: controller,
+                        autofocus: true,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          hintText: "Folder name",
+                          prefixIcon: const Icon(Icons.folder_outlined),
+                          filled: true,
+                          fillColor: ctx.appColors.softBackground.withValues(
+                            alpha: 0.5,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: AppStyle.detailsBorderRadius,
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: AppStyle.detailsBorderRadius,
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: AppStyle.detailsBorderRadius,
+                            borderSide: BorderSide(
+                              color: ctx.colorScheme.primary,
+                              width: 1.5,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                textCapitalization: TextCapitalization.sentences,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  hintText: "Folder name",
-                  prefixIcon: const Icon(Icons.folder_outlined),
-                  filled: true,
-                  fillColor: ctx.appColors.softBackground.withValues(
-                    alpha: 0.5,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: AppStyle.detailsBorderRadius,
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: AppStyle.detailsBorderRadius,
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: AppStyle.detailsBorderRadius,
-                    borderSide: BorderSide(
-                      color: ctx.colorScheme.primary,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
-                onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
-              ),
-              if (atRoot) ...[
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(
-                        value: true,
-                        label: Text("Private"),
-                        icon: Icon(Icons.lock_outline_rounded),
+                        onSubmitted: (v) => Navigator.pop(ctx, (v, isPrivate)),
                       ),
-                      ButtonSegment(
-                        value: false,
-                        label: Text("Public"),
-                        icon: Icon(Icons.photo_library_outlined),
+                      if (atRoot) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<bool>(
+                            segments: const [
+                              ButtonSegment(
+                                value: true,
+                                label: Text("Private"),
+                                icon: Icon(Icons.lock_outline_rounded),
+                              ),
+                              ButtonSegment(
+                                value: false,
+                                label: Text("Public"),
+                                icon: Icon(Icons.photo_library_outlined),
+                              ),
+                            ],
+                            selected: {isPrivate},
+                            onSelectionChanged:
+                                (s) => setSheetState(() => isPrivate = s.first),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                              child: const Text("Cancel"),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  () => Navigator.pop(ctx, (
+                                    controller.text,
+                                    isPrivate,
+                                  )),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: AppStyle.detailsBorderRadius,
+                                ),
+                              ),
+                              icon: const Icon(Icons.check_rounded, size: 20),
+                              label: const Text("Create"),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                    selected: {isPrivate},
-                    onSelectionChanged: (s) =>
-                        setSheetState(() => isPrivate = s.first),
                   ),
                 ),
-              ],
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text("Cancel"),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () =>
-                          Navigator.pop(ctx, (controller.text, isPrivate)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppStyle.detailsBorderRadius,
-                        ),
-                      ),
-                      icon: const Icon(Icons.check_rounded, size: 20),
-                      label: const Text("Create"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
-        ),
-      ),
     );
     if (result != null && result.$1.trim().isNotEmpty && mounted) {
       context.read<ArchivePageBloc>().add(
@@ -248,25 +260,26 @@ class _ArchivePageState extends State<ArchivePage> {
     final controller = TextEditingController(text: folder.name);
     final name = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Rename folder"),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: "Folder name"),
-          onSubmitted: (v) => Navigator.pop(ctx, v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Rename folder"),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: "Folder name"),
+              onSubmitted: (v) => Navigator.pop(ctx, v),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, controller.text),
+                child: const Text("Rename"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text("Rename"),
-          ),
-        ],
-      ),
     );
     if (name != null && name.trim().isNotEmpty && mounted) {
       context.read<ArchivePageBloc>().add(
@@ -282,24 +295,25 @@ class _ArchivePageState extends State<ArchivePage> {
   Future<void> _confirmDeleteFolder(ArchiveFolderView folder) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete "${folder.name}"?'),
-        content: Text(
-          folder.imageCount == 0
-              ? "This folder is empty."
-              : "This will permanently delete ${folder.imageCount} image(s) inside it.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel"),
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Delete "${folder.name}"?'),
+            content: Text(
+              folder.imageCount == 0
+                  ? "This folder is empty."
+                  : "This will permanently delete ${folder.imageCount} image(s) inside it.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text("Delete"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Delete"),
-          ),
-        ],
-      ),
     );
     if (confirmed == true && mounted) {
       context.read<ArchivePageBloc>().add(
@@ -315,36 +329,39 @@ class _ArchivePageState extends State<ArchivePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => UnlockAllBottomSheet(
-        onUnlockAll: (passphrase) {
-          context.read<ArchivePageBloc>().add(
-            ArchivePageEvent.decryptFolder(
-              relativePath: folder.relativePath,
-              isPrivate: folder.isPrivate,
-              passphrase: passphrase,
-            ),
-          );
-        },
-      ),
+      builder:
+          (_) => UnlockAllBottomSheet(
+            onUnlockAll: (passphrase) {
+              context.read<ArchivePageBloc>().add(
+                ArchivePageEvent.decryptFolder(
+                  relativePath: folder.relativePath,
+                  isPrivate: folder.isPrivate,
+                  passphrase: passphrase,
+                ),
+              );
+            },
+          ),
     );
   }
 
   Future<void> _moveSelected() async {
     final bloc = context.read<ArchivePageBloc>();
-    final selected = _lastUiImages
-        .where((img) => _selectedPaths.contains(img.storagePath.path))
-        .toList();
+    final selected =
+        _lastUiImages
+            .where((img) => _selectedPaths.contains(img.storagePath.path))
+            .toList();
     if (selected.isEmpty) return;
 
     final isPrivate = selected.first.storagePath.isPrivateFolder;
     final target = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _MoveTargetSheet(
-        allImages: bloc.images,
-        isPrivate: isPrivate,
-        extraFolders: bloc.folderRelativePaths(isPrivate: isPrivate),
-      ),
+      builder:
+          (_) => _MoveTargetSheet(
+            allImages: bloc.images,
+            isPrivate: isPrivate,
+            extraFolders: bloc.folderRelativePaths(isPrivate: isPrivate),
+          ),
     );
     if (target != null && mounted) {
       bloc.add(
@@ -364,12 +381,17 @@ class _ArchivePageState extends State<ArchivePage> {
       _savedScrollOffset = _scrollController.offset;
     });
 
-    // Set _lastUiImages if the latest state was dearchiving all
-    // so it can show the deachivedAll icons correctly
-    context.read<ArchivePageBloc>().state.mapOrNull(
-      decryptingAllUI:
-          (value) => _lastUiImages = value.dearchivingState.allImages,
+    final archiveBloc = context.read<ArchivePageBloc>();
+
+    // The bloc is preserved across archive opens. On a fresh mount, if the bloc
+    // is resting in a non-`ui` state (e.g. a `failure` from a rejected
+    // duplicate-folder create), re-emit the browsable state from retained data
+    // so the `ui`-only BlocBuilders never render blank.
+    final isUi = archiveBloc.state.maybeMap(
+      ui: (_) => true,
+      orElse: () => false,
     );
+    if (!isUi) archiveBloc.add(const ArchivePageEvent.refreshView());
 
     // Restore position after first frame (needs layout to be done)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -387,79 +409,82 @@ class _ArchivePageState extends State<ArchivePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),
-      builder: (context, state) {
-        final canPop = state.maybeMap(
-          ui: (s) =>
-              !s.isSelectionMode &&
-              s.currentIsPrivate == null &&
-              s.currentPath.isEmpty,
-          orElse: () => false,
-        );
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onHorizontalDragStart: (d) => _dragStartX = d.globalPosition.dx,
-          onHorizontalDragEnd: (d) {
-            if (!canPop &&
-                (_dragStartX ?? double.infinity) < 50 &&
-                (d.primaryVelocity ?? 0) > 100) {
-              _onBack();
-            }
-            _dragStartX = null;
-          },
-          child: PopScope(
-            canPop: canPop,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              _onBack();
+    return BlocListener<ArchivePageBloc, ArchivePageState>(
+      listenWhen:
+          (p, c) => c.maybeMap(failure: (_) => true, orElse: () => false),
+      listener: (context, state) {
+        state.mapOrNull(failure: (f) => context.showSnackbar(f.message));
+      },
+      child: BlocBuilder<ArchivePageBloc, ArchivePageState>(
+        buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),
+        builder: (context, state) {
+          final archiveBloc = context.read<ArchivePageBloc>();
+          final canPop =
+              !archiveBloc.isSelectionMode &&
+              archiveBloc.currentIsPrivate == null &&
+              archiveBloc.currentPath.isEmpty;
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragStart: (d) => _dragStartX = d.globalPosition.dx,
+            onHorizontalDragEnd: (d) {
+              if (!canPop &&
+                  (_dragStartX ?? double.infinity) < 50 &&
+                  (d.primaryVelocity ?? 0) > 100) {
+                _onBack();
+              }
+              _dragStartX = null;
             },
-            child: Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: CustomScrollView(
-                  cacheExtent: 800,
-                  controller: _scrollController,
-                  slivers: [
-                    SliverToBoxAdapter(child: const SizedBox(height: 18)),
-                    SliverToBoxAdapter(child: _header()),
-                    SliverToBoxAdapter(child: _breadcrumb()),
-                    SliverToBoxAdapter(child: const SizedBox(height: 16)),
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        width: double.maxFinite,
-                        child: Row(children: [_encryptedFiles()]),
-                      ),
+            child: PopScope(
+              canPop: canPop,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                _onBack();
+              },
+              child: Scaffold(
+                body: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: CustomScrollView(
+                      cacheExtent: 800,
+                      controller: _scrollController,
+                      slivers: [
+                        SliverToBoxAdapter(child: const SizedBox(height: 18)),
+                        SliverToBoxAdapter(child: _header()),
+                        SliverToBoxAdapter(child: _breadcrumb()),
+                        SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            width: double.maxFinite,
+                            child: Row(children: [_encryptedFiles()]),
+                          ),
+                        ),
+                        _folders(),
+                        _images(),
+                      ],
                     ),
-                    _folders(),
-                    _images(),
-                  ],
+                  ),
                 ),
+                floatingActionButton: _fab(),
               ),
             ),
-            floatingActionButton: _fab(),
-          ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   void _onBack() {
     final archiveBloc = context.read<ArchivePageBloc>();
-    final inSelection = archiveBloc.state.maybeMap(
-      ui: (s) => s.isSelectionMode,
-      orElse: () => false,
-    );
-    if (inSelection) {
+    // Read the canonical navigation getters, not the emitted state: mid-operation
+    // the state can briefly be non-`ui` (e.g. `decryptingAllUI`), which would
+    // otherwise make back exit the archive instead of going up one folder.
+    if (archiveBloc.isSelectionMode) {
       _cancelSelection();
       return;
     }
-    final notAtRoot = archiveBloc.state.maybeMap(
-      ui: (s) => s.currentIsPrivate != null || s.currentPath.isNotEmpty,
-      orElse: () => false,
-    );
+    final notAtRoot =
+        archiveBloc.currentIsPrivate != null ||
+        archiveBloc.currentPath.isNotEmpty;
     if (notAtRoot) {
       archiveBloc.add(const ArchivePageEvent.goUp());
       return;
@@ -470,31 +495,42 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget _fab() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
       buildWhen:
-          (previous, current) => current.maybeMap(
-            decryptingAllUI: (value) => true,
-            ui: (value) => true,
-            orElse: () => false,
-          ),
+          (previous, current) =>
+              current.maybeMap(ui: (value) => true, orElse: () => false),
       builder: (context, state) {
         final archiveBloc = context.read<ArchivePageBloc>();
-        final isDecrypting = archiveBloc.isDecryptingAllImages;
+        final activeJob = state.maybeMap(
+          ui: (s) => s.activeJob,
+          orElse: () => null,
+        );
         final hasDecryptedAll = archiveBloc.hasAllDecrypted;
 
-        // No images at the current navigation level → nothing to
-        // decrypt/encrypt here, hide the FAB.
-        if (archiveBloc.currentFolderImages.isEmpty && !isDecrypting) {
-          return const SizedBox.shrink();
+        // A background decrypt is running for this folder → show progress.
+        if (activeJob != null) {
+          return FloatingActionButton(
+            onPressed:
+                () => context.read<ArchivePageBloc>().add(
+                  const ArchivePageEvent.encryptAll(),
+                ),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                value:
+                    activeJob.totalImages == 0
+                        ? null
+                        : activeJob.progress / activeJob.totalImages,
+                color: context.colorScheme.onPrimary,
+              ),
+            ),
+          );
         }
 
-        final isLoading = state.maybeMap(
-          decryptingAllUI:
-              (value) =>
-                  value.dearchivingState.totalImages !=
-                  value.dearchivingState.progress,
-          orElse: () => isDecrypting && !hasDecryptedAll,
-        );
-
-        if (isLoading) return const SizedBox.shrink();
+        // No images at the current navigation level → nothing to decrypt/encrypt.
+        if (archiveBloc.currentFolderImages.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
         return FloatingActionButton(
           onPressed: () {
@@ -527,15 +563,12 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _header() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (previous, current) => current.maybeMap(
-        ui: (_) => true,
-        orElse: () => false,
-      ),
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(ui: (_) => true, orElse: () => false),
       builder: (context, state) {
-        final isSelectionMode =
-            state.maybeMap(ui: (s) => s.isSelectionMode, orElse: () => false);
-        final atRoot = state.maybeMap(
-          ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
+        final isSelectionMode = state.maybeMap(
+          ui: (s) => s.isSelectionMode,
           orElse: () => false,
         );
 
@@ -558,18 +591,20 @@ class _ArchivePageState extends State<ArchivePage> {
                 onPressed: _selectedPaths.isEmpty ? null : _moveSelected,
                 icon: Icon(
                   Icons.drive_file_move_outline,
-                  color: _selectedPaths.isEmpty
-                      ? context.colorScheme.onSurface.withValues(alpha: 0.3)
-                      : context.colorScheme.onSurface,
+                  color:
+                      _selectedPaths.isEmpty
+                          ? context.colorScheme.onSurface.withValues(alpha: 0.3)
+                          : context.colorScheme.onSurface,
                 ),
               ),
               IconButton(
                 onPressed: _selectedPaths.isEmpty ? null : _deleteSelected,
                 icon: Icon(
                   Icons.delete_rounded,
-                  color: _selectedPaths.isEmpty
-                      ? context.colorScheme.onSurface.withValues(alpha: 0.3)
-                      : context.colorScheme.error,
+                  color:
+                      _selectedPaths.isEmpty
+                          ? context.colorScheme.onSurface.withValues(alpha: 0.3)
+                          : context.colorScheme.error,
                 ),
               ),
             ],
@@ -586,10 +621,10 @@ class _ArchivePageState extends State<ArchivePage> {
                 icon: Icons.archive,
               ),
             ),
-              IconButton(
-                onPressed: _onBack,
-                icon: const Icon(Icons.drive_folder_upload_rounded),
-              ),
+            IconButton(
+              onPressed: _onBack,
+              icon: const Icon(Icons.drive_folder_upload_rounded),
+            ),
             IconButton(
               tooltip: "New folder",
               onPressed: _promptNewFolder,
@@ -620,20 +655,23 @@ class _ArchivePageState extends State<ArchivePage> {
         if (errMessage != null) context.showSnackbar(errMessage);
       },
       (data) {
-        final imported = data.map((e) {
-          final name = e.title ?? e.id;
-          final baseName =
-              (name.contains('.') ? name.split('.').first : name)
+        final imported =
+            data.map((e) {
+              final name = e.title ?? e.id;
+              final baseName = (name.contains('.')
+                      ? name.split('.').first
+                      : name)
                   .replaceAll(" ", "_");
-          return ImportImageAsset(asset: e, name: baseName);
-        }).toList();
+              return ImportImageAsset(asset: e, name: baseName);
+            }).toList();
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (_) => BlocProvider.value(
-            value: context.read<ArchivePageBloc>(),
-            child: _ImportImagesBottomSheet(assets: imported),
-          ),
+          builder:
+              (_) => BlocProvider.value(
+                value: context.read<ArchivePageBloc>(),
+                child: _ImportImagesBottomSheet(assets: imported),
+              ),
         );
       },
     );
@@ -641,13 +679,14 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _breadcrumb() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (previous, current) => current.maybeMap(
-        ui: (_) => true,
-        orElse: () => false,
-      ),
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(ui: (_) => true, orElse: () => false),
       builder: (context, state) {
-        final breadcrumb =
-            state.maybeMap(ui: (s) => s.breadcrumb, orElse: () => <String>[]);
+        final breadcrumb = state.maybeMap(
+          ui: (s) => s.breadcrumb,
+          orElse: () => <String>[],
+        );
         final atRoot = state.maybeMap(
           ui: (s) => s.currentIsPrivate == null && s.currentPath.isEmpty,
           orElse: () => true,
@@ -670,10 +709,9 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _folders() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (previous, current) => current.maybeMap(
-        ui: (_) => true,
-        orElse: () => false,
-      ),
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(ui: (_) => true, orElse: () => false),
       builder: (context, state) {
         final folders = state.maybeMap(
           ui: (s) => s.folders,
@@ -688,12 +726,13 @@ class _ArchivePageState extends State<ArchivePage> {
             final folder = folders[index];
             return _ArchiveFolderTile(
               folder: folder,
-              onTap: () => context.read<ArchivePageBloc>().add(
-                ArchivePageEvent.enterFolder(
-                  relativePath: folder.relativePath,
-                  isPrivate: folder.isPrivate,
-                ),
-              ),
+              onTap:
+                  () => context.read<ArchivePageBloc>().add(
+                    ArchivePageEvent.enterFolder(
+                      relativePath: folder.relativePath,
+                      isPrivate: folder.isPrivate,
+                    ),
+                  ),
               onRename: () => _promptRenameFolder(folder),
               onDelete: () => _confirmDeleteFolder(folder),
               onDecrypt: () => _decryptFolder(folder),
@@ -706,12 +745,9 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _images() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (previous, current) => current.maybeMap(
-        ui: (_) => true,
-        decryptingAllUI: (s) =>
-            _lastUiImages.length == s.dearchivingState.totalImages,
-        orElse: () => false,
-      ),
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(ui: (_) => true, orElse: () => false),
       builder: (context, state) {
         return state.maybeMap(
           ui: (s) {
@@ -719,13 +755,25 @@ class _ArchivePageState extends State<ArchivePage> {
             _lastUiImages = images;
             if (images.isEmpty) {
               return SliverToBoxAdapter(
-                child: s.folders.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 80),
-                        child: _noImages(),
-                      )
-                    : const SizedBox.shrink(),
+                child:
+                    s.folders.isEmpty
+                        ? Padding(
+                          padding: const EdgeInsets.only(top: 80),
+                          child: _noImages(),
+                        )
+                        : const SizedBox.shrink(),
               );
+            }
+
+            // Per-image decrypt state while a background job for this folder runs.
+            final job = s.activeJob;
+            DearchivingStateType? tileStateFor(EncryptedImage image) {
+              if (job == null) return null;
+              final path = image.storagePath.file.path;
+              final inJob = job.allImages.any(
+                (e) => e.storagePath.file.path == path,
+              );
+              return inJob ? job.getState(path) : null;
             }
 
             return SliverList.builder(
@@ -736,44 +784,16 @@ class _ArchivePageState extends State<ArchivePage> {
                   children: [
                     _ArchivedTile(
                       image: image,
-                      dearchivingStateType: null,
+                      dearchivingStateType: tileStateFor(image),
                       isSelectionMode: s.isSelectionMode,
-                      isSelected:
-                          _selectedPaths.contains(image.storagePath.path),
+                      isSelected: _selectedPaths.contains(
+                        image.storagePath.path,
+                      ),
                       onToggleSelection:
                           () => _toggleSelection(image.storagePath.path),
                       onActivateSelection: () => _activateSelection(image),
                     ),
                     if (index != images.length - 1)
-                      Divider(
-                        color: context.colorScheme.onSurface.withValues(
-                          alpha: 0.1,
-                        ),
-                      ),
-                  ],
-                );
-              },
-            );
-          },
-          decryptingAllUI: (s) {
-            final dearchivingState = s.dearchivingState;
-            assert(_lastUiImages.length == dearchivingState.totalImages);
-
-            return SliverList.builder(
-              itemCount: dearchivingState.totalImages,
-              itemBuilder: (context, index) {
-                final image = dearchivingState.allImages.firstWhere(
-                  (e) =>
-                      e.storagePath.path ==
-                      _lastUiImages[index].storagePath.path,
-                );
-                final tileState =
-                    dearchivingState.getState(image.storagePath.path);
-
-                return Column(
-                  children: [
-                    _ArchivedTile(image: image, dearchivingStateType: tileState),
-                    if (index != _lastUiImages.length - 1)
                       Divider(
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.1,
@@ -814,10 +834,9 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget _encryptedFiles() {
     return BlocBuilder<ArchivePageBloc, ArchivePageState>(
-      buildWhen: (previous, current) => current.maybeMap(
-        ui: (_) => true,
-        orElse: () => false,
-      ),
+      buildWhen:
+          (previous, current) =>
+              current.maybeMap(ui: (_) => true, orElse: () => false),
       builder: (context, state) {
         return state.maybeMap(
           ui: (s) {
@@ -833,9 +852,10 @@ class _ArchivePageState extends State<ArchivePage> {
               child: Text(
                 "$encryptedCount archived ${encryptedCount == 1 ? "file" : "files"}",
                 style: context.textTheme.labelMedium!.copyWith(
-                  color: context.isDarkMode
-                      ? context.colorScheme.onPrimary.withValues(alpha: 0.7)
-                      : context.colorScheme.primary,
+                  color:
+                      context.isDarkMode
+                          ? context.colorScheme.onPrimary.withValues(alpha: 0.7)
+                          : context.colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

@@ -6,6 +6,7 @@ import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/picture_provider/pictures_provider.dart';
+import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
@@ -22,7 +23,7 @@ part 'widgets/archive_state.dart';
 /// [ArchivePageBloc] from the shell so its state (folder navigation, loaded
 /// images) is preserved across opens.
 void _openArchive(BuildContext context) {
-  context.pushNamed('archive', extra: context.read<ArchivePageBloc>());
+  context.pushNamed(Routes.archive, extra: context.read<ArchivePageBloc>());
 }
 
 class HomePage extends StatefulWidget {
@@ -52,7 +53,7 @@ class _HomePageState extends State<HomePage> {
           galleryImages: (galleryImages) {
             if (galleryImages.isEmpty) return;
 
-            context.push("/encryption", extra: galleryImages);
+            context.pushNamed(Routes.encryption, extra: galleryImages);
           },
         );
       },

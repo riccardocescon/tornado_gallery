@@ -16,10 +16,8 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     @Default('') String currentPath,
     bool? currentIsPrivate,
     @Default(false) bool isSelectionMode,
+    DearchivingState? activeJob,
   }) = _UI;
-  const factory ArchivePageState.decryptingAllUI({
-    required DearchivingState dearchivingState,
-  }) = _DecryptingAllUI;
   const factory ArchivePageState.imported() = _Imported;
   const factory ArchivePageState.failure({required String message}) = _Failure;
 
@@ -28,13 +26,26 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     initial: () => [],
     loading: () => [],
     deleting: (paths) => [paths],
-    ui: (images, folders, breadcrumb, currentPath, currentIsPrivate,
-            isSelectionMode) =>
-        [images, folders, breadcrumb, currentPath, currentIsPrivate,
-          isSelectionMode],
+    ui:
+        (
+          images,
+          folders,
+          breadcrumb,
+          currentPath,
+          currentIsPrivate,
+          isSelectionMode,
+          activeJob,
+        ) => [
+          images,
+          folders,
+          breadcrumb,
+          currentPath,
+          currentIsPrivate,
+          isSelectionMode,
+          activeJob,
+        ],
     importing: () => [],
     imported: () => [],
-    decryptingAllUI: (dearchivingState) => [dearchivingState],
     failure: (message) => [message],
   );
 }

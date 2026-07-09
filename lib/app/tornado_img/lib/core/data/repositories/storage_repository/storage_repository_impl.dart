@@ -9,6 +9,7 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -20,9 +21,10 @@ import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 /// Has no knowledge of [Gal], [PhotoManager], or [File] directly.
 class StorageRepositoryImpl implements StorageRepository {
   StorageRepositoryImpl()
-      : _publicDatasource = Platform.isIOS
-            ? IosPublicStorageDatasource()
-            : AndroidPublicStorageDatasource();
+    : _publicDatasource =
+          Platform.isIOS
+              ? IosPublicStorageDatasource()
+              : AndroidPublicStorageDatasource();
 
   final PrivateStorageDatasource _private = PrivateStorageDatasource();
   final PublicStorageDatasource _publicDatasource;
@@ -50,7 +52,11 @@ class StorageRepositoryImpl implements StorageRepository {
       // Private filesystem save.
       await _private.save(path: path, fileName: fileName, bytes: bytes);
     } catch (e) {
-      appLogger.logRepository('StorageRepositoryImpl.save: error', error: e.toString());
+      appLogger.log(
+        'StorageRepositoryImpl.save: error',
+        LogLayer.repository,
+        error: e.toString(),
+      );
       rethrow;
     }
   }
@@ -60,19 +66,27 @@ class StorageRepositoryImpl implements StorageRepository {
   @override
   Stream<EncryptedStreamImage> readPrivateImages(String path) async* {
     final dir = Directory(path);
-    appLogger.logRepository('StorageRepositoryImpl: reading private images from $path');
+    appLogger.log(
+      'StorageRepositoryImpl: reading private images from $path',
+      LogLayer.repository,
+    );
 
     if (!await dir.exists()) {
-      appLogger.logRepository('StorageRepositoryImpl: directory not found: $path');
+      appLogger.log(
+        'StorageRepositoryImpl: directory not found: $path',
+        LogLayer.repository,
+      );
       return;
     }
 
-    yield* _private.readAllImages(dir).asyncMap(
-      (image) => EncryptedStreamImage.image(
-        image: image,
-        type: EncryptedStreamImageType.newImage,
-      ),
-    );
+    yield* _private
+        .readAllImages(dir)
+        .asyncMap(
+          (image) => EncryptedStreamImage.image(
+            image: image,
+            type: EncryptedStreamImageType.newImage,
+          ),
+        );
   }
 
   @override
@@ -97,23 +111,27 @@ class StorageRepositoryImpl implements StorageRepository {
       final seen = <String>{};
       for (final album in allAlbums) {
         try {
-          final albumAssets =
-              await album.getAssetListPaged(page: 0, size: 10000);
+          final albumAssets = await album.getAssetListPaged(
+            page: 0,
+            size: 10000,
+          );
           for (final asset in albumAssets) {
             if (!seen.add(asset.id)) continue;
             final result = await _mapPublicAsset(asset, album.name);
             if (result != null) yield result;
           }
         } catch (e) {
-          appLogger.logRepository(
+          appLogger.log(
             'StorageRepositoryImpl.readPublicGalleryImages: ${album.name} error',
+            LogLayer.repository,
             error: e.toString(),
           );
         }
       }
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'StorageRepositoryImpl.readPublicGalleryImages: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       // Permission denied or gallery unavailable — yield nothing.
@@ -137,16 +155,14 @@ class StorageRepositoryImpl implements StorageRepository {
     }
   }
 
-  static const _publicImageExtensions = {'png', 'jpg', 'jpeg'};
-
   Future<EncryptedImage?> _fileToPublicImage(File file) async {
-    final ext = file.path.split('.').last.toLowerCase();
-    if (!_publicImageExtensions.contains(ext)) return null;
+    final ext = FileNameUtils.extensionOf(file.path);
+    if (!Constants.imageExtensions.contains(ext)) return null;
 
     try {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
-      final fileName = file.path.replaceAll('\\', '/').split('/').last;
+      final fileName = FileNameUtils.basename(file.path);
       // Best-effort asset ID for later deletion via MediaStore.
       final assetId = await GalleryPathProvider.findAssetIdByName(fileName);
 
@@ -162,8 +178,9 @@ class StorageRepositoryImpl implements StorageRepository {
         date: await file.lastModified(),
       );
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'StorageRepositoryImpl: error reading public file ${file.path}',
+        LogLayer.repository,
         error: e.toString(),
       );
       return null;
@@ -174,18 +191,22 @@ class StorageRepositoryImpl implements StorageRepository {
 
   @override
   Future<bool> delete(List<StoragePath> images) async {
-    final publicIds = images
-        .where((img) => img.assetId != null)
-        .map((img) => img.assetId!)
-        .toList();
+    final publicIds =
+        images
+            .where((img) => img.assetId != null)
+            .map((img) => img.assetId!)
+            .toList();
 
-    final privatePaths = images
-        .where((img) => img.assetId == null)
-        .map((img) => img.path)
-        .toList();
+    final privatePaths =
+        images
+            .where((img) => img.assetId == null)
+            .map((img) => img.path)
+            .toList();
 
     final publicDeleted =
-        publicIds.isNotEmpty ? await _publicDatasource.delete(publicIds) : false;
+        publicIds.isNotEmpty
+            ? await _publicDatasource.delete(publicIds)
+            : false;
 
     final privateDeleted =
         privatePaths.isNotEmpty ? await _private.delete(privatePaths) : false;
@@ -207,8 +228,9 @@ class StorageRepositoryImpl implements StorageRepository {
     // iOS public gallery asset rename.
     if (assetId != null && Platform.isIOS) {
       if (bytes == null) {
-        appLogger.logRepository(
+        appLogger.log(
           'StorageRepositoryImpl.rename: missing bytes for gallery asset rename',
+          LogLayer.repository,
           error: 'assetId: $assetId',
         );
         return const StorageRenameResult(success: false);
@@ -328,8 +350,9 @@ class StorageRepositoryImpl implements StorageRepository {
         final assetId = storage.assetId;
         if (assetId == null) continue;
         try {
-          final albumName =
-              GalleryPathProvider.getPublicAlbumName(targetRelativePath);
+          final albumName = GalleryPathProvider.getPublicAlbumName(
+            targetRelativePath,
+          );
           await _publicDatasource.save(
             fileName: fileName.split('.').first,
             album: albumName,
@@ -341,8 +364,9 @@ class StorageRepositoryImpl implements StorageRepository {
           movedPrivate[storage.path] = '$albumName/$fileName';
           anySuccess = true;
         } catch (e) {
-          appLogger.logRepository(
+          appLogger.log(
             'StorageRepositoryImpl.moveImages: gallery move failed',
+            LogLayer.repository,
             error: e.toString(),
           );
         }
@@ -379,15 +403,19 @@ class StorageRepositoryImpl implements StorageRepository {
         storagePath = '$publicRootPath/${file.path.split('/').last}';
       } else if (Platform.isIOS) {
         final mappedByAssetId = await AssetNameIndex.resolveByAssetId(asset.id);
-        final mappedByHash = mappedByAssetId ?? await AssetNameIndex.resolveByHash(hash);
-        final displayFileName = mappedByHash ??
+        final mappedByHash =
+            mappedByAssetId ?? await AssetNameIndex.resolveByHash(hash);
+        final displayFileName =
+            mappedByHash ??
             await GalleryPathProvider.resolveAssetDisplayName(
               asset,
               fallbackFilePath: file.path,
             );
         storagePath = '$publicRootPath/$displayFileName';
       } else {
-        throw UnsupportedError('Unsupported platform: ${Platform.operatingSystem}');
+        throw UnsupportedError(
+          'Unsupported platform: ${Platform.operatingSystem}',
+        );
       }
 
       final encryptedImage = EncryptedImage(
@@ -405,8 +433,9 @@ class StorageRepositoryImpl implements StorageRepository {
         type: EncryptedStreamImageType.newImage,
       );
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'StorageRepositoryImpl: error mapping public asset ${asset.id}',
+        LogLayer.repository,
         error: e.toString(),
       );
       return null;

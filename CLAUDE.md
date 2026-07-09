@@ -12,36 +12,33 @@ Tornado IMG is a Flutter mobile app for local image encryption. Users select ima
 
 ## Commands
 
-All commands run from the repo root via Melos.
+> **Melos glob is stale.** `melos.yaml` declares `packages: packages/**`, but the
+> real packages live under `lib/` (`lib/app/tornado_img`, `lib/packages/*`).
+> So `melos exec` matches **zero packages** and silently no-ops (e.g. a
+> `melos exec -- dart analyze` prints SUCCESS without analyzing anything). Until
+> the glob is fixed, run tooling **per package** (`cd` into each):
 
 ```bash
-# Install dependencies
-melos exec -- flutter pub get
+# App package: analyze + tests (the app uses flutter_test, so use `flutter test`)
+cd lib/app/tornado_img
+dart analyze --fatal-infos .
+flutter test                              # all app tests
+flutter test test/path/to/foo_test.dart   # a single test file
+flutter test --name "substring"           # a single test by name
 
-# Run the app
-melos app:run
+# Crypto package (also flutter_test — `dart test` fails: it only dev-deps flutter_test)
+cd lib/packages/tornado_img_crypto && flutter test
 
-# Analyze (fatal on infos)
-melos exec -- dart analyze --fatal-infos .
+# Logger package (pure Dart)
+cd lib/packages/logger && dart test
 
-# Format
-melos exec -- dart format .
-
-# Run all tests
-melos exec --fail-fast -- dart test --reporter=expanded
-
-# Run crypto package tests only
-melos crypto:test
-
-# Build Android APK (debug)
-melos app:build:android
-
-# Build Android release (ignores crypto package — built separately)
-melos exec --flutter --no-private --ignore="*crypto*" -- flutter build apk
-
-# Build iOS release
-melos exec --flutter --no-private --ignore="*crypto*" -- flutter build ios
+# Format a package
+dart format .
 ```
+
+Melos scripts that DO work (they scope explicitly): `melos app:run`,
+`melos app:build:android`. The `melos crypto:test` script is broken (invokes
+`dart test`, which the package can't run).
 
 The crypto package native binary is compiled separately (see `lib/packages/tornado_img_crypto/CLAUDE.md` for full build prerequisites):
 - Windows: `lib/packages/tornado_img_crypto/scripts/build_windows.bat`
@@ -73,13 +70,39 @@ Implements the domain repositories. Key split:
 `injection_container.dart` wires everything with `get_it`. Singletons for core blocs and repositories; factories for feature blocs.
 
 ### Routing
-`go_router` with named routes. Complex objects (e.g., `EncryptedImage`) are passed between routes via `state.extra`, not URL params.
+`go_router`. All navigation is **named** via the `Routes` constants
+(`core/utils/routes.dart`) — use `context.pushNamed(Routes.x, extra: obj)`,
+never raw path strings. Complex objects (e.g. `EncryptedImage`, a bloc instance)
+are passed between routes via `state.extra` (cast to the concrete type in the
+route builder), not URL params.
 
 ### Key Patterns
 - **Either**: `dartz` `Either<Failure, T>` is the return type for all repository and use case calls.
 - **Freezed sealed classes**: `AppState`, `HomepageState`, etc. use `@freezed` union types. Always run `flutter pub run build_runner build` after modifying a `@freezed` class.
 - **Lazy decryption**: `EncryptedImage.decryptInfo` starts as `null`. Decrypted bytes are populated on-demand by `GalleryBloc._onDecryptImages` to avoid loading all images into memory at once.
 - **FFI encryption**: The `tornado_img_crypto` package exposes a Dart interface over a C++ AES-256-CTR engine compiled via CMake per platform.
+
+### Conventions (follow when adding code)
+- **Use cases**: extend `EncryptionUseCase<T, Params>` (Future/`Either`) or
+  `StreamUseCase<T, Params>` (Stream/`Either`) from `core/domain/usecases/usecase.dart`.
+  Class names end in `UseCase`. Wrap the body in `guardEither('log message', () async {...})`
+  — it centralises the try / `Right` / catch·log·`Left(EncryptionFailure)` pattern, so
+  don't hand-roll try/catch in a use case.
+- **Logging**: one entry point — `appLogger.log(message, LogLayer.x, {error})`.
+  `LogLayer` is re-exported from `core/utils/globals.dart` (where `appLogger` lives),
+  so importing globals is enough. There are no `logUi`/`logRepository`/… helpers.
+- **File names / paths**: use `FileNameUtils.basename()` and `FileNameUtils.extensionOf()`
+  and `Constants.imageExtensions` — don't re-inline `split('.')` / `{png,jpg,jpeg}`.
+- **Shared UI**: reuse `AppCard` (`features/presentation/widgets/app_card.dart`) for the
+  standard surface card instead of re-declaring the `Container`+`BoxDecoration`.
+
+### Crypto encoding constraint (do NOT change)
+`encryptor_interface.dart` `_encodePhrase` uses `String.codeUnits` (UTF-16 code
+units, **not** UTF-8). Key derivation depends on these raw bytes, so changing the
+encoding would break decryption of every image already encrypted with a non-ASCII
+password. Any migration is a separate task with a migration strategy. The
+`tornado_img_crypto` package is **gitignored** (excluded from the public repo) —
+edits there apply on disk but won't be committed.
 
 ## Code Generation
 

@@ -9,6 +9,8 @@ import 'package:tornado_img_app/core/data/mappers/asset_mapper.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:watcher/watcher.dart';
 
 /// Android implementation of [PublicFolderDatasource].
@@ -24,8 +26,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
       await Directory(path).create(recursive: true);
       return true;
     } catch (e) {
-      appLogger.logUsecase(
+      appLogger.log(
         'AndroidPublicFolderDatasource: error creating folder',
+        LogLayer.usecase,
         error: e.toString(),
       );
       return false;
@@ -91,8 +94,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
         );
         if (image != null) folder.images.add(image);
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'AndroidPublicFolderDatasource: error mapping asset ${asset.id}',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
       }
@@ -135,16 +139,14 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
     return folder;
   }
 
-  static const _supportedExtensions = {'png', 'jpg', 'jpeg'};
-
   Future<EncryptedImage?> _fileToPublicImage(File file) async {
-    final ext = file.path.split('.').last.toLowerCase();
-    if (!_supportedExtensions.contains(ext)) return null;
+    final ext = FileNameUtils.extensionOf(file.path);
+    if (!Constants.imageExtensions.contains(ext)) return null;
 
     try {
       final bytes = await file.readAsBytes();
       final hash = ByteModeling.generateHash(bytes);
-      final fileName = file.path.split(Platform.pathSeparator).last;
+      final fileName = FileNameUtils.basename(file.path);
       final assetId = await GalleryPathProvider.findAssetIdByName(fileName);
 
       return EncryptedImage(
@@ -157,8 +159,9 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
         date: await file.lastModified(),
       );
     } catch (e) {
-      appLogger.logPageBloc(
+      appLogger.log(
         'AndroidPublicFolderDatasource: error reading subfolder file ${file.path}',
+        LogLayer.pageBloc,
         error: e.toString(),
       );
       return null;

@@ -50,6 +50,34 @@ class _ArchiveFolderTile extends StatelessWidget {
                     color: context.colorScheme.onSurface.withValues(alpha: 0.4),
                   ),
                 ),
+                if (folder.isDecrypting)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            value:
+                                (folder.decryptTotal ?? 0) == 0
+                                    ? null
+                                    : (folder.decryptDone ?? 0) /
+                                        folder.decryptTotal!,
+                            color: context.colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          "Decrypting ${folder.decryptDone ?? 0}/${folder.decryptTotal ?? 0}",
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -64,7 +92,6 @@ class _ArchiveFolderTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SizedBox(
-        height: 80,
         child: FocusedMenuHolder(
           openWithTap: false,
           onPressed: () {},

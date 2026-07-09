@@ -7,3 +7,6 @@ environment:
 
 # Add dependencies here if needed
 dependencies:
+
+dev_dependencies:
+  test: ^1.24.0

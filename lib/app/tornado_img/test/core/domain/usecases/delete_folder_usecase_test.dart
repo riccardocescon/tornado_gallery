@@ -21,13 +21,13 @@ EncryptedImage _img(String path, {String? assetId}) => EncryptedImage(
 
 void main() {
   late _MockStorageRepository repo;
-  late DeleteFolderUsecase useCase;
+  late DeleteFolderUseCase useCase;
 
   setUpAll(() => registerFallbackValue(<StoragePath>[]));
 
   setUp(() {
     repo = _MockStorageRepository();
-    useCase = DeleteFolderUsecase(storageRepo: repo);
+    useCase = DeleteFolderUseCase(storageRepo: repo);
   });
 
   test('deletes folder and forwards contained storage paths', () async {

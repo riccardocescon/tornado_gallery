@@ -358,7 +358,7 @@ extension GalleryStatePatterns on GalleryState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _LoadingEncryption value)?  loadingEncryption,TResult Function( _LoadingDecryption value)?  loadingDecryption,TResult Function( _Encrypted value)?  encrypted,TResult Function( _Decrypted value)?  decrypted,TResult Function( _DecryptionFailure value)?  decryptionFailure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _LoadingEncryption value)?  loadingEncryption,TResult Function( _LoadingDecryption value)?  loadingDecryption,TResult Function( _Encrypted value)?  encrypted,TResult Function( _Decrypted value)?  decrypted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -366,8 +366,7 @@ return initial(_that);case _LoadingEncryption() when loadingEncryption != null:
 return loadingEncryption(_that);case _LoadingDecryption() when loadingDecryption != null:
 return loadingDecryption(_that);case _Encrypted() when encrypted != null:
 return encrypted(_that);case _Decrypted() when decrypted != null:
-return decrypted(_that);case _DecryptionFailure() when decryptionFailure != null:
-return decryptionFailure(_that);case _:
+return decrypted(_that);case _:
   return orElse();
 
 }
@@ -385,7 +384,7 @@ return decryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _LoadingEncryption value)  loadingEncryption,required TResult Function( _LoadingDecryption value)  loadingDecryption,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _Decrypted value)  decrypted,required TResult Function( _DecryptionFailure value)  decryptionFailure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _LoadingEncryption value)  loadingEncryption,required TResult Function( _LoadingDecryption value)  loadingDecryption,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _Decrypted value)  decrypted,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -393,8 +392,7 @@ return initial(_that);case _LoadingEncryption():
 return loadingEncryption(_that);case _LoadingDecryption():
 return loadingDecryption(_that);case _Encrypted():
 return encrypted(_that);case _Decrypted():
-return decrypted(_that);case _DecryptionFailure():
-return decryptionFailure(_that);case _:
+return decrypted(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -411,7 +409,7 @@ return decryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _LoadingEncryption value)?  loadingEncryption,TResult? Function( _LoadingDecryption value)?  loadingDecryption,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _Decrypted value)?  decrypted,TResult? Function( _DecryptionFailure value)?  decryptionFailure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _LoadingEncryption value)?  loadingEncryption,TResult? Function( _LoadingDecryption value)?  loadingDecryption,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _Decrypted value)?  decrypted,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -419,8 +417,7 @@ return initial(_that);case _LoadingEncryption() when loadingEncryption != null:
 return loadingEncryption(_that);case _LoadingDecryption() when loadingDecryption != null:
 return loadingDecryption(_that);case _Encrypted() when encrypted != null:
 return encrypted(_that);case _Decrypted() when decrypted != null:
-return decrypted(_that);case _DecryptionFailure() when decryptionFailure != null:
-return decryptionFailure(_that);case _:
+return decrypted(_that);case _:
   return null;
 
 }
@@ -437,15 +434,14 @@ return decryptionFailure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( int total)?  loadingEncryption,TResult Function( int total)?  loadingDecryption,TResult Function( ArchivingState archivingState)?  encrypted,TResult Function( DearchivingState dearchivingState)?  decrypted,TResult Function( EncryptionFailure failure)?  decryptionFailure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( int total)?  loadingEncryption,TResult Function( int total)?  loadingDecryption,TResult Function( ArchivingState archivingState)?  encrypted,TResult Function( DearchivingState dearchivingState)?  decrypted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _LoadingEncryption() when loadingEncryption != null:
 return loadingEncryption(_that.total);case _LoadingDecryption() when loadingDecryption != null:
 return loadingDecryption(_that.total);case _Encrypted() when encrypted != null:
 return encrypted(_that.archivingState);case _Decrypted() when decrypted != null:
-return decrypted(_that.dearchivingState);case _DecryptionFailure() when decryptionFailure != null:
-return decryptionFailure(_that.failure);case _:
+return decrypted(_that.dearchivingState);case _:
   return orElse();
 
 }
@@ -463,15 +459,14 @@ return decryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( int total)  loadingEncryption,required TResult Function( int total)  loadingDecryption,required TResult Function( ArchivingState archivingState)  encrypted,required TResult Function( DearchivingState dearchivingState)  decrypted,required TResult Function( EncryptionFailure failure)  decryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( int total)  loadingEncryption,required TResult Function( int total)  loadingDecryption,required TResult Function( ArchivingState archivingState)  encrypted,required TResult Function( DearchivingState dearchivingState)  decrypted,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _LoadingEncryption():
 return loadingEncryption(_that.total);case _LoadingDecryption():
 return loadingDecryption(_that.total);case _Encrypted():
 return encrypted(_that.archivingState);case _Decrypted():
-return decrypted(_that.dearchivingState);case _DecryptionFailure():
-return decryptionFailure(_that.failure);case _:
+return decrypted(_that.dearchivingState);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -488,15 +483,14 @@ return decryptionFailure(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( int total)?  loadingEncryption,TResult? Function( int total)?  loadingDecryption,TResult? Function( ArchivingState archivingState)?  encrypted,TResult? Function( DearchivingState dearchivingState)?  decrypted,TResult? Function( EncryptionFailure failure)?  decryptionFailure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( int total)?  loadingEncryption,TResult? Function( int total)?  loadingDecryption,TResult? Function( ArchivingState archivingState)?  encrypted,TResult? Function( DearchivingState dearchivingState)?  decrypted,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _LoadingEncryption() when loadingEncryption != null:
 return loadingEncryption(_that.total);case _LoadingDecryption() when loadingDecryption != null:
 return loadingDecryption(_that.total);case _Encrypted() when encrypted != null:
 return encrypted(_that.archivingState);case _Decrypted() when decrypted != null:
-return decrypted(_that.dearchivingState);case _DecryptionFailure() when decryptionFailure != null:
-return decryptionFailure(_that.failure);case _:
+return decrypted(_that.dearchivingState);case _:
   return null;
 
 }
@@ -739,61 +733,6 @@ class __$DecryptedCopyWithImpl<$Res>
   return _then(_Decrypted(
 dearchivingState: null == dearchivingState ? _self.dearchivingState : dearchivingState // ignore: cast_nullable_to_non_nullable
 as DearchivingState,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _DecryptionFailure extends GalleryState {
-  const _DecryptionFailure({required this.failure}): super._();
-  
-
- final  EncryptionFailure failure;
-
-/// Create a copy of GalleryState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$DecryptionFailureCopyWith<_DecryptionFailure> get copyWith => __$DecryptionFailureCopyWithImpl<_DecryptionFailure>(this, _$identity);
-
-
-
-
-
-
-
-}
-
-/// @nodoc
-abstract mixin class _$DecryptionFailureCopyWith<$Res> implements $GalleryStateCopyWith<$Res> {
-  factory _$DecryptionFailureCopyWith(_DecryptionFailure value, $Res Function(_DecryptionFailure) _then) = __$DecryptionFailureCopyWithImpl;
-@useResult
-$Res call({
- EncryptionFailure failure
-});
-
-
-
-
-}
-/// @nodoc
-class __$DecryptionFailureCopyWithImpl<$Res>
-    implements _$DecryptionFailureCopyWith<$Res> {
-  __$DecryptionFailureCopyWithImpl(this._self, this._then);
-
-  final _DecryptionFailure _self;
-  final $Res Function(_DecryptionFailure) _then;
-
-/// Create a copy of GalleryState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(_DecryptionFailure(
-failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as EncryptionFailure,
   ));
 }
 
