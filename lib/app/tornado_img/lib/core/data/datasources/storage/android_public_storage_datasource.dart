@@ -95,53 +95,32 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
   @override
   Future<bool> deleteFolder(String relativePath, List<String> assetIds) async {
     var ok = false;
-    if (assetIds.isNotEmpty) ok = await delete(assetIds);
 
+    // Resolve every asset under the folder tree up front (bucket-scoped, fast)
+    // and merge with the caller-supplied ids. Firing a single delete() before
+    // any slow work means the OS consent dialog appears immediately and, once
+    // confirmed, MediaStore deletes all assets atomically — so it survives the
+    // app being closed right after. The full-gallery sweep this replaced only
+    // surfaced the dialog seconds later, after which a close deleted nothing.
+    final all = <String>{...assetIds};
+    try {
+      all.addAll(await _publicAssetIdsUnderFolder(relativePath));
+    } catch (e) {
+      appLogger.log(
+        'AndroidPublicStorageDatasource.deleteFolder: asset resolve error',
+        LogLayer.repository,
+        error: e.toString(),
+      );
+    }
+    if (all.isNotEmpty) ok = await delete(all.toList());
+
+    // dart:io cannot delete MediaStore-managed image files on scoped storage,
+    // but after the delete() above the directory holds only empty subfolders,
+    // so removing the tree here just cleans up the now-empty directories.
     final path = await GalleryPathProvider.getPublicFolderPath(
       relative: relativePath,
     );
     final dir = path == null ? null : Directory(path);
-
-    // Fast path: once the tracked assets are gone, a flat folder is already
-    // empty and needs no MediaStore sweep. The sweep below scans the entire
-    // gallery (every image, paged) which is slow on large galleries, so only
-    // run it when the directory still holds content — nested subfolders or
-    // images not tracked by the app.
-    var needsSweep = true;
-    if (dir != null) {
-      try {
-        if (!await dir.exists()) {
-          needsSweep = false;
-        } else if (await dir.list(followLinks: false).isEmpty) {
-          needsSweep = false;
-        }
-      } catch (_) {
-        // Fall back to sweeping if the directory can't be listed.
-      }
-    }
-
-    // dart:io cannot delete MediaStore-managed image files on scoped storage,
-    // which leaves the directory non-empty (errno 39) when [assetIds] does not
-    // cover every asset under the folder (e.g. subfolders or untracked images).
-    // Sweep MediaStore for all assets living under this folder tree and delete
-    // them via PhotoManager before removing the directory itself.
-    if (needsSweep) {
-      try {
-        final passed = assetIds.toSet();
-        final remaining =
-            (await _publicAssetIdsUnderFolder(
-              relativePath,
-            )).where((id) => !passed.contains(id)).toList();
-        if (remaining.isNotEmpty && await delete(remaining)) ok = true;
-      } catch (e) {
-        appLogger.log(
-          'AndroidPublicStorageDatasource.deleteFolder: asset sweep error',
-          LogLayer.repository,
-          error: e.toString(),
-        );
-      }
-    }
-
     try {
       if (dir != null && await dir.exists()) {
         await dir.delete(recursive: true);
@@ -183,36 +162,40 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
 
       final target = 'Pictures/${Constants.appFolderName}/$rel'.toLowerCase();
 
+      // Each album is one MediaStore bucket (= one on-disk directory). Sample
+      // a single asset per album to read its relativePath, then fully page only
+      // the buckets under the target folder tree. This keeps the cost at
+      // O(buckets + assets_in_folder) instead of scanning the whole gallery.
+      String bucketRel(AssetEntity a) {
+        var r = (a.relativePath ?? '').replaceAll('\\', '/').toLowerCase();
+        if (r.endsWith('/')) r = r.substring(0, r.length - 1);
+        return r;
+      }
+
       final albums = await PhotoManager.getAssetPathList(
         type: RequestType.image,
-        hasAll: true,
       );
-      AssetPathEntity? all;
-      for (final a in albums) {
-        if (a.isAll) {
-          all = a;
-          break;
-        }
-      }
-      if (all == null) return ids;
 
       const pageSize = 500;
-      var page = 0;
-      while (true) {
-        final assets = await all.getAssetListPaged(page: page, size: pageSize);
-        if (assets.isEmpty) break;
-        for (final a in assets) {
-          var assetRel =
-              (a.relativePath ?? '').replaceAll('\\', '/').toLowerCase();
-          if (assetRel.endsWith('/')) {
-            assetRel = assetRel.substring(0, assetRel.length - 1);
-          }
-          if (assetRel == target || assetRel.startsWith('$target/')) {
+      for (final album in albums) {
+        final sample = await album.getAssetListPaged(page: 0, size: 1);
+        if (sample.isEmpty) continue;
+        final rel = bucketRel(sample.first);
+        if (rel != target && !rel.startsWith('$target/')) continue;
+
+        var page = 0;
+        while (true) {
+          final assets = await album.getAssetListPaged(
+            page: page,
+            size: pageSize,
+          );
+          if (assets.isEmpty) break;
+          for (final a in assets) {
             ids.add(a.id);
           }
+          if (assets.length < pageSize) break;
+          page++;
         }
-        if (assets.length < pageSize) break;
-        page++;
       }
     } catch (e) {
       appLogger.log(

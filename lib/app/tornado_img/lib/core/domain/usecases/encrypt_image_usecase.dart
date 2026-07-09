@@ -61,8 +61,12 @@ class EncryptImageUseCase
       final String albumName = GalleryPathProvider.getPublicAlbumName(
         params.settings.publicRelativeAlbum,
       );
+      // Asset IDs only exist on iOS (PhotoKit album-per-folder model). On
+      // Android the public image lives at a real filesystem path, so leave
+      // the assetId null — computing it here would hit the Darwin-only
+      // getOrCreatePublicAlbum and throw.
       final String? encryptedAssetId =
-          isGalleryVisible
+          (isGalleryVisible && Platform.isIOS)
               ? await GalleryPathProvider.findMostRecentAssetId(
                 albumName: albumName,
               )
