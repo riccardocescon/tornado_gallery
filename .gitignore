@@ -66,3 +66,4 @@ app.*.map.json
 /lib/packages/tornado_img_crypto/
 
 Handoff.md
+docs/
