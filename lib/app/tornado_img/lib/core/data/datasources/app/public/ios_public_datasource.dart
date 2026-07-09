@@ -35,8 +35,9 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
       );
       return album != null;
     } catch (e) {
-      appLogger.logUsecase(
+      appLogger.log(
         'IosPublicFolderDatasource: error creating album',
+        LogLayer.usecase,
         error: e.toString(),
       );
       return false;
@@ -72,8 +73,9 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
         currentIds = await _currentAssetIds();
         currentAlbums = await _currentAlbumNames();
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'IosPublicFolderDatasource: polling error',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
         continue;
@@ -120,8 +122,9 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
         );
         if (image != null) folder.images.add(image);
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'IosPublicFolderDatasource: error mapping asset ${asset.id}',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
       }
@@ -174,8 +177,9 @@ class IosPublicFolderDatasource implements PublicFolderDatasource {
           if (image != null) current.images.add(image);
         }
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'IosPublicFolderDatasource: error mapping album ${album.name}',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
       }

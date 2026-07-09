@@ -8,11 +8,11 @@ class _MockStorageRepository extends Mock implements StorageRepository {}
 
 void main() {
   late _MockStorageRepository repo;
-  late RenameFolderUsecase useCase;
+  late RenameFolderUseCase useCase;
 
   setUp(() {
     repo = _MockStorageRepository();
-    useCase = RenameFolderUsecase(storageRepo: repo);
+    useCase = RenameFolderUseCase(storageRepo: repo);
   });
 
   test('renames a nested folder keeping its parent path', () async {

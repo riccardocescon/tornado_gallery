@@ -116,7 +116,7 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
               spacing: 20,
               mainAxisSize: MainAxisSize.min,
               children: [
-              Text("Import images", style: context.textTheme.titleMedium),
+                Text("Import images", style: context.textTheme.titleMedium),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = constraints.maxWidth / 2;
@@ -156,49 +156,49 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
                     errorText: _nameError,
                     errorStyle: TextStyle(color: context.colorScheme.error),
                   ),
-              ),
-              if (_inFolder)
-                _option(
-                  icon: Icons.folder_rounded,
-                  title: "Save to this folder",
-                  subtitle: context.read<ArchivePageBloc>().currentPath,
-                  trailing: const SizedBox.shrink(),
-                )
-              else ...[
-                _option(
-                  icon: Icons.folder_rounded,
-                  title: "Save to App folder",
-                  subtitle: "Private folder, only accessible by the app",
-                  trailing: Transform.scale(
-                    scale: 0.8,
-                    child: Switch(
-                      value: saveToAppFolder,
-                      onChanged:
-                          (val) => setState(() {
-                            saveToAppFolder = val;
-                            saveToGallery = !val;
-                          }),
+                ),
+                if (_inFolder)
+                  _option(
+                    icon: Icons.folder_rounded,
+                    title: "Save to this folder",
+                    subtitle: context.read<ArchivePageBloc>().currentPath,
+                    trailing: const SizedBox.shrink(),
+                  )
+                else ...[
+                  _option(
+                    icon: Icons.folder_rounded,
+                    title: "Save to App folder",
+                    subtitle: "Private folder, only accessible by the app",
+                    trailing: Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: saveToAppFolder,
+                        onChanged:
+                            (val) => setState(() {
+                              saveToAppFolder = val;
+                              saveToGallery = !val;
+                            }),
+                      ),
                     ),
                   ),
-                ),
-                _option(
-                  icon: Icons.photo_library_outlined,
-                  title: "Save to Gallery",
-                  subtitle: "Public folder, accessible on the gallery",
-                  trailing: Transform.scale(
-                    scale: 0.8,
-                    child: Switch(
-                      value: saveToGallery,
-                      onChanged:
-                          (val) => setState(() {
-                            saveToGallery = val;
-                            saveToAppFolder = !val;
-                          }),
+                  _option(
+                    icon: Icons.photo_library_outlined,
+                    title: "Save to Gallery",
+                    subtitle: "Public folder, accessible on the gallery",
+                    trailing: Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: saveToGallery,
+                        onChanged:
+                            (val) => setState(() {
+                              saveToGallery = val;
+                              saveToAppFolder = !val;
+                            }),
+                      ),
                     ),
                   ),
-                ),
-              ],
-              ElevatedButton(
+                ],
+                ElevatedButton(
                   onPressed:
                       _canImport
                           ? () {
@@ -224,10 +224,10 @@ class __ImportImagesBottomSheetState extends State<_ImportImagesBottomSheet>
                             context.pop();
                           }
                           : null,
-                child: const Text("Import all"),
-              ),
-            ],
-          ),
+                  child: const Text("Import all"),
+                ),
+              ],
+            ),
           ),
         );
       },

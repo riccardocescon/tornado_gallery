@@ -163,6 +163,12 @@ class _ZoomablePageState extends State<_ZoomablePage>
 
   static const double _zoomedScale = 2.5;
 
+  /// Scale above which the image counts as "zoomed" (small epsilon over 1.0
+  /// to ignore floating-point noise at the resting scale).
+  static const double _zoomedThreshold = 1.01;
+  static const double _minScale = 0.5;
+  static const double _maxScale = 4.0;
+
   @override
   void initState() {
     super.initState();
@@ -179,11 +185,11 @@ class _ZoomablePageState extends State<_ZoomablePage>
 
   void _onTransformChanged() {
     final scale = _controller.value.getMaxScaleOnAxis();
-    widget.onZoomChanged(scale > 1.01);
+    widget.onZoomChanged(scale > _zoomedThreshold);
   }
 
   void _onDoubleTapDown(TapDownDetails details) {
-    final isZoomed = _controller.value.getMaxScaleOnAxis() > 1.01;
+    final isZoomed = _controller.value.getMaxScaleOnAxis() > _zoomedThreshold;
 
     final Matrix4 target;
     if (isZoomed) {
@@ -223,8 +229,8 @@ class _ZoomablePageState extends State<_ZoomablePage>
       onDoubleTap: () {},
       child: InteractiveViewer(
         transformationController: _controller,
-        minScale: 0.5,
-        maxScale: 4.0,
+        minScale: _minScale,
+        maxScale: _maxScale,
         child: Center(
           child: Image.memory(
             widget.bytes,

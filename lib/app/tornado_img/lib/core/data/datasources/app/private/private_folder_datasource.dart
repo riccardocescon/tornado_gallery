@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/data/mappers/file_mapper.dart';
@@ -39,15 +40,16 @@ class PrivateFolderDatasource {
     try {
       entries = Directory(path).listSync();
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'PrivateFolderDatasource: cannot list directory $path',
+        LogLayer.repository,
         error: e.toString(),
       );
       return folder;
     }
 
     for (final entry in entries) {
-      final name = entry.path.split(Platform.pathSeparator).last;
+      final name = FileNameUtils.basename(entry.path);
       final isFile = name.contains('.');
 
       if (isFile) {
@@ -92,16 +94,18 @@ class PrivateFolderDatasource {
     required void Function(String rootPath) removeLookupBranch,
   }) async* {
     if (rootFolder.path.trim().isEmpty) {
-      appLogger.logPageBloc(
+      appLogger.log(
         'PrivateFolderDatasource: skipping watcher, empty path',
+        LogLayer.pageBloc,
       );
       return;
     }
 
     final dir = Directory(rootFolder.path);
     if (!await dir.exists()) {
-      appLogger.logPageBloc(
+      appLogger.log(
         'PrivateFolderDatasource: skipping watcher, folder does not exist (${rootFolder.path})',
+        LogLayer.pageBloc,
       );
       return;
     }
@@ -238,8 +242,9 @@ class PrivateFolderDatasource {
         }
 
         if (parentFolder == null) {
-          appLogger.logPageBloc(
+          appLogger.log(
             'PrivateFolderDatasource: parent not found for $path',
+            LogLayer.pageBloc,
           );
           continue;
         }
@@ -322,7 +327,10 @@ class PrivateFolderDatasource {
     if (folder != null) {
       removeFolder(rootFolder, folder);
       removeLookupBranch(path);
-      appLogger.logPageBloc('PrivateFolderDatasource: folder removed $path');
+      appLogger.log(
+        'PrivateFolderDatasource: folder removed $path',
+        LogLayer.pageBloc,
+      );
       return true;
     }
 
@@ -334,13 +342,17 @@ class PrivateFolderDatasource {
       );
       if (hadImage) {
         parentFolder.images.removeWhere((img) => img.storagePath.path == path);
-        appLogger.logPageBloc('PrivateFolderDatasource: file removed $path');
+        appLogger.log(
+          'PrivateFolderDatasource: file removed $path',
+          LogLayer.pageBloc,
+        );
         return true;
       }
     }
 
-    appLogger.logPageBloc(
+    appLogger.log(
       'PrivateFolderDatasource: path not found for removal $path',
+      LogLayer.pageBloc,
     );
     return false;
   }
@@ -373,8 +385,9 @@ class PrivateFolderDatasource {
       );
       if (!inserted) return false;
       addToLookup(_buildIndex(rescanned));
-      appLogger.logPageBloc(
+      appLogger.log(
         'PrivateFolderDatasource: folder moved $fromPath -> $toPath',
+        LogLayer.pageBloc,
       );
       return true;
     }
@@ -411,8 +424,9 @@ class PrivateFolderDatasource {
     );
     toParent.images.removeWhere((img) => img.storagePath.path == toPath);
     toParent.images.add(updatedImage);
-    appLogger.logPageBloc(
+    appLogger.log(
       'PrivateFolderDatasource: file moved $fromPath -> $toPath',
+      LogLayer.pageBloc,
     );
     return true;
   }
@@ -439,8 +453,9 @@ class PrivateFolderDatasource {
     if (!inserted) return lookupTable.containsKey(parentPath);
 
     addToLookup(_buildIndex(recovered));
-    appLogger.logPageBloc(
+    appLogger.log(
       'PrivateFolderDatasource: recovered missing parent $parentPath',
+      LogLayer.pageBloc,
     );
     return true;
   }
@@ -483,7 +498,9 @@ class PrivateFolderDatasource {
     final map = <String, EncryptedFolder>{};
     void visit(EncryptedFolder folder) {
       map[folder.path] = folder;
-      for (final child in folder.subfolders) visit(child);
+      for (final child in folder.subfolders) {
+        visit(child);
+      }
     }
 
     visit(root);

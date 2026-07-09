@@ -15,7 +15,7 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 
 class EncryptImageUseCase
-    extends EncrpytionUseCase<EncryptedImage, EncryptImageParams> {
+    extends EncryptionUseCase<EncryptedImage, EncryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
@@ -25,9 +25,7 @@ class EncryptImageUseCase
   Future<Either<EncryptionFailure, EncryptedImage>> call(
     EncryptImageParams params,
   ) async {
-
     try {
-
       final safeStem = FileNameUtils.sanitizeFileStem(params.fileId);
       final fileName = '$safeStem.png';
       final saveName = params.settings.galleryVisible ? safeStem : fileName;
@@ -59,16 +57,19 @@ class EncryptImageUseCase
         ),
       );
 
-      
       final isGalleryVisible = params.settings.galleryVisible;
       final String albumName = GalleryPathProvider.getPublicAlbumName(
         params.settings.publicRelativeAlbum,
       );
+      // Asset IDs only exist on iOS (PhotoKit album-per-folder model). On
+      // Android the public image lives at a real filesystem path, so leave
+      // the assetId null — computing it here would hit the Darwin-only
+      // getOrCreatePublicAlbum and throw.
       final String? encryptedAssetId =
-          isGalleryVisible
+          (isGalleryVisible && Platform.isIOS)
               ? await GalleryPathProvider.findMostRecentAssetId(
-                  albumName: albumName,
-                )
+                albumName: albumName,
+              )
               : null;
 
       if (params.settings.deleteOriginals) {
@@ -87,18 +88,19 @@ class EncryptImageUseCase
         // Use the album name as a virtual path so storeRelativeDir resolves
         // the subfolder correctly (matches how IosPublicFolderDatasource
         // assigns paths in _attachSubfolders on reload).
-        outputFolder = Platform.isIOS
-            ? albumName
-            : await GalleryPathProvider.getPublicFolderPath(
-                relative: params.settings.publicRelativeAlbum,
-              );
+        outputFolder =
+            Platform.isIOS
+                ? albumName
+                : await GalleryPathProvider.getPublicFolderPath(
+                  relative: params.settings.publicRelativeAlbum,
+                );
       }
 
       final encryptedFile = File('$outputFolder/$fileName');
       final encryptedImage = EncryptedImage(
         storagePath: StoragePath(
           isPrivateFolder: !isGalleryVisible,
-        path: encryptedFile.path,
+          path: encryptedFile.path,
           assetId: encryptedAssetId,
         ),
         encryptedInfo: BytesInfo(
@@ -110,7 +112,11 @@ class EncryptImageUseCase
 
       return Right(encryptedImage);
     } catch (e) {
-      appLogger.logUsecase('Error encrypting image', error: e.toString());
+      appLogger.log(
+        'Error encrypting image',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }
@@ -136,7 +142,7 @@ class EncryptImageUseCase
       return null;
     }
 
-    final ext = params.file.path.split('.').last.toLowerCase();
+    final ext = FileNameUtils.extensionOf(params.file.path);
     final bytes = await asset.originBytes;
     if (bytes != null) {
       return imageRepo.decodeBytes(bytes, extension: ext);

@@ -30,13 +30,16 @@ class _ArchivedTileState extends State<_ArchivedTile> {
             deleting:
                 (value) => value.paths.contains(widget.image.storagePath.path),
             ui:
-                (value) =>
-                    value.images.any((img) => img.storagePath.path == widget.image.storagePath.path),
+                (value) => value.images.any(
+                  (img) =>
+                      img.storagePath.path == widget.image.storagePath.path,
+                ),
             orElse: () => false,
           ),
       builder: (context, state) {
         final isDeleting = state.maybeMap(
-          deleting: (value) => value.paths.contains(widget.image.storagePath.path),
+          deleting:
+              (value) => value.paths.contains(widget.image.storagePath.path),
           orElse: () => false,
         );
 
@@ -71,7 +74,7 @@ class _ArchivedTileState extends State<_ArchivedTile> {
         } else {
           child = FilledButton(
             onPressed: () {
-              context.push('./encrypted_image_page', extra: widget.image);
+              context.pushNamed(Routes.encryptedImagePage, extra: widget.image);
             },
             onLongPress: widget.onActivateSelection,
             style: FilledButton.styleFrom(
@@ -108,9 +111,7 @@ class _ArchivedTileState extends State<_ArchivedTile> {
                 ),
                 onPressed: () {
                   context.read<ArchivePageBloc>().add(
-                    ArchivePageEvent.delete(
-                      images: [widget.image],
-                    ),
+                    ArchivePageEvent.delete(images: [widget.image]),
                   );
                 },
                 trailingIcon: Icon(
@@ -158,11 +159,7 @@ class _ArchivedTileState extends State<_ArchivedTile> {
 
     return Row(
       spacing: 16,
-      children: [
-        _image(),
-        Expanded(child: _details()),
-        icon,
-      ],
+      children: [_image(), Expanded(child: _details()), icon],
     );
   }
 

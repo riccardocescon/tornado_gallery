@@ -7,6 +7,7 @@ import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+
 /// iOS implementation of [PublicStorageDatasource].
 ///
 /// Uses [PhotoManager] directly instead of [Gal] to avoid the double-asset bug.
@@ -28,37 +29,37 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 class IosPublicStorageDatasource implements PublicStorageDatasource {
   @override
   @override
-Future<void> save({
-  required String fileName,
-  required String album,
-  required Uint8List bytes,
-}) async {
-  final albumEntity = await GalleryPathProvider.getOrCreatePublicAlbum(album);
-  if (albumEntity == null) {
-    throw StateError('IosPublicStorageDatasource: album "$album" not found');
+  Future<void> save({
+    required String fileName,
+    required String album,
+    required Uint8List bytes,
+  }) async {
+    final albumEntity = await GalleryPathProvider.getOrCreatePublicAlbum(album);
+    if (albumEntity == null) {
+      throw StateError('IosPublicStorageDatasource: album "$album" not found');
+    }
+
+    final recentsAsset = await PhotoManager.editor.saveImage(
+      bytes,
+      filename: fileName,
+      title: fileName,
+    );
+    final albumAsset = await PhotoManager.editor.copyAssetToPath(
+      asset: recentsAsset,
+      pathEntity: albumEntity,
+    );
+
+    // ponytail: skip Recents cleanup — deleteWithIds always shows an iOS
+    // confirmation dialog; the app reads only TornadoGallery albums so the
+    // Recents copy is invisible to the app UI.
+
+    final resolvedId = albumAsset.id;
+    await AssetNameIndex.saveByAssetId(assetId: resolvedId, fileName: fileName);
+    await AssetNameIndex.saveByHash(
+      hash: ByteModeling.generateHash(bytes),
+      fileName: fileName,
+    );
   }
-
-  final recentsAsset = await PhotoManager.editor.saveImage(
-    bytes,
-    filename: fileName,
-    title: fileName,
-  );
-  final albumAsset = await PhotoManager.editor.copyAssetToPath(
-    asset: recentsAsset,
-    pathEntity: albumEntity,
-  );
-
-  // ponytail: skip Recents cleanup — deleteWithIds always shows an iOS
-  // confirmation dialog; the app reads only TornadoGallery albums so the
-  // Recents copy is invisible to the app UI.
-
-  final resolvedId = albumAsset.id;
-  await AssetNameIndex.saveByAssetId(assetId: resolvedId, fileName: fileName);
-  await AssetNameIndex.saveByHash(
-    hash: ByteModeling.generateHash(bytes),
-    fileName: fileName,
-  );
-}
 
   @override
   Future<StorageRenameResult> rename({
@@ -69,16 +70,20 @@ Future<void> save({
   }) async {
     try {
       // PhotoKit has no rename API — save new asset, delete old one atomically.
-      final newStem = newFileName.contains('.')
-          ? newFileName.split('.').first
-          : newFileName;
+      final newStem =
+          newFileName.contains('.')
+              ? newFileName.split('.').first
+              : newFileName;
 
       await save(fileName: newStem, album: album, bytes: bytes);
 
-      final newAssetId = await GalleryPathProvider.findMostRecentAssetId(albumName: album);
+      final newAssetId = await GalleryPathProvider.findMostRecentAssetId(
+        albumName: album,
+      );
       if (newAssetId == null) {
-        appLogger.logRepository(
+        appLogger.log(
           'IosPublicStorageDatasource.rename: new asset id not found after save',
+          LogLayer.repository,
         );
         return const StorageRenameResult(success: false);
       }
@@ -95,8 +100,9 @@ Future<void> save({
       if (oldStillExists) {
         // Rollback: remove the newly saved asset to keep state consistent.
         await PhotoManager.editor.deleteWithIds([newAssetId]);
-        appLogger.logRepository(
+        appLogger.log(
           'IosPublicStorageDatasource.rename: old asset still exists after delete, rolling back',
+          LogLayer.repository,
           error: 'oldAssetId: $assetId',
         );
         return const StorageRenameResult(success: false);
@@ -108,8 +114,9 @@ Future<void> save({
       );
       return StorageRenameResult(success: true, newAssetId: newAssetId);
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'IosPublicStorageDatasource.rename: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return const StorageRenameResult(success: false);
@@ -128,23 +135,33 @@ Future<void> save({
     String oldRelativePath,
     String newRelativePath,
   ) async {
-    final oldAlbumName = GalleryPathProvider.getPublicAlbumName(oldRelativePath);
-    final newAlbumName = GalleryPathProvider.getPublicAlbumName(newRelativePath);
+    final oldAlbumName = GalleryPathProvider.getPublicAlbumName(
+      oldRelativePath,
+    );
+    final newAlbumName = GalleryPathProvider.getPublicAlbumName(
+      newRelativePath,
+    );
 
-    final oldAlbums = await GalleryPathProvider.listPublicAlbumsUnder(oldAlbumName);
+    final oldAlbums = await GalleryPathProvider.listPublicAlbumsUnder(
+      oldAlbumName,
+    );
     if (oldAlbums.isEmpty) {
       // No album existed yet — just create the new one.
-      return (await GalleryPathProvider.getOrCreatePublicAlbum(newAlbumName)) != null;
+      return (await GalleryPathProvider.getOrCreatePublicAlbum(newAlbumName)) !=
+          null;
     }
 
     for (final oldAlbum in oldAlbums) {
       // Map "TornadoGallery/old[/sub]" → "TornadoGallery/new[/sub]".
       final correspondingNewName =
           newAlbumName + oldAlbum.name.substring(oldAlbumName.length);
-      final newAlbum = await GalleryPathProvider.getOrCreatePublicAlbum(correspondingNewName);
+      final newAlbum = await GalleryPathProvider.getOrCreatePublicAlbum(
+        correspondingNewName,
+      );
       if (newAlbum == null) {
-        appLogger.logRepository(
+        appLogger.log(
           'IosPublicStorageDatasource.renameFolder: could not create album',
+          LogLayer.repository,
           error: correspondingNewName,
         );
         continue;
@@ -160,8 +177,9 @@ Future<void> save({
             pathEntity: newAlbum,
           );
         } catch (e) {
-          appLogger.logRepository(
+          appLogger.log(
             'IosPublicStorageDatasource.renameFolder: could not move asset',
+            LogLayer.repository,
             error: '${asset.id}: $e',
           );
         }
@@ -175,8 +193,9 @@ Future<void> save({
       try {
         await PhotoManager.editor.darwin.deletePath(oldAlbum);
       } catch (e) {
-        appLogger.logRepository(
+        appLogger.log(
           'IosPublicStorageDatasource.renameFolder: could not delete old album',
+          LogLayer.repository,
           error: '${oldAlbum.name}: $e',
         );
       }
@@ -197,8 +216,9 @@ Future<void> save({
         final deleted = await PhotoManager.editor.darwin.deletePath(album);
         if (!deleted) return false;
       } catch (e) {
-        appLogger.logRepository(
+        appLogger.log(
           'IosPublicStorageDatasource.deleteFolder: album delete failed',
+          LogLayer.repository,
           error: '${album.name}: $e',
         );
         return false;
@@ -230,8 +250,9 @@ Future<void> save({
 
       return success;
     } catch (e) {
-      appLogger.logRepository(
+      appLogger.log(
         'IosPublicStorageDatasource.delete: error',
+        LogLayer.repository,
         error: e.toString(),
       );
       return false;

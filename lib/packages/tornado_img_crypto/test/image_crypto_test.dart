@@ -162,11 +162,7 @@ void main() {
     });
   });
 
-  test('getVersion returns non-empty string', () {
-    expect(getVersion(), isNotEmpty);
-  });
-
-  test('sdkVersion and getVersion return same value', () {
-    expect(sdkVersion(), equals(getVersion()));
+  test('sdkVersion returns non-empty string', () {
+    expect(sdkVersion(), isNotEmpty);
   });
 }

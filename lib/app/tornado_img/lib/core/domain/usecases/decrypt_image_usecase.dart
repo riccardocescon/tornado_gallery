@@ -8,11 +8,12 @@ import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 
 class DecryptImageUseCase
-    extends EncrpytionUseCase<BytesInfo, DecryptImageParams> {
+    extends EncryptionUseCase<BytesInfo, DecryptImageParams> {
   final ImageProcessingRepository imageRepo;
   final StorageRepository storageRepo;
 
@@ -48,7 +49,11 @@ class DecryptImageUseCase
 
       return Right(bytesInfo);
     } catch (e) {
-      appLogger.logUsecase('Error decrypting image', error: e.toString());
+      appLogger.log(
+        'Error decrypting image',
+        LogLayer.usecase,
+        error: e.toString(),
+      );
       return Left(EncryptionFailure.encryptionError(e.toString()));
     }
   }
@@ -73,7 +78,7 @@ class DecryptImageUseCase
       return null;
     }
 
-    final rawExt = params.file.path.split('.').last.toLowerCase();
+    final rawExt = FileNameUtils.extensionOf(params.file.path);
     final extension = rawExt.isEmpty ? 'png' : rawExt;
 
     final bytes = await asset.originBytes;

@@ -12,29 +12,29 @@ import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
+import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
-import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 
-class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUsecase {}
+class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUseCase {}
 
-class _MockImageDeleterUsecase extends Mock implements ImageDeleterUsecase {}
+class _MockImageDeleterUsecase extends Mock implements ImageDeleterUseCase {}
 
-class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
+class _MockImageSaverUsecase extends Mock implements ImageSaverUseCase {}
 
-class _MockCreateFolderUsecase extends Mock implements CreateFolderUsecase {}
+class _MockCreateFolderUsecase extends Mock implements CreateFolderUseCase {}
 
-class _MockRenameFolderUsecase extends Mock implements RenameFolderUsecase {}
+class _MockRenameFolderUsecase extends Mock implements RenameFolderUseCase {}
 
-class _MockDeleteFolderUsecase extends Mock implements DeleteFolderUsecase {}
+class _MockDeleteFolderUsecase extends Mock implements DeleteFolderUseCase {}
 
-class _MockMoveImagesUsecase extends Mock implements MoveImagesUsecase {}
+class _MockMoveImagesUsecase extends Mock implements MoveImagesUseCase {}
 
 class _MockAppBloc extends Mock implements AppBloc {}
 
-class _MockGalleryBloc extends Mock implements GalleryBloc {}
+class _MockDecryptJobManager extends Mock implements DecryptJobManager {}
 
 EncryptedImage _makeImage(String path, {bool isPrivate = true}) =>
     EncryptedImage(
@@ -62,7 +62,7 @@ void main() {
   late _MockDeleteFolderUsecase mockDeleteFolder;
   late _MockMoveImagesUsecase mockMoveImages;
   late _MockAppBloc mockAppBloc;
-  late _MockGalleryBloc mockGalleryBloc;
+  late _MockDecryptJobManager mockDecryptJobManager;
 
   setUpAll(() {
     registerFallbackValue(_makeImage('fallback/img.png'));
@@ -71,7 +71,6 @@ void main() {
     );
     registerFallbackValue(ImageDeleterParams(images: []));
     registerFallbackValue(AppEvent.removeEncryptedImage(path: 'fallback'));
-    registerFallbackValue(GalleryEvent.decryptImages(image: [], password: ''));
     registerFallbackValue(
       CreateFolderParams(parentRelativePath: '', name: 'x', isPrivate: true),
     );
@@ -81,9 +80,7 @@ void main() {
     registerFallbackValue(
       DeleteFolderParams(relativePath: 'x', isPrivate: true),
     );
-    registerFallbackValue(
-      MoveImagesParams(images: [], targetRelativePath: ''),
-    );
+    registerFallbackValue(MoveImagesParams(images: [], targetRelativePath: ''));
   });
 
   setUp(() {
@@ -95,28 +92,42 @@ void main() {
     mockDeleteFolder = _MockDeleteFolderUsecase();
     mockMoveImages = _MockMoveImagesUsecase();
     mockAppBloc = _MockAppBloc();
-    mockGalleryBloc = _MockGalleryBloc();
+    mockDecryptJobManager = _MockDecryptJobManager();
 
     when(() => mockAppBloc.stream).thenAnswer((_) => Stream.empty());
     when(() => mockAppBloc.encryptedImages).thenReturn([]);
     when(() => mockAppBloc.add(any())).thenReturn(null);
-    when(() => mockGalleryBloc.stream).thenAnswer((_) => Stream.empty());
-    when(() => mockGalleryBloc.add(any())).thenReturn(null);
+    when(
+      () => mockDecryptJobManager.updates,
+    ).thenAnswer((_) => const Stream.empty());
+    when(() => mockDecryptJobManager.jobState(any())).thenReturn(null);
+    when(() => mockDecryptJobManager.isRunning(any())).thenReturn(false);
+    when(() => mockDecryptJobManager.cancel(any())).thenReturn(null);
+    when(
+      () => mockDecryptJobManager.start(
+        key: any(named: 'key'),
+        images: any(named: 'images'),
+        password: any(named: 'password'),
+      ),
+    ).thenReturn(null);
     when(
       () => mockGalleryReader.readPrivateFolderPaths(),
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockGalleryReader.readPublicFolderPaths(),
+    ).thenAnswer((_) => const Stream.empty());
   });
 
-  ArchivePageBloc _makeBloc() => ArchivePageBloc(
+  ArchivePageBloc makeBloc() => ArchivePageBloc(
     appBloc: mockAppBloc,
-    galleryBloc: mockGalleryBloc,
-    galleryReaderUsecase: mockGalleryReader,
-    imageDeleterUsecase: mockImageDeleter,
+    decryptJobManager: mockDecryptJobManager,
+    galleryReaderUseCase: mockGalleryReader,
+    imageDeleterUseCase: mockImageDeleter,
     imageSaverUseCase: mockImageSaver,
-    createFolderUsecase: mockCreateFolder,
-    renameFolderUsecase: mockRenameFolder,
-    deleteFolderUsecase: mockDeleteFolder,
-    moveImagesUsecase: mockMoveImages,
+    createFolderUseCase: mockCreateFolder,
+    renameFolderUseCase: mockRenameFolder,
+    deleteFolderUseCase: mockDeleteFolder,
+    moveImagesUseCase: mockMoveImages,
   );
 
   test('initial state is ArchivePageState.initial', () {
@@ -124,7 +135,7 @@ void main() {
       () => mockGalleryReader.call(null),
     ).thenAnswer((_) => const Stream.empty());
 
-    final bloc = _makeBloc();
+    final bloc = makeBloc();
     expect(bloc.state, const ArchivePageState.initial());
     bloc.close();
   });
@@ -142,7 +153,7 @@ void main() {
             Right(_makeStreamImage('/enc/img2.png')),
           ]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -164,7 +175,7 @@ void main() {
             Left(DecryptionFailure.decryptionError('read failed')),
           ]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -182,7 +193,7 @@ void main() {
         when(
           () => mockGalleryReader.call(null),
         ).thenAnswer((_) => const Stream.empty());
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       expect:
@@ -203,7 +214,7 @@ void main() {
           (_) =>
               Stream.fromIterable([Right(_makeStreamImage('/enc/img1.png'))]),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       verify: (_) {
@@ -225,10 +236,10 @@ void main() {
         when(
           () => mockImageDeleter.call(any()),
         ).thenAnswer((_) async => const Right(true));
-        when(() => mockAppBloc.encryptedImages).thenReturn([
-          _makeImage('/enc/img1.png'),
-        ]);
-        return _makeBloc();
+        when(
+          () => mockAppBloc.encryptedImages,
+        ).thenReturn([_makeImage('/enc/img1.png')]);
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -263,7 +274,7 @@ void main() {
         when(() => mockImageDeleter.call(any())).thenAnswer(
           (_) async => Left(EncryptionFailure.encryptionError('cannot delete')),
         );
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -310,37 +321,36 @@ void main() {
       'root level shows top folder Vacanze and only root images',
       build: () {
         seedNested();
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) => b.add(const ArchivePageEvent.setup()),
       verify: (_) {},
-      expect: () => [
-        const ArchivePageState.loading(),
-        isA<ArchivePageState>()
-            .having(
-              (s) => s.maybeMap(
-                ui: (u) => u.folders.map((f) => f.name).toList(),
-                orElse: () => <String>[],
-              ),
-              'folder names',
-              ['Vacanze'],
-            )
-            .having(
-              (s) => s.maybeMap(
-                ui: (u) => u.images.length,
-                orElse: () => -1,
-              ),
-              'root images',
-              1,
-            ),
-      ],
+      expect:
+          () => [
+            const ArchivePageState.loading(),
+            isA<ArchivePageState>()
+                .having(
+                  (s) => s.maybeMap(
+                    ui: (u) => u.folders.map((f) => f.name).toList(),
+                    orElse: () => <String>[],
+                  ),
+                  'folder names',
+                  ['Vacanze'],
+                )
+                .having(
+                  (s) =>
+                      s.maybeMap(ui: (u) => u.images.length, orElse: () => -1),
+                  'root images',
+                  1,
+                ),
+          ],
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(
       'entering Vacanze shows nested folder Mare, its image and breadcrumb',
       build: () {
         seedNested();
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -353,33 +363,32 @@ void main() {
         );
       },
       skip: 2,
-      expect: () => [
-        isA<ArchivePageState>()
-            .having(
-              (s) => s.maybeMap(
-                ui: (u) => u.breadcrumb,
-                orElse: () => <String>[],
-              ),
-              'breadcrumb',
-              ['Vacanze'],
-            )
-            .having(
-              (s) => s.maybeMap(
-                ui: (u) => u.folders.map((f) => f.name).toList(),
-                orElse: () => <String>[],
-              ),
-              'subfolders',
-              ['Mare'],
-            )
-            .having(
-              (s) => s.maybeMap(
-                ui: (u) => u.images.length,
-                orElse: () => -1,
-              ),
-              'images in Vacanze',
-              1,
-            ),
-      ],
+      expect:
+          () => [
+            isA<ArchivePageState>()
+                .having(
+                  (s) => s.maybeMap(
+                    ui: (u) => u.breadcrumb,
+                    orElse: () => <String>[],
+                  ),
+                  'breadcrumb',
+                  ['Vacanze'],
+                )
+                .having(
+                  (s) => s.maybeMap(
+                    ui: (u) => u.folders.map((f) => f.name).toList(),
+                    orElse: () => <String>[],
+                  ),
+                  'subfolders',
+                  ['Mare'],
+                )
+                .having(
+                  (s) =>
+                      s.maybeMap(ui: (u) => u.images.length, orElse: () => -1),
+                  'images in Vacanze',
+                  1,
+                ),
+          ],
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(
@@ -391,7 +400,7 @@ void main() {
         when(
           () => mockCreateFolder.call(any()),
         ).thenAnswer((_) async => const Right(true));
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -401,22 +410,23 @@ void main() {
       verify: (_) {
         verify(() => mockCreateFolder.call(any())).called(1);
       },
-      expect: () => [
-        const ArchivePageState.loading(),
-        isA<ArchivePageState>().having(
-          (s) => s.maybeMap(ui: (_) => true, orElse: () => false),
-          'is ui',
-          true,
-        ),
-        isA<ArchivePageState>().having(
-          (s) => s.maybeMap(
-            ui: (u) => u.folders.map((f) => f.name).toList(),
-            orElse: () => <String>[],
-          ),
-          'folders include NewFolder',
-          contains('NewFolder'),
-        ),
-      ],
+      expect:
+          () => [
+            const ArchivePageState.loading(),
+            isA<ArchivePageState>().having(
+              (s) => s.maybeMap(ui: (_) => true, orElse: () => false),
+              'is ui',
+              true,
+            ),
+            isA<ArchivePageState>().having(
+              (s) => s.maybeMap(
+                ui: (u) => u.folders.map((f) => f.name).toList(),
+                orElse: () => <String>[],
+              ),
+              'folders include NewFolder',
+              contains('NewFolder'),
+            ),
+          ],
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(
@@ -426,7 +436,7 @@ void main() {
         when(
           () => mockRenameFolder.call(any()),
         ).thenAnswer((_) async => const Right(true));
-        return _makeBloc();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -441,18 +451,18 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 30));
       },
       verify: (_) {
-        final captured =
-            verify(() => mockAppBloc.add(captureAny())).captured;
-        final renamedPaths = captured
-            .whereType<AppEvent>()
-            .map(
-              (e) => e.maybeMap(
-                updateEncryptedImage: (v) => v.image.storagePath.path,
-                orElse: () => null,
-              ),
-            )
-            .whereType<String>()
-            .toList();
+        final captured = verify(() => mockAppBloc.add(captureAny())).captured;
+        final renamedPaths =
+            captured
+                .whereType<AppEvent>()
+                .map(
+                  (e) => e.maybeMap(
+                    updateEncryptedImage: (v) => v.image.storagePath.path,
+                    orElse: () => null,
+                  ),
+                )
+                .whereType<String>()
+                .toList();
         expect(
           renamedPaths,
           containsAll(<String>[
@@ -464,10 +474,83 @@ void main() {
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(
-      'decryptFolder dispatches GalleryEvent.decryptImages for nested images',
+      'deleteFolder removes the folder optimistically before the delete '
+      'usecase resolves',
       build: () {
         seedNested();
-        return _makeBloc();
+        // Slow delete: the folder must already be gone from the emitted ui
+        // before this completes.
+        when(() => mockDeleteFolder.call(any())).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 60));
+          return const Right(true);
+        });
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(
+          const ArchivePageEvent.deleteFolder(
+            relativePath: 'Vacanze',
+            isPrivate: true,
+          ),
+        );
+        // Sample the state while the delete usecase is still running.
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      },
+      verify: (bloc) {
+        final folderNames = bloc.state.maybeMap(
+          ui: (u) => u.folders.map((f) => f.name).toList(),
+          orElse: () => <String>['<not-ui>'],
+        );
+        expect(folderNames, isNot(contains('Vacanze')));
+      },
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
+      'deleteFolder rolls the folder back and surfaces failure when the '
+      'delete usecase returns Left',
+      build: () {
+        seedNested();
+        when(() => mockDeleteFolder.call(any())).thenAnswer(
+          (_) async => Left(EncryptionFailure.encryptionError('disk error')),
+        );
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(
+          const ArchivePageEvent.deleteFolder(
+            relativePath: 'Vacanze',
+            isPrivate: true,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+      },
+      verify: (bloc) {
+        // Final emitted state restores the folder (rollback re-emits ui).
+        final folderNames = bloc.state.maybeMap(
+          ui: (u) => u.folders.map((f) => f.name).toList(),
+          orElse: () => <String>['<not-ui>'],
+        );
+        expect(folderNames, contains('Vacanze'));
+        // Images under the folder are back in the in-memory model.
+        expect(
+          bloc.images.map((i) => i.storagePath.path),
+          containsAll(<String>[
+            '/app/encrypted/Vacanze/a.png',
+            '/app/encrypted/Vacanze/Mare/b.png',
+          ]),
+        );
+      },
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
+      'decryptFolder starts a background job for the folder',
+      build: () {
+        seedNested();
+        return makeBloc();
       },
       act: (b) async {
         b.add(const ArchivePageEvent.setup());
@@ -482,16 +565,16 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 30));
       },
       verify: (_) {
-        final captured = verify(
-          () => mockGalleryBloc.add(captureAny()),
-        ).captured;
-        final decryptEvents = captured.whereType<GalleryEvent>().where(
-              (e) => e.maybeMap(
-                decryptImages: (_) => true,
-                orElse: () => false,
-              ),
-            );
-        expect(decryptEvents, isNotEmpty);
+        verify(
+          () => mockDecryptJobManager.start(
+            key: DecryptJobManager.keyFor(
+              isPrivate: true,
+              relativePath: 'Vacanze',
+            ),
+            images: any(named: 'images'),
+            password: 'pw',
+          ),
+        ).called(1);
       },
     );
   });

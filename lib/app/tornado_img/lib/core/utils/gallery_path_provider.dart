@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 
@@ -77,8 +78,9 @@ class GalleryPathProvider {
 
       return _buildIosVirtualPath(album);
     } catch (e) {
-      appLogger.logCore(
+      appLogger.log(
         'GalleryPathProvider: error resolving iOS path',
+        LogLayer.core,
         error: e.toString(),
       );
       return null;
@@ -137,8 +139,9 @@ class GalleryPathProvider {
 
       if (permission == PermissionState.denied ||
           permission == PermissionState.restricted) {
-        appLogger.logCore(
+        appLogger.log(
           'GalleryPathProvider: permission denied (${permission.toString()})',
+          LogLayer.core,
         );
         return null;
       }
@@ -150,8 +153,9 @@ class GalleryPathProvider {
 
       return albums.firstWhereOrNull((e) => e.name == Constants.appFolderName);
     } catch (e) {
-      appLogger.logCore(
+      appLogger.log(
         'GalleryPathProvider: error accessing album',
+        LogLayer.core,
         error: e.toString(),
       );
       return null;
@@ -160,24 +164,28 @@ class GalleryPathProvider {
 
   /// Returns all image assets from the app's public album.
   static Future<List<AssetEntity>> getPublicAssets({
-  bool requestIfNeeded = true,
-}) async {
-  try {
-    final album = await getPublicAlbum(requestIfNeeded: requestIfNeeded);
-    if (album == null) return [];
-    final assets = await album.getAssetListPaged(page: 0, size: 10000);
-    
-    // PhotoKit returns multiple references to the same asset 
-    // (e.g., TornadoGallery + Recents). Deduplicate by ID.
-    final seen = <String>{};
-    return assets
-        .where((e) => e.type == AssetType.image && seen.add(e.id))
-        .toList();
-  } catch (e) {
-    appLogger.logCore('GalleryPathProvider: error reading assets', error: e.toString());
-    rethrow;
+    bool requestIfNeeded = true,
+  }) async {
+    try {
+      final album = await getPublicAlbum(requestIfNeeded: requestIfNeeded);
+      if (album == null) return [];
+      final assets = await album.getAssetListPaged(page: 0, size: 10000);
+
+      // PhotoKit returns multiple references to the same asset
+      // (e.g., TornadoGallery + Recents). Deduplicate by ID.
+      final seen = <String>{};
+      return assets
+          .where((e) => e.type == AssetType.image && seen.add(e.id))
+          .toList();
+    } catch (e) {
+      appLogger.log(
+        'GalleryPathProvider: error reading assets',
+        LogLayer.core,
+        error: e.toString(),
+      );
+      rethrow;
+    }
   }
-}
 
   /// Returns the [AssetPathEntity] whose name equals [albumName], creating it
   /// via PhotoKit if it does not exist yet. iOS-only (album-per-folder model).
@@ -188,8 +196,9 @@ class GalleryPathProvider {
       final permission = await PhotoManager.requestPermissionExtend();
       if (permission == PermissionState.denied ||
           permission == PermissionState.restricted) {
-        appLogger.logCore(
+        appLogger.log(
           'GalleryPathProvider: permission denied creating album "$albumName"',
+          LogLayer.core,
         );
         return null;
       }
@@ -203,8 +212,9 @@ class GalleryPathProvider {
 
       return await PhotoManager.editor.darwin.createAlbum(albumName);
     } catch (e) {
-      appLogger.logCore(
+      appLogger.log(
         'GalleryPathProvider: error creating album "$albumName"',
+        LogLayer.core,
         error: e.toString(),
       );
       return null;
@@ -234,8 +244,9 @@ class GalleryPathProvider {
           .where((e) => e.name == prefix || e.name.startsWith('$prefix/'))
           .toList();
     } catch (e) {
-      appLogger.logCore(
+      appLogger.log(
         'GalleryPathProvider: error listing albums under "$prefix"',
+        LogLayer.core,
         error: e.toString(),
       );
       return [];
@@ -276,13 +287,13 @@ class GalleryPathProvider {
     if ((title == null || title.isEmpty) &&
         fallbackFilePath != null &&
         fallbackFilePath.trim().isNotEmpty) {
-      title = fallbackFilePath.replaceAll('\\', '/').split('/').last;
+      title = FileNameUtils.basename(fallbackFilePath);
     }
 
     title = (title ?? 'image').trim();
     if (title.isEmpty) return 'image.png';
 
-    final fileLike = title.replaceAll('\\', '/').split('/').last;
+    final fileLike = FileNameUtils.basename(title);
     return fileLike.contains('.') ? fileLike : '$fileLike.png';
   }
 
@@ -302,9 +313,10 @@ class GalleryPathProvider {
   /// Returns the asset ID of the most recently added image in [albumName].
   /// Falls back to the root app album when [albumName] is null.
   static Future<String?> findMostRecentAssetId({String? albumName}) async {
-    final album = albumName != null
-        ? await getOrCreatePublicAlbum(albumName)
-        : await getPublicAlbum(requestIfNeeded: true);
+    final album =
+        albumName != null
+            ? await getOrCreatePublicAlbum(albumName)
+            : await getPublicAlbum(requestIfNeeded: true);
     if (album == null) return null;
     final assets = await album.getAssetListPaged(page: 0, size: 1);
     if (assets.isEmpty) return null;

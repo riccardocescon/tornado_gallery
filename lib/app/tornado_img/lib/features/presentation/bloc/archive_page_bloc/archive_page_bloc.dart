@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
 import 'package:tornado_img_app/core/domain/usecases/create_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/delete_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
@@ -9,7 +12,6 @@ import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
-import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
@@ -29,8 +31,6 @@ part 'archive_page_bloc_utils.dart';
 class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final images = <EncryptedImage>[];
   final deletingImagesQueue = <String>[];
-
-  bool isDecryptingAllImages = false;
 
   /// Images the decrypt FAB acts on: at the root (mixed view) only the images
   /// directly at root level of both stores; inside a folder, that folder and
@@ -69,39 +69,56 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   /// Store of the folder currently entered, or null at the root (mixed view).
   bool? get currentIsPrivate => _currentIsPrivate;
 
+  /// Decrypt-job key for the folder currently entered. At the root (mixed view,
+  /// [_currentIsPrivate] == null) a dedicated `'root'` key is used.
+  String get _currentFolderKey =>
+      _currentIsPrivate == null
+          ? 'root'
+          : DecryptJobManager.keyFor(
+            isPrivate: _currentIsPrivate!,
+            relativePath: _currentPath,
+          );
+
+  /// Whether the archive is currently in multi-select mode. Exposed so the view
+  /// can decide back-navigation without depending on the transient emitted
+  /// state (which may briefly be non-`ui` mid-operation).
+  bool get isSelectionMode => _isSelectionMode;
+
   /// Folders created in-session that may still be empty, so they show up
   /// before any image lives in them.
   final Set<FolderKey> _createdFolders = <FolderKey>{};
 
-  final GalleryReaderUsecase galleryReaderUsecase;
-  final ImageDeleterUsecase imageDeleterUsecase;
+  final GalleryReaderUseCase galleryReaderUseCase;
+  final ImageDeleterUseCase imageDeleterUseCase;
 
   final AppBloc appBloc;
-  final GalleryBloc galleryBloc;
+  final DecryptJobManager decryptJobManager;
 
-  final ImageSaverUsecase imageSaverUseCase;
-  final CreateFolderUsecase createFolderUsecase;
-  final RenameFolderUsecase renameFolderUsecase;
-  final DeleteFolderUsecase deleteFolderUsecase;
-  final MoveImagesUsecase moveImagesUsecase;
+  /// Live subscription to background decrypt progress; re-emits the view on tick.
+  StreamSubscription<void>? _decryptSub;
+
+  final ImageSaverUseCase imageSaverUseCase;
+  final CreateFolderUseCase createFolderUseCase;
+  final RenameFolderUseCase renameFolderUseCase;
+  final DeleteFolderUseCase deleteFolderUseCase;
+  final MoveImagesUseCase moveImagesUseCase;
 
   ArchivePageBloc({
     required this.appBloc,
-    required this.galleryBloc,
-    required this.galleryReaderUsecase,
-    required this.imageDeleterUsecase,
+    required this.decryptJobManager,
+    required this.galleryReaderUseCase,
+    required this.imageDeleterUseCase,
     required this.imageSaverUseCase,
-    required this.createFolderUsecase,
-    required this.renameFolderUsecase,
-    required this.deleteFolderUsecase,
-    required this.moveImagesUsecase,
-  })
-    : super(const ArchivePageState.initial()) {
+    required this.createFolderUseCase,
+    required this.renameFolderUseCase,
+    required this.deleteFolderUseCase,
+    required this.moveImagesUseCase,
+  }) : super(const ArchivePageState.initial()) {
     on<_Setup>((event, emit) async {
       emit(const ArchivePageState.loading());
 
       bool hasFailure = false;
-      final galleryStream = galleryReaderUsecase.call(null);
+      final galleryStream = galleryReaderUseCase.call(null);
       await for (final result in galleryStream) {
         result.fold(
           (failure) {
@@ -134,11 +151,11 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         );
       }
 
-      await for (final rel in galleryReaderUsecase.readPrivateFolderPaths()) {
+      await for (final rel in galleryReaderUseCase.readPrivateFolderPaths()) {
         _createdFolders.add((isPrivate: true, relativePath: rel));
       }
 
-      await for (final rel in galleryReaderUsecase.readPublicFolderPaths()) {
+      await for (final rel in galleryReaderUseCase.readPublicFolderPaths()) {
         _createdFolders.add((isPrivate: false, relativePath: rel));
       }
 
@@ -158,8 +175,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               images.add(value.image);
               _emit(emit);
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Image already exists in gallery, skipping add: ${value.image.storagePath.file.path}',
+                LogLayer.pageBloc,
               );
             }
           },
@@ -173,13 +191,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             if (index != -1) {
               images[index] = value.image;
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Updated image not found, adding as new',
+                LogLayer.pageBloc,
                 error: value.oldIdentifier,
               );
               images.add(value.image);
             }
-            if (isDecryptingAllImages) return;
             _emit(emit);
           },
           removedGalleryImage: (value) {
@@ -195,32 +213,39 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               deletingImagesQueue.remove(value.path);
               _emit(emit);
               if (deletingImagesQueue.isNotEmpty) {
-                emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
+                emit(
+                  ArchivePageState.deleting(
+                    paths: List.from(deletingImagesQueue),
+                  ),
+                );
               }
             } else {
-              appLogger.logPageBloc(
+              appLogger.log(
                 'Removed image not found in gallery, skipping remove: ${value.path}',
+                LogLayer.pageBloc,
               );
             }
           },
           orElse: () {},
         );
       }
-      
     });
     on<_ArchivePageDelete>((event, emit) async {
       deletingImagesQueue.addAll(
-        event.images.map((img) => img.storagePath.assetId ?? img.storagePath.path),
+        event.images.map(
+          (img) => img.storagePath.assetId ?? img.storagePath.path,
+        ),
       );
       emit(ArchivePageState.deleting(paths: List.from(deletingImagesQueue)));
-      final result = await imageDeleterUsecase.call(
+      final result = await imageDeleterUseCase.call(
         ImageDeleterParams(images: event.images),
       );
 
       result.fold(
         (failure) {
-          appLogger.logPageBloc(
+          appLogger.log(
             'Failed to delete image',
+            LogLayer.pageBloc,
             error: failure.message,
           );
           emit(ArchivePageState.failure(message: failure.message));
@@ -231,17 +256,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
               final resolvedPath = _resolveRemovalPath(image);
 
               if (resolvedPath == null) {
-                appLogger.logPageBloc(
+                appLogger.log(
                   'Delete succeeded but image path was not found in AppBloc',
+                  LogLayer.pageBloc,
                   error:
                       'path=${image.storagePath.path}, assetId=${image.storagePath.assetId}',
                 );
                 continue;
               }
 
-              appBloc.add(
-                AppEvent.removeEncryptedImage(path: resolvedPath),
-              );
+              appBloc.add(AppEvent.removeEncryptedImage(path: resolvedPath));
             }
           } else {
             _emit(emit);
@@ -250,6 +274,8 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       );
     });
     on<_ArchivePageEncryptAll>((event, emit) async {
+      // Stop any background decrypt for this folder before re-locking.
+      decryptJobManager.cancel(_currentFolderKey);
       for (final image in currentFolderImages) {
         appBloc.add(
           AppEvent.setDecryptedInfo(
@@ -258,76 +284,18 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
           ),
         );
       }
-      isDecryptingAllImages = false;
       _emit(emit);
     });
     on<_ArchivePageDecryptAll>((event, emit) async {
-
-      final scopedPaths =
-          currentFolderImages.map((i) => i.storagePath.path).toSet();
-      final sortedImages = this.sortedImages
-          .where((img) => scopedPaths.contains(img.storagePath.path))
-          .toList();
-      final sortedImagesTable = {
-        for (int i = 0; i < sortedImages.length; i++) i: sortedImages[i],
-      };
-      sortedImages.removeWhere((img) => img.decryptInfo != null);
-      bool hasRemovedImages =
-          sortedImages.length != sortedImagesTable.keys.length;
-
-      galleryBloc.add(
-        GalleryEvent.decryptImages(
-          image: sortedImages,
-          password: event.passphrase,
-        ),
+      // Kick off a background job for the current folder and return at once; the
+      // manager decrypts off-loop (in parallel with other folders) and progress
+      // flows back via the [decryptJobManager.updates] subscription.
+      decryptJobManager.start(
+        key: _currentFolderKey,
+        images: currentFolderImages,
+        password: event.passphrase,
       );
-
-      isDecryptingAllImages = true;
-
-      await for (final state in galleryBloc.stream) {
-        final completed = state.maybeMap(
-          decrypted: (value) {
-            var dearchivingState = value.dearchivingState;
-
-            final completed =
-                dearchivingState.progress == dearchivingState.totalImages;
-
-            if (hasRemovedImages) {
-              final sortedImagesTableValues =
-                  sortedImagesTable.entries.toList();
-              for (final dearchivedImage in dearchivingState.dearchivedImages) {
-                final item = sortedImagesTableValues.firstWhere(
-                  (value) =>
-                      value.value.storagePath.path ==
-                      dearchivedImage.storagePath.path,
-                );
-                if (item.value.isDecrypted) continue;
-
-                sortedImagesTable[item.key] = item.value.overrideWith(
-                  decryptInfo: dearchivedImage.decryptInfo,
-                );
-              }
-
-              dearchivingState = dearchivingState.copyWith(
-                totalImages: sortedImagesTable.length,
-                dearchivedImages: sortedImagesTable.values.toList(),
-              );
-            }
-
-            emit(
-              ArchivePageState.decryptingAllUI(
-                dearchivingState: dearchivingState,
-              ),
-            );
-
-            return completed;
-          },
-          orElse: () => false,
-        );
-        if (completed) break;
-      }
-
-      isDecryptingAllImages = false;
+      _emit(emit);
     });
     on<_ImportImages>((event, emit) async {
       emit(const ArchivePageState.importing());
@@ -346,21 +314,24 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
                 ? ImageSaverParams.appFolder(
                   bytes: bytes,
                   fileName: fileName,
-                  path: hasRel
-                      ? '${await GalleryPathProvider.getPrivateFolderPath()}/$rel'
-                      : await GalleryPathProvider.getPrivateFolderPath(),
+                  path:
+                      hasRel
+                          ? '${await GalleryPathProvider.getPrivateFolderPath()}/$rel'
+                          : await GalleryPathProvider.getPrivateFolderPath(),
                 )
                 : ImageSaverParams.gallery(
                   bytes: bytes,
                   fileName: fileName,
-                  album: hasRel
-                      ? '${Constants.appFolderName}/$rel'
-                      : Constants.appFolderName,
+                  album:
+                      hasRel
+                          ? '${Constants.appFolderName}/$rel'
+                          : Constants.appFolderName,
                 );
         final result = await imageSaverUseCase.call(params);
         if (result.isLeft()) {
-          appLogger.logPageBloc(
+          appLogger.log(
             'Failed to import image: $fileName',
+            LogLayer.pageBloc,
             error: result.left.message,
           );
         } else {
@@ -392,6 +363,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
       emit(const ArchivePageState.imported());
     });
+    on<_RefreshView>(_onRefreshView);
     on<_ActivateSelectionMode>(_onActivateSelectionMode);
     on<_CancelSelectionMode>(_onCancelSelectionMode);
     on<_EnterFolder>(_onEnterFolder);
@@ -401,6 +373,17 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     on<_DeleteFolder>(_onDeleteFolder);
     on<_MoveImages>(_onMoveImages);
     on<_DecryptFolder>(_onDecryptFolder);
+
+    // Background decrypt progress → refresh the view (folder tiles + FAB).
+    _decryptSub = decryptJobManager.updates.listen(
+      (_) => add(const ArchivePageEvent.refreshView()),
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _decryptSub?.cancel();
+    return super.close();
   }
 
   // ── Folder navigation ───────────────────────────────────────────────────────
@@ -434,7 +417,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     // Inside a folder the store is fixed; at the root (mixed view) the user
     // picks it explicitly via [event.isPrivate], defaulting to private.
     final isPrivate = event.isPrivate ?? _currentIsPrivate ?? true;
-    final result = await createFolderUsecase.call(
+    final result = await createFolderUseCase.call(
       CreateFolderParams(
         parentRelativePath: _currentPath,
         name: event.name,
@@ -445,8 +428,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       (failure) => emit(ArchivePageState.failure(message: failure.message)),
       (_) {
         final safeName = FileNameUtils.sanitizeFileStem(event.name);
-        final rel =
-            _currentPath.isEmpty ? safeName : '$_currentPath/$safeName';
+        final rel = _currentPath.isEmpty ? safeName : '$_currentPath/$safeName';
         _createdFolders.add((isPrivate: isPrivate, relativePath: rel));
         appBloc.add(
           AppEvent.folderCreated(isPrivate: isPrivate, relativePath: rel),
@@ -460,7 +442,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _RenameFolder event,
     Emitter<ArchivePageState> emit,
   ) async {
-    final result = await renameFolderUsecase.call(
+    final result = await renameFolderUseCase.call(
       RenameFolderParams(
         relativePath: event.relativePath,
         newName: event.newName,
@@ -485,14 +467,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     // the renamed entries by file path, so no duplicates result.
     final marker =
         event.isPrivate ? '/encrypted/' : '/${Constants.appFolderName}/';
-    final affected = images
-        .where(
-          (img) =>
-              img.storagePath.isPrivateFolder == event.isPrivate &&
-              (img.storeRelativeDir == oldRel ||
-                  img.storeRelativeDir.startsWith('$oldRel/')),
-        )
-        .toList();
+    final affected =
+        images
+            .where(
+              (img) =>
+                  img.storagePath.isPrivateFolder == event.isPrivate &&
+                  (img.storeRelativeDir == oldRel ||
+                      img.storeRelativeDir.startsWith('$oldRel/')),
+            )
+            .toList();
     for (final img in affected) {
       final path = img.storagePath.path.replaceAll('\\', '/');
       final mi = path.lastIndexOf(marker);
@@ -513,14 +496,15 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
     // Re-register in-session created folders (incl. empty ones) under the new
     // name so they stay visible after the rename.
-    final renamedCreated = _createdFolders
-        .where(
-          (f) =>
-              f.isPrivate == event.isPrivate &&
-              (f.relativePath == oldRel ||
-                  f.relativePath.startsWith('$oldRel/')),
-        )
-        .toList();
+    final renamedCreated =
+        _createdFolders
+            .where(
+              (f) =>
+                  f.isPrivate == event.isPrivate &&
+                  (f.relativePath == oldRel ||
+                      f.relativePath.startsWith('$oldRel/')),
+            )
+            .toList();
     _createdFolders.removeWhere(
       (f) =>
           f.isPrivate == event.isPrivate &&
@@ -551,7 +535,51 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       isPrivate: event.isPrivate,
       relativePath: event.relativePath,
     );
-    final result = await deleteFolderUsecase.call(
+
+    // Snapshot for rollback: the Android public delete sweeps MediaStore and
+    // can take seconds. Awaiting it before touching the view froze the folder
+    // on screen until completion (only a restart showed it gone). Instead
+    // remove optimistically, run the delete in the background, and restore the
+    // snapshot if it fails.
+    final removedImages = List<EncryptedImage>.from(contained);
+    final removedFolders =
+        _createdFolders
+            .where(
+              (f) =>
+                  f.isPrivate == event.isPrivate &&
+                  (f.relativePath == event.relativePath ||
+                      f.relativePath.startsWith('${event.relativePath}/')),
+            )
+            .toList();
+
+    for (final img in removedImages) {
+      images.removeWhere(
+        (i) =>
+            i.storagePath.path == img.storagePath.path ||
+            (img.storagePath.assetId != null &&
+                i.storagePath.assetId == img.storagePath.assetId),
+      );
+      appBloc.add(
+        AppEvent.removeEncryptedImage(
+          path: img.storagePath.assetId ?? img.storagePath.path,
+        ),
+      );
+    }
+    _createdFolders.removeWhere(
+      (f) =>
+          f.isPrivate == event.isPrivate &&
+          (f.relativePath == event.relativePath ||
+              f.relativePath.startsWith('${event.relativePath}/')),
+    );
+    appBloc.add(
+      AppEvent.folderDeleted(
+        isPrivate: event.isPrivate,
+        relativePath: event.relativePath,
+      ),
+    );
+    _emit(emit);
+
+    final result = await deleteFolderUseCase.call(
       DeleteFolderParams(
         relativePath: event.relativePath,
         isPrivate: event.isPrivate,
@@ -559,35 +587,25 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       ),
     );
     result.fold(
-      (failure) => emit(ArchivePageState.failure(message: failure.message)),
-      (_) {
-        for (final img in contained) {
-          images.removeWhere(
-            (i) =>
-                i.storagePath.path == img.storagePath.path ||
-                (img.storagePath.assetId != null &&
-                    i.storagePath.assetId == img.storagePath.assetId),
-          );
-          appBloc.add(
-            AppEvent.removeEncryptedImage(
-              path: img.storagePath.assetId ?? img.storagePath.path,
-            ),
-          );
+      (failure) {
+        // Rollback: restore the removed images and folders, then surface the
+        // failure. `failure` only triggers a snackbar in the view; the trailing
+        // `_emit` re-renders the restored `ui` state so the folder reappears.
+        images.addAll(removedImages);
+        for (final img in removedImages) {
+          appBloc.add(AppEvent.addEncryptedImage(image: img));
         }
-        _createdFolders.removeWhere(
-          (f) =>
-              f.isPrivate == event.isPrivate &&
-              (f.relativePath == event.relativePath ||
-                  f.relativePath.startsWith('${event.relativePath}/')),
-        );
+        _createdFolders.addAll(removedFolders);
         appBloc.add(
-          AppEvent.folderDeleted(
+          AppEvent.folderCreated(
             isPrivate: event.isPrivate,
             relativePath: event.relativePath,
           ),
         );
+        emit(ArchivePageState.failure(message: failure.message));
         _emit(emit);
       },
+      (_) {},
     );
   }
 
@@ -595,7 +613,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     _MoveImages event,
     Emitter<ArchivePageState> emit,
   ) async {
-    final result = await moveImagesUsecase.call(
+    final result = await moveImagesUseCase.call(
       MoveImagesParams(
         images: event.images,
         targetRelativePath: event.targetRelativePath,
@@ -625,54 +643,31 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
     );
   }
 
-  Future<void> _onDecryptFolder(
-    _DecryptFolder event,
-    Emitter<ArchivePageState> emit,
-  ) async {
+  void _onDecryptFolder(_DecryptFolder event, Emitter<ArchivePageState> emit) {
     final folderImages = ArchiveTreeUtils.imagesUnder(
       images,
       isPrivate: event.isPrivate,
       relativePath: event.relativePath,
-    )..removeWhere((img) => img.decryptInfo != null);
-
-    if (folderImages.isEmpty) {
-      _emit(emit);
-      return;
-    }
-
-    galleryBloc.add(
-      GalleryEvent.decryptImages(
-        image: folderImages,
-        password: event.passphrase,
-      ),
     );
 
-    isDecryptingAllImages = true;
-
-    await for (final state in galleryBloc.stream) {
-      final completed = state.maybeMap(
-        decrypted: (value) {
-          final dearchivingState = value.dearchivingState;
-          emit(
-            ArchivePageState.decryptingAllUI(
-              dearchivingState: dearchivingState,
-            ),
-          );
-          return dearchivingState.progress == dearchivingState.totalImages;
-        },
-        orElse: () => false,
-      );
-      if (completed) break;
-    }
-
-    isDecryptingAllImages = false;
+    // Background job keyed by this folder so it runs in parallel with others
+    // and survives navigating away.
+    decryptJobManager.start(
+      key: DecryptJobManager.keyFor(
+        isPrivate: event.isPrivate,
+        relativePath: event.relativePath,
+      ),
+      images: folderImages,
+      password: event.passphrase,
+    );
     _emit(emit);
   }
 
-  List<String> folderRelativePaths({required bool isPrivate}) => _createdFolders
-      .where((f) => f.isPrivate == isPrivate)
-      .map((f) => f.relativePath)
-      .toList();
+  List<String> folderRelativePaths({required bool isPrivate}) =>
+      _createdFolders
+          .where((f) => f.isPrivate == isPrivate)
+          .map((f) => f.relativePath)
+          .toList();
 
   List<EncryptedImage> get sortedImages {
     // TODO: optimize it by saving the sorted images based on the user filter
@@ -703,10 +698,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
       _createdFolders,
       isPrivate: _currentIsPrivate,
       currentPath: _currentPath,
+      jobFor:
+          (isPrivate, relativePath) => decryptJobManager.jobState(
+            DecryptJobManager.keyFor(
+              isPrivate: isPrivate,
+              relativePath: relativePath,
+            ),
+          ),
     );
-    final breadcrumb = _currentPath.isEmpty
-        ? const <String>[]
-        : _currentPath.split('/');
+    final breadcrumb =
+        _currentPath.isEmpty ? const <String>[] : _currentPath.split('/');
 
     emit(
       ArchivePageState.ui(
@@ -716,8 +717,16 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         currentPath: _currentPath,
         currentIsPrivate: _currentIsPrivate,
         isSelectionMode: _isSelectionMode,
+        activeJob: decryptJobManager.jobState(_currentFolderKey),
       ),
     );
+  }
+
+  /// Re-derives the browsable `ui` state from the bloc's retained data. Used
+  /// when the page is re-opened while the bloc is resting in a terminal state
+  /// (e.g. a `failure` from a folder op) so the archive never renders blank.
+  void _onRefreshView(_RefreshView event, Emitter<ArchivePageState> emit) {
+    _emit(emit);
   }
 
   void _onActivateSelectionMode(
@@ -737,13 +746,13 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   }
 
   String? _resolveRemovalPath(EncryptedImage image) {
-  // Preferisci assetId come identificatore stabile su iOS.
-  final assetId = image.storagePath.assetId;
-  if (assetId != null) return assetId;
+    // Preferisci assetId come identificatore stabile su iOS.
+    final assetId = image.storagePath.assetId;
+    if (assetId != null) return assetId;
 
-  final direct = appBloc.encryptedImages.firstWhereOrNull(
-    (img) => img.storagePath.path == image.storagePath.path,
-  );
-  return direct?.storagePath.path;
-}
+    final direct = appBloc.encryptedImages.firstWhereOrNull(
+      (img) => img.storagePath.path == image.storagePath.path,
+    );
+    return direct?.storagePath.path;
+  }
 }

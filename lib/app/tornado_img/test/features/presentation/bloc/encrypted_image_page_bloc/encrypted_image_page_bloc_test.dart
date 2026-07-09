@@ -18,9 +18,9 @@ class _MockAppBloc extends Mock implements AppBloc {}
 
 class _MockGalleryBloc extends Mock implements GalleryBloc {}
 
-class _MockImageSaverUsecase extends Mock implements ImageSaverUsecase {}
+class _MockImageSaverUsecase extends Mock implements ImageSaverUseCase {}
 
-class _MockImageRenamerUsecase extends Mock implements ImageRenamerUsecase {}
+class _MockImageRenamerUsecase extends Mock implements ImageRenamerUseCase {}
 
 EncryptedImage _makeImage(String path) => EncryptedImage(
   storagePath: StoragePath(
@@ -77,8 +77,8 @@ void main() {
     final bloc = EncryptedImagePageBloc(
       appBloc: mockAppBloc,
       galleryBloc: mockGalleryBloc,
-      imageSaverUsecase: mockImageSaverUsecase,
-      imageRenamerUsecase: mockImageRenamerUsecase,
+      imageSaverUseCase: mockImageSaverUsecase,
+      imageRenamerUseCase: mockImageRenamerUsecase,
     );
     expect(bloc.state, const EncryptedImagePageState.initial());
     bloc.close();
@@ -94,8 +94,8 @@ void main() {
           () => EncryptedImagePageBloc(
             appBloc: mockAppBloc,
             galleryBloc: mockGalleryBloc,
-            imageSaverUsecase: mockImageSaverUsecase,
-            imageRenamerUsecase: mockImageRenamerUsecase,
+            imageSaverUseCase: mockImageSaverUsecase,
+            imageRenamerUseCase: mockImageRenamerUsecase,
           ),
       act:
           (b) {
@@ -123,8 +123,8 @@ void main() {
       final bloc = EncryptedImagePageBloc(
         appBloc: mockAppBloc,
         galleryBloc: mockGalleryBloc,
-        imageSaverUsecase: mockImageSaverUsecase,
-        imageRenamerUsecase: mockImageRenamerUsecase,
+        imageSaverUseCase: mockImageSaverUsecase,
+        imageRenamerUseCase: mockImageRenamerUsecase,
       );
       const testPassword = 'test123';
 
@@ -148,8 +148,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -185,8 +185,8 @@ void main() {
           () => EncryptedImagePageBloc(
             appBloc: mockAppBloc,
             galleryBloc: mockGalleryBloc,
-            imageSaverUsecase: mockImageSaverUsecase,
-            imageRenamerUsecase: mockImageRenamerUsecase,
+            imageSaverUseCase: mockImageSaverUsecase,
+            imageRenamerUseCase: mockImageRenamerUsecase,
           ),
       seed: () => EncryptedImagePageState.ui(image: tImage),
       act: (b) => b.add(const EncryptedImagePageEvent.decrypt()),
@@ -206,8 +206,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       seed: () => EncryptedImagePageState.ui(image: tImage),
@@ -239,8 +239,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -275,8 +275,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -308,8 +308,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -342,8 +342,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -378,8 +378,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {
@@ -407,8 +407,8 @@ void main() {
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
           galleryBloc: mockGalleryBloc,
-          imageSaverUsecase: mockImageSaverUsecase,
-          imageRenamerUsecase: mockImageRenamerUsecase,
+          imageSaverUseCase: mockImageSaverUsecase,
+          imageRenamerUseCase: mockImageRenamerUsecase,
         );
       },
       act: (b) {

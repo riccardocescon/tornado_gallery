@@ -22,18 +22,18 @@ EncryptedImage _makeImage(String path, {String? assetId}) => EncryptedImage(
 
 void main() {
   late _MockStorageRepository mockStorageRepo;
-  late ImageDeleterUsecase useCase;
+  late ImageDeleterUseCase useCase;
 
   setUp(() {
     mockStorageRepo = _MockStorageRepository();
-    useCase = ImageDeleterUsecase(storageRepo: mockStorageRepo);
+    useCase = ImageDeleterUseCase(storageRepo: mockStorageRepo);
   });
 
   setUpAll(() {
     registerFallbackValue(<StoragePath>[]);
   });
 
-  group('ImageDeleterUsecase.call', () {
+  group('ImageDeleterUseCase.call', () {
     test('returns Right(true) when storage deletes successfully', () async {
       when(
         () => mockStorageRepo.delete(any()),
