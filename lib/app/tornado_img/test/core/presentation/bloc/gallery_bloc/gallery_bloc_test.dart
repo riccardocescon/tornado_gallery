@@ -11,10 +11,10 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart'
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 
 class _MockEncryptImageUseCase extends Mock implements EncryptImageUseCase {}
 
@@ -58,6 +58,7 @@ void main() {
         ),
       ),
     );
+    registerFallbackValue(DecryptImageParams(file: tFile, password: ''));
   });
 
   setUp(() {
@@ -65,10 +66,13 @@ void main() {
     mockDecryptUseCase = _MockDecryptImageUseCase();
     tImage = GalleryImage(id: _tImageId, file: tFile, date: DateTime(2024));
     tEncryptedImage = EncryptedImage(
-      path: 'encrypted_img1.enc',
+      storagePath: StoragePath(
+        path: 'encrypted_img1.enc',
+        isPrivateFolder: false,
+        assetId: null,
+      ),
       encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
       date: DateTime(2024),
-      isPrivateFolder: false,
     );
   });
 
@@ -97,12 +101,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -133,12 +136,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -169,12 +171,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/folder',
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -205,12 +206,11 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'mypassword',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: '/my/path',
               ),
-              filename: null,
             ),
           ),
       verify: (_) {
@@ -243,12 +243,11 @@ void main() {
         );
         b.add(
           GalleryEvent.encryptImages(
-            images: [tImage, image2],
+            images: {tImage: null, image2: null},
             password: 'secret',
             settings: EncryptionSettings.init().copyWith(
               outputFolder: _tDestination,
             ),
-            filename: null,
           ),
         );
       },
@@ -280,10 +279,13 @@ void main() {
       'skips image when overrideImage is false and image exists at destination',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         return _makeBloc(
           encrypt: mockEncryptionUseCase,
@@ -294,13 +296,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -322,10 +323,13 @@ void main() {
       'does not skip image when overrideImage is true even if image exists at destination',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         when(
           () => mockEncryptionUseCase.call(any()),
@@ -340,13 +344,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: true,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -378,13 +381,12 @@ void main() {
       act:
           (b) => b.add(
             GalleryEvent.encryptImages(
-              images: [tImage],
+              images: {tImage: null},
               password: 'secret',
               settings: EncryptionSettings.init().copyWith(
                 outputFolder: _tDestination,
                 overrideImage: false,
               ),
-              filename: null,
             ),
           ),
       expect:
@@ -403,13 +405,16 @@ void main() {
     );
 
     blocTest<GalleryBloc, GalleryState>(
-      'skips existing images and encrypts new ones in a mixed batch',
+      'skips existing and encrypts new in mixed batch',
       build: () {
         final existingImage = EncryptedImage(
-          path: '$_tDestination/$_tImageId.png',
+          storagePath: StoragePath(
+            path: '$_tDestination/$_tImageId.png',
+            isPrivateFolder: false,
+            assetId: null,
+          ),
           encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
           date: DateTime(2024),
-          isPrivateFolder: false,
         );
         when(
           () => mockEncryptionUseCase.call(any()),
@@ -428,13 +433,12 @@ void main() {
         );
         b.add(
           GalleryEvent.encryptImages(
-            images: [tImage, image2],
+            images: {tImage: null, image2: null},
             password: 'secret',
             settings: EncryptionSettings.init().copyWith(
               outputFolder: _tDestination,
               overrideImage: false,
             ),
-            filename: null,
           ),
         );
       },
@@ -464,6 +468,164 @@ void main() {
             ),
           ],
       verify: (_) => verify(() => mockEncryptionUseCase.call(any())).called(1),
+    );
+  });
+
+  group('GalleryEvent.decryptImages', () {
+    final tDecryptedInfo = BytesInfo(
+      bytes: Uint8List.fromList([5, 6, 7]),
+      hash: 'decrypted_hash',
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits [loadingDecryption, decrypted(initial), decrypted(success)] on success',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'secret',
+            ),
+          ),
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 1),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.loadingImages,
+                orElse: () => null,
+              ),
+              'initial: image in loadingImages',
+              hasLength(1),
+            ),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages,
+                orElse: () => null,
+              ),
+              'final: image moved to dearchived',
+              hasLength(1),
+            ),
+          ],
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits decrypted with failedImages when use case returns Left',
+      build: () {
+        when(() => mockDecryptUseCase.call(any())).thenAnswer(
+          (_) async => Left(EncryptionFailure.encryptionError('bad key')),
+        );
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'wrong',
+            ),
+          ),
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 1),
+            isA<GalleryState>(),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.failedImages,
+                orElse: () => null,
+              ),
+              'image in failedImages',
+              contains(tEncryptedImage),
+            ),
+          ],
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'passes correct file and password to decryptUseCase',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act:
+          (b) => b.add(
+            GalleryEvent.decryptImages(
+              image: [tEncryptedImage],
+              password: 'mypass',
+            ),
+          ),
+      verify: (_) {
+        final captured =
+            verify(() => mockDecryptUseCase.call(captureAny())).captured;
+        final params = captured.first as DecryptImageParams;
+        expect(params.file.path, tEncryptedImage.storagePath.file.path);
+        expect(params.password, 'mypass');
+      },
+    );
+
+    blocTest<GalleryBloc, GalleryState>(
+      'emits progress states for each image in multi-image batch',
+      build: () {
+        when(
+          () => mockDecryptUseCase.call(any()),
+        ).thenAnswer((_) async => Right(tDecryptedInfo));
+        return _makeBloc(
+          encrypt: mockEncryptionUseCase,
+          decrypt: mockDecryptUseCase,
+        );
+      },
+      act: (b) {
+        final image2 = EncryptedImage(
+          storagePath: StoragePath(
+            path: 'enc2.png',
+            isPrivateFolder: true,
+            assetId: null,
+          ),
+          encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
+          date: DateTime(2024),
+        );
+        b.add(
+          GalleryEvent.decryptImages(
+            image: [tEncryptedImage, image2],
+            password: 'secret',
+          ),
+        );
+      },
+      expect:
+          () => [
+            GalleryState.loadingDecryption(total: 2),
+            isA<GalleryState>(),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages.length,
+                orElse: () => 0,
+              ),
+              'one dearchived after first image',
+              equals(1),
+            ),
+            isA<GalleryState>().having(
+              (s) => s.maybeMap(
+                decrypted: (d) => d.dearchivingState.dearchivedImages.length,
+                orElse: () => 0,
+              ),
+              'two dearchived after second image',
+              equals(2),
+            ),
+          ],
     );
   });
 }

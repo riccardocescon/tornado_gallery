@@ -101,11 +101,7 @@ class _ArchiveState extends StatelessWidget {
                         Icons.folder_rounded,
                         amount?.toString(),
                         "encrypted files",
-                        () {
-                          context.read<HomepageBloc>().add(
-                            const HomepageEvent.setScreen(page: Pages.archive),
-                          );
-                        }
+                        () => _openArchive(context),
                       ),
                       Divider(
                         height: 2,
@@ -118,12 +114,7 @@ class _ArchiveState extends StatelessWidget {
                         Icons.archive_rounded,
                         folderAmount?.toString(),
                         "archives",
-                        () {
-                          context.showSnackbar(
-                            "Feature coming soon",
-                            duration: const Duration(seconds: 1),
-                          );
-                        },
+                        () => _openArchive(context),
                       ),
                       Divider(
                         height: 2,
@@ -293,11 +284,7 @@ class _ArchiveState extends StatelessWidget {
 
   Widget _openArchiveButton(BuildContext context) {
     return FilledButton(
-      onPressed: () {
-        context.read<HomepageBloc>().add(
-          HomepageEvent.setScreen(page: Pages.archive),
-        );
-      },
+      onPressed: () => _openArchive(context),
       style: FilledButton.styleFrom(
         backgroundColor: context.appColors.softButton,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -436,15 +423,19 @@ class _ArchiveState extends StatelessWidget {
   }
 
   Widget _usageBar(BuildContext context) {
-    return BlocBuilder<AppBloc, AppState>(
+    return BlocBuilder<HomepageBloc, HomepageState>(
       buildWhen:
           (previous, current) => current.maybeMap(
-            addedGalleryImage: (value) => true,
-            removedGalleryImage: (value) => true,
+            galleryStatus: (_) => true,
             orElse: () => false,
           ),
       builder: (context, state) {
-        final totalImages = getIt<AppBloc>().encryptedImages.length;
+
+        final totalImages = state.maybeMap(
+          galleryStatus: (value) => value.imagesLoaded,
+          orElse: () => getIt<AppBloc>().encryptedImages.length,
+        );
+
         final percentage =
             totalImages > 0
                 ? (totalImages / Constants.maxEncryptedImages).clamp(0, 1)

@@ -20,8 +20,8 @@ void main() {
   late _MockImageProcessingRepository mockImageRepo;
   late _MockStorageRepository mockStorageRepo;
   late DecryptImageUseCase useCase;
+  late File tFile;
 
-  final tFile = File('test.png');
   final tImageData = _FakeImageData();
   final tEncryptedData = _FakeImageData();
   final tEncoded = Uint8List.fromList([1, 2, 3]);
@@ -30,13 +30,21 @@ void main() {
     registerFallbackValue(_FakeImageData());
   });
 
-  setUp(() {
+  setUp(() async {
+    tFile = File(
+      '${Directory.systemTemp.path}/decrypt_test_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+    await tFile.create();
     mockImageRepo = _MockImageProcessingRepository();
     mockStorageRepo = _MockStorageRepository();
     useCase = DecryptImageUseCase(
       imageRepo: mockImageRepo,
       storageRepo: mockStorageRepo,
     );
+  });
+
+  tearDown(() async {
+    if (await tFile.exists()) await tFile.delete();
   });
 
   group('DecryptImageUseCase.call', () {

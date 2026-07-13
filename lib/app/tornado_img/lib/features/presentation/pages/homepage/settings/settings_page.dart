@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/assets.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
+import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
@@ -83,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               Spacer(),
                               IconButton(
                                 onPressed: () {
-                                  context.push('/logger');
+                                  context.pushNamed(Routes.logger);
                                 },
                                 icon: Icon(Icons.arrow_forward_ios_rounded),
                               ),
@@ -145,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       Text(
-                        "Currently the storage limit is set to 50 encrypted files.\nIn future updates more storage management options will be added.",
+                        "Currently the storage limit is set to ${Constants.maxEncryptedImages} encrypted files.\nIn future updates more storage management options will be added.",
                         style: context.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.normal,
                         ),

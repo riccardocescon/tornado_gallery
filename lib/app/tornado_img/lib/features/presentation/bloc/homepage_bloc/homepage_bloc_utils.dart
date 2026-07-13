@@ -14,3 +14,9 @@ class _GalleryStream extends _HomepageStream {
 
   _GalleryStream(this.galleryState);
 }
+
+class _AppStream extends _HomepageStream {
+  final AppState appState;
+
+  _AppStream(this.appState);
+}

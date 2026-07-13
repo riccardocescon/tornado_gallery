@@ -48,15 +48,17 @@ extension EncryptionPageEventPatterns on EncryptionPageEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _SetPassword value)?  setPassword,TResult Function( _SetFileName value)?  setFileName,TResult Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult Function( _SetOutputFolder value)?  setOutputFolder,TResult Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult Function( _Encrypt value)?  encrypt,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Setup value)?  setup,TResult Function( _SetPassword value)?  setPassword,TResult Function( _SetFileName value)?  setFileName,TResult Function( _SelectImage value)?  selectImage,TResult Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult Function( _SetOutputFolder value)?  setOutputFolder,TResult Function( _SetPublicAlbum value)?  setPublicAlbum,TResult Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult Function( _Encrypt value)?  encrypt,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _SetPassword() when setPassword != null:
 return setPassword(_that);case _SetFileName() when setFileName != null:
-return setFileName(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setFileName(_that);case _SelectImage() when selectImage != null:
+return selectImage(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility(_that);case _SetOutputFolder() when setOutputFolder != null:
-return setOutputFolder(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
+return setOutputFolder(_that);case _SetPublicAlbum() when setPublicAlbum != null:
+return setPublicAlbum(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
 return toggleDeleteOriginals(_that);case _Encrypt() when encrypt != null:
 return encrypt(_that);case _:
@@ -77,15 +79,17 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _SetPassword value)  setPassword,required TResult Function( _SetFileName value)  setFileName,required TResult Function( _ToggleGalleryVisibility value)  toggleGalleryVisibility,required TResult Function( _SetOutputFolder value)  setOutputFolder,required TResult Function( _ToggleOverrideImage value)  toggleOverrideImage,required TResult Function( _ToggleDeleteOriginals value)  toggleDeleteOriginals,required TResult Function( _Encrypt value)  encrypt,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Setup value)  setup,required TResult Function( _SetPassword value)  setPassword,required TResult Function( _SetFileName value)  setFileName,required TResult Function( _SelectImage value)  selectImage,required TResult Function( _ToggleGalleryVisibility value)  toggleGalleryVisibility,required TResult Function( _SetOutputFolder value)  setOutputFolder,required TResult Function( _SetPublicAlbum value)  setPublicAlbum,required TResult Function( _ToggleOverrideImage value)  toggleOverrideImage,required TResult Function( _ToggleDeleteOriginals value)  toggleDeleteOriginals,required TResult Function( _Encrypt value)  encrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that);case _SetPassword():
 return setPassword(_that);case _SetFileName():
-return setFileName(_that);case _ToggleGalleryVisibility():
+return setFileName(_that);case _SelectImage():
+return selectImage(_that);case _ToggleGalleryVisibility():
 return toggleGalleryVisibility(_that);case _SetOutputFolder():
-return setOutputFolder(_that);case _ToggleOverrideImage():
+return setOutputFolder(_that);case _SetPublicAlbum():
+return setPublicAlbum(_that);case _ToggleOverrideImage():
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals():
 return toggleDeleteOriginals(_that);case _Encrypt():
 return encrypt(_that);case _:
@@ -105,15 +109,17 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _SetPassword value)?  setPassword,TResult? Function( _SetFileName value)?  setFileName,TResult? Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult? Function( _SetOutputFolder value)?  setOutputFolder,TResult? Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult? Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult? Function( _Encrypt value)?  encrypt,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Setup value)?  setup,TResult? Function( _SetPassword value)?  setPassword,TResult? Function( _SetFileName value)?  setFileName,TResult? Function( _SelectImage value)?  selectImage,TResult? Function( _ToggleGalleryVisibility value)?  toggleGalleryVisibility,TResult? Function( _SetOutputFolder value)?  setOutputFolder,TResult? Function( _SetPublicAlbum value)?  setPublicAlbum,TResult? Function( _ToggleOverrideImage value)?  toggleOverrideImage,TResult? Function( _ToggleDeleteOriginals value)?  toggleDeleteOriginals,TResult? Function( _Encrypt value)?  encrypt,}){
 final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that);case _SetPassword() when setPassword != null:
 return setPassword(_that);case _SetFileName() when setFileName != null:
-return setFileName(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setFileName(_that);case _SelectImage() when selectImage != null:
+return selectImage(_that);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility(_that);case _SetOutputFolder() when setOutputFolder != null:
-return setOutputFolder(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
+return setOutputFolder(_that);case _SetPublicAlbum() when setPublicAlbum != null:
+return setPublicAlbum(_that);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage(_that);case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
 return toggleDeleteOriginals(_that);case _Encrypt() when encrypt != null:
 return encrypt(_that);case _:
@@ -133,14 +139,16 @@ return encrypt(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images)?  setup,TResult Function( String password)?  setPassword,TResult Function( String name)?  setFileName,TResult Function()?  toggleGalleryVisibility,TResult Function( String outputFolder)?  setOutputFolder,TResult Function()?  toggleOverrideImage,TResult Function()?  toggleDeleteOriginals,TResult Function()?  encrypt,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<GalleryImage> images)?  setup,TResult Function( String password)?  setPassword,TResult Function( String name)?  setFileName,TResult Function( int index)?  selectImage,TResult Function()?  toggleGalleryVisibility,TResult Function( String relative,  String label)?  setOutputFolder,TResult Function( String relative,  String label)?  setPublicAlbum,TResult Function()?  toggleOverrideImage,TResult Function()?  toggleDeleteOriginals,TResult Function()?  encrypt,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.images);case _SetPassword() when setPassword != null:
 return setPassword(_that.password);case _SetFileName() when setFileName != null:
-return setFileName(_that.name);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setFileName(_that.name);case _SelectImage() when selectImage != null:
+return selectImage(_that.index);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility();case _SetOutputFolder() when setOutputFolder != null:
-return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage() when toggleOverrideImage != null:
+return setOutputFolder(_that.relative,_that.label);case _SetPublicAlbum() when setPublicAlbum != null:
+return setPublicAlbum(_that.relative,_that.label);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage();case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
 return toggleDeleteOriginals();case _Encrypt() when encrypt != null:
 return encrypt();case _:
@@ -161,14 +169,16 @@ return encrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images)  setup,required TResult Function( String password)  setPassword,required TResult Function( String name)  setFileName,required TResult Function()  toggleGalleryVisibility,required TResult Function( String outputFolder)  setOutputFolder,required TResult Function()  toggleOverrideImage,required TResult Function()  toggleDeleteOriginals,required TResult Function()  encrypt,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<GalleryImage> images)  setup,required TResult Function( String password)  setPassword,required TResult Function( String name)  setFileName,required TResult Function( int index)  selectImage,required TResult Function()  toggleGalleryVisibility,required TResult Function( String relative,  String label)  setOutputFolder,required TResult Function( String relative,  String label)  setPublicAlbum,required TResult Function()  toggleOverrideImage,required TResult Function()  toggleDeleteOriginals,required TResult Function()  encrypt,}) {final _that = this;
 switch (_that) {
 case _Setup():
 return setup(_that.images);case _SetPassword():
 return setPassword(_that.password);case _SetFileName():
-return setFileName(_that.name);case _ToggleGalleryVisibility():
+return setFileName(_that.name);case _SelectImage():
+return selectImage(_that.index);case _ToggleGalleryVisibility():
 return toggleGalleryVisibility();case _SetOutputFolder():
-return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage():
+return setOutputFolder(_that.relative,_that.label);case _SetPublicAlbum():
+return setPublicAlbum(_that.relative,_that.label);case _ToggleOverrideImage():
 return toggleOverrideImage();case _ToggleDeleteOriginals():
 return toggleDeleteOriginals();case _Encrypt():
 return encrypt();case _:
@@ -188,14 +198,16 @@ return encrypt();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images)?  setup,TResult? Function( String password)?  setPassword,TResult? Function( String name)?  setFileName,TResult? Function()?  toggleGalleryVisibility,TResult? Function( String outputFolder)?  setOutputFolder,TResult? Function()?  toggleOverrideImage,TResult? Function()?  toggleDeleteOriginals,TResult? Function()?  encrypt,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<GalleryImage> images)?  setup,TResult? Function( String password)?  setPassword,TResult? Function( String name)?  setFileName,TResult? Function( int index)?  selectImage,TResult? Function()?  toggleGalleryVisibility,TResult? Function( String relative,  String label)?  setOutputFolder,TResult? Function( String relative,  String label)?  setPublicAlbum,TResult? Function()?  toggleOverrideImage,TResult? Function()?  toggleDeleteOriginals,TResult? Function()?  encrypt,}) {final _that = this;
 switch (_that) {
 case _Setup() when setup != null:
 return setup(_that.images);case _SetPassword() when setPassword != null:
 return setPassword(_that.password);case _SetFileName() when setFileName != null:
-return setFileName(_that.name);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
+return setFileName(_that.name);case _SelectImage() when selectImage != null:
+return selectImage(_that.index);case _ToggleGalleryVisibility() when toggleGalleryVisibility != null:
 return toggleGalleryVisibility();case _SetOutputFolder() when setOutputFolder != null:
-return setOutputFolder(_that.outputFolder);case _ToggleOverrideImage() when toggleOverrideImage != null:
+return setOutputFolder(_that.relative,_that.label);case _SetPublicAlbum() when setPublicAlbum != null:
+return setPublicAlbum(_that.relative,_that.label);case _ToggleOverrideImage() when toggleOverrideImage != null:
 return toggleOverrideImage();case _ToggleDeleteOriginals() when toggleDeleteOriginals != null:
 return toggleDeleteOriginals();case _Encrypt() when encrypt != null:
 return encrypt();case _:
@@ -392,6 +404,65 @@ as String,
 /// @nodoc
 
 
+class _SelectImage extends EncryptionPageEvent {
+  const _SelectImage({required this.index}): super._();
+  
+
+ final  int index;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SelectImageCopyWith<_SelectImage> get copyWith => __$SelectImageCopyWithImpl<_SelectImage>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptionPageEvent.selectImage(index: $index)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SelectImageCopyWith<$Res> implements $EncryptionPageEventCopyWith<$Res> {
+  factory _$SelectImageCopyWith(_SelectImage value, $Res Function(_SelectImage) _then) = __$SelectImageCopyWithImpl;
+@useResult
+$Res call({
+ int index
+});
+
+
+
+
+}
+/// @nodoc
+class __$SelectImageCopyWithImpl<$Res>
+    implements _$SelectImageCopyWith<$Res> {
+  __$SelectImageCopyWithImpl(this._self, this._then);
+
+  final _SelectImage _self;
+  final $Res Function(_SelectImage) _then;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? index = null,}) {
+  return _then(_SelectImage(
+index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _ToggleGalleryVisibility extends EncryptionPageEvent {
   const _ToggleGalleryVisibility(): super._();
   
@@ -418,10 +489,11 @@ String toString() {
 
 
 class _SetOutputFolder extends EncryptionPageEvent {
-  const _SetOutputFolder({required this.outputFolder}): super._();
+  const _SetOutputFolder({required this.relative, required this.label}): super._();
   
 
- final  String outputFolder;
+ final  String relative;
+ final  String label;
 
 /// Create a copy of EncryptionPageEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -435,7 +507,7 @@ _$SetOutputFolderCopyWith<_SetOutputFolder> get copyWith => __$SetOutputFolderCo
 
 @override
 String toString() {
-  return 'EncryptionPageEvent.setOutputFolder(outputFolder: $outputFolder)';
+  return 'EncryptionPageEvent.setOutputFolder(relative: $relative, label: $label)';
 }
 
 
@@ -446,7 +518,7 @@ abstract mixin class _$SetOutputFolderCopyWith<$Res> implements $EncryptionPageE
   factory _$SetOutputFolderCopyWith(_SetOutputFolder value, $Res Function(_SetOutputFolder) _then) = __$SetOutputFolderCopyWithImpl;
 @useResult
 $Res call({
- String outputFolder
+ String relative, String label
 });
 
 
@@ -463,9 +535,71 @@ class __$SetOutputFolderCopyWithImpl<$Res>
 
 /// Create a copy of EncryptionPageEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? outputFolder = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? relative = null,Object? label = null,}) {
   return _then(_SetOutputFolder(
-outputFolder: null == outputFolder ? _self.outputFolder : outputFolder // ignore: cast_nullable_to_non_nullable
+relative: null == relative ? _self.relative : relative // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _SetPublicAlbum extends EncryptionPageEvent {
+  const _SetPublicAlbum({required this.relative, required this.label}): super._();
+  
+
+ final  String relative;
+ final  String label;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetPublicAlbumCopyWith<_SetPublicAlbum> get copyWith => __$SetPublicAlbumCopyWithImpl<_SetPublicAlbum>(this, _$identity);
+
+
+
+
+
+@override
+String toString() {
+  return 'EncryptionPageEvent.setPublicAlbum(relative: $relative, label: $label)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetPublicAlbumCopyWith<$Res> implements $EncryptionPageEventCopyWith<$Res> {
+  factory _$SetPublicAlbumCopyWith(_SetPublicAlbum value, $Res Function(_SetPublicAlbum) _then) = __$SetPublicAlbumCopyWithImpl;
+@useResult
+$Res call({
+ String relative, String label
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetPublicAlbumCopyWithImpl<$Res>
+    implements _$SetPublicAlbumCopyWith<$Res> {
+  __$SetPublicAlbumCopyWithImpl(this._self, this._then);
+
+  final _SetPublicAlbum _self;
+  final $Res Function(_SetPublicAlbum) _then;
+
+/// Create a copy of EncryptionPageEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? relative = null,Object? label = null,}) {
+  return _then(_SetPublicAlbum(
+relative: null == relative ? _self.relative : relative // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -663,12 +797,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult Function( EncryptionSettings settings)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult Function( EncryptionSettings settings)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
-return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
+return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
@@ -690,12 +824,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String size,  String dateTime)  ui,required TResult Function( EncryptionSettings settings)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)  ui,required TResult Function( EncryptionSettings settings)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _UI():
-return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI():
+return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI():
 return settingsUi(_that.settings);case _Encrypting():
 return encrypting(_that.archivingState);case _Encrypted():
 return encrypted();case _Failure():
@@ -716,12 +850,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String size,  String dateTime)?  ui,TResult? Function( EncryptionSettings settings)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult? Function( EncryptionSettings settings)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _UI() when ui != null:
-return ui(_that.images,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
+return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
 return encrypted();case _Failure() when failure != null:
@@ -779,7 +913,7 @@ class _Loading extends EncryptionPageState {
 
 
 class _UI extends EncryptionPageState {
-  const _UI({required final  List<GalleryImage> images, required this.size, required this.dateTime}): _images = images,super._();
+  const _UI({required final  List<GalleryImage> images, required this.fileName, required this.size, required this.dateTime}): _images = images,super._();
   
 
  final  List<GalleryImage> _images;
@@ -789,6 +923,7 @@ class _UI extends EncryptionPageState {
   return EqualUnmodifiableListView(_images);
 }
 
+ final  String fileName;
  final  String size;
  final  String dateTime;
 
@@ -811,7 +946,7 @@ abstract mixin class _$UICopyWith<$Res> implements $EncryptionPageStateCopyWith<
   factory _$UICopyWith(_UI value, $Res Function(_UI) _then) = __$UICopyWithImpl;
 @useResult
 $Res call({
- List<GalleryImage> images, String size, String dateTime
+ List<GalleryImage> images, String fileName, String size, String dateTime
 });
 
 
@@ -828,10 +963,11 @@ class __$UICopyWithImpl<$Res>
 
 /// Create a copy of EncryptionPageState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? size = null,Object? dateTime = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? images = null,Object? fileName = null,Object? size = null,Object? dateTime = null,}) {
   return _then(_UI(
 images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
-as List<GalleryImage>,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as List<GalleryImage>,fileName: null == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
+as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as String,dateTime: null == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
 as String,
   ));

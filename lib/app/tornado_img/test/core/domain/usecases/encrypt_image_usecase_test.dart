@@ -8,7 +8,7 @@ import 'package:tornado_img_app/core/domain/repositories/image_processing_reposi
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
-import 'package:tornado_img_app/features/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
 
 class _MockImageProcessingRepository extends Mock
     implements ImageProcessingRepository {}
@@ -21,8 +21,8 @@ void main() {
   late _MockImageProcessingRepository mockImageRepo;
   late _MockStorageRepository mockStorageRepo;
   late EncryptImageUseCase useCase;
+  late File tFile;
 
-  final tFile = File('test.png');
   final tImageData = _FakeImageData();
   final tEncryptedData = _FakeImageData();
   final tEncoded = Uint8List.fromList([9, 8, 7]);
@@ -33,13 +33,21 @@ void main() {
     registerFallbackValue(Uint8List(0));
   });
 
-  setUp(() {
+  setUp(() async {
+    tFile = File(
+      '${Directory.systemTemp.path}/encrypt_test_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+    await tFile.create();
     mockImageRepo = _MockImageProcessingRepository();
     mockStorageRepo = _MockStorageRepository();
     useCase = EncryptImageUseCase(
       imageRepo: mockImageRepo,
       storageRepo: mockStorageRepo,
     );
+  });
+
+  tearDown(() async {
+    if (await tFile.exists()) await tFile.delete();
   });
 
   group('EncryptImageUseCase.call', () {
@@ -73,7 +81,7 @@ void main() {
 
       expect(result.isRight(), isTrue);
       result.fold((_) => fail('Expected Right'), (encryptedImage) {
-        expect(encryptedImage.path, '/my/folder/abc123.png');
+        expect(encryptedImage.storagePath.path, '/my/folder/abc123.png');
         expect(encryptedImage.encryptedInfo.bytes, tEncoded);
       });
       

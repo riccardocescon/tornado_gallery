@@ -44,13 +44,16 @@ extension AppEventPatterns on AppEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _AddEncryptedImage value)?  addEncryptedImage,TResult Function( _RemoveEncryptedImage value)?  removeEncryptedImage,TResult Function( _SetDecryptedInfo value)?  setDecryptedInfo,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _AddEncryptedImage value)?  addEncryptedImage,TResult Function( _UpdateEncryptedImage value)?  updateEncryptedImage,TResult Function( _RemoveEncryptedImage value)?  removeEncryptedImage,TResult Function( _SetDecryptedInfo value)?  setDecryptedInfo,TResult Function( _FolderCreated value)?  folderCreated,TResult Function( _FolderDeleted value)?  folderDeleted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
-return addEncryptedImage(_that);case _RemoveEncryptedImage() when removeEncryptedImage != null:
+return addEncryptedImage(_that);case _UpdateEncryptedImage() when updateEncryptedImage != null:
+return updateEncryptedImage(_that);case _RemoveEncryptedImage() when removeEncryptedImage != null:
 return removeEncryptedImage(_that);case _SetDecryptedInfo() when setDecryptedInfo != null:
-return setDecryptedInfo(_that);case _:
+return setDecryptedInfo(_that);case _FolderCreated() when folderCreated != null:
+return folderCreated(_that);case _FolderDeleted() when folderDeleted != null:
+return folderDeleted(_that);case _:
   return orElse();
 
 }
@@ -68,13 +71,16 @@ return setDecryptedInfo(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _AddEncryptedImage value)  addEncryptedImage,required TResult Function( _RemoveEncryptedImage value)  removeEncryptedImage,required TResult Function( _SetDecryptedInfo value)  setDecryptedInfo,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _AddEncryptedImage value)  addEncryptedImage,required TResult Function( _UpdateEncryptedImage value)  updateEncryptedImage,required TResult Function( _RemoveEncryptedImage value)  removeEncryptedImage,required TResult Function( _SetDecryptedInfo value)  setDecryptedInfo,required TResult Function( _FolderCreated value)  folderCreated,required TResult Function( _FolderDeleted value)  folderDeleted,}){
 final _that = this;
 switch (_that) {
 case _AddEncryptedImage():
-return addEncryptedImage(_that);case _RemoveEncryptedImage():
+return addEncryptedImage(_that);case _UpdateEncryptedImage():
+return updateEncryptedImage(_that);case _RemoveEncryptedImage():
 return removeEncryptedImage(_that);case _SetDecryptedInfo():
-return setDecryptedInfo(_that);case _:
+return setDecryptedInfo(_that);case _FolderCreated():
+return folderCreated(_that);case _FolderDeleted():
+return folderDeleted(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -91,13 +97,16 @@ return setDecryptedInfo(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _AddEncryptedImage value)?  addEncryptedImage,TResult? Function( _RemoveEncryptedImage value)?  removeEncryptedImage,TResult? Function( _SetDecryptedInfo value)?  setDecryptedInfo,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _AddEncryptedImage value)?  addEncryptedImage,TResult? Function( _UpdateEncryptedImage value)?  updateEncryptedImage,TResult? Function( _RemoveEncryptedImage value)?  removeEncryptedImage,TResult? Function( _SetDecryptedInfo value)?  setDecryptedInfo,TResult? Function( _FolderCreated value)?  folderCreated,TResult? Function( _FolderDeleted value)?  folderDeleted,}){
 final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
-return addEncryptedImage(_that);case _RemoveEncryptedImage() when removeEncryptedImage != null:
+return addEncryptedImage(_that);case _UpdateEncryptedImage() when updateEncryptedImage != null:
+return updateEncryptedImage(_that);case _RemoveEncryptedImage() when removeEncryptedImage != null:
 return removeEncryptedImage(_that);case _SetDecryptedInfo() when setDecryptedInfo != null:
-return setDecryptedInfo(_that);case _:
+return setDecryptedInfo(_that);case _FolderCreated() when folderCreated != null:
+return folderCreated(_that);case _FolderDeleted() when folderDeleted != null:
+return folderDeleted(_that);case _:
   return null;
 
 }
@@ -114,12 +123,15 @@ return setDecryptedInfo(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image)?  addEncryptedImage,TResult Function( String path)?  removeEncryptedImage,TResult Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( EncryptedImage image)?  addEncryptedImage,TResult Function( EncryptedImage image,  String oldIdentifier)?  updateEncryptedImage,TResult Function( String path)?  removeEncryptedImage,TResult Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,TResult Function( bool isPrivate,  String relativePath)?  folderCreated,TResult Function( bool isPrivate,  String relativePath)?  folderDeleted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
-return addEncryptedImage(_that.image);case _RemoveEncryptedImage() when removeEncryptedImage != null:
+return addEncryptedImage(_that.image);case _UpdateEncryptedImage() when updateEncryptedImage != null:
+return updateEncryptedImage(_that.image,_that.oldIdentifier);case _RemoveEncryptedImage() when removeEncryptedImage != null:
 return removeEncryptedImage(_that.path);case _SetDecryptedInfo() when setDecryptedInfo != null:
-return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
+return setDecryptedInfo(_that.path,_that.decryptedInfo);case _FolderCreated() when folderCreated != null:
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeleted() when folderDeleted != null:
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   return orElse();
 
 }
@@ -137,12 +149,15 @@ return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image)  addEncryptedImage,required TResult Function( String path)  removeEncryptedImage,required TResult Function( String path,  BytesInfo? decryptedInfo)  setDecryptedInfo,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( EncryptedImage image)  addEncryptedImage,required TResult Function( EncryptedImage image,  String oldIdentifier)  updateEncryptedImage,required TResult Function( String path)  removeEncryptedImage,required TResult Function( String path,  BytesInfo? decryptedInfo)  setDecryptedInfo,required TResult Function( bool isPrivate,  String relativePath)  folderCreated,required TResult Function( bool isPrivate,  String relativePath)  folderDeleted,}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage():
-return addEncryptedImage(_that.image);case _RemoveEncryptedImage():
+return addEncryptedImage(_that.image);case _UpdateEncryptedImage():
+return updateEncryptedImage(_that.image,_that.oldIdentifier);case _RemoveEncryptedImage():
 return removeEncryptedImage(_that.path);case _SetDecryptedInfo():
-return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
+return setDecryptedInfo(_that.path,_that.decryptedInfo);case _FolderCreated():
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeleted():
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -159,12 +174,15 @@ return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image)?  addEncryptedImage,TResult? Function( String path)?  removeEncryptedImage,TResult? Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( EncryptedImage image)?  addEncryptedImage,TResult? Function( EncryptedImage image,  String oldIdentifier)?  updateEncryptedImage,TResult? Function( String path)?  removeEncryptedImage,TResult? Function( String path,  BytesInfo? decryptedInfo)?  setDecryptedInfo,TResult? Function( bool isPrivate,  String relativePath)?  folderCreated,TResult? Function( bool isPrivate,  String relativePath)?  folderDeleted,}) {final _that = this;
 switch (_that) {
 case _AddEncryptedImage() when addEncryptedImage != null:
-return addEncryptedImage(_that.image);case _RemoveEncryptedImage() when removeEncryptedImage != null:
+return addEncryptedImage(_that.image);case _UpdateEncryptedImage() when updateEncryptedImage != null:
+return updateEncryptedImage(_that.image,_that.oldIdentifier);case _RemoveEncryptedImage() when removeEncryptedImage != null:
 return removeEncryptedImage(_that.path);case _SetDecryptedInfo() when setDecryptedInfo != null:
-return setDecryptedInfo(_that.path,_that.decryptedInfo);case _:
+return setDecryptedInfo(_that.path,_that.decryptedInfo);case _FolderCreated() when folderCreated != null:
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeleted() when folderDeleted != null:
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   return null;
 
 }
@@ -221,6 +239,63 @@ class __$AddEncryptedImageCopyWithImpl<$Res>
   return _then(_AddEncryptedImage(
 image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
 as EncryptedImage,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _UpdateEncryptedImage extends AppEvent {
+  const _UpdateEncryptedImage({required this.image, required this.oldIdentifier}): super._();
+  
+
+ final  EncryptedImage image;
+ final  String oldIdentifier;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$UpdateEncryptedImageCopyWith<_UpdateEncryptedImage> get copyWith => __$UpdateEncryptedImageCopyWithImpl<_UpdateEncryptedImage>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$UpdateEncryptedImageCopyWith<$Res> implements $AppEventCopyWith<$Res> {
+  factory _$UpdateEncryptedImageCopyWith(_UpdateEncryptedImage value, $Res Function(_UpdateEncryptedImage) _then) = __$UpdateEncryptedImageCopyWithImpl;
+@useResult
+$Res call({
+ EncryptedImage image, String oldIdentifier
+});
+
+
+
+
+}
+/// @nodoc
+class __$UpdateEncryptedImageCopyWithImpl<$Res>
+    implements _$UpdateEncryptedImageCopyWith<$Res> {
+  __$UpdateEncryptedImageCopyWithImpl(this._self, this._then);
+
+  final _UpdateEncryptedImage _self;
+  final $Res Function(_UpdateEncryptedImage) _then;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? image = null,Object? oldIdentifier = null,}) {
+  return _then(_UpdateEncryptedImage(
+image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
+as EncryptedImage,oldIdentifier: null == oldIdentifier ? _self.oldIdentifier : oldIdentifier // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -340,6 +415,120 @@ as BytesInfo?,
 }
 
 /// @nodoc
+
+
+class _FolderCreated extends AppEvent {
+  const _FolderCreated({required this.isPrivate, required this.relativePath}): super._();
+  
+
+ final  bool isPrivate;
+ final  String relativePath;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FolderCreatedCopyWith<_FolderCreated> get copyWith => __$FolderCreatedCopyWithImpl<_FolderCreated>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FolderCreatedCopyWith<$Res> implements $AppEventCopyWith<$Res> {
+  factory _$FolderCreatedCopyWith(_FolderCreated value, $Res Function(_FolderCreated) _then) = __$FolderCreatedCopyWithImpl;
+@useResult
+$Res call({
+ bool isPrivate, String relativePath
+});
+
+
+
+
+}
+/// @nodoc
+class __$FolderCreatedCopyWithImpl<$Res>
+    implements _$FolderCreatedCopyWith<$Res> {
+  __$FolderCreatedCopyWithImpl(this._self, this._then);
+
+  final _FolderCreated _self;
+  final $Res Function(_FolderCreated) _then;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? isPrivate = null,Object? relativePath = null,}) {
+  return _then(_FolderCreated(
+isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
+as bool,relativePath: null == relativePath ? _self.relativePath : relativePath // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _FolderDeleted extends AppEvent {
+  const _FolderDeleted({required this.isPrivate, required this.relativePath}): super._();
+  
+
+ final  bool isPrivate;
+ final  String relativePath;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FolderDeletedCopyWith<_FolderDeleted> get copyWith => __$FolderDeletedCopyWithImpl<_FolderDeleted>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FolderDeletedCopyWith<$Res> implements $AppEventCopyWith<$Res> {
+  factory _$FolderDeletedCopyWith(_FolderDeleted value, $Res Function(_FolderDeleted) _then) = __$FolderDeletedCopyWithImpl;
+@useResult
+$Res call({
+ bool isPrivate, String relativePath
+});
+
+
+
+
+}
+/// @nodoc
+class __$FolderDeletedCopyWithImpl<$Res>
+    implements _$FolderDeletedCopyWith<$Res> {
+  __$FolderDeletedCopyWithImpl(this._self, this._then);
+
+  final _FolderDeleted _self;
+  final $Res Function(_FolderDeleted) _then;
+
+/// Create a copy of AppEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? isPrivate = null,Object? relativePath = null,}) {
+  return _then(_FolderDeleted(
+isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
+as bool,relativePath: null == relativePath ? _self.relativePath : relativePath // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$AppState {
 
 
@@ -372,14 +561,16 @@ extension AppStatePatterns on AppState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Added value)?  addedGalleryImage,TResult Function( _Updated value)?  updatedGalleryImage,TResult Function( _Removed value)?  removedGalleryImage,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Added value)?  addedGalleryImage,TResult Function( _Updated value)?  updatedGalleryImage,TResult Function( _Removed value)?  removedGalleryImage,TResult Function( _FolderCreatedState value)?  folderCreated,TResult Function( _FolderDeletedState value)?  folderDeleted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Added() when addedGalleryImage != null:
 return addedGalleryImage(_that);case _Updated() when updatedGalleryImage != null:
 return updatedGalleryImage(_that);case _Removed() when removedGalleryImage != null:
-return removedGalleryImage(_that);case _:
+return removedGalleryImage(_that);case _FolderCreatedState() when folderCreated != null:
+return folderCreated(_that);case _FolderDeletedState() when folderDeleted != null:
+return folderDeleted(_that);case _:
   return orElse();
 
 }
@@ -397,14 +588,16 @@ return removedGalleryImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Added value)  addedGalleryImage,required TResult Function( _Updated value)  updatedGalleryImage,required TResult Function( _Removed value)  removedGalleryImage,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Added value)  addedGalleryImage,required TResult Function( _Updated value)  updatedGalleryImage,required TResult Function( _Removed value)  removedGalleryImage,required TResult Function( _FolderCreatedState value)  folderCreated,required TResult Function( _FolderDeletedState value)  folderDeleted,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Added():
 return addedGalleryImage(_that);case _Updated():
 return updatedGalleryImage(_that);case _Removed():
-return removedGalleryImage(_that);case _:
+return removedGalleryImage(_that);case _FolderCreatedState():
+return folderCreated(_that);case _FolderDeletedState():
+return folderDeleted(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -421,14 +614,16 @@ return removedGalleryImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Added value)?  addedGalleryImage,TResult? Function( _Updated value)?  updatedGalleryImage,TResult? Function( _Removed value)?  removedGalleryImage,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Added value)?  addedGalleryImage,TResult? Function( _Updated value)?  updatedGalleryImage,TResult? Function( _Removed value)?  removedGalleryImage,TResult? Function( _FolderCreatedState value)?  folderCreated,TResult? Function( _FolderDeletedState value)?  folderDeleted,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Added() when addedGalleryImage != null:
 return addedGalleryImage(_that);case _Updated() when updatedGalleryImage != null:
 return updatedGalleryImage(_that);case _Removed() when removedGalleryImage != null:
-return removedGalleryImage(_that);case _:
+return removedGalleryImage(_that);case _FolderCreatedState() when folderCreated != null:
+return folderCreated(_that);case _FolderDeletedState() when folderDeleted != null:
+return folderDeleted(_that);case _:
   return null;
 
 }
@@ -445,13 +640,15 @@ return removedGalleryImage(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( EncryptedImage image)?  addedGalleryImage,TResult Function( EncryptedImage image)?  updatedGalleryImage,TResult Function( String path)?  removedGalleryImage,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( EncryptedImage image)?  addedGalleryImage,TResult Function( EncryptedImage image,  String oldIdentifier)?  updatedGalleryImage,TResult Function( String path)?  removedGalleryImage,TResult Function( bool isPrivate,  String relativePath)?  folderCreated,TResult Function( bool isPrivate,  String relativePath)?  folderDeleted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Added() when addedGalleryImage != null:
 return addedGalleryImage(_that.image);case _Updated() when updatedGalleryImage != null:
-return updatedGalleryImage(_that.image);case _Removed() when removedGalleryImage != null:
-return removedGalleryImage(_that.path);case _:
+return updatedGalleryImage(_that.image,_that.oldIdentifier);case _Removed() when removedGalleryImage != null:
+return removedGalleryImage(_that.path);case _FolderCreatedState() when folderCreated != null:
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeletedState() when folderDeleted != null:
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   return orElse();
 
 }
@@ -469,13 +666,15 @@ return removedGalleryImage(_that.path);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( EncryptedImage image)  addedGalleryImage,required TResult Function( EncryptedImage image)  updatedGalleryImage,required TResult Function( String path)  removedGalleryImage,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( EncryptedImage image)  addedGalleryImage,required TResult Function( EncryptedImage image,  String oldIdentifier)  updatedGalleryImage,required TResult Function( String path)  removedGalleryImage,required TResult Function( bool isPrivate,  String relativePath)  folderCreated,required TResult Function( bool isPrivate,  String relativePath)  folderDeleted,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Added():
 return addedGalleryImage(_that.image);case _Updated():
-return updatedGalleryImage(_that.image);case _Removed():
-return removedGalleryImage(_that.path);case _:
+return updatedGalleryImage(_that.image,_that.oldIdentifier);case _Removed():
+return removedGalleryImage(_that.path);case _FolderCreatedState():
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeletedState():
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -492,13 +691,15 @@ return removedGalleryImage(_that.path);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( EncryptedImage image)?  addedGalleryImage,TResult? Function( EncryptedImage image)?  updatedGalleryImage,TResult? Function( String path)?  removedGalleryImage,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( EncryptedImage image)?  addedGalleryImage,TResult? Function( EncryptedImage image,  String oldIdentifier)?  updatedGalleryImage,TResult? Function( String path)?  removedGalleryImage,TResult? Function( bool isPrivate,  String relativePath)?  folderCreated,TResult? Function( bool isPrivate,  String relativePath)?  folderDeleted,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Added() when addedGalleryImage != null:
 return addedGalleryImage(_that.image);case _Updated() when updatedGalleryImage != null:
-return updatedGalleryImage(_that.image);case _Removed() when removedGalleryImage != null:
-return removedGalleryImage(_that.path);case _:
+return updatedGalleryImage(_that.image,_that.oldIdentifier);case _Removed() when removedGalleryImage != null:
+return removedGalleryImage(_that.path);case _FolderCreatedState() when folderCreated != null:
+return folderCreated(_that.isPrivate,_that.relativePath);case _FolderDeletedState() when folderDeleted != null:
+return folderDeleted(_that.isPrivate,_that.relativePath);case _:
   return null;
 
 }
@@ -586,10 +787,11 @@ as EncryptedImage,
 
 
 class _Updated extends AppState {
-  const _Updated({required this.image}): super._();
+  const _Updated({required this.image, required this.oldIdentifier}): super._();
   
 
  final  EncryptedImage image;
+ final  String oldIdentifier;
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
@@ -610,7 +812,7 @@ abstract mixin class _$UpdatedCopyWith<$Res> implements $AppStateCopyWith<$Res> 
   factory _$UpdatedCopyWith(_Updated value, $Res Function(_Updated) _then) = __$UpdatedCopyWithImpl;
 @useResult
 $Res call({
- EncryptedImage image
+ EncryptedImage image, String oldIdentifier
 });
 
 
@@ -627,10 +829,11 @@ class __$UpdatedCopyWithImpl<$Res>
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? image = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? image = null,Object? oldIdentifier = null,}) {
   return _then(_Updated(
 image: null == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
-as EncryptedImage,
+as EncryptedImage,oldIdentifier: null == oldIdentifier ? _self.oldIdentifier : oldIdentifier // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -685,6 +888,120 @@ class __$RemovedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? path = null,}) {
   return _then(_Removed(
 path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _FolderCreatedState extends AppState {
+  const _FolderCreatedState({required this.isPrivate, required this.relativePath}): super._();
+  
+
+ final  bool isPrivate;
+ final  String relativePath;
+
+/// Create a copy of AppState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FolderCreatedStateCopyWith<_FolderCreatedState> get copyWith => __$FolderCreatedStateCopyWithImpl<_FolderCreatedState>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FolderCreatedStateCopyWith<$Res> implements $AppStateCopyWith<$Res> {
+  factory _$FolderCreatedStateCopyWith(_FolderCreatedState value, $Res Function(_FolderCreatedState) _then) = __$FolderCreatedStateCopyWithImpl;
+@useResult
+$Res call({
+ bool isPrivate, String relativePath
+});
+
+
+
+
+}
+/// @nodoc
+class __$FolderCreatedStateCopyWithImpl<$Res>
+    implements _$FolderCreatedStateCopyWith<$Res> {
+  __$FolderCreatedStateCopyWithImpl(this._self, this._then);
+
+  final _FolderCreatedState _self;
+  final $Res Function(_FolderCreatedState) _then;
+
+/// Create a copy of AppState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? isPrivate = null,Object? relativePath = null,}) {
+  return _then(_FolderCreatedState(
+isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
+as bool,relativePath: null == relativePath ? _self.relativePath : relativePath // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _FolderDeletedState extends AppState {
+  const _FolderDeletedState({required this.isPrivate, required this.relativePath}): super._();
+  
+
+ final  bool isPrivate;
+ final  String relativePath;
+
+/// Create a copy of AppState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FolderDeletedStateCopyWith<_FolderDeletedState> get copyWith => __$FolderDeletedStateCopyWithImpl<_FolderDeletedState>(this, _$identity);
+
+
+
+
+
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FolderDeletedStateCopyWith<$Res> implements $AppStateCopyWith<$Res> {
+  factory _$FolderDeletedStateCopyWith(_FolderDeletedState value, $Res Function(_FolderDeletedState) _then) = __$FolderDeletedStateCopyWithImpl;
+@useResult
+$Res call({
+ bool isPrivate, String relativePath
+});
+
+
+
+
+}
+/// @nodoc
+class __$FolderDeletedStateCopyWithImpl<$Res>
+    implements _$FolderDeletedStateCopyWith<$Res> {
+  __$FolderDeletedStateCopyWithImpl(this._self, this._then);
+
+  final _FolderDeletedState _self;
+  final $Res Function(_FolderDeletedState) _then;
+
+/// Create a copy of AppState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? isPrivate = null,Object? relativePath = null,}) {
+  return _then(_FolderDeletedState(
+isPrivate: null == isPrivate ? _self.isPrivate : isPrivate // ignore: cast_nullable_to_non_nullable
+as bool,relativePath: null == relativePath ? _self.relativePath : relativePath // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

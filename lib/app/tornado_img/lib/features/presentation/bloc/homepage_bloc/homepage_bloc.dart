@@ -7,12 +7,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/core/managers/stream_manager.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_entity.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_folder.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_entity.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:rxdart/rxdart.dart';
@@ -24,7 +26,6 @@ part 'homepage_bloc_utils.dart';
 
 enum Pages {
   home(icon: Icons.home, label: 'Home'),
-  archive(icon: Icons.lock_rounded, label: 'Archive'),
   settings(icon: Icons.settings, label: 'Settings');
 
   const Pages({required this.icon, required this.label});
@@ -35,12 +36,23 @@ enum Pages {
 
 class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
   StreamManager? _streamManager;
+  bool _refreshInFlight = false;
+  final Map<String, EncryptedImage> _runtimeUpserts =
+      <String, EncryptedImage>{};
+  final Set<String> _runtimeRemovals = <String>{};
+
+  // Folder create/delete made on the archive page. The filesystem watcher does
+  // not reliably emit events for empty directories, so these runtime deltas
+  // keep the folder count exact without a full disk rescan. Keys are deduped
+  // against the in-memory tree at count time to avoid double counting.
+  final Set<String> _runtimeFolderCreations = <String>{};
+  final Set<String> _runtimeFolderRemovals = <String>{};
 
   final selectedImages = <GalleryImage>[];
   Pages currentPage = Pages.home;
 
   final AppRepository _repo;
-  final AppFolderStreamerUsecase _folderStreamer;
+  final AppFolderStreamerUseCase _folderStreamer;
 
   EncryptedFolder? appEncryptedRootFolder;
   EncryptedFolder? appPublicEncryptedRootFolder;
@@ -55,7 +67,7 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
 
   HomepageBloc({
     required AppRepository appRepository,
-    required AppFolderStreamerUsecase folderStreamer,
+    required AppFolderStreamerUseCase folderStreamer,
   }) : _repo = appRepository,
        _folderStreamer = folderStreamer,
        super(const HomepageState.initial()) {
@@ -72,7 +84,15 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           .startWith(getIt<GalleryBloc>().state)
           .map((s) => _GalleryStream(s));
 
-      final mergedStream = Rx.merge([taggedFolderStream, taggedGalleryStream]);
+      final taggedAppStream = getIt<AppBloc>().stream
+          .startWith(getIt<AppBloc>().state)
+          .map((s) => _AppStream(s));
+
+      final mergedStream = Rx.merge([
+        taggedFolderStream,
+        taggedGalleryStream,
+        taggedAppStream,
+      ]);
 
       _streamManager = StreamManager.fromStream(mergedStream);
 
@@ -94,11 +114,73 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
               },
               encrypted: (value) {
                 final archive = value.archivingState;
-                final completed =
-                    archive.progress ==
-                    archive.totalImages;
+                final wasArchiving = currentArchivingState != null;
+                final completed = archive.progress == archive.totalImages;
+
+                appPublicEncryptedRootFolder = _folderStreamer
+                    .mergeArchivedPublicImages(
+                      currentPublicFolder: appPublicEncryptedRootFolder,
+                      archivedImages: archive.archivedImages,
+                    );
 
                 currentArchivingState = completed ? null : archive;
+                _emit(emit);
+
+                if (completed && wasArchiving) {
+                  add(const HomepageEvent.refresh());
+                }
+              },
+              orElse: () => null,
+            );
+            break;
+
+          case _AppStream(:final appState):
+            appState.maybeMap(
+              addedGalleryImage: (value) {
+                _runtimeRemovals.remove(value.image.storagePath.path);
+                _runtimeUpserts[value.image.storagePath.path] = value.image;
+                _emit(emit);
+              },
+              updatedGalleryImage: (value) {
+                // Rimuovi il vecchio per qualsiasi forma di identificatore
+                _runtimeUpserts.removeWhere(
+                  (key, img) =>
+                      key == value.oldIdentifier ||
+                      img.storagePath.path == value.oldIdentifier ||
+                      img.storagePath.assetId == value.oldIdentifier,
+                );
+                _runtimeRemovals.add(value.oldIdentifier);
+
+                // Inserisci il nuovo con chiave stabile
+                final newKey =
+                    value.image.storagePath.assetId ??
+                    value.image.storagePath.path;
+                _runtimeUpserts[newKey] = value.image;
+                _emit(emit);
+              },
+              removedGalleryImage: (value) {
+                _runtimeUpserts.removeWhere(
+                  (_, img) =>
+                      img.storagePath.path == value.path ||
+                      img.storagePath.assetId == value.path,
+                );
+                _runtimeRemovals.add(value.path);
+                _emit(emit);
+              },
+              folderCreated: (value) {
+                final key = _folderKey(value.isPrivate, value.relativePath);
+                _runtimeFolderRemovals.remove(key);
+                _runtimeFolderCreations.add(key);
+                _emit(emit);
+              },
+              folderDeleted: (value) {
+                final key = _folderKey(value.isPrivate, value.relativePath);
+                // Deleting a folder removes its whole subtree, so drop any
+                // in-session creations under it too.
+                _runtimeFolderCreations.removeWhere(
+                  (k) => k == key || k.startsWith('$key/'),
+                );
+                _runtimeFolderRemovals.add(key);
                 _emit(emit);
               },
               orElse: () => null,
@@ -109,10 +191,37 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     });
 
     on<_Refresh>((event, emit) async {
-      await _repo.dispose();
-      await _streamManager?.dispose();
-      _streamManager = null;
-      add(const HomepageEvent.setup());
+      if (_refreshInFlight) return;
+      _refreshInFlight = true;
+
+      try {
+        await _repo.dispose();
+        await _folderStreamer.dispose();
+        await _streamManager?.dispose();
+        _streamManager = null;
+
+        // Force an immediate snapshot refresh to reconcile latest storage state.
+        appEncryptedRootFolder = await _repo.loadPrivateRootFolder();
+        appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+        if (appPublicEncryptedRootFolder == null) {
+          final created = await _repo.createPublicFolder();
+          if (created) {
+            appPublicEncryptedRootFolder = await _repo.loadPublicRootFolder();
+          }
+        }
+
+        // Fresh repository snapshot is authoritative after a manual refresh.
+        _runtimeUpserts.clear();
+        _runtimeRemovals.clear();
+        _runtimeFolderCreations.clear();
+        _runtimeFolderRemovals.clear();
+
+        _emit(emit);
+
+        add(const HomepageEvent.setup());
+      } finally {
+        _refreshInFlight = false;
+      }
     });
 
     on<_GalleryAssetsSelected>((event, emit) async {
@@ -127,8 +236,9 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
           HomepageState.galleryImages(imagesLoaded: List.of(selectedImages)),
         );
       } catch (e) {
-        appLogger.logPageBloc(
+        appLogger.log(
           'Error opening gallery with photo_manager picker',
+          LogLayer.pageBloc,
           error: e.toString(),
         );
         emit(HomepageState.failure(message: e.toString()));
@@ -147,29 +257,34 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     final private = appEncryptedRootFolder;
     if (private == null) return;
 
-    final subFolders =
-        private.subfolders + (appPublicEncryptedRootFolder?.subfolders ?? []);
+    // Every image across both stores, at any depth, deduped by stable key. The
+    // whole tree is the source of truth here — a nested image must be counted
+    // exactly once, not once flat and once via its subfolder.
+    final mergedByKey = <String, EncryptedImage>{};
+    _collectImages(private, mergedByKey);
+    final public = appPublicEncryptedRootFolder;
+    if (public != null) _collectImages(public, mergedByKey);
 
-    final images =
-        private.images + (appPublicEncryptedRootFolder?.images ?? []);
+    // Reconcile with runtime deltas the folder-tree snapshot hasn't caught yet.
+    for (final removedKey in _runtimeRemovals) {
+      mergedByKey.removeWhere(
+        (key, img) =>
+            key == removedKey ||
+            img.storagePath.path == removedKey ||
+            img.storagePath.assetId == removedKey,
+      );
+    }
 
-    final totalImages = subFolders.fold<int>(
-      images.length,
-      (previousValue, folder) => previousValue + folder.images.length,
-    );
+    for (final entry in _runtimeUpserts.entries) {
+      final key = entry.value.storagePath.assetId ?? entry.key;
+      mergedByKey[key] = entry.value;
+    }
 
-    final totalBytes = subFolders.fold<int>(
-      images.fold<int>(
-        0,
-        (prev, image) => prev + image.file.lengthSync(),
-      ),
-      (prev, folder) =>
-          prev +
-          folder.images.fold<int>(
-            0,
-            (prev2, image) => prev2 + image.file.lengthSync(),
-          ),
-    );
+    final images = mergedByKey.values.toList();
+
+    final totalImages = images.length;
+
+    final totalBytes = _sumImagesBytes(images);
 
     final lastLoaded =
         images.isNotEmpty
@@ -181,11 +296,88 @@ class HomepageBloc extends Bloc<HomepageEvent, HomepageState> {
     emit(
       HomepageState.galleryStatus(
         imagesLoaded: totalImages,
-        folderLoaded: private.subfolders.length + 1,
+        folderLoaded: _countFolders(private, appPublicEncryptedRootFolder),
         bytesLoaded: totalBytes,
         lastLoaded: lastLoaded,
         archivingState: currentArchivingState,
       ),
     );
+  }
+
+  /// Total folder count across the private and public trees, reconciled with
+  /// the runtime create/delete deltas the filesystem watcher cannot see (empty
+  /// directories). Pure in-memory — no disk access.
+  int _countFolders(EncryptedFolder private, EncryptedFolder? public) {
+    final treeKeys = <String>{};
+    _collectFolderKeys(private, private.path, true, treeKeys);
+    if (public != null) {
+      _collectFolderKeys(public, public.path, false, treeKeys);
+    }
+
+    var count = treeKeys.length;
+    for (final key in _runtimeFolderCreations) {
+      if (!treeKeys.contains(key)) count++;
+    }
+    // A removed folder takes its whole subtree with it: subtract every tree
+    // folder that equals or lives under a removed path.
+    for (final treeKey in treeKeys) {
+      final removed = _runtimeFolderRemovals.any(
+        (r) => treeKey == r || treeKey.startsWith('$r/'),
+      );
+      if (removed) count--;
+    }
+    return count;
+  }
+
+  /// Collects every image in [folder] and its subfolders, keyed by the stable
+  /// identifier (`assetId ?? path`) so the same physical image never appears
+  /// twice in the count.
+  void _collectImages(EncryptedFolder folder, Map<String, EncryptedImage> out) {
+    for (final img in folder.images) {
+      out[img.storagePath.assetId ?? img.storagePath.path] = img;
+    }
+    for (final sub in folder.subfolders) {
+      _collectImages(sub, out);
+    }
+  }
+
+  void _collectFolderKeys(
+    EncryptedFolder folder,
+    String rootPath,
+    bool isPrivate,
+    Set<String> out,
+  ) {
+    for (final sub in folder.subfolders) {
+      out.add(_folderKey(isPrivate, _relativeTo(rootPath, sub.path)));
+      _collectFolderKeys(sub, rootPath, isPrivate, out);
+    }
+  }
+
+  String _folderKey(bool isPrivate, String relativePath) =>
+      '${isPrivate ? 1 : 0}:$relativePath';
+
+  String _relativeTo(String rootPath, String path) {
+    var root = rootPath.replaceAll('\\', '/');
+    var p = path.replaceAll('\\', '/');
+    if (p.startsWith(root)) p = p.substring(root.length);
+    if (p.startsWith('/')) p = p.substring(1);
+    return p;
+  }
+
+  int _sumImagesBytes(List<EncryptedImage> images) {
+    return images.fold<int>(
+      0,
+      (total, image) => total + _safeFileLength(image),
+    );
+  }
+
+  int _safeFileLength(EncryptedImage image) {
+    try {
+      final file = image.storagePath.file;
+      if (!file.existsSync()) return image.encryptedInfo.bytes.length;
+      return file.lengthSync();
+    } catch (_) {
+      return image.encryptedInfo.bytes.length;
+    }
   }
 }

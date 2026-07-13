@@ -4,16 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
+import 'package:tornado_img_app/core/presentation/pages/fullscreen_image_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
-import 'package:tornado_img_app/features/domain/entities/archiving_state.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_image.dart';
+import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
+import 'package:tornado_img_app/core/domain/entities/encryption_settings.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_image.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
+import 'package:tornado_img_app/features/presentation/widgets/app_card.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
 
 part 'widgets/images_preview_card.dart';
+part 'widgets/images_preview/single_image_layout.dart';
+part 'widgets/images_preview/multi_images_layout.dart';
 part 'widgets/password_card.dart';
 part 'widgets/options_card.dart';
 part 'widgets/options/output_folder_option.dart';
@@ -167,7 +173,7 @@ class EncryptionPage extends StatelessWidget {
                               )
                               : const Icon(Icons.lock_rounded, size: 18),
                           Text(
-                            isEncrypting ? "Encrpyting..." : "Encrypt Images",
+                            isEncrypting ? "Encrypting..." : "Encrypt Images",
                             style: context.textTheme.labelLarge,
                           ),
                         ],
