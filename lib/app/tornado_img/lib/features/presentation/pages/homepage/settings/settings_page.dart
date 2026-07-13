@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/domain/entities/pro_product.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/assets.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
@@ -11,6 +14,7 @@ import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
+import 'package:tornado_img_app/features/presentation/widgets/pro_widgets.dart';
 import 'package:tornado_img_app/injection_container.dart';
 import 'package:tornado_img_app/theme/theme_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,7 +29,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -47,6 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 UpdateAppCard(),
               ],
             ),
+            _subscriptionSection(context),
             Column(
               spacing: 12,
               children: [
@@ -146,11 +150,18 @@ class _SettingsPageState extends State<SettingsPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      Text(
-                        "Currently the storage limit is set to ${Constants.maxEncryptedImages} encrypted files.\nIn future updates more storage management options will be added.",
-                        style: context.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.normal,
-                        ),
+                      BlocBuilder<PurchaseBloc, PurchaseState>(
+                        builder: (context, _) {
+                          final isPro = context.read<PurchaseBloc>().isPro;
+                          return Text(
+                            isPro
+                                ? "Unlimited encrypted files and archives — thanks for going Pro."
+                                : "Currently the storage limit is set to ${Constants.maxEncryptedImages} encrypted files and ${Constants.maxArchives} archives.\nGo Pro to remove both limits.",
+                            style: context.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.normal,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -235,6 +246,53 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  /// "Upgrade to Pro" when free, "Pro active" when not. Rebuilt on entitlement
+  /// changes so a purchase made on the paywall is reflected the moment we're
+  /// back here.
+  Widget _subscriptionSection(BuildContext context) {
+    return BlocBuilder<PurchaseBloc, PurchaseState>(
+      builder: (context, _) {
+        final purchases = context.read<PurchaseBloc>();
+
+        return Column(
+          spacing: 10,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "SUBSCRIPTION",
+              style: context.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.4,
+              ),
+            ),
+            if (!purchases.isPro)
+              const ProUpgradeCard()
+            else
+              ProStatusCard(
+                // Nothing to manage for a lifetime unlock.
+                onManage:
+                    purchases.plan == ProPlan.monthly
+                        ? _openManageSubscription
+                        : null,
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// The plugin exposes no manage-subscription API, so we deep-link the store.
+  Future<void> _openManageSubscription() {
+    return launchUrl(
+      Uri.parse(
+        Platform.isIOS
+            ? Constants.manageSubscriptionIos
+            : Constants.manageSubscriptionAndroid,
+      ),
+      mode: LaunchMode.externalApplication,
     );
   }
 
@@ -433,4 +491,3 @@ class _ThemeSwitcher extends StatelessWidget {
     );
   }
 }
-

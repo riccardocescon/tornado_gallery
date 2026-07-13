@@ -16,20 +16,23 @@ EncryptedImage _img(String path, {bool isPrivate = true}) => EncryptedImage(
 
 void main() {
   group('EncryptedFolder.copyWith', () {
-    test('preserves subfolders when only images are overridden (regression)', () {
-      final child = EncryptedFolder.empty('/enc/Vacanze', true);
-      final folder = EncryptedFolder(
-        path: '/enc',
-        images: [],
-        subfolders: [child],
-        isPrivateFolder: true,
-      );
+    test(
+      'preserves subfolders when only images are overridden (regression)',
+      () {
+        final child = EncryptedFolder.empty('/enc/Vacanze', true);
+        final folder = EncryptedFolder(
+          path: '/enc',
+          images: [],
+          subfolders: [child],
+          isPrivateFolder: true,
+        );
 
-      final updated = folder.copyWith(images: [_img('/enc/a.png')]);
+        final updated = folder.copyWith(images: [_img('/enc/a.png')]);
 
-      expect(updated.images, hasLength(1));
-      expect(updated.subfolders, equals([child]));
-    });
+        expect(updated.images, hasLength(1));
+        expect(updated.subfolders, equals([child]));
+      },
+    );
 
     test('overrides subfolders when provided', () {
       final folder = EncryptedFolder.empty('/enc', true);
@@ -43,14 +46,12 @@ void main() {
 
   group('EncryptedFolder.storeRelativePath', () {
     test('private folder is relative to encrypted/', () {
-      final folder =
-          EncryptedFolder.empty('/app/encrypted/Vacanze/Mare', true);
+      final folder = EncryptedFolder.empty('/app/encrypted/Vacanze/Mare', true);
       expect(folder.storeRelativePath, 'Vacanze/Mare');
     });
 
     test('gallery folder is relative to TornadoGallery', () {
-      final folder =
-          EncryptedFolder.empty('TornadoGallery/Vacanze', false);
+      final folder = EncryptedFolder.empty('TornadoGallery/Vacanze', false);
       expect(folder.storeRelativePath, 'Vacanze');
     });
 
@@ -74,9 +75,10 @@ void main() {
 
     test('gallery image directory relative to TornadoGallery', () {
       expect(
-        _img('/sdcard/Pictures/TornadoGallery/Vacanze/a.png',
-                isPrivate: false)
-            .storeRelativeDir,
+        _img(
+          '/sdcard/Pictures/TornadoGallery/Vacanze/a.png',
+          isPrivate: false,
+        ).storeRelativeDir,
         'Vacanze',
       );
     });

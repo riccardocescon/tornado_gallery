@@ -10,7 +10,7 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
 
   const factory EncryptionPageEvent.setPassword({required String password}) =
       _SetPassword;
-      
+
   const factory EncryptionPageEvent.setFileName({required String name}) =
       _SetFileName;
 
@@ -37,7 +37,7 @@ abstract class EncryptionPageEvent with _$EncryptionPageEvent {
 
   const factory EncryptionPageEvent.toggleOverrideImage() =
       _ToggleOverrideImage;
-      
+
   const factory EncryptionPageEvent.toggleDeleteOriginals() =
       _ToggleDeleteOriginals;
 

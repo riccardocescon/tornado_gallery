@@ -17,6 +17,7 @@ extension _AppRepositoryLookup on AppRepositoryImpl {
         visit(child);
       }
     }
+
     visit(root);
     return map;
   }
@@ -24,9 +25,7 @@ extension _AppRepositoryLookup on AppRepositoryImpl {
   /// Removes [rootPath] and all descendant paths from [_lookupTable].
   void _removeLookupBranch(String rootPath) {
     final prefix = '$rootPath/';
-    _lookupTable.removeWhere(
-      (k, _) => k == rootPath || k.startsWith(prefix),
-    );
+    _lookupTable.removeWhere((k, _) => k == rootPath || k.startsWith(prefix));
   }
 
   // ── Tree mutation ───────────────────────────────────────────────────────────
@@ -53,7 +52,9 @@ extension _AppRepositoryLookup on AppRepositoryImpl {
     final parent = findParent(rootFolder);
     if (parent == null) return false;
 
-    final alreadyExists = parent.subfolders.any((f) => f.path == newFolder.path);
+    final alreadyExists = parent.subfolders.any(
+      (f) => f.path == newFolder.path,
+    );
     if (alreadyExists) return false;
 
     parent.subfolders.add(newFolder);

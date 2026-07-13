@@ -80,8 +80,7 @@ class _InfoState extends State<_Info> {
                         Icon(
                           isDecrypted
                               ? Icons.restore_rounded
-                              :
-                          Icons.remove_red_eye_rounded,
+                              : Icons.remove_red_eye_rounded,
                           color: context.colorScheme.onSurface,
                           size: 28,
                         ),

@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/domain/entities/archiving_state.dart';
@@ -24,11 +25,26 @@ class EncryptionPageBloc
 
   final AppBloc appBloc;
   final GalleryBloc galleryBloc;
+  final PurchaseBloc purchaseBloc;
 
   EncryptionSettings settings = EncryptionSettings.init();
 
-  EncryptionPageBloc({required this.appBloc, required this.galleryBloc})
-    : super(const EncryptionPageState.initial()) {
+  /// Encrypting this selection would take a free user past the image cap.
+  ///
+  /// The UI disables the Encrypt button on this and offers Pro instead, so the
+  /// user never reaches a dead end; the `_Encrypt` handler re-checks it because
+  /// the archive can grow underneath an open encryption page.
+  bool get exceedsFreeLimit {
+    if (purchaseBloc.isPro) return false;
+    return appBloc.encryptedImages.length + images.length >
+        Constants.maxEncryptedImages;
+  }
+
+  EncryptionPageBloc({
+    required this.appBloc,
+    required this.galleryBloc,
+    required this.purchaseBloc,
+  }) : super(const EncryptionPageState.initial()) {
     on<_Setup>((event, emit) async {
       images.addAll(event.images);
       for (int i = 0; i < images.length; i++) {
@@ -89,23 +105,10 @@ class EncryptionPageBloc
       _emitImageData(emit);
     });
     on<_Encrypt>((event, emit) async {
-      emit(
-        EncryptionPageState.encrypting(
-          archivingState: ArchivingState.init(
-            totalImages: images.length,
-          ),
-        ),
-      );
-
-
-      final totalEncrytped = appBloc.encryptedImages.length + images.length;
-      if (totalEncrytped > Constants.maxEncryptedImages) {
-        emit(
-          const EncryptionPageState.failure(
-            message:
-                'Encryption limit reached. Please delete some encrypted images to continue.',
-          ),
-        );
+      // Validate before announcing any work: emitting `encrypting` first and
+      // then failing flashes the progress UI for a frame.
+      if (exceedsFreeLimit) {
+        emit(const EncryptionPageState.limitReached());
         return;
       }
 
@@ -117,6 +120,12 @@ class EncryptionPageBloc
         );
         return;
       }
+
+      emit(
+        EncryptionPageState.encrypting(
+          archivingState: ArchivingState.init(totalImages: images.length),
+        ),
+      );
 
       final archivedImages = <String>[];
 
@@ -150,7 +159,6 @@ class EncryptionPageBloc
       await for (final state in galleryBloc.stream) {
         final completed = state.maybeMap(
           encrypted: (value) {
-
             _syncNewArchivedImages(
               value.archivingState.archivedImages,
               archivedImages,
@@ -187,7 +195,6 @@ class EncryptionPageBloc
             .where((img) => !alreadyArchivedImages.contains(img.name))
             .toList();
     for (final newArchive in toUpdate) {
-      
       alreadyArchivedImages.add(newArchive.storagePath.path);
       appBloc.add(AppEvent.addEncryptedImage(image: newArchive));
     }
@@ -218,10 +225,6 @@ class EncryptionPageBloc
   }
 
   void _emitSettings(Emitter<EncryptionPageState> emit) {
-    emit(
-      EncryptionPageState.settingsUi(
-        settings: settings
-      ),
-    );
+    emit(EncryptionPageState.settingsUi(settings: settings));
   }
 }

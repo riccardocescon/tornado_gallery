@@ -6,7 +6,7 @@ import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 
 class ImageRenamerUseCase
-  extends EncryptionUseCase<StorageRenameResult, ImageRenamerParams> {
+    extends EncryptionUseCase<StorageRenameResult, ImageRenamerParams> {
   final StorageRepository storageRepo;
 
   ImageRenamerUseCase({required this.storageRepo});

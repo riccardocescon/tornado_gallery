@@ -15,6 +15,15 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color heroGradientStart; // top-left of highlighted hero cards
   final Color heroGradientEnd; // bottom-right of highlighted hero cards
 
+  // Pro tokens. A purple brand family, deliberately separate from [accent] so
+  // Pro surfaces read as "premium" rather than as another primary action.
+  // Identical in light and dark: it is a brand colour, not a surface.
+  final Color pro; // Pro glyphs, selected plan ring, badges
+  final Color onPro; // text & icons on top of the Pro gradient
+  final Color proSubtle; // low-opacity purple for tinted icon chips
+  final Color proGradientStart;
+  final Color proGradientEnd;
+
   AppColorsExtension({
     required this.softBackground,
     required this.softButton,
@@ -26,6 +35,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.accentSubtle,
     required this.heroGradientStart,
     required this.heroGradientEnd,
+    required this.pro,
+    required this.onPro,
+    required this.proSubtle,
+    required this.proGradientStart,
+    required this.proGradientEnd,
   });
 
   @override
@@ -40,6 +54,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? accentSubtle,
     Color? heroGradientStart,
     Color? heroGradientEnd,
+    Color? pro,
+    Color? onPro,
+    Color? proSubtle,
+    Color? proGradientStart,
+    Color? proGradientEnd,
   }) {
     return AppColorsExtension(
       softBackground: softBackground ?? this.softBackground,
@@ -52,6 +71,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       accentSubtle: accentSubtle ?? this.accentSubtle,
       heroGradientStart: heroGradientStart ?? this.heroGradientStart,
       heroGradientEnd: heroGradientEnd ?? this.heroGradientEnd,
+      pro: pro ?? this.pro,
+      onPro: onPro ?? this.onPro,
+      proSubtle: proSubtle ?? this.proSubtle,
+      proGradientStart: proGradientStart ?? this.proGradientStart,
+      proGradientEnd: proGradientEnd ?? this.proGradientEnd,
     );
   }
 
@@ -72,6 +96,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       heroGradientStart:
           Color.lerp(heroGradientStart, other.heroGradientStart, t)!,
       heroGradientEnd: Color.lerp(heroGradientEnd, other.heroGradientEnd, t)!,
+      pro: Color.lerp(pro, other.pro, t)!,
+      onPro: Color.lerp(onPro, other.onPro, t)!,
+      proSubtle: Color.lerp(proSubtle, other.proSubtle, t)!,
+      proGradientStart:
+          Color.lerp(proGradientStart, other.proGradientStart, t)!,
+      proGradientEnd: Color.lerp(proGradientEnd, other.proGradientEnd, t)!,
     );
   }
 }

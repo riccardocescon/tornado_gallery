@@ -38,6 +38,15 @@ class AppColors {
   static const Color darkHeroStart = Color(0xFF22427E);
   static const Color darkHeroEnd = Color(0xFF15243F);
 
+  // Tornado Gallery Pro — a purple family kept apart from the navy accent so
+  // premium surfaces never read as just another primary action. Same in both
+  // themes: it is a brand colour, not a surface.
+  static const Color pro = Color(0xFF8B6BFF);
+  static const Color proGradientStart = Color(0xFF8B6BFF);
+  static const Color proGradientEnd = Color(0xFF5B3FD6);
+  // Glow under the Pro CTAs — the one place the app uses a coloured shadow.
+  static const Color proGlow = Color(0xFF6D47D8);
+
   // Status
   static const Color success = Color(0xFF2E8B57);
   static const Color warning = Color(0xFFE7A93B);
@@ -367,6 +376,11 @@ class AppTheme {
           accentSubtle: AppColors.primary.withValues(alpha: 0.08),
           heroGradientStart: AppColors.primary,
           heroGradientEnd: AppColors.primaryDark,
+          pro: AppColors.pro,
+          onPro: Colors.white,
+          proSubtle: AppColors.pro.withValues(alpha: 0.16),
+          proGradientStart: AppColors.proGradientStart,
+          proGradientEnd: AppColors.proGradientEnd,
         ),
       ],
     );
@@ -516,10 +530,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: AppColors.darkAccent,
-            width: 1.4,
-          ),
+          borderSide: const BorderSide(color: AppColors.darkAccent, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
@@ -693,6 +704,11 @@ class AppTheme {
           accentSubtle: AppColors.darkAccent.withValues(alpha: 0.16),
           heroGradientStart: AppColors.darkHeroStart,
           heroGradientEnd: AppColors.darkHeroEnd,
+          pro: AppColors.pro,
+          onPro: Colors.white,
+          proSubtle: AppColors.pro.withValues(alpha: 0.16),
+          proGradientStart: AppColors.proGradientStart,
+          proGradientEnd: AppColors.proGradientEnd,
         ),
       ],
     );

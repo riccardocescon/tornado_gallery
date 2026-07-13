@@ -76,10 +76,7 @@ void main() {
     ).thenAnswer((_) async => const StorageMoveResult(success: false));
 
     final result = await useCase.call(
-      MoveImagesParams(
-        images: [_img('/enc/a.png')],
-        targetRelativePath: 'X',
-      ),
+      MoveImagesParams(images: [_img('/enc/a.png')], targetRelativePath: 'X'),
     );
     expect(result.isLeft(), isTrue);
   });
@@ -93,10 +90,7 @@ void main() {
     ).thenThrow(Exception('boom'));
 
     final result = await useCase.call(
-      MoveImagesParams(
-        images: [_img('/enc/a.png')],
-        targetRelativePath: 'X',
-      ),
+      MoveImagesParams(images: [_img('/enc/a.png')], targetRelativePath: 'X'),
     );
     expect(result.isLeft(), isTrue);
   });

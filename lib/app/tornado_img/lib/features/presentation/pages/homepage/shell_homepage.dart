@@ -75,28 +75,28 @@ class _ShellHomepageState extends State<ShellHomepage> {
         _onPop();
       },
       child: BlocListener<HomepageBloc, HomepageState>(
-      listener: (context, state) {
-        state.maybeMap(
-          homepageSet: (value) {
-            _pageController.animateToPage(
-              value.page.index,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
-            );
-          },
-          orElse: () {},
-        );
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: PageView(
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: pages,
+        listener: (context, state) {
+          state.maybeMap(
+            homepageSet: (value) {
+              _pageController.animateToPage(
+                value.page.index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+              );
+            },
+            orElse: () {},
+          );
+        },
+        child: Scaffold(
+          body: SafeArea(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: pages,
+            ),
           ),
+          bottomNavigationBar: BottomAppNavBar(),
         ),
-        bottomNavigationBar: BottomAppNavBar(),
-      ),
       ),
     );
   }

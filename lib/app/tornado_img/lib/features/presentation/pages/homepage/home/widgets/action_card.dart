@@ -35,19 +35,21 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: darker ? null : context.colorScheme.surface,
-          gradient: darker
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [ext.heroGradientStart, ext.heroGradientEnd],
-                )
-              : null,
+          gradient:
+              darker
+                  ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [ext.heroGradientStart, ext.heroGradientEnd],
+                  )
+                  : null,
           borderRadius: AppStyle.cardBorderRadius,
-          border: darker
-              ? Border.all(color: context.theme.dividerColor)
-              : Border.all(
-                  color: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                ),
+          border:
+              darker
+                  ? Border.all(color: context.theme.dividerColor)
+                  : Border.all(
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
         ),
         child: Column(
           spacing: 8,

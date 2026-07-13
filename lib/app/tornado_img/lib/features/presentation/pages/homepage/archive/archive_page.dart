@@ -411,9 +411,17 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget build(BuildContext context) {
     return BlocListener<ArchivePageBloc, ArchivePageState>(
       listenWhen:
-          (p, c) => c.maybeMap(failure: (_) => true, orElse: () => false),
+          (p, c) => c.maybeMap(
+            failure: (_) => true,
+            limitReached: (_) => true,
+            orElse: () => false,
+          ),
       listener: (context, state) {
-        state.mapOrNull(failure: (f) => context.showSnackbar(f.message));
+        state.mapOrNull(
+          failure: (f) => context.showSnackbar(f.message),
+          // The free archive cap: an offer, not an error — go sell Pro.
+          limitReached: (_) => context.pushNamed(Routes.pro),
+        );
       },
       child: BlocBuilder<ArchivePageBloc, ArchivePageState>(
         buildWhen: (p, c) => c.maybeMap(ui: (_) => true, orElse: () => false),

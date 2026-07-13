@@ -87,8 +87,11 @@ class _SettingToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EncryptionPageBloc, EncryptionPageState>(
-      buildWhen: (previous, current) =>
-          current.maybeMap(settingsUi: (state) => true, orElse: () => false),
+      buildWhen:
+          (previous, current) => current.maybeMap(
+            settingsUi: (state) => true,
+            orElse: () => false,
+          ),
       builder: (context, state) {
         final value = state.maybeMap(
           settingsUi: (state) => selector(state.settings),
@@ -98,8 +101,7 @@ class _SettingToggle extends StatelessWidget {
           scale: 0.8,
           child: Switch(
             value: value,
-            onChanged: (_) =>
-                context.read<EncryptionPageBloc>().add(event),
+            onChanged: (_) => context.read<EncryptionPageBloc>().add(event),
           ),
         );
       },

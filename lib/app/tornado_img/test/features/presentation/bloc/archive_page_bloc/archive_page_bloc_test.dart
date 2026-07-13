@@ -14,8 +14,10 @@ import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart'
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 
 class _MockGalleryReaderUsecase extends Mock implements GalleryReaderUseCase {}
@@ -35,6 +37,8 @@ class _MockMoveImagesUsecase extends Mock implements MoveImagesUseCase {}
 class _MockAppBloc extends Mock implements AppBloc {}
 
 class _MockDecryptJobManager extends Mock implements DecryptJobManager {}
+
+class _MockPurchaseBloc extends Mock implements PurchaseBloc {}
 
 EncryptedImage _makeImage(String path, {bool isPrivate = true}) =>
     EncryptedImage(
@@ -63,6 +67,7 @@ void main() {
   late _MockMoveImagesUsecase mockMoveImages;
   late _MockAppBloc mockAppBloc;
   late _MockDecryptJobManager mockDecryptJobManager;
+  late _MockPurchaseBloc mockPurchaseBloc;
 
   setUpAll(() {
     registerFallbackValue(_makeImage('fallback/img.png'));
@@ -93,6 +98,11 @@ void main() {
     mockMoveImages = _MockMoveImagesUsecase();
     mockAppBloc = _MockAppBloc();
     mockDecryptJobManager = _MockDecryptJobManager();
+    mockPurchaseBloc = _MockPurchaseBloc();
+
+    // Pro by default so the existing tests exercise folder behaviour rather
+    // than the free-tier cap; the cap tests below opt out explicitly.
+    when(() => mockPurchaseBloc.isPro).thenReturn(true);
 
     when(() => mockAppBloc.stream).thenAnswer((_) => Stream.empty());
     when(() => mockAppBloc.encryptedImages).thenReturn([]);
@@ -120,6 +130,7 @@ void main() {
 
   ArchivePageBloc makeBloc() => ArchivePageBloc(
     appBloc: mockAppBloc,
+    purchaseBloc: mockPurchaseBloc,
     decryptJobManager: mockDecryptJobManager,
     galleryReaderUseCase: mockGalleryReader,
     imageDeleterUseCase: mockImageDeleter,
@@ -389,6 +400,71 @@ void main() {
                   1,
                 ),
           ],
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
+      'createFolder is blocked at the free archive cap and offers Pro instead',
+      build: () {
+        when(() => mockPurchaseBloc.isPro).thenReturn(false);
+        // Exactly at the cap already: the next archive must not be created.
+        when(() => mockGalleryReader.call(null)).thenAnswer(
+          (_) => Stream.fromIterable([
+            for (var i = 0; i < Constants.maxArchives; i++)
+              Right<DecryptionFailure, EncryptedStreamImage>(
+                _makeStreamImage('/app/encrypted/Archive$i/img.png'),
+              ),
+          ]),
+        );
+        when(
+          () => mockCreateFolder.call(any()),
+        ).thenAnswer((_) async => const Right(true));
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(const ArchivePageEvent.createFolder(name: 'OneTooMany'));
+      },
+      verify: (_) {
+        verifyNever(() => mockCreateFolder.call(any()));
+      },
+      expect:
+          () => [
+            const ArchivePageState.loading(),
+            isA<ArchivePageState>().having(
+              (s) => s.maybeMap(ui: (_) => true, orElse: () => false),
+              'is ui',
+              true,
+            ),
+            const ArchivePageState.limitReached(),
+          ],
+    );
+
+    blocTest<ArchivePageBloc, ArchivePageState>(
+      'createFolder past the free cap is allowed for a Pro user',
+      build: () {
+        when(() => mockPurchaseBloc.isPro).thenReturn(true);
+        when(() => mockGalleryReader.call(null)).thenAnswer(
+          (_) => Stream.fromIterable([
+            for (var i = 0; i < Constants.maxArchives; i++)
+              Right<DecryptionFailure, EncryptedStreamImage>(
+                _makeStreamImage('/app/encrypted/Archive$i/img.png'),
+              ),
+          ]),
+        );
+        when(
+          () => mockCreateFolder.call(any()),
+        ).thenAnswer((_) async => const Right(true));
+        return makeBloc();
+      },
+      act: (b) async {
+        b.add(const ArchivePageEvent.setup());
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        b.add(const ArchivePageEvent.createFolder(name: 'OneMore'));
+      },
+      verify: (_) {
+        verify(() => mockCreateFolder.call(any())).called(1);
+      },
     );
 
     blocTest<ArchivePageBloc, ArchivePageState>(

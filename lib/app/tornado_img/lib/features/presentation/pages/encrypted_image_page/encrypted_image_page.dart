@@ -49,10 +49,8 @@ class EncryptedImagePage extends StatelessWidget {
           );
         },
         buildWhen:
-            (previous, current) => current.maybeMap(
-              ui: (value) => true,
-              orElse: () => false,
-            ),
+            (previous, current) =>
+                current.maybeMap(ui: (value) => true, orElse: () => false),
         builder: (context, state) {
           return state.maybeMap(
             ui: (value) {
@@ -82,7 +80,6 @@ class EncryptedImagePage extends StatelessWidget {
   }
 
   Widget _titleRow(BuildContext context, EncryptedImage image) {
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

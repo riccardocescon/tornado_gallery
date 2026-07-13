@@ -75,7 +75,7 @@ void main() {
           fileId: 'abc123',
           settings: EncryptionSettings.init().copyWith(
             outputFolder: '/my/folder',
-          )
+          ),
         ),
       );
 
@@ -84,7 +84,6 @@ void main() {
         expect(encryptedImage.storagePath.path, '/my/folder/abc123.png');
         expect(encryptedImage.encryptedInfo.bytes, tEncoded);
       });
-      
     });
 
     test('calls repos in correct order with correct arguments', () async {

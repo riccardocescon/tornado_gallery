@@ -65,33 +65,36 @@ void main() {
       );
     });
 
-    test('appFolder mode preserves extension and passes path to storage', () async {
-      when(
-        () => mockStorageRepo.save(
-          bytes: any(named: 'bytes'),
-          fileName: any(named: 'fileName'),
-          path: any(named: 'path'),
-          album: any(named: 'album'),
-        ),
-      ).thenAnswer((_) async {});
+    test(
+      'appFolder mode preserves extension and passes path to storage',
+      () async {
+        when(
+          () => mockStorageRepo.save(
+            bytes: any(named: 'bytes'),
+            fileName: any(named: 'fileName'),
+            path: any(named: 'path'),
+            album: any(named: 'album'),
+          ),
+        ).thenAnswer((_) async {});
 
-      await useCase.call(
-        ImageSaverParams.appFolder(
-          bytes: tBytes,
-          fileName: 'photo.png',
-          path: '/private/folder',
-        ),
-      );
+        await useCase.call(
+          ImageSaverParams.appFolder(
+            bytes: tBytes,
+            fileName: 'photo.png',
+            path: '/private/folder',
+          ),
+        );
 
-      verify(
-        () => mockStorageRepo.save(
-          bytes: tBytes,
-          fileName: 'photo.png',
-          path: '/private/folder',
-          album: null,
-        ),
-      );
-    });
+        verify(
+          () => mockStorageRepo.save(
+            bytes: tBytes,
+            fileName: 'photo.png',
+            path: '/private/folder',
+            album: null,
+          ),
+        );
+      },
+    );
 
     test('returns Left(encryptionError) when storage throws', () async {
       when(

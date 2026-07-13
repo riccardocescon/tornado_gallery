@@ -15,8 +15,12 @@ import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
+import 'package:tornado_img_app/core/data/datasources/purchase_datasource.dart';
+import 'package:tornado_img_app/core/data/repositories/purchase_repository/purchase_repository_impl.dart';
+import 'package:tornado_img_app/core/domain/repositories/purchase_repository.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/data/repositories/app_repository/app_repository_impl.dart';
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
@@ -53,12 +57,18 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton(
     () => DecryptJobManager(decryptUseCase: getIt(), appBloc: getIt()),
   );
+  getIt.registerLazySingleton(() => PurchaseBloc(purchaseRepository: getIt()));
   getIt.registerFactory(
-    () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
+    () => EncryptionPageBloc(
+      appBloc: getIt(),
+      galleryBloc: getIt(),
+      purchaseBloc: getIt(),
+    ),
   );
   getIt.registerFactory(
     () => ArchivePageBloc(
       appBloc: getIt(),
+      purchaseBloc: getIt(),
       decryptJobManager: getIt(),
       galleryReaderUseCase: getIt(),
       imageDeleterUseCase: getIt(),
@@ -103,6 +113,13 @@ void setupInjectionContainer() {
     () => ImageProcessingRepositoryImpl(),
   );
   getIt.registerFactory<AppRepository>(() => AppRepositoryImpl());
+
+  // Must be a singleton: it holds the one live subscription to the store's
+  // purchase stream and the cached entitlement every gate reads.
+  getIt.registerLazySingleton(() => PurchaseDatasource());
+  getIt.registerLazySingleton<PurchaseRepository>(
+    () => PurchaseRepositoryImpl(datasource: getIt(), preferences: prefs),
+  );
 
   getIt.registerLazySingleton(() => ThemeNotifier());
   getIt.registerLazySingleton(() => WhatsNewService(prefs));

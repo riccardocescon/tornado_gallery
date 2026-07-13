@@ -19,12 +19,18 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     DearchivingState? activeJob,
   }) = _UI;
   const factory ArchivePageState.imported() = _Imported;
+
+  /// The free archive cap would be exceeded. Not a [failure]: the UI answers it
+  /// with the paywall, not an error.
+  const factory ArchivePageState.limitReached() = _LimitReached;
+
   const factory ArchivePageState.failure({required String message}) = _Failure;
 
   @override
   List<Object?> get props => when(
     initial: () => [],
     loading: () => [],
+    limitReached: () => [],
     deleting: (paths) => [paths],
     ui:
         (

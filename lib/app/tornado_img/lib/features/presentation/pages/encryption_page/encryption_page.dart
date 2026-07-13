@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
+import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/core/presentation/pages/fullscreen_image_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/extentions.dart';
@@ -16,6 +18,7 @@ import 'package:tornado_img_app/features/presentation/widgets/app_card.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
+import 'package:tornado_img_app/features/presentation/widgets/pro_widgets.dart';
 
 part 'widgets/images_preview_card.dart';
 part 'widgets/images_preview/single_image_layout.dart';
@@ -51,6 +54,9 @@ class EncryptionPage extends StatelessWidget {
               },
             );
           },
+          // The button is already disabled in this case; this only fires if the
+          // archive grew past the cap while this page was open.
+          limitReached: (_) => context.pushNamed(Routes.pro),
           failure: (value) {
             context.showErrorSnackbar("Encryption failed: ${value.message}");
           },
@@ -143,6 +149,7 @@ class EncryptionPage extends StatelessWidget {
                       (previous, current) => current.maybeMap(
                         encrypted: (state) => true,
                         encrypting: (state) => true,
+                        limitReached: (state) => true,
                         failure: (state) => true,
                         orElse: () => false,
                       ),
@@ -152,32 +159,52 @@ class EncryptionPage extends StatelessWidget {
                       orElse: () => false,
                     );
 
-                    return FilledButton(
-                      onPressed:
-                          isEncrypting
-                              ? () {}
-                              : () => context.read<EncryptionPageBloc>().add(
-                                const EncryptionPageEvent.encrypt(),
-                              ),
-                      child: Row(
-                        spacing: 8,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          isEncrypting
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.lock_rounded, size: 18),
-                          Text(
-                            isEncrypting ? "Encrypting..." : "Encrypt Images",
-                            style: context.textTheme.labelLarge,
+                    // This selection would take a free user past the cap. Offer
+                    // Pro instead of letting them press a button that can only
+                    // fail.
+                    final blocked =
+                        context.read<EncryptionPageBloc>().exceedsFreeLimit;
+
+                    return Column(
+                      spacing: 12,
+                      children: [
+                        if (blocked)
+                          const ProLimitBanner(
+                            message:
+                                "You've reached the free limit of "
+                                "${Constants.maxEncryptedImages} encrypted images. "
+                                "Unlock Pro for unlimited encryptions.",
                           ),
-                        ],
-                      ),
+                        FilledButton(
+                          onPressed:
+                              (isEncrypting || blocked)
+                                  ? null
+                                  : () => context
+                                      .read<EncryptionPageBloc>()
+                                      .add(const EncryptionPageEvent.encrypt()),
+                          child: Row(
+                            spacing: 8,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              isEncrypting
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Icon(Icons.lock_rounded, size: 18),
+                              Text(
+                                isEncrypting
+                                    ? "Encrypting..."
+                                    : "Encrypt Images",
+                                style: context.textTheme.labelLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),

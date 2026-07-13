@@ -18,7 +18,6 @@ class UpdateAppCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           foregroundColor: context.colorScheme.onPrimaryContainer,
-          
         ),
         child: Row(
           spacing: 12,

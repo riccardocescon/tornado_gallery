@@ -12,6 +12,7 @@ import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
@@ -92,6 +93,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final ImageDeleterUseCase imageDeleterUseCase;
 
   final AppBloc appBloc;
+  final PurchaseBloc purchaseBloc;
   final DecryptJobManager decryptJobManager;
 
   /// Live subscription to background decrypt progress; re-emits the view on tick.
@@ -105,6 +107,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
   ArchivePageBloc({
     required this.appBloc,
+    required this.purchaseBloc,
     required this.decryptJobManager,
     required this.galleryReaderUseCase,
     required this.imageDeleterUseCase,
@@ -410,10 +413,23 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
 
   // ── Folder management ───────────────────────────────────────────────────────
 
+  /// Archives that exist right now, across both stores and every depth.
+  int get archiveCount =>
+      ArchiveTreeUtils.allFolderKeys(images, _createdFolders).length;
+
+  /// Creating one more archive would take a free user past the cap.
+  bool get exceedsFreeLimit =>
+      !purchaseBloc.isPro && archiveCount >= Constants.maxArchives;
+
   Future<void> _onCreateFolder(
     _CreateFolder event,
     Emitter<ArchivePageState> emit,
   ) async {
+    if (exceedsFreeLimit) {
+      emit(const ArchivePageState.limitReached());
+      return;
+    }
+
     // Inside a folder the store is fixed; at the root (mixed view) the user
     // picks it explicitly via [event.isPrivate], defaulting to private.
     final isPrivate = event.isPrivate ?? _currentIsPrivate ?? true;
@@ -586,27 +602,24 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
         contained: contained,
       ),
     );
-    result.fold(
-      (failure) {
-        // Rollback: restore the removed images and folders, then surface the
-        // failure. `failure` only triggers a snackbar in the view; the trailing
-        // `_emit` re-renders the restored `ui` state so the folder reappears.
-        images.addAll(removedImages);
-        for (final img in removedImages) {
-          appBloc.add(AppEvent.addEncryptedImage(image: img));
-        }
-        _createdFolders.addAll(removedFolders);
-        appBloc.add(
-          AppEvent.folderCreated(
-            isPrivate: event.isPrivate,
-            relativePath: event.relativePath,
-          ),
-        );
-        emit(ArchivePageState.failure(message: failure.message));
-        _emit(emit);
-      },
-      (_) {},
-    );
+    result.fold((failure) {
+      // Rollback: restore the removed images and folders, then surface the
+      // failure. `failure` only triggers a snackbar in the view; the trailing
+      // `_emit` re-renders the restored `ui` state so the folder reappears.
+      images.addAll(removedImages);
+      for (final img in removedImages) {
+        appBloc.add(AppEvent.addEncryptedImage(image: img));
+      }
+      _createdFolders.addAll(removedFolders);
+      appBloc.add(
+        AppEvent.folderCreated(
+          isPrivate: event.isPrivate,
+          relativePath: event.relativePath,
+        ),
+      );
+      emit(ArchivePageState.failure(message: failure.message));
+      _emit(emit);
+    }, (_) {});
   }
 
   Future<void> _onMoveImages(

@@ -37,8 +37,7 @@ class EncryptedImagePageBloc
     required this.galleryBloc,
     required this.imageSaverUseCase,
     required this.imageRenamerUseCase,
-  })
-    : super(const EncryptedImagePageState.initial()) {
+  }) : super(const EncryptedImagePageState.initial()) {
     on<_Setup>((event, emit) async {
       image = appBloc.encryptedImages.firstWhere(
         (img) => img.storagePath.file.path == event.imagePath,
@@ -58,7 +57,6 @@ class EncryptedImagePageBloc
           orElse: () => null,
         );
       }
-
     });
     on<_UpdatePassword>((event, emit) => password = event.password);
     on<_Decrypt>((event, emit) async {
@@ -100,12 +98,14 @@ class EncryptedImagePageBloc
 
         if (completed) break;
       }
-      
     });
     on<_Restore>((event, emit) {
       image = image.copyWithDecryptInfo(decryptInfo: null);
       appBloc.add(
-        AppEvent.setDecryptedInfo(path: image.storagePath.path, decryptedInfo: null),
+        AppEvent.setDecryptedInfo(
+          path: image.storagePath.path,
+          decryptedInfo: null,
+        ),
       );
       emit(EncryptedImagePageState.ui(image: image));
     });
@@ -129,14 +129,20 @@ class EncryptedImagePageBloc
       );
 
       foRename.fold(
-        (failure) => emit(EncryptedImagePageState.failure(message: failure.message)),
+        (failure) =>
+            emit(EncryptedImagePageState.failure(message: failure.message)),
         (result) {
           if (!result.success) {
-            emit(const EncryptedImagePageState.failure(message: 'Unable to rename this image'));
+            emit(
+              const EncryptedImagePageState.failure(
+                message: 'Unable to rename this image',
+              ),
+            );
             return;
           }
 
-          final oldIdentifier = image.storagePath.assetId ?? image.storagePath.path;
+          final oldIdentifier =
+              image.storagePath.assetId ?? image.storagePath.path;
 
           final newPath = '$path/${event.newName}.$ext';
           image = image.copyWith(
@@ -146,10 +152,12 @@ class EncryptedImagePageBloc
             ),
           );
 
-          appBloc.add(AppEvent.updateEncryptedImage(
-            image: image,
-            oldIdentifier: oldIdentifier,
-          ));
+          appBloc.add(
+            AppEvent.updateEncryptedImage(
+              image: image,
+              oldIdentifier: oldIdentifier,
+            ),
+          );
 
           emit(const EncryptedImagePageState.imageRenamed());
           emit(EncryptedImagePageState.ui(image: image));

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/presentation/bloc/purchase_bloc/purchase_bloc.dart';
 import 'package:tornado_img_app/core/presentation/widgets/update_app_card.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/picture_provider/pictures_provider.dart';
@@ -14,6 +15,7 @@ import 'package:tornado_img_app/features/presentation/bloc/homepage_bloc/homepag
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/loading_container.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_title.dart';
+import 'package:tornado_img_app/features/presentation/widgets/pro_widgets.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
 part 'widgets/action_card.dart';
@@ -34,7 +36,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   void initState() {
     context.read<HomepageBloc>().add(const HomepageEvent.setup());
@@ -84,7 +85,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 
   Widget _actions() {
     return IntrinsicHeight(

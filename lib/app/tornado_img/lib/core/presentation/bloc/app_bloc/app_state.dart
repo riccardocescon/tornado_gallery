@@ -7,8 +7,10 @@ abstract class AppState with _$AppState, EquatableMixin {
   const factory AppState.initial() = _Initial;
   const factory AppState.addedGalleryImage({required EncryptedImage image}) =
       _Added;
-  const factory AppState.updatedGalleryImage({required EncryptedImage image, required String oldIdentifier}) =
-      _Updated;
+  const factory AppState.updatedGalleryImage({
+    required EncryptedImage image,
+    required String oldIdentifier,
+  }) = _Updated;
   const factory AppState.removedGalleryImage({required String path}) = _Removed;
 
   const factory AppState.folderCreated({
