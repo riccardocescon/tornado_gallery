@@ -10,7 +10,7 @@ class _MockStorageRepository extends Mock implements StorageRepository {}
 
 void main() {
   late _MockStorageRepository mockStorageRepo;
-  late ImageSaverUsecase useCase;
+  late ImageSaverUseCase useCase;
 
   final tBytes = Uint8List.fromList([1, 2, 3]);
 
@@ -20,10 +20,10 @@ void main() {
 
   setUp(() {
     mockStorageRepo = _MockStorageRepository();
-    useCase = ImageSaverUsecase(storageRepo: mockStorageRepo);
+    useCase = ImageSaverUseCase(storageRepo: mockStorageRepo);
   });
 
-  group('ImageSaverUsecase.call', () {
+  group('ImageSaverUseCase.call', () {
     test('returns Right(null) when storage saves successfully', () async {
       when(
         () => mockStorageRepo.save(
@@ -35,7 +35,7 @@ void main() {
       ).thenAnswer((_) async {});
 
       final result = await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'image.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'image.png'),
       );
 
       expect(result.isRight(), isTrue);
@@ -52,7 +52,7 @@ void main() {
       ).thenAnswer((_) async {});
 
       await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'photo.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'photo.png'),
       );
 
       verify(
@@ -60,6 +60,34 @@ void main() {
           bytes: tBytes,
           fileName: 'photo',
           path: null,
+          album: null,
+        ),
+      );
+    });
+
+    test('appFolder mode preserves extension and passes path to storage', () async {
+      when(
+        () => mockStorageRepo.save(
+          bytes: any(named: 'bytes'),
+          fileName: any(named: 'fileName'),
+          path: any(named: 'path'),
+          album: any(named: 'album'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await useCase.call(
+        ImageSaverParams.appFolder(
+          bytes: tBytes,
+          fileName: 'photo.png',
+          path: '/private/folder',
+        ),
+      );
+
+      verify(
+        () => mockStorageRepo.save(
+          bytes: tBytes,
+          fileName: 'photo.png',
+          path: '/private/folder',
           album: null,
         ),
       );
@@ -76,7 +104,7 @@ void main() {
       ).thenThrow(Exception('write error'));
 
       final result = await useCase.call(
-        ImageSaverParams(bytes: tBytes, fileName: 'image.png'),
+        ImageSaverParams.gallery(bytes: tBytes, fileName: 'image.png'),
       );
 
       expect(result.isLeft(), isTrue);

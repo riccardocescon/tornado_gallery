@@ -17,7 +17,7 @@
 
 
     <application
-        android:label="tornado_img"
+        android:label="Tornado Gallery"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"

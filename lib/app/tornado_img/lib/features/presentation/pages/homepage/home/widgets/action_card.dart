@@ -25,100 +25,97 @@ class _ActionCard extends StatelessWidget {
         darker ? context.colorScheme.onPrimary : context.colorScheme.onSurface;
 
     final foregroundButtonColor =
-        darker
-            ? context.colorScheme.primaryContainer
-            : context.colorScheme.onSurface;
+        darker ? context.colorScheme.primary : context.colorScheme.onSurface;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:
-            darker
-                ? context.colorScheme.primaryContainer
-                : context.colorScheme.surface,
-        borderRadius: AppStyle.cardBorderRadius,
-        border:
-            darker
-                ? null
-                : Border.all(
+    final ext = context.appColors;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: darker ? null : context.colorScheme.surface,
+          gradient: darker
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [ext.heroGradientStart, ext.heroGradientEnd],
+                )
+              : null,
+          borderRadius: AppStyle.cardBorderRadius,
+          border: darker
+              ? Border.all(color: context.theme.dividerColor)
+              : Border.all(
                   color: context.colorScheme.onSurface.withValues(alpha: 0.1),
                 ),
-      ),
-      child: Column(
-        spacing: 8,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ContainedItem.icon(
-            icon: icon,
-            backgroundColor:
-                darker
-                    ? context.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.1,
-                    )
-                    : context.appColors.softBackground,
-            iconColor: foregroundColor,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4,
-              children: [
-                Text(
-                  title,
-                  style: context.textTheme.bodyLarge?.copyWith(
-                    color: foregroundColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: foregroundColor.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
+        ),
+        child: Column(
+          spacing: 8,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ContainedItem.icon(
+              icon: icon,
+              backgroundColor:
+                  darker ? ext.accentSubtle : context.appColors.softBackground,
+              iconColor: foregroundColor,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 6.0),
-            child: FilledButton(
-              onPressed: onPressed,
-              style: FilledButton.styleFrom(
-                backgroundColor:
-                    darker
-                        ? context.colorScheme.onPrimary
-                        : context.appColors.softButton,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      AppStyle.cardBorderRadius - BorderRadius.circular(8),
-                ),
-              ),
-              child: Row(
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(buttonIcon, size: 14, color: foregroundButtonColor),
-                  Flexible(
-                    child: Text(
-                      buttonText,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: foregroundButtonColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
+                  Text(
+                    title,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: foregroundColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: foregroundColor.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      darker
+                          ? context.colorScheme.onPrimary
+                          : context.appColors.softButton,
+                  borderRadius:
+                      AppStyle.cardBorderRadius - BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  spacing: 4,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(buttonIcon, size: 14, color: foregroundButtonColor),
+                    Flexible(
+                      child: Text(
+                        buttonText,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: foregroundButtonColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

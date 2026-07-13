@@ -15,5 +15,8 @@ abstract class EncryptedImagePageEvent
 
   const factory EncryptedImagePageEvent.restore() = _Restore;
 
+  const factory EncryptedImagePageEvent.rename({required String newName}) =
+      _Rename;
+
   const factory EncryptedImagePageEvent.saveImage() = _SaveImage;
 }

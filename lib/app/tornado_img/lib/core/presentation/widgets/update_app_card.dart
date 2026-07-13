@@ -7,10 +7,7 @@ class UpdateAppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!upgrader.isUpdateAvailable()) {
-      return const SizedBox();
-    }
-
+    if (!upgrader.isUpdateAvailable()) return const SizedBox.shrink();
     return SizedBox(
       width: double.maxFinite,
       child: FilledButton(
@@ -19,7 +16,9 @@ class UpdateAppCard extends StatelessWidget {
           backgroundColor: context.colorScheme.primaryContainer.withValues(
             alpha: 0.6,
           ),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           foregroundColor: context.colorScheme.onPrimaryContainer,
+          
         ),
         child: Row(
           spacing: 12,

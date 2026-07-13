@@ -1,6 +1,6 @@
 name: tornado_img_app
 description: "Tornado Image - A powerful Flutter app for image encryption"
-version: 0.0.2+2
+version: 1.0.6+7
 publish_to: 'none'
 
 environment:
@@ -41,15 +41,13 @@ dependencies:
   shared_preferences: ^2.5.3
   get_it: ^9.2.0
   rxdart: ^0.28.0
+  watcher: ^1.2.1
   image: ^4.7.2
   wechat_assets_picker: ^10.1.0
   focused_menu: ^1.0.5
   gal: ^2.3.2
   url_launcher: ^6.3.2
   upgrader: ^13.1.0
-
-  
-  device_preview_plus: ^2.6.0
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +58,7 @@ dev_dependencies:
   mocktail: ^1.0.4
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
+  device_preview_plus: ^2.6.0
 
 flutter:
   uses-material-design: true

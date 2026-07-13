@@ -64,3 +64,6 @@ app.*.map.json
 
 # Ignore specific local packages, they are private
 /lib/packages/tornado_img_crypto/
+
+Handoff.md
+docs/

@@ -8,8 +8,8 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
-import 'package:tornado_img_app/features/domain/entities/encrypted/encrypted_image.dart';
-import 'package:tornado_img_app/features/domain/entities/gallery_stream_image.dart';
+import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
+import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
 
 class _MockImageProcessingRepository extends Mock
     implements ImageProcessingRepository {}
@@ -28,10 +28,13 @@ class _FakePathProviderPlatform extends PathProviderPlatform
 EncryptedStreamImage _makeStreamImage(String path) =>
     EncryptedStreamImage.image(
       image: EncryptedImage(
-        path: path,
+        storagePath: StoragePath(
+          path: path,
+          isPrivateFolder: true,
+          assetId: '',
+        ),
         encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
         date: DateTime(2024),
-        isPrivateFolder: true,
       ),
       type: EncryptedStreamImageType.newImage,
     );
@@ -41,7 +44,7 @@ void main() {
 
   late _MockImageProcessingRepository mockImageRepo;
   late _MockStorageRepository mockStorageRepo;
-  late GalleryReaderUsecase useCase;
+  late GalleryReaderUseCase useCase;
   late Directory tempDir;
 
   setUp(() async {
@@ -50,7 +53,7 @@ void main() {
 
     mockImageRepo = _MockImageProcessingRepository();
     mockStorageRepo = _MockStorageRepository();
-    useCase = GalleryReaderUsecase(
+    useCase = GalleryReaderUseCase(
       imageRepo: mockImageRepo,
       storageRepo: mockStorageRepo,
     );
@@ -62,7 +65,7 @@ void main() {
     }
   });
 
-  group('GalleryReaderUsecase.call', () {
+  group('GalleryReaderUseCase.call', () {
     test('yields Right for each private image', () async {
       final img1 = _makeStreamImage('/enc/img1.png');
       final img2 = _makeStreamImage('/enc/img2.png');

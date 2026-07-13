@@ -46,14 +46,21 @@ class __ImageState extends State<_Image> {
                 final bloc = context.read<EncryptedImagePageBloc>();
                 final allImages = context.read<AppBloc>().encryptedImages;
                 final index = allImages.indexWhere(
-                  (img) => img.file.path == bloc.image.file.path,
+                  (img) =>
+                      img.storagePath.file.path ==
+                      bloc.image.storagePath.file.path,
                 );
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     fullscreenDialog: true,
                     builder:
-                        (_) => _FullscreenImageViewer(
+                        (_) => FullscreenImageViewer(
                           images: allImages,
+                          getBytes:
+                              (image) =>
+                                  image.decryptInfo?.bytes ??
+                                  image.encryptedInfo.bytes,
+                          getFilePath: (image) => image.storagePath.path,
                           initialIndex: index == -1 ? 0 : index,
                         ),
                   ),

@@ -5,32 +5,34 @@ Pod::Spec.new do |spec|
   spec.homepage      = 'https://github.com/riccardocescon/tornado_gallery'
   spec.authors       = { 'Riccardo Cescon' => 'riccardo.cescon@example.com' }
   spec.summary       = 'A powerful encryption package for images with AES-CTR cipher'
-  
-  spec.source              = { :path => '.' }
-  spec.source_files        = 'src/**/*.{c,cpp,h}'
-  spec.public_header_files = 'src/**/*.h'
-  
+
+  spec.source = { :path => '.' }
+  spec.source_files = 'Classes/**/*.{h,m,mm,c,cc,cpp}'
+
+  # Pre-built xcframework produced by build_test_deploy.ps1 (phase 2 on macOS).
+  # The xcframework contains two slices:
+  #   - arm64-iphoneos          (physical device)
+  #   - arm64 + x86_64 -iphonesimulator  (fat simulator library)
+  spec.vendored_frameworks = 'Frameworks/tornado_crypto.xcframework'
+
   spec.ios.deployment_target = '11.0'
   spec.osx.deployment_target = '10.14'
-  
-  # C++ configuration
-  spec.compiler_flags = '-x objective-c++'
+
+  # CommonCrypto (AES-CTR, HMAC-SHA256, SHA256) and Foundation are system
+  # frameworks already available on every Apple platform — no extra install.
+  spec.frameworks = ['Security', 'Foundation']
+  spec.libraries  = ['c++']
+
   spec.xcconfig = {
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
-    'CLANG_CXX_LIBRARY' => 'libc++'
+    'CLANG_CXX_LIBRARY'           => 'libc++'
   }
-  
-  # System frameworks and libraries
-  spec.frameworks = ['Security', 'Foundation']
-  spec.libraries = ['c++']
-  
-  # For now, we'll implement crypto without OpenSSL dependency on iOS
-  # iOS has built-in CommonCrypto which we can use instead
+
   spec.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
-    'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64',
-    'VALID_ARCHS[sdk=iphoneos*]' => 'arm64'
+    'DEFINES_MODULE'                       => 'YES',
+    'VALID_ARCHS[sdk=iphonesimulator*]'    => 'arm64 x86_64',
+    'VALID_ARCHS[sdk=iphoneos*]'           => 'arm64'
   }
-  
+
   spec.dependency 'Flutter'
 end

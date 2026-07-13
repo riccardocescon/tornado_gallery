@@ -6,13 +6,19 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
 
   const factory ArchivePageState.initial() = _Initial;
   const factory ArchivePageState.loading() = _Loading;
+  const factory ArchivePageState.importing() = _Importing;
   const factory ArchivePageState.deleting({required List<String> paths}) =
       _Deleting;
-  const factory ArchivePageState.ui({required List<EncryptedImage> images}) =
-      _UI;
-  const factory ArchivePageState.decryptingAllUI({
-    required DearchivingState dearchivingState,
-  }) = _DecryptingAllUI;
+  const factory ArchivePageState.ui({
+    required List<EncryptedImage> images,
+    @Default(<ArchiveFolderView>[]) List<ArchiveFolderView> folders,
+    @Default(<String>[]) List<String> breadcrumb,
+    @Default('') String currentPath,
+    bool? currentIsPrivate,
+    @Default(false) bool isSelectionMode,
+    DearchivingState? activeJob,
+  }) = _UI;
+  const factory ArchivePageState.imported() = _Imported;
   const factory ArchivePageState.failure({required String message}) = _Failure;
 
   @override
@@ -20,8 +26,26 @@ abstract class ArchivePageState with _$ArchivePageState, EquatableMixin {
     initial: () => [],
     loading: () => [],
     deleting: (paths) => [paths],
-    ui: (images) => [images],
-    decryptingAllUI: (dearchivingState) => [dearchivingState],
+    ui:
+        (
+          images,
+          folders,
+          breadcrumb,
+          currentPath,
+          currentIsPrivate,
+          isSelectionMode,
+          activeJob,
+        ) => [
+          images,
+          folders,
+          breadcrumb,
+          currentPath,
+          currentIsPrivate,
+          isSelectionMode,
+          activeJob,
+        ],
+    importing: () => [],
+    imported: () => [],
     failure: (message) => [message],
   );
 }
