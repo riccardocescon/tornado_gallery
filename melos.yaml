@@ -2,7 +2,8 @@ name: tornado_img
 repository: https://github.com/your-username/tornado_img
 
 packages:
-  - packages/**
+  - lib/app/*
+  - lib/packages/*
 
 command:
   version:
@@ -48,7 +49,7 @@ scripts:
   # Custom scripts for your workflow
   crypto:test: >
     melos exec --scope="tornado_img_crypto" -- \
-      dart test --reporter=expanded
+      flutter test
   app:run: >
     melos exec --scope="tornado_img_app" -- \
       flutter run
