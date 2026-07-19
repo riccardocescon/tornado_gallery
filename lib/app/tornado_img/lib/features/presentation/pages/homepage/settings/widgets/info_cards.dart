@@ -39,7 +39,7 @@ class _InfoCards extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.colorScheme.surface,
+        color: context.colorScheme.surfaceContainerLow,
         borderRadius: AppStyle.cardBorderRadius,
         border: Border.all(
           color: context.colorScheme.onSurface.withValues(alpha: 0.1),

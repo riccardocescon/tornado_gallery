@@ -14,6 +14,14 @@ class AppColors {
   static const Color lightSurfaceAlt = Color(0xFFE7E9EC);
   static const Color lightBorder = Color(0xFFE2E7F0);
 
+  // M3 surface-container ladder (light): tone rises = more tinted, anchored on
+  // surface (white) → background → surfaceAlt.
+  static const Color lightSurfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color lightSurfaceContainerLow = Color(0xFFF7F9FC);
+  static const Color lightSurfaceContainer = Color(0xFFF1F4F9);
+  static const Color lightSurfaceContainerHigh = Color(0xFFEBEEF3);
+  static const Color lightSurfaceContainerHighest = Color(0xFFE7E9EC);
+
   static const Color lightTextPrimary = Color(0xFF162033);
   static const Color lightTextSecondary = Color(0xFF5C6877);
   static const Color lightIcon = Color(0xFF4D5A6D);
@@ -23,6 +31,14 @@ class AppColors {
   static const Color darkSurface = Color(0xFF141E32);
   static const Color darkSurfaceAlt = Color(0xFF1E2B45);
   static const Color darkBorder = Color(0xFF2B3B59);
+
+  // M3 surface-container ladder (dark): tone rises = lighter, anchored on
+  // background (darkest) → surface → surfaceAlt.
+  static const Color darkSurfaceContainerLowest = Color(0xFF0A111E);
+  static const Color darkSurfaceContainerLow = Color(0xFF101A2B);
+  static const Color darkSurfaceContainer = Color(0xFF141E32);
+  static const Color darkSurfaceContainerHigh = Color(0xFF18253D);
+  static const Color darkSurfaceContainerHighest = Color(0xFF1E2B45);
 
   static const Color darkTextPrimary = Color(0xFFF2F6FC);
   static const Color darkTextSecondary = Color(0xFF9DB0CC);
@@ -73,6 +89,11 @@ class AppTheme {
       onError: Colors.white,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightTextPrimary,
+      surfaceContainerLowest: AppColors.lightSurfaceContainerLowest,
+      surfaceContainerLow: AppColors.lightSurfaceContainerLow,
+      surfaceContainer: AppColors.lightSurfaceContainer,
+      surfaceContainerHigh: AppColors.lightSurfaceContainerHigh,
+      surfaceContainerHighest: AppColors.lightSurfaceContainerHighest,
       tertiary: Colors.blue.shade700,
     );
 
@@ -402,7 +423,11 @@ class AppTheme {
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
       onSurfaceVariant: AppColors.darkTextSecondary,
-      surfaceContainerHighest: AppColors.darkSurfaceAlt,
+      surfaceContainerLowest: AppColors.darkSurfaceContainerLowest,
+      surfaceContainerLow: AppColors.darkSurfaceContainerLow,
+      surfaceContainer: AppColors.darkSurfaceContainer,
+      surfaceContainerHigh: AppColors.darkSurfaceContainerHigh,
+      surfaceContainerHighest: AppColors.darkSurfaceContainerHighest,
       outline: AppColors.darkBorder,
       tertiary: AppColors.darkAccent,
     );
