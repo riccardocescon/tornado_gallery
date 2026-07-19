@@ -13,18 +13,21 @@ class _InfoCards extends StatelessWidget {
           Icons.shield_rounded,
           'Local Only',
           'Your photos never leave your device, all encryption and decryption happens locally on your device',
+          iconColor: Colors.green,
         ),
         _card(
           context,
           Icons.key_rounded,
           'Strong Encryption',
           'Intrinsic your image with a passphrase of any length',
+          iconColor: Colors.blue,
         ),
         _card(
           context,
           Icons.code_rounded,
           'Open Source',
           'The source code of Tornado Gallery is available on GitHub, allowing anyone to inspect, modify, and contribute to the project.',
+          iconColor: Colors.orange,
         ),
       ],
     );
@@ -35,6 +38,9 @@ class _InfoCards extends StatelessWidget {
     IconData icon,
     String title,
     String subtitle,
+    {
+    Color? iconColor,
+  }
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -49,7 +55,11 @@ class _InfoCards extends StatelessWidget {
         spacing: 12,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ContainedItem.icon(icon: icon),
+          ContainedItem.icon(
+            icon: icon,
+            iconColor: iconColor?.withValues(alpha: 0.8),
+            backgroundColor: iconColor?.withValues(alpha: 0.1),
+          ),
           Expanded(
             child: Column(
               spacing: 4,
