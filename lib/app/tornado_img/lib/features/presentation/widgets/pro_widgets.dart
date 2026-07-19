@@ -178,7 +178,6 @@ class ProStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colorScheme.surface,
           borderRadius: AppStyle.proCardBorderRadius,
-          border: Border.all(color: context.colorScheme.outlineVariant),
         ),
         child: Row(
           spacing: 14,
@@ -196,8 +195,8 @@ class ProStatusCard extends StatelessWidget {
                   ),
                   Text(
                     onManage == null
-                        ? "Thanks for the support — no limits"
-                        : "Thanks for the support — tap to manage",
+                        ? "Thanks for the support - no limits"
+                        : "Thanks for the support - tap to manage",
                     style: context.textTheme.labelMedium,
                   ),
                 ],
