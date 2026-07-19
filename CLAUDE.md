@@ -12,11 +12,10 @@ Tornado IMG is a Flutter mobile app for local image encryption. Users select ima
 
 ## Commands
 
-> **Melos glob is stale.** `melos.yaml` declares `packages: packages/**`, but the
-> real packages live under `lib/` (`lib/app/tornado_img`, `lib/packages/*`).
-> So `melos exec` matches **zero packages** and silently no-ops (e.g. a
-> `melos exec -- dart analyze` prints SUCCESS without analyzing anything). Until
-> the glob is fixed, run tooling **per package** (`cd` into each):
+The melos glob matches the three real packages (`lib/app/*`, `lib/packages/*` —
+verify with `melos list`). `melos analyze` and `melos format` work workspace-wide.
+`melos test` does **not**: it invokes `dart test`, which fails in the two
+flutter_test packages (app, crypto) — for tests, run per package:
 
 ```bash
 # App package: analyze + tests (the app uses flutter_test, so use `flutter test`)
@@ -36,9 +35,8 @@ cd lib/packages/logger && dart test
 dart format .
 ```
 
-Melos scripts that DO work (they scope explicitly): `melos app:run`,
-`melos app:build:android`. The `melos crypto:test` script is broken (invokes
-`dart test`, which the package can't run).
+Scoped melos scripts: `melos app:run`, `melos app:build:android`,
+`melos crypto:test`.
 
 The crypto package native binary is compiled separately (see `lib/packages/tornado_img_crypto/CLAUDE.md` for full build prerequisites):
 - Windows: `lib/packages/tornado_img_crypto/scripts/build_windows.bat`
@@ -46,6 +44,60 @@ The crypto package native binary is compiled separately (see `lib/packages/torna
 - C++ engine test/deploy: `lib/cpp/scripts/build_test_deploy.ps1`
 
 The C++ source lives at `lib/cpp/src/` (shared across platforms). Per `README.md` it is excluded from the public repo, but is present in this working tree. Deep docs: `lib/cpp/CLAUDE.md`.
+
+## File map — look here first, don't search
+
+The app's Dart package is named **`tornado_img_app`** (imports are
+`package:tornado_img_app/...`, *not* `tornado_img`). All paths below are
+relative to `lib/app/tornado_img/lib/`.
+
+| You need | File |
+|---|---|
+| App entry, root `BlocProvider`s | `main.dart` |
+| DI wiring (`get_it`) | `injection_container.dart` |
+| GoRouter route table (builders, `state.extra` casts) | `routes.dart` |
+| Route name/path constants (`Routes.x` / `Routes.xPath`) | `core/utils/routes.dart` |
+| `Constants` (free caps, `imageExtensions`, `proGracePeriod`) | `core/utils/constants.dart` |
+| `appLogger` + `LogLayer` | `core/utils/globals.dart` |
+| `FileNameUtils` | `core/utils/file_name_utils.dart` |
+| Theme + `AppColorsExtension` tokens | `theme/theme.dart`, `theme/app_colors_ext.dart` |
+| `AppStyle` (radii etc.) | `app_style.dart` (package root, not `theme/`) |
+| Failure types (incl. `PurchaseFailure`) | `core/failures/failures.dart` |
+| Entities | `core/domain/entities/` — encrypted ones in `entities/encrypted/` (`encrypted_image.dart`, `encrypted_folder.dart`); Pro: `pro_entitlement.dart`, `pro_product.dart` |
+| Use case base classes + `guardEither` | `core/domain/usecases/usecase.dart`; use cases sit beside it |
+| Repository interfaces | `core/domain/repositories/` |
+| Repository impls | `core/data/repositories/<name>_repository/<name>_repository_impl.dart` |
+| Storage/gallery datasources (platform split) | `core/data/datasources/storage/` and `datasources/app/{private,public}/` |
+| IAP datasource (sole `in_app_purchase` importer) | `core/data/datasources/purchase_datasource.dart` |
+| Core blocs: `AppBloc`, `GalleryBloc`, `PurchaseBloc` | `core/presentation/bloc/<x>_bloc/` |
+| Feature blocs: Homepage, Archive, Encryption, EncryptedImage | `features/presentation/bloc/<x>_bloc/` |
+| `ArchiveTreeUtils` (folder-tree walks) | `features/presentation/bloc/archive_page_bloc/archive_page_bloc_utils.dart` |
+| Pages | `features/presentation/pages/<page>/` — sub-widgets in `<page>/widgets/` via `part of` (see the `clear-widgets` skill) |
+| Shared widgets (`AppCard`, `pro_widgets.dart`, `PageTitle`, …) | `features/presentation/widgets/` |
+| Folder watching / decrypt queue | `core/managers/stream_manager.dart`, `core/managers/decrypt_job_manager.dart` |
+| What's New popup | `core/presentation/widgets/whats_new_dialog.dart` + `core/data/whats_new_service.dart` |
+
+Each bloc folder holds `<x>_bloc.dart`, `<x>_event.dart`, `<x>_state.dart`
+joined by `part` directives, plus the generated `.freezed.dart`. Tests mirror
+source paths under `lib/app/tornado_img/test/` (e.g.
+`test/core/domain/usecases/encrypt_image_usecase_test.dart`).
+
+### Common task recipes (files to touch, nothing else)
+
+- **New page + route**: page under `features/presentation/pages/<page>/` →
+  constants pair in `core/utils/routes.dart` → `GoRoute` in `routes.dart` → if it
+  has a bloc, register a **factory** in `injection_container.dart`.
+- **New use case**: class in `core/domain/usecases/` extending
+  `EncryptionUseCase`/`StreamUseCase` with `guardEither` → register in
+  `injection_container.dart` → inject into the calling bloc.
+- **New bloc state/event**: edit the `@freezed` union → run build_runner (see
+  **Code Generation**) → handle the new case in the page's `BlocBuilder`/`BlocListener`.
+- **New Pro-gated feature**: read `PurchaseBloc.isPro` at the choke point → emit
+  `limitReached` (never `failure`) → UI responds with `context.pushNamed(Routes.pro)`.
+
+These recipes exist as invocable skills (`/add-page`, `/regen`, `/pro-gate`,
+`/release-check`, plus `/unit-test`, `/clear-widgets`, `/update-whats-new`) —
+catalog with details in `docs/skills.md`.
 
 ## Architecture
 
