@@ -24,10 +24,13 @@ LinearGradient proGradient(BuildContext context) => LinearGradient(
 /// here, because the glow is what marks a surface as premium.
 List<BoxShadow> proGlow() => [
   BoxShadow(
-    color: AppColors.proGlow.withValues(alpha: 0.45),
-    blurRadius: 34,
-    spreadRadius: -14,
-    offset: const Offset(0, 16),
+    color: AppColors.proGlow.withValues(alpha: 1),
+    blurRadius: 14,
+    // Deflated so the glow hugs the widget, then pushed down far enough that the
+    // blur clears the top edge — so it reads only along the bottom curve, never
+    // as a halo above and below. offset.dy >= blurRadius + spreadRadius.
+    spreadRadius: -3,
+    offset: const Offset(0, 8),
   ),
 ];
 
