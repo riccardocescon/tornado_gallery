@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 part 'widgets/pro_header.dart';
 part 'widgets/pro_hero.dart';
 part 'widgets/pro_benefits.dart';
+part 'widgets/pro_launch_promo.dart';
 part 'widgets/pro_plans.dart';
 part 'widgets/pro_footer.dart';
 part 'widgets/pro_action_bar.dart';
@@ -35,9 +36,15 @@ class _ProPageState extends State<ProPage> {
   bool _busy = false;
   bool _welcoming = false;
 
+  /// The plan the user already owned when they opened the paywall (null when
+  /// free). A monthly subscriber is here to upgrade to lifetime.
+  ProPlan? _entryPlan;
+  bool get _isUpgrade => _entryPlan == ProPlan.monthly;
+
   @override
   void initState() {
     super.initState();
+    _entryPlan = context.read<PurchaseBloc>().plan;
     context.read<PurchaseBloc>().add(const PurchaseEvent.loadProducts());
   }
 
@@ -58,9 +65,11 @@ class _ProPageState extends State<ProPage> {
                   children: [
                     const _Header(),
                     const SizedBox(height: 20),
-                    const _Hero(),
+                    _Hero(isUpgrade: _isUpgrade),
                     const SizedBox(height: 22),
                     const _Benefits(),
+                    const SizedBox(height: 22),
+                    const _LaunchPromo(),
                     const SizedBox(height: 22),
                     _Plans(
                       products: _products,
@@ -71,13 +80,14 @@ class _ProPageState extends State<ProPage> {
                     const SizedBox(height: 4),
                     const _Reassurance(),
                     const SizedBox(height: 18),
-                    const _FooterLinks(),
+                    _FooterLinks(isUpgrade: _isUpgrade),
                   ],
                 ),
               ),
               _ActionBar(
                 product: _selectedProduct,
                 busy: _busy,
+                isUpgrade: _isUpgrade,
                 onBuy:
                     (product) => context.read<PurchaseBloc>().add(
                       PurchaseEvent.buy(product: product),
@@ -96,11 +106,18 @@ class _ProPageState extends State<ProPage> {
     state.maybeWhen(
       products:
           (products) => setState(() {
-            _products = products;
+            // A monthly subscriber already owns monthly — only lifetime is an
+            // upgrade, so don't offer them the plan they already have.
+            _products =
+                _isUpgrade
+                    ? products
+                        .where((p) => p.plan == ProPlan.lifetime)
+                        .toList()
+                    : products;
             _busy = false;
             // Never offer a plan the store didn't return.
-            if (_selectedProduct == null && products.isNotEmpty) {
-              _selected = products.last.plan;
+            if (_selectedProduct == null && _products.isNotEmpty) {
+              _selected = _products.last.plan;
             }
           }),
       loadingProducts: () => setState(() => _busy = true),
@@ -113,8 +130,15 @@ class _ProPageState extends State<ProPage> {
         }
       },
       entitlement: (entitlement) {
-        if (!entitlement.isPro || _welcoming) return;
-        // Bought or restored: celebrate, then get out of the way.
+        // Celebrate only when the plan advances past what we entered with, so a
+        // silent resume-restore (same plan) never pops a user mid-upgrade.
+        if (!entitlement.isPro ||
+            _welcoming ||
+            entitlement.plan == _entryPlan) {
+          return;
+        }
+        // Bought or upgraded: celebrate, then get out of the way.
+        final isUpgrade = _isUpgrade;
         setState(() {
           _busy = false;
           if (entitlement.plan != null) _selected = entitlement.plan!;
@@ -124,7 +148,13 @@ class _ProPageState extends State<ProPage> {
         final router = GoRouter.of(context);
         Future.delayed(const Duration(milliseconds: 1600), () {
           if (!mounted) return;
-          if (router.canPop()) router.pop();
+          // The lifetime unlock doesn't cancel the monthly subscription — nudge
+          // the user to cancel it so they aren't billed twice.
+          if (isUpgrade) {
+            _promptCancelMonthly(router);
+          } else if (router.canPop()) {
+            router.pop();
+          }
         });
       },
       failure: (message) {
@@ -133,5 +163,35 @@ class _ProPageState extends State<ProPage> {
       },
       orElse: () {},
     );
+  }
+
+  /// After a monthly → lifetime upgrade the subscription is still live (no store
+  /// auto-cancels it), so point the user at the store to cancel it.
+  Future<void> _promptCancelMonthly(GoRouter router) async {
+    await showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("You're Lifetime Pro now"),
+            content: const Text(
+              "Your monthly subscription is still active. Cancel it so you're "
+              "not billed again — your Lifetime unlock never expires.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Later"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  openManageSubscription();
+                },
+                child: const Text("Cancel subscription"),
+              ),
+            ],
+          ),
+    );
+    if (mounted && router.canPop()) router.pop();
   }
 }

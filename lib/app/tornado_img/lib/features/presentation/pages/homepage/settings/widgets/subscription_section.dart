@@ -25,29 +25,20 @@ class _SubscriptionSection extends StatelessWidget {
             ),
             if (!purchases.isPro)
               const ProUpgradeCard()
+            // A monthly subscriber gets a single gradient card: it tips them
+            // toward the lifetime unlock. Tapping it opens the paywall, which
+            // auto-filters to the Lifetime plan for a monthly subscriber.
+            else if (purchases.plan == ProPlan.monthly)
+              const ProUpgradeCard(
+                title: "Upgrade to Lifetime",
+                subtitle: "One payment, Pro forever",
+              )
+            // Lifetime: nothing to manage.
             else
-              ProStatusCard(
-                // Nothing to manage for a lifetime unlock.
-                onManage:
-                    purchases.plan == ProPlan.monthly
-                        ? _openManageSubscription
-                        : null,
-              ),
+              const ProStatusCard(),
           ],
         );
       },
-    );
-  }
-
-  /// The plugin exposes no manage-subscription API, so we deep-link the store.
-  Future<void> _openManageSubscription() {
-    return launchUrl(
-      Uri.parse(
-        Platform.isIOS
-            ? Constants.manageSubscriptionIos
-            : Constants.manageSubscriptionAndroid,
-      ),
-      mode: LaunchMode.externalApplication,
     );
   }
 }

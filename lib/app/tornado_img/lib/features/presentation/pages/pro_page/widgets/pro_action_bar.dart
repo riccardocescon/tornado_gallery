@@ -4,11 +4,13 @@ class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.product,
     required this.busy,
+    required this.isUpgrade,
     required this.onBuy,
   });
 
   final ProProduct? product;
   final bool busy;
+  final bool isUpgrade;
   final ValueChanged<ProProduct> onBuy;
 
   @override
@@ -81,6 +83,7 @@ class _ActionBar extends StatelessWidget {
   String _ctaLabel() {
     final product = this.product;
     if (product == null) return "Unavailable";
+    if (isUpgrade) return "Upgrade to Lifetime · ${product.price}";
     return switch (product.plan) {
       ProPlan.monthly => "Continue with Monthly · ${product.price}/month",
       ProPlan.lifetime => "Continue with Lifetime · ${product.price}",

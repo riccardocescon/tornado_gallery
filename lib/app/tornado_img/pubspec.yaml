@@ -1,6 +1,6 @@
 name: tornado_img_app
 description: "Tornado Image - A powerful Flutter app for image encryption"
-version: 1.0.7+8
+version: 1.0.7+10
 publish_to: 'none'
 
 environment:

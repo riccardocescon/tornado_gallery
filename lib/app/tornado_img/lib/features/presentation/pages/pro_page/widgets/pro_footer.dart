@@ -34,7 +34,11 @@ class _Reassurance extends StatelessWidget {
 }
 
 class _FooterLinks extends StatelessWidget {
-  const _FooterLinks();
+  const _FooterLinks({required this.isUpgrade});
+
+  /// A monthly subscriber has nothing to restore — they're here to upgrade —
+  /// so the third link manages their subscription instead.
+  final bool isUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +50,15 @@ class _FooterLinks extends StatelessWidget {
         _dot(context),
         _link(context, "Privacy Policy", () => _open(Constants.privacyUrl)),
         _dot(context),
-        _link(
-          context,
-          "Restore purchases",
-          () => context.read<PurchaseBloc>().add(const PurchaseEvent.restore()),
-        ),
+        if (isUpgrade)
+          _link(context, "Manage subscription", openManageSubscription)
+        else
+          _link(
+            context,
+            "Restore purchases",
+            () =>
+                context.read<PurchaseBloc>().add(const PurchaseEvent.restore()),
+          ),
       ],
     );
   }

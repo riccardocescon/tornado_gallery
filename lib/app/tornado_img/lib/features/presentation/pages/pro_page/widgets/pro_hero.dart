@@ -1,7 +1,9 @@
 part of '../pro_page.dart';
 
 class _Hero extends StatelessWidget {
-  const _Hero();
+  const _Hero({required this.isUpgrade});
+
+  final bool isUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,9 @@ class _Hero extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 280),
           child: Text(
-            "Go Pro and remove every limit in Tornado Gallery.",
+            isUpgrade
+                ? "Upgrade to Lifetime and pay once — Pro forever."
+                : "Go Pro and remove every limit in Tornado Gallery.",
             textAlign: TextAlign.center,
             style: context.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w600,
