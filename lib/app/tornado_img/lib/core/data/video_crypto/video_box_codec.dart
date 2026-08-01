@@ -234,7 +234,10 @@ Future<ParsedVideoBox?> _readPayload(
   final view = ByteData.sublistView(fixed);
   var o = 0;
 
-  if (view.getUint32(o) != Constants.videoBoxMagic) return null;
+  if (view.getUint32(o) != Constants.videoBoxMagic) {
+    appLogger.log('findVideoBox: bad payload magic', LogLayer.repository);
+    return null;
+  }
   o += 4;
   final version = view.getUint8(o);
   o += 1;
@@ -256,11 +259,17 @@ Future<ParsedVideoBox?> _readPayload(
   o += VideoBoxHeader.kcvLength;
   final chunkSize = view.getUint32(o);
   o += 4;
-  if (chunkSize == 0) return null;
+  if (chunkSize == 0) {
+    appLogger.log('findVideoBox: chunkSize is zero', LogLayer.repository);
+    return null;
+  }
   final originalSize = view.getUint64(o);
   o += 8;
   final extLen = view.getUint8(o);
-  if (extLen == 0) return null;
+  if (extLen == 0) {
+    appLogger.log('findVideoBox: extLen is zero', LogLayer.repository);
+    return null;
+  }
 
   final extBytes = await raf.read(extLen);
   if (extBytes.length < extLen) return null;
