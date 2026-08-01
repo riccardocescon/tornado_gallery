@@ -146,8 +146,11 @@ class GalleryPathProvider {
         return null;
       }
 
+      // `common` (image + video), not `image`: gallery-visible encrypted videos
+      // live in the same album and an image-only query hides them from every
+      // read, delete and asset-id lookup built on this method.
       final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
+        type: RequestType.common,
         hasAll: true,
       );
 
@@ -162,7 +165,7 @@ class GalleryPathProvider {
     }
   }
 
-  /// Returns all image assets from the app's public album.
+  /// Returns all media assets (images and videos) from the app's public album.
   static Future<List<AssetEntity>> getPublicAssets({
     bool requestIfNeeded = true,
   }) async {
@@ -174,9 +177,7 @@ class GalleryPathProvider {
       // PhotoKit returns multiple references to the same asset
       // (e.g., TornadoGallery + Recents). Deduplicate by ID.
       final seen = <String>{};
-      return assets
-          .where((e) => e.type == AssetType.image && seen.add(e.id))
-          .toList();
+      return assets.where((e) => seen.add(e.id)).toList();
     } catch (e) {
       appLogger.log(
         'GalleryPathProvider: error reading assets',
@@ -204,7 +205,7 @@ class GalleryPathProvider {
       }
 
       final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
+        type: RequestType.common,
         hasAll: true,
       );
       final existing = albums.firstWhereOrNull((e) => e.name == albumName);
@@ -237,7 +238,7 @@ class GalleryPathProvider {
       }
 
       final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
+        type: RequestType.common,
         hasAll: true,
       );
       return albums

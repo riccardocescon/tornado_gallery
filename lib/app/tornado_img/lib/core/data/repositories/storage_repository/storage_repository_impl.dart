@@ -41,10 +41,12 @@ class StorageRepositoryImpl implements StorageRepository {
   }) async {
     try {
       if (path == null) {
-        // Public gallery save.
+        // Public gallery save. Resolve the album here rather than trusting the
+        // caller: an empty name means `Pictures/` loose on Android and a
+        // non-creatable album on iOS, and callers do omit it.
         await _publicDatasource.save(
           fileName: fileName,
-          album: album ?? '',
+          album: GalleryPathProvider.getPublicAlbumName(album),
           bytes: bytes,
         );
         return;

@@ -113,15 +113,29 @@ poster frame, followed by two top-level `uuid` boxes players ignore —
 with a per-video salt mixed into the passphrase). Layout and parsing live in
 `core/data/video_crypto/video_box_codec.dart`.
 
-- **Never read an encrypted video whole.** Folder scans go through
+- **Never read an encrypted video whole.** Every scan goes through
   `readMediaPreviewBytes()`, which reads only the poster box; the ciphertext is
-  up to 2 GB. Same reason `GalleryBloc`'s image-decrypt path skips videos.
+  up to 2 GB. That includes `AssetMapper.fromAsset` (the PhotoKit/MediaStore
+  path), not just the filesystem walks. Same reason `GalleryBloc`'s
+  image-decrypt path skips videos.
+- **The public gallery is not images-only.** Album and asset queries use
+  `RequestType.common`; an `image`-only filter silently hides gallery-visible
+  videos from reads, deletes and asset-id lookups.
 - **Playback** decrypts to a temp file under `systemTemp/tornado_video`
   (`VideoPlayerPage` deletes it on dispose and sweeps the dir before each run).
   On-the-fly range decryption is a deliberate phase-2.
 - **Sharing:** file/document only. Platforms that re-encode (WhatsApp "video",
   socials) strip the boxes and the ciphertext is lost.
-- v1 saves encrypted videos to **private storage only**.
+- **Gallery visibility is Android-only.** With the toggle on, the encrypted video
+  is built in `systemTemp/tornado_video_enc`, handed to `Gal.putVideo` and the
+  temp copy deleted — it lands in `Pictures/TornadoGallery[/<sub>]` because gal
+  uses `DIRECTORY_PICTURES` whenever an album is given, so the app's own public
+  scan and playback (real path) still find it. **iOS stays private**: its public
+  paths are virtual, which `DecryptVideoUseCase` can't open, and it is unverified
+  whether PhotoKit preserves the custom `uuid` boxes when re-importing an mp4 —
+  if it re-encodes, the ciphertext is gone. The gate is the single
+  `Platform.isAndroid` in `GalleryBloc`; `EncryptVideoUseCase` itself just
+  publishes whenever `publicRelativeAlbum != null`.
 - The **Pro gate is not wired** — merge points are marked `TODO(monetization)`
   in `encryption_page_bloc.dart` (batch) and `gallery_bloc.dart` (per-asset
   dispatch, the one that matters).

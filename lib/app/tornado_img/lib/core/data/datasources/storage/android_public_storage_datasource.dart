@@ -180,8 +180,10 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
         return r;
       }
 
+      // `common`, not `image`: an image-only query would leave the folder's
+      // encrypted videos behind on delete.
       final albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
+        type: RequestType.common,
       );
 
       const pageSize = 500;

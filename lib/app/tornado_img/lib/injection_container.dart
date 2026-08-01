@@ -93,7 +93,7 @@ void setupInjectionContainer() {
     () => CosmeticMp4Builder(imageRepo: getIt()),
   );
   getIt.registerLazySingleton<EncryptVideoUseCase>(
-    () => EncryptVideoUseCase(cosmeticBuilder: getIt()),
+    () => EncryptVideoUseCase(cosmeticBuilder: getIt(), storageRepo: getIt()),
   );
   getIt.registerLazySingleton<DecryptVideoUseCase>(
     () => DecryptVideoUseCase(),

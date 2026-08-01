@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tornado_img_app/core/data/video_crypto/cosmetic_mp4_builder.dart';
+import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_video_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_video_usecase.dart';
 
@@ -13,6 +14,10 @@ import 'package:tornado_img_app/core/domain/usecases/encrypt_video_usecase.dart'
 const String _dllPath = '../../cpp/build/tornado_crypto.dll';
 
 class _MockCosmeticMp4Builder extends Mock implements CosmeticMp4Builder {}
+
+/// Unused by this suite's private-storage path — the encryption step here never
+/// publishes — but [EncryptVideoUseCase] requires it.
+class _MockStorageRepository extends Mock implements StorageRepository {}
 
 /// A minimal but structurally valid mp4 (`ftyp` box then `mdat` box), so
 /// `findVideoBox`'s box walk can skip over it to reach the `uuid` box —
@@ -106,7 +111,10 @@ void main() {
       final src = File('${tmp.path}/source.mp4');
       await src.writeAsBytes(original);
 
-      final encryptUseCase = EncryptVideoUseCase(cosmeticBuilder: mockBuilder);
+      final encryptUseCase = EncryptVideoUseCase(
+        cosmeticBuilder: mockBuilder,
+        storageRepo: _MockStorageRepository(),
+      );
       final encryptResult = await encryptUseCase.call(
         EncryptVideoParams(
           file: src,

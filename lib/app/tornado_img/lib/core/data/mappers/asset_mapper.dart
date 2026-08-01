@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:photo_manager/photo_manager.dart';
+import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -24,7 +25,12 @@ class AssetMapper {
       final file = await asset.file;
       if (file == null) return null;
 
-      final bytes = await file.readAsBytes();
+      // Never `readAsBytes()` here: a gallery-visible encrypted video is mostly
+      // ciphertext and can run to gigabytes. This reads the poster box for
+      // videos and the whole file only for images — same helper the private and
+      // Android-subfolder scans use.
+      final bytes = await readMediaPreviewBytes(file);
+      if (bytes == null) return null;
       final hash = ByteModeling.generateHash(bytes);
       final filePath =
           '$folderPath${Platform.pathSeparator}${FileNameUtils.basename(file.path)}';

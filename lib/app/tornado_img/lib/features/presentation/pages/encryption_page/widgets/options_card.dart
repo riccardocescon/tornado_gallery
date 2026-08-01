@@ -5,6 +5,12 @@ class _OptionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // v1 saves gallery-visible videos to the public album on Android only, so
+    // say so rather than letting the toggle promise something it won't do.
+    final iosVideoCaveat =
+        Platform.isIOS &&
+        context.read<EncryptionPageBloc>().images.any((image) => image.isVideo);
+
     return Column(
       children: [
         Row(
@@ -28,7 +34,9 @@ class _OptionsCard extends StatelessWidget {
                 icon: Icons.remove_red_eye_outlined,
                 title: "Gallery visibility",
                 subtitle:
-                    "Allow encrypted images to be saved in public gallery",
+                    iosVideoCaveat
+                        ? "Allow encrypted images to be saved in public gallery. On iOS videos are always saved privately."
+                        : "Allow encrypted images to be saved in public gallery",
                 trailing: _SettingToggle(
                   selector: (settings) => settings.galleryVisible,
                   event: const EncryptionPageEvent.toggleGalleryVisibility(),

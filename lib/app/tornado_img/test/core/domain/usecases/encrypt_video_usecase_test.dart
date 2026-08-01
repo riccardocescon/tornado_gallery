@@ -8,6 +8,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tornado_img_app/core/data/video_crypto/cosmetic_mp4_builder.dart';
 import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/data/video_crypto/video_cipher.dart';
+import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_video_usecase.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 
@@ -17,6 +18,8 @@ import 'package:tornado_img_app/core/utils/constants.dart';
 const String _dllPath = '../../cpp/build/tornado_crypto.dll';
 
 class _MockCosmeticMp4Builder extends Mock implements CosmeticMp4Builder {}
+
+class _MockStorageRepository extends Mock implements StorageRepository {}
 
 class _FakePathProviderPlatform extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
@@ -57,6 +60,7 @@ void main() {
 
   late Directory tmp;
   late _MockCosmeticMp4Builder mockBuilder;
+  late _MockStorageRepository mockStorageRepo;
   late EncryptVideoUseCase useCase;
   final tCosmetic = _fakeMp4();
   final tPoster = Uint8List.fromList(List.generate(64, (i) => (i * 7) & 0xFF));
@@ -69,7 +73,11 @@ void main() {
     tmp = await Directory.systemTemp.createTemp('encrypt_video_usecase_test');
     PathProviderPlatform.instance = _FakePathProviderPlatform(tmp.path);
     mockBuilder = _MockCosmeticMp4Builder();
-    useCase = EncryptVideoUseCase(cosmeticBuilder: mockBuilder);
+    mockStorageRepo = _MockStorageRepository();
+    useCase = EncryptVideoUseCase(
+      cosmeticBuilder: mockBuilder,
+      storageRepo: mockStorageRepo,
+    );
     when(
       () => mockBuilder.build(
         posterBytes: any(named: 'posterBytes'),
@@ -251,6 +259,51 @@ void main() {
         expect(
           encryptedImage.storagePath.path.replaceAll('\\', '/'),
           contains('/encrypted/'),
+        );
+      });
+    }, skip: skip, tags: ['native']);
+
+    test('hands the file to the gallery when publicRelativeAlbum is set', () async {
+      when(
+        () => mockStorageRepo.saveVideo(
+          filePath: any(named: 'filePath'),
+          album: any(named: 'album'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final src = await writeSource('source3.mp4', [1, 2, 3, 4, 5]);
+
+      final result = await useCase.call(
+        EncryptVideoParams(
+          file: src,
+          password: 'video-pw',
+          fileId: 'vid6',
+          posterBytes: Uint8List(0),
+          // '' = root album, and the discriminator is `!= null`, so this must
+          // still take the public branch.
+          publicRelativeAlbum: '',
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+
+      final captured =
+          verify(
+            () => mockStorageRepo.saveVideo(
+              filePath: captureAny(named: 'filePath'),
+              album: captureAny(named: 'album'),
+            ),
+          ).captured;
+      expect(captured[1], Constants.appFolderName);
+      // The temp copy must not outlive the hand-off to the platform.
+      expect(await File(captured[0] as String).exists(), isFalse);
+
+      result.fold((_) => fail('Expected Right'), (encryptedImage) {
+        expect(encryptedImage.storagePath.isPrivateFolder, isFalse);
+        // No real public dir on the test host, so the album name stands in.
+        expect(
+          encryptedImage.storagePath.path,
+          '${Constants.appFolderName}/vid6.mp4',
         );
       });
     }, skip: skip, tags: ['native']);
