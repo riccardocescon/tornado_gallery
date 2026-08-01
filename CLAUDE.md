@@ -121,9 +121,16 @@ with a per-video salt mixed into the passphrase). Layout and parsing live in
 - **The public gallery is not images-only.** Album and asset queries use
   `RequestType.common`; an `image`-only filter silently hides gallery-visible
   videos from reads, deletes and asset-id lookups.
-- **Playback** decrypts to a temp file under `systemTemp/tornado_video`
-  (`VideoPlayerPage` deletes it on dispose and sweeps the dir before each run).
+- **Playback** decrypts to a temp file under `systemTemp/tornado_video`.
   On-the-fly range decryption is a deliberate phase-2.
+- **Decrypted videos stay unlocked across navigation**, the counterpart of an
+  image keeping `decryptInfo` in `AppBloc`: `DecryptedVideoCache`
+  (`core/managers/`, app-lifetime singleton) owns the temp file and the last
+  playback position, keyed by the *encrypted* file's path — so a rename must
+  `rekey()`. `VideoPlayerPage` no longer deletes plaintext on dispose; it dies
+  on Restore, on the archive's re-encrypt-all, or at the next session's
+  `sweepOnce()` (which runs **once**, before the first decrypt — a repeat sweep
+  would wipe live entries).
 - **Sharing:** file/document only. Platforms that re-encode (WhatsApp "video",
   socials) strip the boxes and the ciphertext is lost.
 - **Gallery visibility is Android-only.** With the toggle on, the encrypted video

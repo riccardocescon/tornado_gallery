@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/domain/usecases/create_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/delete_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/gallery_reader_usecase.dart';
@@ -94,6 +95,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   final AppBloc appBloc;
   final DecryptJobManager decryptJobManager;
 
+  /// Plaintext of decrypted videos; re-locking a folder must clear it.
+  final DecryptedVideoCache videoCache;
+
   /// Live subscription to background decrypt progress; re-emits the view on tick.
   StreamSubscription<void>? _decryptSub;
 
@@ -106,6 +110,7 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
   ArchivePageBloc({
     required this.appBloc,
     required this.decryptJobManager,
+    required this.videoCache,
     required this.galleryReaderUseCase,
     required this.imageDeleterUseCase,
     required this.imageSaverUseCase,
@@ -283,6 +288,9 @@ class ArchivePageBloc extends Bloc<ArchivePageEvent, ArchivePageState> {
             decryptedInfo: null,
           ),
         );
+        // Videos hold their plaintext on disk, not in decryptInfo — re-locking
+        // has to drop that too.
+        unawaited(videoCache.evict(image.storagePath.path));
       }
       _emit(emit);
     });

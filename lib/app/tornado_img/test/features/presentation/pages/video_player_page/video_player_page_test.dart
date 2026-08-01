@@ -13,6 +13,7 @@ import 'package:tornado_img_app/core/domain/usecases/decrypt_video_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/video_saver_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/features/presentation/pages/video_player_page/video_player_page.dart';
 import 'package:tornado_img_app/features/presentation/widgets/rename_bottom_sheet.dart';
@@ -35,6 +36,7 @@ void main() {
   late _MockVideoSaverUseCase saveUseCase;
   late _MockImageRenamerUseCase renameUseCase;
   late AppBloc appBloc;
+  late DecryptedVideoCache videoCache;
 
   final videoPath = '${Directory.systemTemp.path}/clip.mp4';
 
@@ -51,6 +53,7 @@ void main() {
     saveUseCase = _MockVideoSaverUseCase();
     renameUseCase = _MockImageRenamerUseCase();
     appBloc = AppBloc();
+    videoCache = DecryptedVideoCache();
 
     // The shared RenameBottomSheet validates the new name against AppBloc's
     // in-memory list, which it resolves from get_it.
@@ -89,6 +92,7 @@ void main() {
             decryptUseCase: decryptUseCase,
             saveUseCase: saveUseCase,
             renameUseCase: renameUseCase,
+            videoCache: videoCache,
           ),
         ),
       ),
@@ -170,6 +174,17 @@ void main() {
     appBloc.add(AppEvent.addEncryptedImage(image: videoImage()));
     await tester.pumpAndSettle();
 
+    // Stand in for a cached plaintext: the rename must carry the entry over to
+    // the new path, or the next visit re-asks for the password.
+    // Sync I/O: inside `testWidgets` the fake-async zone never completes real
+    // async file operations.
+    final plaintext = File('${Directory.systemTemp.path}/clip-plain.mp4');
+    plaintext.writeAsBytesSync(<int>[0]);
+    addTearDown(() {
+      if (plaintext.existsSync()) plaintext.deleteSync();
+    });
+    videoCache.put(videoPath, plaintext);
+
     await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -190,5 +205,10 @@ void main() {
     expect(params.newFileName, 'holiday.mp4');
     expect(find.text('Video renamed successfully'), findsOneWidget);
     expect(appBloc.encryptedImages.single.name, 'holiday.mp4');
+    expect(videoCache.entry(videoPath), isNull);
+    expect(
+      videoCache.entry('${Directory.systemTemp.path}/holiday.mp4'),
+      isNotNull,
+    );
   });
 }

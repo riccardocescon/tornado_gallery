@@ -25,6 +25,7 @@ import 'package:tornado_img_app/core/data/repositories/app_repository/app_reposi
 import 'package:tornado_img_app/core/domain/repositories/app_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/app_folder_streamer_usecase.dart';
 import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/features/presentation/bloc/archive_page_bloc/archive_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encryption_page_bloc/encryption_page_bloc.dart';
@@ -58,6 +59,7 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton(
     () => DecryptJobManager(decryptUseCase: getIt(), appBloc: getIt()),
   );
+  getIt.registerLazySingleton(() => DecryptedVideoCache());
   getIt.registerFactory(
     () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
   );
@@ -65,6 +67,7 @@ void setupInjectionContainer() {
     () => ArchivePageBloc(
       appBloc: getIt(),
       decryptJobManager: getIt(),
+      videoCache: getIt(),
       galleryReaderUseCase: getIt(),
       imageDeleterUseCase: getIt(),
       imageSaverUseCase: getIt(),

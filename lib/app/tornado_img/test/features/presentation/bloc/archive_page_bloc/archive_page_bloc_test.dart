@@ -13,6 +13,7 @@ import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/managers/decrypt_job_manager.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/domain/entities/gallery_stream_image.dart';
@@ -121,6 +122,8 @@ void main() {
   ArchivePageBloc makeBloc() => ArchivePageBloc(
     appBloc: mockAppBloc,
     decryptJobManager: mockDecryptJobManager,
+    // Real one: with no entries every call is an early return, no I/O.
+    videoCache: DecryptedVideoCache(),
     galleryReaderUseCase: mockGalleryReader,
     imageDeleterUseCase: mockImageDeleter,
     imageSaverUseCase: mockImageSaver,

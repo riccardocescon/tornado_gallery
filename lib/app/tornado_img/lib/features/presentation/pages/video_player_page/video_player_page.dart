@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,10 +9,12 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/domain/usecases/decrypt_video_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/video_saver_usecase.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/pages/fullscreen_video_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
 import 'package:tornado_img_app/features/presentation/widgets/page_background.dart';
@@ -28,12 +31,15 @@ part 'widgets/actions.dart';
 /// preview, title row, Info card (decrypt / restore + password + file info),
 /// Actions card (save, rename).
 ///
-/// Decryption writes the plaintext to a temp file, plays it, and deletes it on
-/// the way out.
+/// Decryption writes the plaintext to a temp file and plays it. The file and the
+/// playback position are handed to [DecryptedVideoCache], so leaving and
+/// re-entering the page resumes where it left off — the video counterpart of an
+/// image keeping its `decryptInfo` in [AppBloc]. Only Restore (or a folder
+/// re-encrypt) drops the plaintext.
 ///
-/// ponytail: no bloc. The only state that outlives a frame is the player
-/// controller, which is widget-lifecycle bound anyway; add one if this page
-/// ever needs more than the [AppBloc] nudge the rename already does.
+/// ponytail: no bloc. The state that outlives the page lives in the cache
+/// singleton; add one if this page ever needs more than the [AppBloc] nudge the
+/// rename already does.
 class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({
     super.key,
@@ -41,6 +47,7 @@ class VideoPlayerPage extends StatefulWidget {
     this.decryptUseCase,
     this.saveUseCase,
     this.renameUseCase,
+    this.videoCache,
   });
 
   final EncryptedImage image;
@@ -49,6 +56,7 @@ class VideoPlayerPage extends StatefulWidget {
   final DecryptVideoUseCase? decryptUseCase;
   final VideoSaverUseCase? saveUseCase;
   final ImageRenamerUseCase? renameUseCase;
+  final DecryptedVideoCache? videoCache;
 
   @override
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
@@ -58,6 +66,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late final DecryptVideoUseCase _decryptUseCase;
   late final VideoSaverUseCase _saveUseCase;
   late final ImageRenamerUseCase _renameUseCase;
+  late final DecryptedVideoCache _videoCache;
 
   /// Mutable: renaming changes the file this page points at.
   late EncryptedImage _image;
@@ -77,25 +86,70 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _decryptUseCase = widget.decryptUseCase ?? getIt<DecryptVideoUseCase>();
     _saveUseCase = widget.saveUseCase ?? getIt<VideoSaverUseCase>();
     _renameUseCase = widget.renameUseCase ?? getIt<ImageRenamerUseCase>();
-  }
+    _videoCache = widget.videoCache ?? getIt<DecryptedVideoCache>();
 
-  /// Clears plaintext a previous crash left behind, right before writing new
-  /// plaintext into the same directory.
-  ///
-  /// ponytail: whole-directory sweep, fine while only one player can be open;
-  /// move to per-file lifecycle if that ever stops being true.
-  Future<void> _sweepTempDir() async {
-    final dir = Directory('${Directory.systemTemp.path}/tornado_video');
-    if (await dir.exists()) await dir.delete(recursive: true);
+    // Already decrypted in an earlier visit: re-attach instead of asking for the
+    // password again.
+    final cached = _videoCache.entry(_image.storagePath.path);
+    if (cached != null) {
+      _decrypting = true;
+      unawaited(_attachController(cached.file, at: cached.position));
+    }
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
-    // Plaintext must not outlive the page (see the plan's v1 decision to
-    // decrypt to disk rather than stream on the fly).
-    _tempFile?.delete().ignore();
+    final controller = _controller;
+    if (controller != null) {
+      // Hand the position back so the next visit resumes here.
+      _videoCache.savePosition(
+        _image.storagePath.path,
+        controller.value.position,
+      );
+      controller.dispose();
+    }
+    // The plaintext deliberately outlives the page — the cache owns it now.
     super.dispose();
+  }
+
+  /// Opens [file] in a player at [at] and flips the page to its unlocked state.
+  /// Shared by the fresh-decrypt and the cache-hit paths.
+  Future<void> _attachController(
+    File file, {
+    Duration at = Duration.zero,
+  }) async {
+    final controller = VideoPlayerController.file(file);
+    try {
+      await controller.initialize();
+    } catch (e) {
+      // Truncated or otherwise unplayable temp file: drop it and fall back to
+      // the password prompt rather than spinning forever.
+      await controller.dispose();
+      await _videoCache.evict(_image.storagePath.path);
+      if (!mounted) return;
+      setState(() {
+        _decrypting = false;
+        _error = 'Unable to play this video';
+      });
+      appLogger.log('Video playback init failed', LogLayer.ui, error: '$e');
+      return;
+    }
+    if (!mounted) {
+      await controller.dispose();
+      return;
+    }
+    if (at > Duration.zero) await controller.seekTo(at);
+    await controller.setLooping(true);
+    await controller.play();
+    if (!mounted) {
+      await controller.dispose();
+      return;
+    }
+    setState(() {
+      _decrypting = false;
+      _tempFile = file;
+      _controller = controller;
+    });
   }
 
   Future<void> _decryptAndPlay() async {
@@ -109,7 +163,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       _error = null;
     });
 
-    await _sweepTempDir();
+    await _videoCache.sweepOnce();
 
     final result = await _decryptUseCase.call(
       DecryptVideoParams(
@@ -128,20 +182,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         });
       },
       (file) async {
-        final controller = VideoPlayerController.file(file);
-        await controller.initialize();
-        if (!mounted) {
-          await controller.dispose();
-          await file.delete();
-          return;
-        }
-        await controller.setLooping(true);
-        await controller.play();
-        setState(() {
-          _decrypting = false;
-          _tempFile = file;
-          _controller = controller;
-        });
+        _videoCache.put(_image.storagePath.path, file);
+        await _attachController(file);
       },
     );
   }
@@ -149,14 +191,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   /// Drops the player and the plaintext temp file — back to the poster.
   void _restore() {
     final controller = _controller;
-    final tempFile = _tempFile;
     setState(() {
       _controller = null;
       _tempFile = null;
       _error = null;
     });
     controller?.dispose();
-    tempFile?.delete().ignore();
+    _videoCache.evict(_image.storagePath.path).ignore();
   }
 
   /// Saves the plaintext temp file when unlocked, the encrypted mp4 otherwise —
@@ -225,6 +266,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             oldIdentifier: oldIdentifier,
           ),
         );
+        // The cache is keyed by the encrypted file's path — follow the rename.
+        _videoCache.rekey(_image.storagePath.path, updated.storagePath.path);
         setState(() => _image = updated);
         messenger.showSnackBar(
           const SnackBar(content: Text('Video renamed successfully')),
