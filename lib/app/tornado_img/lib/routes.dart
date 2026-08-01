@@ -12,6 +12,7 @@ import 'package:tornado_img_app/features/presentation/pages/encrypted_image_page
 import 'package:tornado_img_app/features/presentation/pages/encryption_page/encryption_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/archive/archive_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/shell_homepage.dart';
+import 'package:tornado_img_app/features/presentation/pages/video_player_page/video_player_page.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
 GoRouter routes = GoRouter(
@@ -85,6 +86,13 @@ GoRouter routes = GoRouter(
                       ),
               child: EncryptedImagePage(),
             );
+          },
+        ),
+        GoRoute(
+          path: r.Routes.videoPlayerPath,
+          name: r.Routes.videoPlayer,
+          builder: (context, state) {
+            return VideoPlayerPage(image: state.extra as EncryptedImage);
           },
         ),
       ],

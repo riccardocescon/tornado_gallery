@@ -12,6 +12,7 @@ class Routes {
   static const String encryption = 'encryption';
   static const String archive = 'archive';
   static const String encryptedImagePage = 'encrypted_image_page';
+  static const String videoPlayer = 'video_player';
 
   // ── Route paths (use in GoRoute path: definitions) ────────────────────────
   static const String homePath = '/';
@@ -19,4 +20,5 @@ class Routes {
   static const String encryptionPath = 'encryption';
   static const String archivePath = 'archive';
   static const String encryptedImagePagePath = 'encrypted_image_page';
+  static const String videoPlayerPath = 'video_player';
 }

@@ -74,7 +74,12 @@ class _ArchivedTileState extends State<_ArchivedTile> {
         } else {
           child = FilledButton(
             onPressed: () {
-              context.pushNamed(Routes.encryptedImagePage, extra: widget.image);
+              context.pushNamed(
+                widget.image.isVideo
+                    ? Routes.videoPlayer
+                    : Routes.encryptedImagePage,
+                extra: widget.image,
+              );
             },
             onLongPress: widget.onActivateSelection,
             style: FilledButton.styleFrom(
@@ -167,6 +172,32 @@ class _ArchivedTileState extends State<_ArchivedTile> {
     final bytes =
         widget.image.decryptInfo?.bytes ?? widget.image.encryptedInfo.bytes;
     final isDecrypted = widget.image.decryptInfo != null;
+
+    // A video's preview bytes are already the scrambled poster frame (see
+    // the poster box in video_box_codec.dart), so it needs no zoom — only the
+    // play hint that tells it apart from a still.
+    if (widget.image.isVideo) {
+      return ClipRRect(
+        borderRadius: AppStyle.detailsBorderRadius,
+        child: SizedBox(
+          width: 56,
+          height: 80,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.memory(bytes, fit: BoxFit.cover),
+              Center(
+                child: Icon(
+                  Icons.play_circle_fill_rounded,
+                  size: 24,
+                  color: context.appColors.onAccent,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return ClipRRect(
       borderRadius: AppStyle.detailsBorderRadius,
