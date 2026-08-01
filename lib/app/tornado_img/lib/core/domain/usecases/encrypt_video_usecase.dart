@@ -51,21 +51,27 @@ class EncryptVideoUseCase
 
       try {
         final salt = _randomSalt();
+
+        // Write the cosmetic bytes first so the file on disk is real from
+        // this point on — if anything below throws (including a malformed
+        // header caught synchronously by buildVideoBoxPrefix), the catch
+        // block below has a genuine partial file to clean up.
+        await outputFile.writeAsBytes(cosmetic, flush: true);
+
         final header = VideoBoxHeader(
           salt: salt,
           kcv: videoKeyCheckValue(params.password, salt),
           originalSize: originalSize,
           originalExt: FileNameUtils.extensionOf(params.file.path),
         );
+        final prefix = buildVideoBoxPrefix(header);
 
-        // Cosmetic bytes and the box prefix are small (a few KB); write them
-        // in one shot, then stream the (possibly multi-GB) ciphertext
-        // straight from source to destination in bounded memory.
-        await outputFile.writeAsBytes(
-          cosmetic + buildVideoBoxPrefix(header),
-          flush: true,
-        );
+        final raf = await outputFile.open(mode: FileMode.writeOnlyAppend);
+        await raf.writeFrom(prefix);
+        await raf.close();
 
+        // Stream the (possibly multi-GB) ciphertext straight from source to
+        // destination in bounded memory.
         await processVideoPayload(
           srcPath: params.file.path,
           srcOffset: 0,

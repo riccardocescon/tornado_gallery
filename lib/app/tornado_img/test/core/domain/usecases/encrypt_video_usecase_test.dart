@@ -143,6 +143,32 @@ void main() {
         expect(await File('${tmp.path}/vid2.mp4').exists(), isFalse);
       },
     );
+
+    test(
+      'deletes the partial output file when buildVideoBoxPrefix rejects the '
+      'header synchronously (no DLL involved)',
+      () async {
+        // A non-ASCII extension makes buildVideoBoxPrefix throw ArgumentError
+        // *after* the use case has already written the cosmetic bytes to
+        // outputFile (see the two-step write in encrypt_video_usecase.dart) —
+        // exactly the window the catch/delete branch exists to clean up.
+        // Pure synchronous Dart validation: no native cipher call is reached.
+        final src = await writeSource('badext.mp4é', [1, 2, 3, 4]);
+
+        final result = await useCase.call(
+          EncryptVideoParams(
+            file: src,
+            password: 'secret',
+            fileId: 'vid5',
+            posterBytes: Uint8List(0),
+            destinationPath: tmp.path,
+          ),
+        );
+
+        expect(result.isLeft(), isTrue);
+        expect(await File('${tmp.path}/vid5.mp4').exists(), isFalse);
+      },
+    );
   });
 
   group('EncryptVideoUseCase.call — full pipeline', () {
