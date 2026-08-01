@@ -141,7 +141,7 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
 
   Future<EncryptedImage?> _fileToPublicImage(File file) async {
     final ext = FileNameUtils.extensionOf(file.path);
-    if (!Constants.imageExtensions.contains(ext)) return null;
+    if (!Constants.mediaExtensions.contains(ext)) return null;
 
     try {
       final bytes = await file.readAsBytes();

@@ -16,8 +16,8 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 class PrivateStorageDatasource {
   // ── Read ────────────────────────────────────────────────────────────────────
 
-  /// Recursively yields every supported image file under [dir] as an
-  /// [EncryptedImage]. Skips files with unsupported extensions silently.
+  /// Recursively yields every supported image or video file under [dir] as
+  /// an [EncryptedImage]. Skips files with unsupported extensions silently.
   Stream<EncryptedImage> readAllImages(Directory dir) async* {
     await for (final entity in dir.list(recursive: true, followLinks: false)) {
       if (entity is! File) continue;
@@ -203,7 +203,7 @@ class PrivateStorageDatasource {
 
   Future<EncryptedImage?> _fileToImage(File file) async {
     final ext = FileNameUtils.extensionOf(file.path);
-    if (!Constants.imageExtensions.contains(ext)) {
+    if (!Constants.mediaExtensions.contains(ext)) {
       appLogger.log(
         'PrivateStorageDatasource: unsupported file skipped: ${file.path}',
         LogLayer.repository,

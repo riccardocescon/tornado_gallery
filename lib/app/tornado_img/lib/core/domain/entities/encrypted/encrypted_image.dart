@@ -13,6 +13,9 @@ class EncryptedImage with EquatableMixin {
 
   bool get isDecrypted => decryptInfo != null;
 
+  bool get isVideo => Constants.videoExtensions
+      .contains(FileNameUtils.extensionOf(storagePath.path).toLowerCase());
+
   EncryptedImage({
     required this.storagePath,
     required this.date,
@@ -51,7 +54,7 @@ class EncryptedImage with EquatableMixin {
     final raw = FileNameUtils.basename(storagePath.file.path);
     // Normalize double extension e.g. "188.png.png" -> "188.png"
     final lower = raw.toLowerCase();
-    for (final ext in Constants.imageExtensions.map((e) => '.$e')) {
+    for (final ext in Constants.mediaExtensions.map((e) => '.$e')) {
       if (lower.endsWith('$ext$ext')) {
         return raw.substring(0, raw.length - ext.length);
       }

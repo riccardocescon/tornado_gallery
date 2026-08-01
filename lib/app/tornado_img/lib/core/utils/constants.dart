@@ -13,6 +13,13 @@ class Constants {
   /// the picker and to restore the right extension on decryption.
   static const Set<String> videoExtensions = {'mp4', 'mov'};
 
+  /// Union of [imageExtensions] and [videoExtensions] — every extension a
+  /// folder scan should recognize as "ours", regardless of media type.
+  static const Set<String> mediaExtensions = {
+    ...imageExtensions,
+    ...videoExtensions,
+  };
+
   /// Largest video accepted for encryption.
   ///
   /// The encrypted file lives in the app sandbox and is duplicated in cache
