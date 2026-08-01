@@ -1,20 +1,29 @@
+@Tags(['native'])
+library;
+
+// These tests exercise our wrapper's own conventions — which 16 bytes are the
+// KCV plaintext, and which stream offset the payload starts at — not the
+// cipher itself. The cipher (processVideoFile/processVideoBlock) has its own
+// coverage in tornado_img_crypto's video_crypto_test.dart. Requires the real
+// native DLL, hence the tag and the existsSync guard below.
+
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tornado_img_app/core/data/video_crypto/video_cipher.dart';
+import 'package:tornado_img_crypto/tornado_img_crypto.dart';
 
-/// XORs each byte against the repeating phrase, byte-for-byte. Symmetric,
-/// deterministic, and cheap — lets the streaming/chunking logic be tested
-/// without the native DLL.
-Future<Uint8List> _fakeXor(Uint8List input, String phrase) async {
-  final key = phrase.codeUnits;
-  return Uint8List.fromList([
-    for (var i = 0; i < input.length; i++) input[i] ^ key[i % key.length],
-  ]);
-}
+// The DLL lives at <repo root>/lib/cpp/build/tornado_crypto.dll. `flutter
+// test` runs with the current directory set to this package
+// (lib/app/tornado_img), so two levels up reaches the repo root.
+const String _dllPath = '../../cpp/build/tornado_crypto.dll';
 
 void main() {
+  final dllPresent = File(_dllPath).existsSync();
+  final skip = dllPresent ? false : 'native tornado_crypto.dll not found at $_dllPath';
+
   late Directory tmp;
 
   setUp(() async {
@@ -28,232 +37,135 @@ void main() {
   Uint8List salt([int seed = 1]) =>
       Uint8List.fromList(List.generate(16, (i) => (i + seed) & 0xFF));
 
-  group('VideoCipher.hex', () {
-    test('is lowercase, zero-padded, and unseparated', () {
-      final bytes = Uint8List.fromList([0, 1, 0xAB, 0xFF]);
-      expect(VideoCipher.hex(bytes), '0001abff');
-    });
+  group('videoKeyCheckValue', () {
+    test('same phrase and salt give the same kcv', () {
+      final s = salt();
+      expect(videoKeyCheckValue('pw', s), equals(videoKeyCheckValue('pw', s)));
+    }, skip: skip);
+
+    test('a different phrase gives a different kcv', () {
+      final s = salt();
+      expect(
+        videoKeyCheckValue('pw1', s),
+        isNot(equals(videoKeyCheckValue('pw2', s))),
+      );
+    }, skip: skip);
+
+    test('a different salt gives a different kcv', () {
+      expect(
+        videoKeyCheckValue('pw', salt(1)),
+        isNot(equals(videoKeyCheckValue('pw', salt(2)))),
+      );
+    }, skip: skip);
   });
 
-  group('VideoCipher.chunkPhrase', () {
-    test('differs across chunk indexes', () {
+  group('matchesVideoKeyCheckValue', () {
+    test('true for a matching password', () {
       final s = salt();
-      final p0 = VideoCipher.chunkPhrase('pw', s, 0);
-      final p1 = VideoCipher.chunkPhrase('pw', s, 1);
-      expect(p0, isNot(equals(p1)));
-    });
+      final kcv = videoKeyCheckValue('pw', s);
+      expect(matchesVideoKeyCheckValue('pw', s, kcv), isTrue);
+    }, skip: skip);
 
-    test('differs across salts', () {
-      final p0 = VideoCipher.chunkPhrase('pw', salt(1), 0);
-      final p1 = VideoCipher.chunkPhrase('pw', salt(2), 0);
-      expect(p0, isNot(equals(p1)));
-    });
+    test('false for a wrong password', () {
+      final s = salt();
+      final kcv = videoKeyCheckValue('pw', s);
+      expect(matchesVideoKeyCheckValue('wrong', s, kcv), isFalse);
+    }, skip: skip);
   });
 
-  group('VideoCipher.process (fake processor)', () {
-    Future<File> writeRandomFile(String name, int length) async {
-      final bytes = Uint8List.fromList(
-        List.generate(length, (i) => (i * 31 + 7) & 0xFF),
+  group('processVideoPayload', () {
+    test('roundtrips a non-block-aligned file, bit-perfect', () async {
+      final rnd = Random(1234);
+      final original = Uint8List.fromList(
+        List.generate(1024 * 1024 + 7, (_) => rnd.nextInt(256)),
       );
-      final file = File('${tmp.path}/$name');
-      await file.writeAsBytes(bytes);
-      return file;
-    }
+      final src = File('${tmp.path}/src.bin');
+      await src.writeAsBytes(original);
+      final enc = File('${tmp.path}/enc.bin');
+      final dec = File('${tmp.path}/dec.bin');
+      final s = salt(3);
 
-    Future<File> runCipher(
-      VideoCipher cipher,
-      File src,
-      String outName, {
-      required int totalBytes,
-      required String phrase,
-      required Uint8List salt,
-      required int chunkSize,
-    }) async {
-      final out = File('${tmp.path}/$outName');
-      final raf = await src.open();
-      final sink = out.openWrite();
-      try {
-        await cipher.process(
-          src: raf,
-          out: sink,
-          totalBytes: totalBytes,
-          phrase: phrase,
-          salt: salt,
-          chunkSize: chunkSize,
-        );
-      } finally {
-        await raf.close();
-        await sink.close();
-      }
-      return out;
-    }
+      await processVideoPayload(
+        srcPath: src.path,
+        srcOffset: 0,
+        length: original.length,
+        dstPath: enc.path,
+        phrase: 'video-password',
+        salt: s,
+      ).done;
 
-    test(
-      'roundtrips a 10 MiB + 3 byte file through a partial last chunk',
-      () async {
-        const totalBytes = 10 * 1024 * 1024 + 3;
-        const chunkSize = 4 * 1024 * 1024;
-        final srcFile = await writeRandomFile('plain.bin', totalBytes);
-        final original = await srcFile.readAsBytes();
-        final s = salt();
-        final cipher = VideoCipher(processor: _fakeXor);
+      final encrypted = await enc.readAsBytes();
+      expect(encrypted.length, original.length);
+      expect(encrypted, isNot(equals(original)));
 
-        final encFile = await runCipher(
-          cipher,
-          srcFile,
-          'enc.bin',
-          totalBytes: totalBytes,
-          phrase: 'pw',
-          salt: s,
-          chunkSize: chunkSize,
-        );
-        final encrypted = await encFile.readAsBytes();
-        expect(encrypted.length, totalBytes);
-        expect(encrypted, isNot(equals(original)));
+      await processVideoPayload(
+        srcPath: enc.path,
+        srcOffset: 0,
+        length: encrypted.length,
+        dstPath: dec.path,
+        phrase: 'video-password',
+        salt: s,
+      ).done;
 
-        final decFile = await runCipher(
-          cipher,
-          encFile,
-          'dec.bin',
-          totalBytes: totalBytes,
-          phrase: 'pw',
-          salt: s,
-          chunkSize: chunkSize,
-        );
-        final decrypted = await decFile.readAsBytes();
-        expect(decrypted, equals(original));
-      },
-    );
+      expect(await dec.readAsBytes(), equals(original));
+    }, skip: skip);
 
-    test('output length equals input length for a whole-chunk file', () async {
-      const totalBytes = 4 * 1024 * 1024; // exactly one chunk
-      final srcFile = await writeRandomFile('exact.bin', totalBytes);
-      final cipher = VideoCipher(processor: _fakeXor);
+    test('starts the payload stream at videoStreamDataOffset', () async {
+      final original = Uint8List.fromList(List.generate(4096, (i) => i & 0xFF));
+      final src = File('${tmp.path}/src.bin');
+      await src.writeAsBytes(original);
+      final s = salt(9);
 
-      final outFile = await runCipher(
-        cipher,
-        srcFile,
-        'exact_out.bin',
-        totalBytes: totalBytes,
+      final viaWrapper = File('${tmp.path}/wrapper.bin');
+      await processVideoPayload(
+        srcPath: src.path,
+        srcOffset: 0,
+        length: original.length,
+        dstPath: viaWrapper.path,
         phrase: 'pw',
-        salt: salt(),
-        chunkSize: totalBytes,
-      );
+        salt: s,
+      ).done;
 
-      expect(await outFile.length(), totalBytes);
-    });
-
-    test('output length equals input length for a small file', () async {
-      const totalBytes = 100;
-      final srcFile = await writeRandomFile('small.bin', totalBytes);
-      final cipher = VideoCipher(processor: _fakeXor);
-
-      final outFile = await runCipher(
-        cipher,
-        srcFile,
-        'small_out.bin',
-        totalBytes: totalBytes,
+      final viaPackage = File('${tmp.path}/package.bin');
+      await processVideoFile(
+        srcPath: src.path,
+        srcOffset: 0,
+        length: original.length,
+        dstPath: viaPackage.path,
         phrase: 'pw',
-        salt: salt(),
-        chunkSize: 4 * 1024 * 1024,
+        salt: s,
+        streamOffset: videoStreamDataOffset,
+      ).done;
+
+      expect(
+        await viaWrapper.readAsBytes(),
+        equals(await viaPackage.readAsBytes()),
       );
+    }, skip: skip);
 
-      expect(await outFile.length(), totalBytes);
-    });
+    test('append writes ciphertext after existing bytes in dstPath', () async {
+      final original = Uint8List.fromList(List.generate(64, (i) => i));
+      final src = File('${tmp.path}/src.bin');
+      await src.writeAsBytes(original);
+      final s = salt(5);
 
-    test('processes zero bytes as a no-op', () async {
-      final srcFile = await writeRandomFile('empty.bin', 0);
-      final cipher = VideoCipher(processor: _fakeXor);
+      final dst = File('${tmp.path}/dst.bin');
+      final prefix = Uint8List.fromList([1, 2, 3, 4]);
+      await dst.writeAsBytes(prefix);
 
-      final outFile = await runCipher(
-        cipher,
-        srcFile,
-        'empty_out.bin',
-        totalBytes: 0,
+      await processVideoPayload(
+        srcPath: src.path,
+        srcOffset: 0,
+        length: original.length,
+        dstPath: dst.path,
         phrase: 'pw',
-        salt: salt(),
-        chunkSize: 4 * 1024 * 1024,
-      );
+        salt: s,
+        append: true,
+      ).done;
 
-      expect(await outFile.length(), 0);
-    });
-  });
-
-  group('VideoCipher key check value', () {
-    test('same phrase and salt give the same kcv', () async {
-      final s = salt();
-      final k1 = await VideoCipher.keyCheckValue(
-        'pw',
-        s,
-        processor: _fakeXor,
-      );
-      final k2 = await VideoCipher.keyCheckValue(
-        'pw',
-        s,
-        processor: _fakeXor,
-      );
-      expect(k1, equals(k2));
-    });
-
-    test('a different phrase gives a different kcv', () async {
-      final s = salt();
-      final k1 = await VideoCipher.keyCheckValue(
-        'pw1',
-        s,
-        processor: _fakeXor,
-      );
-      final k2 = await VideoCipher.keyCheckValue(
-        'pw2',
-        s,
-        processor: _fakeXor,
-      );
-      expect(k1, isNot(equals(k2)));
-    });
-
-    test('a different salt gives a different kcv', () async {
-      final k1 = await VideoCipher.keyCheckValue(
-        'pw',
-        salt(1),
-        processor: _fakeXor,
-      );
-      final k2 = await VideoCipher.keyCheckValue(
-        'pw',
-        salt(2),
-        processor: _fakeXor,
-      );
-      expect(k1, isNot(equals(k2)));
-    });
-
-    test('matchesKeyCheckValue is true for a matching password', () async {
-      final s = salt();
-      final kcv = await VideoCipher.keyCheckValue(
-        'pw',
-        s,
-        processor: _fakeXor,
-      );
-      final result = await VideoCipher.matchesKeyCheckValue(
-        'pw',
-        s,
-        kcv,
-        processor: _fakeXor,
-      );
-      expect(result, isTrue);
-    });
-
-    test('matchesKeyCheckValue is false for a wrong password', () async {
-      final s = salt();
-      final kcv = await VideoCipher.keyCheckValue(
-        'pw',
-        s,
-        processor: _fakeXor,
-      );
-      final result = await VideoCipher.matchesKeyCheckValue(
-        'wrong',
-        s,
-        kcv,
-        processor: _fakeXor,
-      );
-      expect(result, isFalse);
-    });
+      final written = await dst.readAsBytes();
+      expect(written.length, prefix.length + original.length);
+      expect(written.sublist(0, prefix.length), equals(prefix));
+    }, skip: skip);
   });
 }
