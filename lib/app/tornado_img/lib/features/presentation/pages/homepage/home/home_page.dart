@@ -100,7 +100,7 @@ class _HomePageState extends State<HomePage> {
               buttonIcon: Icons.image_rounded,
               darker: true,
               onPressed: () async {
-                final assets = await PicturesProvider.pickImagesFromGallery(
+                final assets = await PicturesProvider.pickMediaFromGallery(
                   context,
                 );
 

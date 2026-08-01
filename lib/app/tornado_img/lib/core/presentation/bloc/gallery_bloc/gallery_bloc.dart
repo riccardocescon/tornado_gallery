@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/encrypt_image_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/encrypt_video_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
@@ -17,17 +21,35 @@ part 'gallery_bloc.freezed.dart';
 part 'gallery_event.dart';
 part 'gallery_state.dart';
 
+/// Fetches the poster thumbnail bytes for a video asset by id. Real runs use
+/// [_defaultVideoPosterFetcher] (a `photo_manager` platform-channel call);
+/// tests inject a fake so [GalleryBloc]'s routing logic stays testable
+/// without a device — same reasoning as why [EncryptVideoParams] takes
+/// `posterBytes` instead of resolving the asset itself.
+typedef VideoPosterFetcher = Future<Uint8List?> Function(String assetId);
+
+Future<Uint8List?> _defaultVideoPosterFetcher(String assetId) async {
+  final asset = await AssetEntity.fromId(assetId);
+  if (asset == null) return null;
+  return asset.thumbnailDataWithSize(const ThumbnailSize(720, 720));
+}
+
 class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
   final EncryptImageUseCase encryptUseCase;
+  final EncryptVideoUseCase encryptVideoUseCase;
   final DecryptImageUseCase decryptUseCase;
 
   final AppBloc appBloc;
+  final VideoPosterFetcher _fetchVideoPoster;
 
   GalleryBloc({
     required this.encryptUseCase,
+    required this.encryptVideoUseCase,
     required this.decryptUseCase,
     required this.appBloc,
-  }) : super(const GalleryState.initial()) {
+    VideoPosterFetcher fetchVideoPoster = _defaultVideoPosterFetcher,
+  }) : _fetchVideoPoster = fetchVideoPoster,
+       super(const GalleryState.initial()) {
     on<_EncryptImages>(_onEncryptImages);
     on<_DecryptImages>(_onDecryptImages);
   }
@@ -45,11 +67,13 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     for (final entry in event.images.entries) {
       final image = entry.key;
       final filename = entry.value;
+      final isVideo = image.isVideo;
 
       final skipped = _isSkipped(
         event.settings.overrideImage,
         event.settings.destinationPath,
         image.id,
+        isVideo ? 'mp4' : 'png',
       );
 
       if (skipped) {
@@ -58,6 +82,49 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
           'Encryption skipped for ${image.file.path}: File already exists and override is disabled',
           LogLayer.bloc,
         );
+      } else if (isVideo) {
+        // TODO(monetization): gate here — if !purchaseBloc.isPro, skip the
+        // encryptVideoUseCase call below, add `image` to `failed` (or a new
+        // "requires Pro" bucket the UI can special-case) and emit a
+        // paywall-offer signal instead of silently proceeding. This is the
+        // per-asset dispatch point the Pro gate needs to intercept.
+        final posterBytes = await _fetchVideoPoster(image.id);
+        if (posterBytes == null) {
+          failed.add(image);
+          appLogger.log(
+            'Video encryption failed for ${image.file.path}: could not read a poster thumbnail (corrupt or cloud-only asset?)',
+            LogLayer.bloc,
+          );
+        } else {
+          final result = await encryptVideoUseCase.call(
+            EncryptVideoParams(
+              file: image.file,
+              password: event.password,
+              fileId: filename ?? image.id,
+              posterBytes: posterBytes,
+              // v1: encrypted videos always land in private storage. When
+              // galleryVisible is true, destinationPath is null and
+              // EncryptVideoUseCase already defaults null to the private
+              // root, so this needs no extra branching here.
+              destinationPath: event.settings.destinationPath,
+            ),
+          );
+
+          result.fold(
+            (error) {
+              failed.add(image);
+              appLogger.log(
+                'Video encryption failed for ${image.file.path}',
+                LogLayer.bloc,
+                error: error.message,
+              );
+            },
+            (encryptedImage) {
+              encrypted.add(encryptedImage);
+              appBloc.add(AppEvent.addEncryptedImage(image: encryptedImage));
+            },
+          );
+        }
       } else {
         final result = await encryptUseCase.call(
           EncryptImageParams(
@@ -154,7 +221,15 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     }
   }
 
-  bool _isSkipped(bool overrideImage, String? destinationPath, String imageId) {
+  /// [extension] is the output file's extension without the dot — `png` for
+  /// images, `mp4` for videos (the cosmetic wrapper is always `.mp4`
+  /// regardless of the source container).
+  bool _isSkipped(
+    bool overrideImage,
+    String? destinationPath,
+    String imageId,
+    String extension,
+  ) {
     if (overrideImage) return false;
     if (destinationPath == null || destinationPath.isEmpty) return false;
 
@@ -162,7 +237,8 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
 
     final encryptedImages = appBloc.encryptedImages;
     final exists = encryptedImages.any(
-      (img) => img.storagePath.file.path == '$destinationPath/$safeStem.png',
+      (img) =>
+          img.storagePath.file.path == '$destinationPath/$safeStem.$extension',
     );
     return exists;
   }

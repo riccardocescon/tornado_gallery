@@ -109,6 +109,14 @@ class EncryptionPageBloc
         return;
       }
 
+      // TODO(monetization): before dispatching, check whether `images`
+      // contains a video (GalleryImage.isVideo / Constants.videoExtensions)
+      // and !purchaseBloc.isPro; if so, emit a paywall-offer failure/state
+      // here instead of proceeding — same early-return shape as the
+      // encryption-limit check above. The actual per-asset video dispatch
+      // this gate needs to guard lives in GalleryBloc._onEncryptImages
+      // (core/presentation/bloc/gallery_bloc/gallery_bloc.dart), not here —
+      // this bloc only forwards the whole batch via GalleryEvent.encryptImages.
       if (password.isEmpty) {
         emit(
           const EncryptionPageState.failure(

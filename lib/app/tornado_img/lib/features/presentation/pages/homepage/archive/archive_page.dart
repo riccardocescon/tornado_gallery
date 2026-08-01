@@ -648,7 +648,7 @@ class _ArchivePageState extends State<ArchivePage> {
   }
 
   Future<void> _onImport(BuildContext context) async {
-    final assets = await PicturesProvider.pickImagesFromGallery(context);
+    final assets = await PicturesProvider.pickMediaFromGallery(context);
     if (!context.mounted) return;
     assets.fold(
       (errMessage) {

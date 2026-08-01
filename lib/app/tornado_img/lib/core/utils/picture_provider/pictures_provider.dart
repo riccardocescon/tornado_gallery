@@ -4,11 +4,11 @@ import 'package:tornado_img_app/core/utils/picture_provider/selection_picker.dar
 import 'package:tornado_img_app/extentions.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
-/// Provides image picking from the system gallery via [AssetPicker].
+/// Provides image and video picking from the system gallery via [AssetPicker].
 class PicturesProvider {
   PicturesProvider._();
 
-  static Future<Either<String?, List<AssetEntity>>> pickImagesFromGallery(
+  static Future<Either<String?, List<AssetEntity>>> pickMediaFromGallery(
     BuildContext context,
   ) async {
     final permissionState = await PhotoManager.requestPermissionExtend();
@@ -18,7 +18,11 @@ class PicturesProvider {
     }
 
     final provider = DefaultAssetPickerProvider(
-      requestType: RequestType.image,
+      // TODO(monetization): make conditional on Pro status —
+      // `purchaseBloc.isPro ? RequestType.common : RequestType.image`. Free
+      // users should keep the image-only picker; video selection is a Pro
+      // feature.
+      requestType: RequestType.common,
       maxAssets: 100,
     );
 

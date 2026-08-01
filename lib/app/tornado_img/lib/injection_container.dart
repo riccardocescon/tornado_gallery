@@ -46,6 +46,7 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton(
     () => GalleryBloc(
       encryptUseCase: getIt(),
+      encryptVideoUseCase: getIt(),
       decryptUseCase: getIt(),
       appBloc: getIt(),
     ),
