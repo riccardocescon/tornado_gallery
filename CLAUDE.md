@@ -104,6 +104,28 @@ password. Any migration is a separate task with a migration strategy. The
 `tornado_img_crypto` package is **gitignored** (excluded from the public repo) —
 edits there apply on disk but won't be committed.
 
+## Video encryption
+
+An encrypted video is a **playable mp4**: a ~3 s silent clip of the scrambled
+poster frame, followed by two top-level `uuid` boxes players ignore —
+`TORNADO-POSTR-01` (the scrambled poster as PNG) and `TORNADO-VIDEO-01`
+(header + the original file's AES-256-CTR ciphertext, streamed in 4 MiB chunks
+with a per-video salt mixed into the passphrase). Layout and parsing live in
+`core/data/video_crypto/video_box_codec.dart`.
+
+- **Never read an encrypted video whole.** Folder scans go through
+  `readMediaPreviewBytes()`, which reads only the poster box; the ciphertext is
+  up to 2 GB. Same reason `GalleryBloc`'s image-decrypt path skips videos.
+- **Playback** decrypts to a temp file under `systemTemp/tornado_video`
+  (`VideoPlayerPage` deletes it on dispose and sweeps the dir before each run).
+  On-the-fly range decryption is a deliberate phase-2.
+- **Sharing:** file/document only. Platforms that re-encode (WhatsApp "video",
+  socials) strip the boxes and the ciphertext is lost.
+- v1 saves encrypted videos to **private storage only**.
+- The **Pro gate is not wired** — merge points are marked `TODO(monetization)`
+  in `encryption_page_bloc.dart` (batch) and `gallery_bloc.dart` (per-asset
+  dispatch, the one that matters).
+
 ## Code Generation
 
 The project uses `freezed` and `build_runner`. After modifying any file with `@freezed`, `@injectable`, or other annotations:
