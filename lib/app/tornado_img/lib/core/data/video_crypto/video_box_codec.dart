@@ -11,7 +11,7 @@
 //   size u32 (or 1, then largesize u64)   ← total box size
 //   'uuid'
 //   usertype 16B                          ← Constants.videoBoxUserType
-//   magic u32 'TVE1' | version u8 | salt 16B | kcv 16B | chunkSize u32
+//   magic u32 'TVE1' | version u8 | salt 16B | kcv 16B
 //   originalSize u64 | extLen u8 | ext ASCII
 //   ciphertext (originalSize bytes)
 
@@ -26,7 +26,6 @@ class VideoBoxHeader {
   const VideoBoxHeader({
     required this.salt,
     required this.kcv,
-    required this.chunkSize,
     required this.originalSize,
     required this.originalExt,
   });
@@ -42,13 +41,6 @@ class VideoBoxHeader {
   /// Lets a wrong password be reported from 16 bytes instead of after
   /// decrypting the whole file. Exactly [kcvLength] bytes.
   final Uint8List kcv;
-
-  /// Size, in bytes, of the chunks this video was encrypted in.
-  ///
-  /// Stored per-file (rather than always read from `Constants.videoChunkSize`)
-  /// so that changing the app's chunk size later cannot break decryption of
-  /// videos already encrypted with a different one.
-  final int chunkSize;
 
   /// Size of the original video in bytes. CTR preserves length, so this is also
   /// the ciphertext length.
@@ -73,7 +65,7 @@ class ParsedVideoBox {
 
 const int _boxTypeUuid = 0x75756964; // 'uuid'
 const int _fixedPayloadLength =
-    4 + 1 + VideoBoxHeader.saltLength + VideoBoxHeader.kcvLength + 4 + 8 + 1;
+    4 + 1 + VideoBoxHeader.saltLength + VideoBoxHeader.kcvLength + 8 + 1;
 
 /// Builds everything that precedes the ciphertext: box framing plus payload
 /// header. The caller appends exactly `header.originalSize` ciphertext bytes.
@@ -90,13 +82,6 @@ Uint8List buildVideoBoxPrefix(VideoBoxHeader header) {
       header.kcv,
       'kcv',
       'must be exactly ${VideoBoxHeader.kcvLength} bytes',
-    );
-  }
-  if (header.chunkSize <= 0 || header.chunkSize > 0xFFFFFFFF) {
-    throw ArgumentError.value(
-      header.chunkSize,
-      'chunkSize',
-      'must be > 0 and <= 0xFFFFFFFF',
     );
   }
   if (header.originalSize < 0) {
@@ -160,8 +145,6 @@ Uint8List buildVideoBoxPrefix(VideoBoxHeader header) {
   o += VideoBoxHeader.saltLength;
   out.setAll(o, header.kcv);
   o += VideoBoxHeader.kcvLength;
-  view.setUint32(o, header.chunkSize);
-  o += 4;
   view.setUint64(o, header.originalSize);
   o += 8;
   view.setUint8(o, ext.length);
@@ -257,12 +240,6 @@ Future<ParsedVideoBox?> _readPayload(
     fixed.sublist(o, o + VideoBoxHeader.kcvLength),
   );
   o += VideoBoxHeader.kcvLength;
-  final chunkSize = view.getUint32(o);
-  o += 4;
-  if (chunkSize == 0) {
-    appLogger.log('findVideoBox: chunkSize is zero', LogLayer.repository);
-    return null;
-  }
   final originalSize = view.getUint64(o);
   o += 8;
   final extLen = view.getUint8(o);
@@ -289,7 +266,6 @@ Future<ParsedVideoBox?> _readPayload(
     header: VideoBoxHeader(
       salt: salt,
       kcv: kcv,
-      chunkSize: chunkSize,
       originalSize: originalSize,
       originalExt: ext,
     ),

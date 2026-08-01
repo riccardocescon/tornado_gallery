@@ -20,18 +20,6 @@ class Constants {
   /// with something the user can act on.
   static const int maxVideoBytes = 2 * 1024 * 1024 * 1024;
 
-  /// Size of each chunk a video is encrypted/decrypted in, in bytes.
-  ///
-  /// The native engine's Fisher-Yates keystream permutation allocates a table
-  /// proportional to the input size (~32 MB per 4 MiB chunk), so processing a
-  /// whole video in one call would scale that allocation with file size.
-  /// Encryption is therefore chunked and sequential — do not "optimize" it to
-  /// a single whole-file call. The chunk size used for a given file is also
-  /// stored in that file's box header (`VideoBoxHeader.chunkSize`), so
-  /// changing this constant later cannot break videos already encrypted with
-  /// the old chunk size.
-  static const int videoChunkSize = 4 * 1024 * 1024;
-
   /// 16-byte `uuid` box usertype identifying our ciphertext box: `TORNADO-VIDEO-01`.
   static const List<int> videoBoxUserType = [
     0x54, 0x4F, 0x52, 0x4E, 0x41, 0x44, 0x4F, 0x2D, // TORNADO-

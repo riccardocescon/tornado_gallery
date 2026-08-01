@@ -38,19 +38,9 @@ void main() {
     return out.toBytes();
   }
 
-  // Deliberately not Constants.videoChunkSize (4 MiB): if the codec ever
-  // hardcoded the constant instead of reading header.chunkSize, tests using
-  // this value would still catch it.
-  const testChunkSize = 64 * 1024;
-
-  VideoBoxHeader header({
-    int size = 128,
-    String ext = 'mp4',
-    int chunkSize = testChunkSize,
-  }) => VideoBoxHeader(
+  VideoBoxHeader header({int size = 128, String ext = 'mp4'}) => VideoBoxHeader(
     salt: bytes(VideoBoxHeader.saltLength, 3),
     kcv: bytes(VideoBoxHeader.kcvLength, 9),
-    chunkSize: chunkSize,
     originalSize: size,
     originalExt: ext,
   );
@@ -91,7 +81,6 @@ void main() {
       expect(parsed.header.originalExt, 'mp4');
       expect(parsed.header.salt, equals(h.salt));
       expect(parsed.header.kcv, equals(h.kcv));
-      expect(parsed.header.chunkSize, testChunkSize);
 
       // The offset must actually point at the ciphertext.
       final actual = await withRaf(f, (raf) async {
@@ -136,27 +125,6 @@ void main() {
       expect(await withRaf(f, findVideoBox), isNull);
     });
 
-    test('returns null when the stored chunkSize is zero', () async {
-      final prefix = buildVideoBoxPrefix(header(size: 16));
-      // chunkSize sits right after box head(8) + usertype(16) + magic(4) +
-      // version(1) + salt + kcv — same corruption technique as the magic test.
-      final chunkSizeOffset =
-          8 +
-          16 +
-          4 +
-          1 +
-          VideoBoxHeader.saltLength +
-          VideoBoxHeader.kcvLength;
-      prefix.setRange(chunkSizeOffset, chunkSizeOffset + 4, [0, 0, 0, 0]);
-
-      final f = await writeFile('bad_chunk.mp4', [
-        ...fakeMp4(),
-        ...prefix,
-        ...bytes(16),
-      ]);
-      expect(await withRaf(f, findVideoBox), isNull);
-    });
-
     test('returns null when the declared size overflows the box', () async {
       // Claim far more ciphertext than the file actually carries.
       final prefix = buildVideoBoxPrefix(header(size: 16));
@@ -187,7 +155,6 @@ void main() {
         VideoBoxHeader(
           salt: bytes(VideoBoxHeader.saltLength),
           kcv: bytes(VideoBoxHeader.kcvLength),
-          chunkSize: testChunkSize,
           originalSize: huge,
           originalExt: 'mp4',
         ),
@@ -222,7 +189,6 @@ void main() {
           VideoBoxHeader(
             salt: bytes(8),
             kcv: bytes(VideoBoxHeader.kcvLength),
-            chunkSize: testChunkSize,
             originalSize: 16,
             originalExt: 'mp4',
           ),
@@ -237,7 +203,6 @@ void main() {
           VideoBoxHeader(
             salt: bytes(VideoBoxHeader.saltLength),
             kcv: bytes(4),
-            chunkSize: testChunkSize,
             originalSize: 16,
             originalExt: 'mp4',
           ),
@@ -249,13 +214,6 @@ void main() {
     test('rejects an empty extension', () {
       expect(
         () => buildVideoBoxPrefix(header(size: 16, ext: '')),
-        throwsArgumentError,
-      );
-    });
-
-    test('rejects a chunkSize of zero', () {
-      expect(
-        () => buildVideoBoxPrefix(header(size: 16, chunkSize: 0)),
         throwsArgumentError,
       );
     });
