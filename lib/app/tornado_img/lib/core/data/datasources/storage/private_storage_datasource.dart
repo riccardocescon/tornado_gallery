@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
@@ -213,7 +214,8 @@ class PrivateStorageDatasource {
 
     try {
       final lastModified = await file.lastModified();
-      final bytes = await file.readAsBytes();
+      final bytes = await readMediaPreviewBytes(file);
+      if (bytes == null) return null;
       final hash = ByteModeling.generateHash(bytes);
 
       appLogger.log(

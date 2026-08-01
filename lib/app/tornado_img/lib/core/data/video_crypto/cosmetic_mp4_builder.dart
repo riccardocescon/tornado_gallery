@@ -38,6 +38,10 @@ class CosmeticMp4Builder {
   /// (`decodeBytes` → `encrypt` → `encode`) and encodes the result as a
   /// silent mp4.
   ///
+  /// Returns both the clip and the scrambled poster PNG it was built from:
+  /// Task 4 embeds the PNG in the encrypted file (`buildPosterBox`) so folder
+  /// scans get a thumbnail without decoding video.
+  ///
   /// [posterBytes]: jpeg/png thumbnail of the source video (max 720 px long
   /// side). A larger poster is downscaled here rather than trusted — the 720
   /// cap is a binding constraint of the plan, not just a caller convention.
@@ -45,7 +49,7 @@ class CosmeticMp4Builder {
   /// Throws a [StateError] if the poster can't be decoded or the scrambling
   /// pipeline produces no output. Task 4 wraps this call in `guardEither`,
   /// which turns the exception into a `Left`.
-  Future<Uint8List> build({
+  Future<({Uint8List mp4, Uint8List posterPng})> build({
     required Uint8List posterBytes,
     required String password,
   }) async {
@@ -86,6 +90,10 @@ class CosmeticMp4Builder {
     }
 
     final rgba = frame.getBytes(order: img.ChannelOrder.rgba);
+    // Re-encoded from the downscaled/padded frame rather than reusing
+    // `encodedPng`: this is the frame the clip actually shows, and it is
+    // capped at 720 px, which `encodedPng` is not.
+    final posterPng = img.encodePng(frame);
     final outPath = await _newTempPath();
 
     try {
@@ -109,7 +117,7 @@ class CosmeticMp4Builder {
 
       await FlutterQuickVideoEncoder.finish();
 
-      return await File(outPath).readAsBytes();
+      return (mp4: await File(outPath).readAsBytes(), posterPng: posterPng);
     } finally {
       final f = File(outPath);
       if (await f.exists()) await f.delete();

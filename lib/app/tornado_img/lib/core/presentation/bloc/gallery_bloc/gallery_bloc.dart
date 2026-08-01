@@ -166,11 +166,16 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
     _DecryptImages event,
     Emitter<GalleryState> emit,
   ) async {
-    final totalImages = event.image.length;
+    // Videos never go through the image pipeline: their file is mostly
+    // ciphertext and may be gigabytes, and playback owns that path
+    // (VideoPlayerPage → DecryptVideoUseCase). Dropping them here keeps a
+    // future bulk-decrypt caller from reading one whole into memory.
+    final images = event.image.where((e) => !e.isVideo).toList();
+    final totalImages = images.length;
     emit(GalleryState.loadingDecryption(total: totalImages));
 
-    final loading = event.image.where((e) => e.decryptInfo == null).toList();
-    final dearchived = event.image.where((e) => e.decryptInfo != null).toList();
+    final loading = images.where((e) => e.decryptInfo == null).toList();
+    final dearchived = images.where((e) => e.decryptInfo != null).toList();
     final failed = <EncryptedImage>[];
 
     emit(
@@ -184,7 +189,7 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
       ),
     );
 
-    for (final image in event.image) {
+    for (final image in images) {
       final result = await decryptUseCase.call(
         DecryptImageParams(
           file: image.storagePath.file,

@@ -182,6 +182,67 @@ void main() {
     });
   });
 
+  group('buildPosterBox / findPosterBox', () {
+    test('roundtrips a poster box sitting before the ciphertext box', () async {
+      final png = bytes(512, 5);
+      final ciphertext = bytes(64, 21);
+      final h = header(size: ciphertext.length);
+      final cosmetic = fakeMp4();
+      final poster = buildPosterBox(png);
+      final prefix = buildVideoBoxPrefix(h);
+
+      final f = await writeFile('enc.mp4', [
+        ...cosmetic,
+        ...poster,
+        ...prefix,
+        ...ciphertext,
+      ]);
+
+      expect(await withRaf(f, findPosterBox), equals(png));
+
+      // The poster box must not disturb the ciphertext box behind it.
+      final parsed = await withRaf(f, findVideoBox);
+      expect(
+        parsed!.ciphertextOffset,
+        cosmetic.length + poster.length + prefix.length,
+      );
+    });
+
+    test('returns null when only the ciphertext box is present', () async {
+      final f = await writeFile('enc.mp4', [
+        ...fakeMp4(),
+        ...buildVideoBoxPrefix(header(size: 16)),
+        ...bytes(16),
+      ]);
+      expect(await withRaf(f, findPosterBox), isNull);
+    });
+
+    test('returns null for an mp4 without our boxes', () async {
+      final f = await writeFile('plain.mp4', fakeMp4());
+      expect(await withRaf(f, findPosterBox), isNull);
+    });
+
+    test('writes the agreed usertype', () {
+      final box = buildPosterBox(bytes(16));
+      expect(
+        box.sublist(8, 24),
+        equals(Uint8List.fromList(Constants.videoPosterUserType)),
+      );
+      expect(ByteData.sublistView(box).getUint32(0), box.length);
+    });
+
+    test('rejects an empty poster', () {
+      expect(() => buildPosterBox(Uint8List(0)), throwsArgumentError);
+    });
+
+    test('rejects a poster larger than the read cap', () {
+      expect(
+        () => buildPosterBox(Uint8List(Constants.maxPosterBytes + 1)),
+        throwsArgumentError,
+      );
+    });
+  });
+
   group('buildVideoBoxPrefix validation', () {
     test('rejects a salt of the wrong length', () {
       expect(

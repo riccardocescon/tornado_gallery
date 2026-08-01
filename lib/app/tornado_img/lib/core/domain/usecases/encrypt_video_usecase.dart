@@ -56,7 +56,12 @@ class EncryptVideoUseCase
         // this point on — if anything below throws (including a malformed
         // header caught synchronously by buildVideoBoxPrefix), the catch
         // block below has a genuine partial file to clean up.
-        await outputFile.writeAsBytes(cosmetic, flush: true);
+        await outputFile.writeAsBytes(cosmetic.mp4, flush: true);
+
+        // The scrambled poster rides along as its own `uuid` box so folder
+        // scans can render a thumbnail from a few hundred KB instead of
+        // reading back a file that may be gigabytes long.
+        final posterBox = buildPosterBox(cosmetic.posterPng);
 
         final header = VideoBoxHeader(
           salt: salt,
@@ -67,6 +72,7 @@ class EncryptVideoUseCase
         final prefix = buildVideoBoxPrefix(header);
 
         final raf = await outputFile.open(mode: FileMode.writeOnlyAppend);
+        await raf.writeFrom(posterBox);
         await raf.writeFrom(prefix);
         await raf.close();
 
@@ -96,12 +102,13 @@ class EncryptVideoUseCase
             isPrivateFolder: true,
             assetId: null,
           ),
-          // The cosmetic bytes are the only part worth hashing here — the
-          // ciphertext can be multi-GB, and hashing it would defeat the
-          // point of streaming it in bounded memory.
+          // The scrambled poster stands in for the "encrypted bytes" of an
+          // image: it is what the UI renders, and it is small. Hashing the
+          // ciphertext instead would defeat the point of streaming it in
+          // bounded memory.
           encryptedInfo: BytesInfo(
-            bytes: cosmetic,
-            hash: ByteModeling.generateHash(cosmetic),
+            bytes: cosmetic.posterPng,
+            hash: ByteModeling.generateHash(cosmetic.posterPng),
           ),
           date: DateTime.now(),
         ),

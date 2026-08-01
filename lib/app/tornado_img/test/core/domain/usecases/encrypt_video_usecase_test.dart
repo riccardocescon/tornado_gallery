@@ -59,6 +59,7 @@ void main() {
   late _MockCosmeticMp4Builder mockBuilder;
   late EncryptVideoUseCase useCase;
   final tCosmetic = _fakeMp4();
+  final tPoster = Uint8List.fromList(List.generate(64, (i) => (i * 7) & 0xFF));
 
   setUpAll(() {
     registerFallbackValue(Uint8List(0));
@@ -74,7 +75,7 @@ void main() {
         posterBytes: any(named: 'posterBytes'),
         password: any(named: 'password'),
       ),
-    ).thenAnswer((_) async => tCosmetic);
+    ).thenAnswer((_) async => (mp4: tCosmetic, posterPng: tPoster));
   });
 
   tearDown(() async {
@@ -203,8 +204,10 @@ void main() {
 
         final raf = await outFile.open();
         final parsed = await findVideoBox(raf);
+        final poster = await findPosterBox(raf);
         await raf.close();
 
+        expect(poster, equals(tPoster));
         expect(parsed, isNotNull);
         expect(parsed!.header.originalSize, original.length);
         expect(parsed.header.originalExt, 'mp4');
@@ -220,7 +223,8 @@ void main() {
         result.fold((_) => fail('Expected Right'), (encryptedImage) {
           expect(encryptedImage.storagePath.path, outFile.path);
           expect(encryptedImage.storagePath.isPrivateFolder, isTrue);
-          expect(encryptedImage.encryptedInfo.bytes, tCosmetic);
+          // The poster, not the clip: it is what the archive renders.
+          expect(encryptedImage.encryptedInfo.bytes, tPoster);
         });
       },
       skip: skip,

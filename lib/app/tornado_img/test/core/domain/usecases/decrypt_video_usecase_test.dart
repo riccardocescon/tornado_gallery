@@ -93,7 +93,12 @@ void main() {
           posterBytes: any(named: 'posterBytes'),
           password: any(named: 'password'),
         ),
-      ).thenAnswer((_) async => _fakeMp4());
+      ).thenAnswer(
+        (_) async => (
+          mp4: _fakeMp4(),
+          posterPng: Uint8List.fromList(List.filled(32, 0x11)),
+        ),
+      );
 
       original = Uint8List.fromList(
         List.generate(64 * 1024 + 13, (i) => (i * 7) & 0xFF),

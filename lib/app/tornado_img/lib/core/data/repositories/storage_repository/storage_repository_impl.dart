@@ -5,6 +5,7 @@ import 'package:tornado_img_app/core/data/datasources/storage/android_public_sto
 import 'package:tornado_img_app/core/data/datasources/storage/ios_public_storage_datasource.dart';
 import 'package:tornado_img_app/core/data/datasources/storage/private_storage_datasource.dart';
 import 'package:tornado_img_app/core/data/datasources/storage/public_storage_datasource.dart';
+import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
@@ -160,7 +161,8 @@ class StorageRepositoryImpl implements StorageRepository {
     if (!Constants.mediaExtensions.contains(ext)) return null;
 
     try {
-      final bytes = await file.readAsBytes();
+      final bytes = await readMediaPreviewBytes(file);
+      if (bytes == null) return null;
       final hash = ByteModeling.generateHash(bytes);
       final fileName = FileNameUtils.basename(file.path);
       // Best-effort asset ID for later deletion via MediaStore.

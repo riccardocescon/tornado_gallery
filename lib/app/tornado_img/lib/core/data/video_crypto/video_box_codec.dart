@@ -19,6 +19,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:tornado_img_app/core/utils/constants.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
 /// Header of the ciphertext box.
@@ -154,11 +155,78 @@ Uint8List buildVideoBoxPrefix(VideoBoxHeader header) {
   return out;
 }
 
+/// Builds a complete `uuid` box carrying the scrambled poster [png].
+///
+/// Written between the cosmetic clip and the ciphertext box so a folder scan
+/// can show a thumbnail after reading a few hundred KB instead of the whole
+/// file. Players ignore it exactly as they ignore the ciphertext box.
+Uint8List buildPosterBox(Uint8List png) {
+  if (png.isEmpty || png.length > Constants.maxPosterBytes) {
+    throw ArgumentError.value(
+      png.length,
+      'png',
+      'must be 1..${Constants.maxPosterBytes} bytes',
+    );
+  }
+
+  final out = Uint8List(8 + 16 + png.length);
+  final view = ByteData.sublistView(out);
+  view.setUint32(0, out.length);
+  view.setUint32(4, _boxTypeUuid);
+  out.setAll(8, Constants.videoPosterUserType);
+  out.setAll(24, png);
+  return out;
+}
+
 /// Walks the top-level boxes of [raf] looking for our ciphertext box.
 ///
 /// Returns null when the file has no such box or the payload is malformed —
 /// both simply mean "this is not an encrypted video", not an error.
-Future<ParsedVideoBox?> findVideoBox(RandomAccessFile raf) async {
+Future<ParsedVideoBox?> findVideoBox(RandomAccessFile raf) =>
+    _walkUuidBoxes(raf, (bodyOffset, boxEnd) =>
+        _readPayload(raf, bodyOffset, boxEnd));
+
+/// Returns the scrambled poster PNG embedded by [buildPosterBox], or null when
+/// the file carries none (older files, or not an encrypted video at all).
+Future<Uint8List?> findPosterBox(RandomAccessFile raf) =>
+    _walkUuidBoxes(raf, (bodyOffset, boxEnd) =>
+        _readPoster(raf, bodyOffset, boxEnd));
+
+/// Bytes a folder scan should carry as an encrypted media file's preview.
+///
+/// Images are their own preview, so the file is read whole. Videos are not:
+/// the file is mostly ciphertext and may be gigabytes, so only the embedded
+/// poster box is read. A video without one is not ours (or is corrupt) and
+/// yields null so the caller can skip it instead of loading it into memory.
+Future<Uint8List?> readMediaPreviewBytes(File file) async {
+  if (!Constants.videoExtensions.contains(
+    FileNameUtils.extensionOf(file.path),
+  )) {
+    return file.readAsBytes();
+  }
+
+  final raf = await file.open();
+  try {
+    final poster = await findPosterBox(raf);
+    if (poster == null) {
+      appLogger.log(
+        'readMediaPreviewBytes: no poster box in ${file.path} — skipped',
+        LogLayer.repository,
+      );
+    }
+    return poster;
+  } finally {
+    await raf.close();
+  }
+}
+
+/// Walks top-level boxes, handing every `uuid` box body to [onUuidBox]. The
+/// first non-null result wins; a null one means "not the box we want, keep
+/// walking", which is what lets the poster and ciphertext boxes coexist.
+Future<T?> _walkUuidBoxes<T>(
+  RandomAccessFile raf,
+  Future<T?> Function(int bodyOffset, int boxEnd) onUuidBox,
+) async {
   final fileLength = await raf.length();
   var offset = 0;
 
@@ -188,7 +256,7 @@ Future<ParsedVideoBox?> findVideoBox(RandomAccessFile raf) async {
     if (size < bodyOffset - offset || offset + size > fileLength) return null;
 
     if (type == _boxTypeUuid) {
-      final parsed = await _readPayload(raf, bodyOffset, offset + size);
+      final parsed = await onUuidBox(bodyOffset, offset + size);
       if (parsed != null) return parsed;
     }
 
@@ -196,6 +264,25 @@ Future<ParsedVideoBox?> findVideoBox(RandomAccessFile raf) async {
   }
 
   return null;
+}
+
+Future<Uint8List?> _readPoster(
+  RandomAccessFile raf,
+  int bodyOffset,
+  int boxEnd,
+) async {
+  final length = boxEnd - bodyOffset - 16;
+  if (length <= 0 || length > Constants.maxPosterBytes) return null;
+
+  await raf.setPosition(bodyOffset);
+  final userType = await raf.read(16);
+  if (userType.length < 16) return null;
+  for (var i = 0; i < 16; i++) {
+    if (userType[i] != Constants.videoPosterUserType[i]) return null;
+  }
+
+  final png = await raf.read(length);
+  return png.length < length ? null : png;
 }
 
 Future<ParsedVideoBox?> _readPayload(

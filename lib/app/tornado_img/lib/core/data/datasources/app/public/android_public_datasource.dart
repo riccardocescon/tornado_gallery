@@ -6,6 +6,7 @@ import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/data/datasources/app/public/public_folder_datasource.dart';
 import 'package:tornado_img_app/core/data/mappers/asset_mapper.dart';
+import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_folder.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
@@ -144,7 +145,8 @@ class AndroidPublicFolderDatasource implements PublicFolderDatasource {
     if (!Constants.mediaExtensions.contains(ext)) return null;
 
     try {
-      final bytes = await file.readAsBytes();
+      final bytes = await readMediaPreviewBytes(file);
+      if (bytes == null) return null;
       final hash = ByteModeling.generateHash(bytes);
       final fileName = FileNameUtils.basename(file.path);
       final assetId = await GalleryPathProvider.findAssetIdByName(fileName);
