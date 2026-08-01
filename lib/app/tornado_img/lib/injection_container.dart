@@ -56,10 +56,15 @@ void setupInjectionContainer() {
   getIt.registerLazySingleton(
     () => HomepageBloc(appRepository: getIt(), folderStreamer: getIt()),
   );
-  getIt.registerLazySingleton(
-    () => DecryptJobManager(decryptUseCase: getIt(), appBloc: getIt()),
-  );
   getIt.registerLazySingleton(() => DecryptedVideoCache());
+  getIt.registerLazySingleton(
+    () => DecryptJobManager(
+      decryptUseCase: getIt(),
+      decryptVideoUseCase: getIt(),
+      videoCache: getIt(),
+      appBloc: getIt(),
+    ),
+  );
   getIt.registerFactory(
     () => EncryptionPageBloc(appBloc: getIt(), galleryBloc: getIt()),
   );

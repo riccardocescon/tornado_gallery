@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/domain/entities/image_data.dart';
 import 'package:tornado_img_app/core/domain/repositories/image_processing_repository.dart';
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
 import 'package:tornado_img_app/core/failures/failures.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
@@ -59,6 +61,19 @@ class DecryptImageUseCase
   }
 
   Future<ImageData?> _decodeInput(DecryptImageParams params) async {
+    // A video is not decodable as an image — and reading one whole would pull
+    // up to 2 GB of ciphertext into memory. Its visual preview is the scrambled
+    // poster PNG in the `uuid` box, so that is what gets unscrambled here: the
+    // result is the clear thumbnail every caller renders from `decryptInfo`.
+    // The file's own plaintext is playback's job (DecryptVideoUseCase).
+    if (Constants.videoExtensions.contains(
+      FileNameUtils.extensionOf(params.file.path),
+    )) {
+      final poster = await readMediaPreviewBytes(params.file);
+      if (poster == null) return null;
+      return imageRepo.decodeBytes(poster, extension: 'png');
+    }
+
     if (await params.file.exists()) {
       try {
         final decodedFromFile = await imageRepo.decode(params.file);

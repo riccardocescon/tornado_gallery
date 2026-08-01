@@ -4,6 +4,8 @@ import 'dart:collection';
 import 'package:tornado_img_app/core/domain/entities/dearchiving_state.dart';
 import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.dart';
 import 'package:tornado_img_app/core/domain/usecases/decrypt_image_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/decrypt_video_usecase.dart';
+import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
@@ -18,13 +20,19 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 class DecryptJobManager {
   DecryptJobManager({
     required DecryptImageUseCase decryptUseCase,
+    required DecryptVideoUseCase decryptVideoUseCase,
+    required DecryptedVideoCache videoCache,
     required AppBloc appBloc,
     int maxConcurrent = 3,
   }) : _decryptUseCase = decryptUseCase,
+       _decryptVideoUseCase = decryptVideoUseCase,
+       _videoCache = videoCache,
        _appBloc = appBloc,
        _maxConcurrent = maxConcurrent;
 
   final DecryptImageUseCase _decryptUseCase;
+  final DecryptVideoUseCase _decryptVideoUseCase;
+  final DecryptedVideoCache _videoCache;
   final AppBloc _appBloc;
 
   /// Upper bound on concurrent [DecryptImageUseCase] calls across all jobs, to
@@ -94,34 +102,53 @@ class DecryptJobManager {
 
       await _acquire();
       try {
-        final result = await _decryptUseCase.call(
-          DecryptImageParams(
-            file: image.storagePath.file,
-            password: password,
-            assetId: image.storagePath.assetId,
-          ),
-        );
+        // A video's plaintext goes to a temp file the cache owns, so opening it
+        // plays straight away. Done first: it verifies the password from the
+        // box's KCV, so a wrong one fails here instead of silently producing a
+        // garbage poster.
+        final videoFailure =
+            image.isVideo ? await _decryptVideoFile(image, password) : null;
 
-        job.loading.remove(image);
-        result.fold(
-          (failure) {
-            job.failed.add(image);
-            appLogger.log(
-              'DecryptJobManager: decrypt failed',
-              LogLayer.bloc,
-              error: '${image.storagePath.path}: ${failure.message}',
-            );
-          },
-          (bytes) {
-            job.dearchived.add(image.copyWith(decryptInfo: bytes));
-            _appBloc.add(
-              AppEvent.setDecryptedInfo(
-                path: image.storagePath.path,
-                decryptedInfo: bytes,
-              ),
-            );
-          },
-        );
+        if (videoFailure != null) {
+          job.loading.remove(image);
+          job.failed.add(image);
+          appLogger.log(
+            'DecryptJobManager: video decrypt failed',
+            LogLayer.bloc,
+            error: '${image.storagePath.path}: $videoFailure',
+          );
+        } else {
+          // For a video this unscrambles the poster box, not the whole file —
+          // see DecryptImageUseCase.
+          final result = await _decryptUseCase.call(
+            DecryptImageParams(
+              file: image.storagePath.file,
+              password: password,
+              assetId: image.storagePath.assetId,
+            ),
+          );
+
+          job.loading.remove(image);
+          result.fold(
+            (failure) {
+              job.failed.add(image);
+              appLogger.log(
+                'DecryptJobManager: decrypt failed',
+                LogLayer.bloc,
+                error: '${image.storagePath.path}: ${failure.message}',
+              );
+            },
+            (bytes) {
+              job.dearchived.add(image.copyWith(decryptInfo: bytes));
+              _appBloc.add(
+                AppEvent.setDecryptedInfo(
+                  path: image.storagePath.path,
+                  decryptedInfo: bytes,
+                ),
+              );
+            },
+          );
+        }
       } finally {
         _release();
       }
@@ -132,6 +159,29 @@ class DecryptJobManager {
     // remain in AppBloc, so the folder still shows as decrypted.
     _jobs.remove(key);
     _tick();
+  }
+
+  /// Writes a video's plaintext to a temp file and hands it to
+  /// [DecryptedVideoCache], the file-level counterpart of `decryptInfo`.
+  /// Returns the failure message, or null on success (a cache hit included).
+  Future<String?> _decryptVideoFile(
+    EncryptedImage image,
+    String password,
+  ) async {
+    final path = image.storagePath.path;
+    if (_videoCache.entry(path) != null) return null;
+
+    // Same ordering VideoPlayerPage uses: drop a previous run's leftovers
+    // before the first plaintext of this session lands in the temp dir.
+    await _videoCache.sweepOnce();
+
+    final result = await _decryptVideoUseCase.call(
+      DecryptVideoParams(encryptedPath: path, password: password),
+    );
+    return result.fold((failure) => failure.message, (file) {
+      _videoCache.put(path, file);
+      return null;
+    });
   }
 
   // ── Concurrency gate ────────────────────────────────────────────────────────

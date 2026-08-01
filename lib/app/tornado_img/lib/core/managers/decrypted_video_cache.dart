@@ -19,7 +19,7 @@ import 'package:tornado_img_app/core/utils/globals.dart';
 /// if it ever is.
 class DecryptedVideoCache {
   final Map<String, _Entry> _entries = <String, _Entry>{};
-  bool _swept = false;
+  Future<void>? _sweep;
 
   /// Temp dir [DecryptVideoUseCase] writes plaintext into.
   static Directory get tempDir =>
@@ -67,9 +67,13 @@ class DecryptedVideoCache {
   /// Clears plaintext a previous run left behind. Runs **once per session**,
   /// before the first decrypt: after that the same directory holds the live
   /// cache entries, and a second sweep would delete them.
-  Future<void> sweepOnce() async {
-    if (_swept) return;
-    _swept = true;
+  ///
+  /// Memoized as a future, not a bool: concurrent callers (the bulk decrypt job
+  /// runs several videos at once) must all wait for the same delete to finish,
+  /// or a later one starts writing into a directory still being wiped.
+  Future<void> sweepOnce() => _sweep ??= _sweep0();
+
+  Future<void> _sweep0() async {
     final dir = tempDir;
     if (await dir.exists()) await dir.delete(recursive: true);
   }

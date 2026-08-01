@@ -198,6 +198,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     });
     controller?.dispose();
     _videoCache.evict(_image.storagePath.path).ignore();
+    // A bulk decrypt also unscrambles the poster into `decryptInfo`; clear it
+    // or the archive tile keeps showing this video as unlocked.
+    context.read<AppBloc>().add(
+      AppEvent.setDecryptedInfo(
+        path: _image.storagePath.path,
+        decryptedInfo: null,
+      ),
+    );
   }
 
   /// Saves the plaintext temp file when unlocked, the encrypted mp4 otherwise —
