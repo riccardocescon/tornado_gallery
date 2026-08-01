@@ -17,6 +17,13 @@ abstract class StorageRepository {
     required String? path,
     required String? album,
   });
+
+  /// Saves the video file at [filePath] into the public gallery album [album].
+  ///
+  /// Path-based rather than bytes-based: a video (encrypted or plaintext) can
+  /// run to gigabytes and must never be loaded into memory.
+  Future<void> saveVideo({required String filePath, required String album});
+
   Stream<EncryptedStreamImage> readPrivateImages(String path);
   Stream<EncryptedStreamImage> readPublicGalleryImages();
   Future<bool> imageExists(String path, String fileName);

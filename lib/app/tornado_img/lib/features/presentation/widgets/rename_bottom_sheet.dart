@@ -1,15 +1,32 @@
-part of '../encrypted_image_page.dart';
+import 'package:flutter/material.dart';
+import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
+import 'package:tornado_img_app/core/utils/file_name_validator.dart';
+import 'package:tornado_img_app/extentions.dart';
+import 'package:tornado_img_app/injection_container.dart';
 
-class _RenameBottomSheet extends StatefulWidget {
-  const _RenameBottomSheet({required this.currentName});
+/// Bottom sheet that asks for a new file name and hands it to [onRename].
+///
+/// Shared by the encrypted image and video pages, so it stays caller-agnostic:
+/// the name validation reads [AppBloc] directly from `get_it`, and applying the
+/// rename is the caller's job.
+class RenameBottomSheet extends StatefulWidget {
+  const RenameBottomSheet({
+    super.key,
+    required this.currentName,
+    required this.onRename,
+    this.title = 'Rename image',
+  });
 
+  /// Current name **without** its extension.
   final String currentName;
+  final ValueChanged<String> onRename;
+  final String title;
 
   @override
-  State<_RenameBottomSheet> createState() => _RenameBottomSheetState();
+  State<RenameBottomSheet> createState() => _RenameBottomSheetState();
 }
 
-class _RenameBottomSheetState extends State<_RenameBottomSheet> {
+class _RenameBottomSheetState extends State<RenameBottomSheet> {
   late TextEditingController _controller;
   final _formKey = GlobalKey<FormState>();
   String? _errorText;
@@ -68,7 +85,7 @@ class _RenameBottomSheetState extends State<_RenameBottomSheet> {
               spacing: 20,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Rename image", style: context.textTheme.titleMedium),
+                Text(widget.title, style: context.textTheme.titleMedium),
                 TextFormField(
                   controller: _controller,
                   validator: _validate,
@@ -86,12 +103,10 @@ class _RenameBottomSheetState extends State<_RenameBottomSheet> {
                             if (_formKey.currentState?.validate() != true) {
                               return;
                             }
-                            context.read<EncryptedImagePageBloc>().add(
-                              EncryptedImagePageEvent.rename(
-                                newName: _controller.text,
-                              ),
-                            );
-                            context.pop();
+                            widget.onRename(_controller.text);
+                            // Plain Navigator: the sheet is a modal route, not
+                            // a GoRouter one.
+                            Navigator.of(context).pop();
                           }
                           : null,
                   child: const Text("Rename"),

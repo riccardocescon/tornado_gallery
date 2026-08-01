@@ -15,6 +15,12 @@ abstract class PublicStorageDatasource {
     required Uint8List bytes,
   });
 
+  /// Saves the video file at [filePath] into the app's public gallery album.
+  ///
+  /// Path-based on purpose: an encrypted video's payload runs to gigabytes and
+  /// must never be read into memory (see the video notes in `CLAUDE.md`).
+  Future<void> saveVideo({required String filePath, required String album});
+
   /// Renames a public gallery asset identified by [assetId].
   ///
   /// On iOS, PhotoKit has no rename API — the implementation saves a new

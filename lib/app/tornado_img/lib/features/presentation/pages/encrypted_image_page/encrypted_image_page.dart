@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tornado_img_app/app_style.dart';
@@ -13,15 +12,13 @@ import 'package:tornado_img_app/core/domain/entities/encrypted/encrypted_image.d
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/features/presentation/bloc/encrypted_image_page_bloc/encrypted_image_page_bloc.dart';
 import 'package:tornado_img_app/features/presentation/widgets/contained_item.dart';
+import 'package:tornado_img_app/features/presentation/widgets/page_background.dart';
 import 'package:tornado_img_app/features/presentation/widgets/password_form_field.dart';
-import 'package:tornado_img_app/core/utils/file_name_validator.dart';
-import 'package:tornado_img_app/injection_container.dart';
+import 'package:tornado_img_app/features/presentation/widgets/rename_bottom_sheet.dart';
 
 part 'widgets/image.dart';
 part 'widgets/info.dart';
 part 'widgets/actions.dart';
-part 'widgets/page_background.dart';
-part 'widgets/rename_bottom_sheet.dart';
 
 class EncryptedImagePage extends StatelessWidget {
   const EncryptedImagePage({super.key});
@@ -49,10 +46,8 @@ class EncryptedImagePage extends StatelessWidget {
           );
         },
         buildWhen:
-            (previous, current) => current.maybeMap(
-              ui: (value) => true,
-              orElse: () => false,
-            ),
+            (previous, current) =>
+                current.maybeMap(ui: (value) => true, orElse: () => false),
         builder: (context, state) {
           return state.maybeMap(
             ui: (value) {
@@ -82,7 +77,6 @@ class EncryptedImagePage extends StatelessWidget {
   }
 
   Widget _titleRow(BuildContext context, EncryptedImage image) {
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -18,6 +18,7 @@ import 'package:tornado_img_app/core/domain/usecases/move_images_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/rename_folder_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart';
 import 'package:tornado_img_app/core/domain/usecases/image_saver_usecase.dart';
+import 'package:tornado_img_app/core/domain/usecases/video_saver_usecase.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
 import 'package:tornado_img_app/core/presentation/bloc/gallery_bloc/gallery_bloc.dart';
 import 'package:tornado_img_app/core/data/repositories/app_repository/app_repository_impl.dart';
@@ -105,6 +106,7 @@ void setupInjectionContainer() {
   );
   getIt.registerFactory(() => AppFolderStreamerUseCase(appRepository: getIt()));
   getIt.registerFactory(() => ImageSaverUseCase(storageRepo: getIt()));
+  getIt.registerFactory(() => VideoSaverUseCase(storageRepo: getIt()));
   getIt.registerFactory(() => ImageRenamerUseCase(storageRepo: getIt()));
   getIt.registerFactory(() => CreateFolderUseCase(storageRepo: getIt()));
   getIt.registerFactory(() => RenameFolderUseCase(storageRepo: getIt()));

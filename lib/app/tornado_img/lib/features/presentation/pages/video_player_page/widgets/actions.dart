@@ -1,9 +1,16 @@
-part of '../encrypted_image_page.dart';
+part of '../video_player_page.dart';
 
+/// Save / rename, same card and copy as the encrypted image page's `_Actions`.
 class _Actions extends StatelessWidget {
-  const _Actions({required this.image});
+  const _Actions({
+    required this.image,
+    required this.onSave,
+    required this.onRename,
+  });
 
   final EncryptedImage image;
+  final VoidCallback onSave;
+  final ValueChanged<String> onRename;
 
   @override
   Widget build(BuildContext context) {
@@ -23,25 +30,21 @@ class _Actions extends StatelessWidget {
             children: [
               OptionItem.button(
                 icon: Icons.save,
-                title: "Save picture",
+                title: "Save video",
                 subtitle:
-                    "Save the current state of the picture. Currently this will be stored in the gallery pictures folder.",
+                    "Save the current state of the video. Currently this will be stored in the gallery videos folder.",
                 trailing: Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 16,
                   color: context.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
-                onTap: () {
-                  context.read<EncryptedImagePageBloc>().add(
-                    const EncryptedImagePageEvent.saveImage(),
-                  );
-                },
+                onTap: onSave,
               ),
               OptionItem.button(
                 icon: Icons.edit,
                 title: "Rename",
                 subtitle:
-                    "Rename the picture. This will change the name of the file on disk.",
+                    "Rename the video. This will change the name of the file on disk.",
                 trailing: Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 16,
@@ -49,19 +52,14 @@ class _Actions extends StatelessWidget {
                 ),
                 onTap: () {
                   final nameWithoutExtension = image.name.split('.').first;
-                  final bloc = context.read<EncryptedImagePageBloc>();
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     builder:
                         (_) => RenameBottomSheet(
+                          title: 'Rename video',
                           currentName: nameWithoutExtension,
-                          onRename:
-                              (newName) => bloc.add(
-                                EncryptedImagePageEvent.rename(
-                                  newName: newName,
-                                ),
-                              ),
+                          onRename: onRename,
                         ),
                   );
                 },

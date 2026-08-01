@@ -62,6 +62,23 @@ class StorageRepositoryImpl implements StorageRepository {
     }
   }
 
+  @override
+  Future<void> saveVideo({
+    required String filePath,
+    required String album,
+  }) async {
+    try {
+      await _publicDatasource.saveVideo(filePath: filePath, album: album);
+    } catch (e) {
+      appLogger.log(
+        'StorageRepositoryImpl.saveVideo: error',
+        LogLayer.repository,
+        error: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
   // ── Read ────────────────────────────────────────────────────────────────────
 
   @override

@@ -28,7 +28,7 @@ class _InfoState extends State<_Info> {
 
     final created = DateFormat('yyyy-MM-dd HH:mm:ss').format(createdAt);
 
-    return _PageBackground(
+    return PageBackground(
       child: Column(
         spacing: 16,
         children: [
@@ -80,8 +80,7 @@ class _InfoState extends State<_Info> {
                         Icon(
                           isDecrypted
                               ? Icons.restore_rounded
-                              :
-                          Icons.remove_red_eye_rounded,
+                              : Icons.remove_red_eye_rounded,
                           color: context.colorScheme.onSurface,
                           size: 28,
                         ),

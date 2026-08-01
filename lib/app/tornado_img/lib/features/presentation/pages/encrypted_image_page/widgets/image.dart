@@ -8,7 +8,6 @@ class _Image extends StatefulWidget {
 }
 
 class __ImageState extends State<_Image> {
-
   Uint8List? bytes;
 
   @override

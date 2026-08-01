@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:photo_manager/photo_manager.dart';
@@ -5,6 +6,7 @@ import 'package:tornado_img_app/core/data/datasources/storage/public_storage_dat
 import 'package:tornado_img_app/core/domain/repositories/storage_repository.dart';
 import 'package:tornado_img_app/core/utils/asset_name_index.dart';
 import 'package:tornado_img_app/core/utils/byte_modeling.dart';
+import 'package:tornado_img_app/core/utils/file_name_utils.dart';
 import 'package:tornado_img_app/core/utils/gallery_path_provider.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
 
@@ -57,6 +59,34 @@ class IosPublicStorageDatasource implements PublicStorageDatasource {
     await AssetNameIndex.saveByAssetId(assetId: resolvedId, fileName: fileName);
     await AssetNameIndex.saveByHash(
       hash: ByteModeling.generateHash(bytes),
+      fileName: fileName,
+    );
+  }
+
+  @override
+  Future<void> saveVideo({
+    required String filePath,
+    required String album,
+  }) async {
+    final albumEntity = await GalleryPathProvider.getOrCreatePublicAlbum(album);
+    if (albumEntity == null) {
+      throw StateError('IosPublicStorageDatasource: album "$album" not found');
+    }
+
+    final fileName = FileNameUtils.basename(filePath);
+    final recentsAsset = await PhotoManager.editor.saveVideo(
+      File(filePath),
+      title: fileName,
+    );
+    final albumAsset = await PhotoManager.editor.copyAssetToPath(
+      asset: recentsAsset,
+      pathEntity: albumEntity,
+    );
+
+    // Only the asset-id index: the hash index would mean reading a file that
+    // can run to gigabytes, which the video path deliberately never does.
+    await AssetNameIndex.saveByAssetId(
+      assetId: albumAsset.id,
       fileName: fileName,
     );
   }

@@ -24,6 +24,14 @@ class AndroidPublicStorageDatasource implements PublicStorageDatasource {
   }
 
   @override
+  Future<void> saveVideo({
+    required String filePath,
+    required String album,
+  }) async {
+    await Gal.putVideo(filePath, album: album);
+  }
+
+  @override
   Future<StorageRenameResult> rename({
     required String assetId,
     required String newFileName,
