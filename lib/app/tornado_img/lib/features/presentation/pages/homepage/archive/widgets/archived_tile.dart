@@ -4,6 +4,7 @@ class _ArchivedTile extends StatefulWidget {
   const _ArchivedTile({
     required this.image,
     required this.dearchivingStateType,
+    this.siblings = const [],
     this.isSelectionMode = false,
     this.isSelected = false,
     this.onToggleSelection,
@@ -11,6 +12,10 @@ class _ArchivedTile extends StatefulWidget {
   });
 
   final EncryptedImage image;
+
+  /// This archive level in display order — handed to the video player so its
+  /// fullscreen viewer can swipe to the next/previous item.
+  final List<EncryptedImage> siblings;
   final DearchivingStateType? dearchivingStateType;
   final bool isSelectionMode;
   final bool isSelected;
@@ -74,12 +79,16 @@ class _ArchivedTileState extends State<_ArchivedTile> {
         } else {
           child = FilledButton(
             onPressed: () {
-              context.pushNamed(
-                widget.image.isVideo
-                    ? Routes.videoPlayer
-                    : Routes.encryptedImagePage,
-                extra: widget.image,
-              );
+              if (widget.image.isVideo) {
+                context.pushNamed(
+                  Routes.videoPlayer,
+                  extra: (image: widget.image, siblings: widget.siblings),
+                );
+                return;
+              }
+              // Images already page through `AppBloc.encryptedImages` inside
+              // their own fullscreen viewer.
+              context.pushNamed(Routes.encryptedImagePage, extra: widget.image);
             },
             onLongPress: widget.onActivateSelection,
             style: FilledButton.styleFrom(

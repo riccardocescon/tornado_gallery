@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tornado_img_app/core/presentation/widgets/zoomable_view.dart';
 
 class FullscreenImageViewer<T> extends StatefulWidget {
   final List<T> images;
@@ -129,114 +130,16 @@ class _FullscreenImageViewerState<T> extends State<FullscreenImageViewer<T>>
             final image = widget.images[index];
             final bytes = widget.getBytes(image);
             final filePath = widget.getFilePath(image);
-            return _ZoomablePage(
+            return ZoomableView(
               key: ValueKey(filePath),
-              bytes: bytes,
               onZoomChanged: (zoomed) => _isZoomed.value = zoomed,
+              child: Image.memory(
+                bytes,
+                fit: BoxFit.contain,
+                gaplessPlayback: true,
+              ),
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _ZoomablePage extends StatefulWidget {
-  final Uint8List bytes;
-  final ValueChanged<bool> onZoomChanged;
-
-  const _ZoomablePage({
-    super.key,
-    required this.bytes,
-    required this.onZoomChanged,
-  });
-
-  @override
-  State<_ZoomablePage> createState() => _ZoomablePageState();
-}
-
-class _ZoomablePageState extends State<_ZoomablePage>
-    with SingleTickerProviderStateMixin {
-  final _controller = TransformationController();
-  late AnimationController _animController;
-  Animation<Matrix4>? _animation;
-
-  static const double _zoomedScale = 2.5;
-
-  /// Scale above which the image counts as "zoomed" (small epsilon over 1.0
-  /// to ignore floating-point noise at the resting scale).
-  static const double _zoomedThreshold = 1.01;
-  static const double _minScale = 0.5;
-  static const double _maxScale = 4.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_onTransformChanged);
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    )..addListener(() {
-      if (_animation != null) {
-        _controller.value = _animation!.value;
-      }
-    });
-  }
-
-  void _onTransformChanged() {
-    final scale = _controller.value.getMaxScaleOnAxis();
-    widget.onZoomChanged(scale > _zoomedThreshold);
-  }
-
-  void _onDoubleTapDown(TapDownDetails details) {
-    final isZoomed = _controller.value.getMaxScaleOnAxis() > _zoomedThreshold;
-
-    final Matrix4 target;
-    if (isZoomed) {
-      target = Matrix4.identity();
-    } else {
-      final position = details.localPosition;
-      target =
-          Matrix4.identity()
-            ..translateByDouble(
-              -position.dx * (_zoomedScale - 1),
-              -position.dy * (_zoomedScale - 1),
-              0.0,
-              1.0,
-            )
-            ..scaleByDouble(_zoomedScale, _zoomedScale, 1.0, 1.0);
-    }
-
-    _animation = Matrix4Tween(begin: _controller.value, end: target).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
-    );
-
-    _animController.forward(from: 0);
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_onTransformChanged);
-    _controller.dispose();
-    _animController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTapDown: _onDoubleTapDown,
-      onDoubleTap: () {},
-      child: InteractiveViewer(
-        transformationController: _controller,
-        minScale: _minScale,
-        maxScale: _maxScale,
-        child: Center(
-          child: Image.memory(
-            widget.bytes,
-            fit: BoxFit.contain,
-            gaplessPlayback: true,
-          ),
         ),
       ),
     );

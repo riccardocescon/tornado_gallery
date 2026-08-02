@@ -31,8 +31,7 @@ GoRouter routes = GoRouter(
       builder: (context, state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: getIt<HomepageBloc>(),
-            ),
+            BlocProvider.value(value: getIt<HomepageBloc>()),
             BlocProvider(
               lazy: false,
               create:
@@ -41,7 +40,7 @@ GoRouter routes = GoRouter(
             ),
           ],
           child: const ShellHomepage(),
-        ); 
+        );
       },
       routes: [
         GoRoute(
@@ -64,10 +63,7 @@ GoRouter routes = GoRouter(
           name: r.Routes.archive,
           builder: (context, state) {
             final bloc = state.extra as ArchivePageBloc;
-            return BlocProvider.value(
-              value: bloc,
-              child: const ArchivePage(),
-            );
+            return BlocProvider.value(value: bloc, child: const ArchivePage());
           },
         ),
         GoRoute(
@@ -92,7 +88,9 @@ GoRouter routes = GoRouter(
           path: r.Routes.videoPlayerPath,
           name: r.Routes.videoPlayer,
           builder: (context, state) {
-            return VideoPlayerPage(image: state.extra as EncryptedImage);
+            final args = state.extra as VideoPlayerArgs;
+
+            return VideoPlayerPage(image: args.image, siblings: args.siblings);
           },
         ),
       ],

@@ -1,18 +1,23 @@
 part of '../video_player_page.dart';
 
-/// The 300px-tall media box: the scrambled poster while locked, the player once
-/// decrypted. Tapping the player opens [FullscreenVideoViewer] on the same
-/// controller.
+/// The 300px-tall media box: the scrambled poster while locked, a still frame of
+/// the decrypted video once unlocked.
+///
+/// It deliberately does not play or scrub — tapping opens
+/// [FullscreenMediaViewer], which owns every playback control. One place with a
+/// player, instead of two half-players fighting over the same texture.
 class _Preview extends StatelessWidget {
   const _Preview({
     required this.image,
     required this.controller,
     required this.decrypting,
+    required this.onOpen,
   });
 
   final EncryptedImage image;
   final VideoPlayerController? controller;
   final bool decrypting;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -44,38 +49,28 @@ class _Preview extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: AppStyle.cardBorderRadius,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          Center(
-            child: AspectRatio(
-              aspectRatio: controller.value.aspectRatio,
-              child: VideoPlayer(controller),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onOpen,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const ColoredBox(color: Colors.black),
+            Center(
+              child: AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: VideoPlayer(controller),
+              ),
             ),
-          ),
-          VideoProgressIndicator(controller, allowScrubbing: true),
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap:
-                  () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      fullscreenDialog: true,
-                      builder:
-                          (_) => FullscreenVideoViewer(
-                            controller: controller,
-                            title: image.name,
-                          ),
-                    ),
-                  ),
-              onDoubleTap:
-                  () =>
-                      controller.value.isPlaying
-                          ? controller.pause()
-                          : controller.play(),
+            const Center(
+              child: Icon(
+                Icons.play_circle_fill_rounded,
+                size: 64,
+                color: Colors.white70,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

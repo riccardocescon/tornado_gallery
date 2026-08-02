@@ -123,6 +123,49 @@ with a per-video salt mixed into the passphrase). Layout and parsing live in
   videos from reads, deletes and asset-id lookups.
 - **Playback** decrypts to a temp file under `systemTemp/tornado_video`.
   On-the-fly range decryption is a deliberate phase-2.
+- **All playback controls live in `FullscreenMediaViewer`**
+  (`core/presentation/pages/fullscreen_media_viewer/`); `VideoPlayerPage`'s 300px
+  box is a *paused* still frame plus a play button that pushes the viewer. One
+  player, not two half-players sharing a texture — and the old inline
+  `VideoProgressIndicator` was unreachable anyway, a `HitTestBehavior.opaque`
+  overlay ate every drag. The viewer **owns its controllers**, one for the
+  current page, and writes positions back through
+  `DecryptedVideoCache.savePosition` on page change and on dispose.
+  Scrub previews are a throttled `seekTo` on the real player (the plaintext is a
+  local file, so a platform seek lands in ms) — deliberately **no** thumbnail
+  strip, so there is no frame cache to invalidate on `evict`/`rekey`/`sweepOnce`.
+  **Rate-limit scrub seeks by the clock, and never pause to scrub.** Measured on
+  device: 261 drag updates → 241 issued seeks → ExoPlayer wedged at
+  `buffering=true` with the position frozen, and `play()` could not recover it.
+  Awaiting `seekTo` is *not* back-pressure — the Android handler is
+  `exoPlayer.seekTo(pos)` and the platform call returns before the seek runs, so
+  a "one in flight" queue drains instantly and throttles nothing. Every scrub
+  seek therefore passes a 250 ms floor with a trailing timer (`_SeekBar`), on top
+  of `SeekQueue` (`core/utils/seek_queue.dart`, latest-target-wins). The bar also
+  **keeps the video playing** while dragging and only mutes it: a playing
+  ExoPlayer keeps its pipeline hot and recovers from a bad seek, a paused one
+  wedged mid-scrub stays wedged. And no seek target may equal `duration`: that
+  sets `isCompleted`, and the plugin's `play()` does
+  `if (position == duration) seekTo(Duration.zero)`, so releasing a scrub at the
+  far right would restart from the beginning — `clampSeekTarget`
+  (`core/utils/duration_utils.dart`, also used by `seekBy`) keeps every target
+  250 ms short of the end.
+  Three gesture rules the layout depends on, all of them things that already
+  broke once: the seek bar and the pager are siblings competing for the same
+  horizontal drag, so a `Listener` flips `_scrubbing` (and the pager to
+  `NeverScrollableScrollPhysics`) on **pointer down** — the slider's
+  `onChangeStart` is too late, the page has the pointer by then. `_chromeVisible`
+  must only change inside `setState`: it feeds the `IgnorePointer` around the
+  controls, and a stale one leaves the invisible 72px play button eating swipes
+  (`IconButton` is `HitTestBehavior.opaque`). And pinch zoom comes from the
+  shared `ZoomableView`, with `doubleTapToZoom: false` on video because there the
+  double tap is ±10s; it enables panning only once zoomed, so at rest the drag
+  stays with the pager.
+  Horizontal swipe pages the archive level it was opened from, filtered by
+  `FullscreenMediaViewer.playable()` to **already-unlocked** items only: there is
+  no app-wide passphrase, so unlocking mid-swipe would need a password prompt
+  inside the fullscreen chrome. The level list rides along as the
+  `videoPlayer` route's `extra` (`VideoPlayerArgs`), passed by `_ArchivedTile`.
 - **Decrypted videos stay unlocked across navigation**, the counterpart of an
   image keeping `decryptInfo` in `AppBloc`: `DecryptedVideoCache`
   (`core/managers/`, app-lifetime singleton) owns the temp file and the last

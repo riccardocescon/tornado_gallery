@@ -11,7 +11,7 @@ import 'package:tornado_img_app/core/domain/usecases/image_renamer_usecase.dart'
 import 'package:tornado_img_app/core/domain/usecases/video_saver_usecase.dart';
 import 'package:tornado_img_app/core/managers/decrypted_video_cache.dart';
 import 'package:tornado_img_app/core/presentation/bloc/app_bloc/app_bloc.dart';
-import 'package:tornado_img_app/core/presentation/pages/fullscreen_video_viewer.dart';
+import 'package:tornado_img_app/core/presentation/pages/fullscreen_media_viewer/fullscreen_media_viewer.dart';
 import 'package:tornado_img_app/core/presentation/widgets/option_item.dart';
 import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/globals.dart';
@@ -26,6 +26,11 @@ import 'package:video_player/video_player.dart';
 part 'widgets/preview.dart';
 part 'widgets/info.dart';
 part 'widgets/actions.dart';
+
+/// `extra` payload of the `videoPlayer` route: the tapped video plus the archive
+/// level it came from, in display order, so the fullscreen viewer can page.
+typedef VideoPlayerArgs =
+    ({EncryptedImage image, List<EncryptedImage> siblings});
 
 /// Detail page for an encrypted video. Same shape as `EncryptedImagePage`:
 /// preview, title row, Info card (decrypt / restore + password + file info),
@@ -44,6 +49,7 @@ class VideoPlayerPage extends StatefulWidget {
   const VideoPlayerPage({
     super.key,
     required this.image,
+    this.siblings = const [],
     this.decryptUseCase,
     this.saveUseCase,
     this.renameUseCase,
@@ -51,6 +57,10 @@ class VideoPlayerPage extends StatefulWidget {
   });
 
   final EncryptedImage image;
+
+  /// The archive level this video was opened from, in display order — what the
+  /// fullscreen viewer pages through. Empty means "just this one".
+  final List<EncryptedImage> siblings;
 
   /// Injectable for widget tests; real runs resolve them from `get_it`.
   final DecryptVideoUseCase? decryptUseCase;
@@ -138,9 +148,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       await controller.dispose();
       return;
     }
+    // Paused on purpose: this is a still frame, playback lives in the
+    // fullscreen viewer. Seeking still renders the resume position.
     if (at > Duration.zero) await controller.seekTo(at);
-    await controller.setLooping(true);
-    await controller.play();
     if (!mounted) {
       await controller.dispose();
       return;
@@ -186,6 +196,52 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         await _attachController(file);
       },
     );
+  }
+
+  /// Opens the real player. The pager walks this video's archive level, live
+  /// objects pulled from [AppBloc] (the siblings handed over at tap time are
+  /// snapshots and may have been un/relocked since), filtered to what can
+  /// actually be rendered.
+  Future<void> _openFullscreen() async {
+    final live = {
+      for (final item in context.read<AppBloc>().encryptedImages)
+        item.storagePath.path: item,
+    };
+    final currentPath = _image.storagePath.path;
+
+    final ordered =
+        widget.siblings.isEmpty
+            ? <EncryptedImage>[_image]
+            : widget.siblings.map((sibling) {
+              // A rename moved this page's file; the snapshot still has the old
+              // path, so redirect it to the current one.
+              final path =
+                  sibling.storagePath.path == widget.image.storagePath.path
+                      ? currentPath
+                      : sibling.storagePath.path;
+              return live[path] ?? sibling;
+            }).toList();
+
+    final items = FullscreenMediaViewer.playable(ordered, _videoCache);
+    final index = items.indexWhere((i) => i.storagePath.path == currentPath);
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder:
+            (_) => FullscreenMediaViewer(
+              items: index < 0 ? [_image] : items,
+              initialIndex: index < 0 ? 0 : index,
+              videoCache: _videoCache,
+            ),
+      ),
+    );
+
+    if (!mounted) return;
+    // The viewer wrote the position it left off at back to the cache; move the
+    // still frame there too.
+    final cached = _videoCache.entry(currentPath);
+    if (cached != null) await _controller?.seekTo(cached.position);
   }
 
   /// Drops the player and the plaintext temp file — back to the poster.
@@ -300,6 +356,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   image: _image,
                   controller: _controller,
                   decrypting: _decrypting,
+                  onOpen: _openFullscreen,
                 ),
               ),
               _titleRow(context),

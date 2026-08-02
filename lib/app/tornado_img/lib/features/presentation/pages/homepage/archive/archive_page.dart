@@ -784,6 +784,7 @@ class _ArchivePageState extends State<ArchivePage> {
                   children: [
                     _ArchivedTile(
                       image: image,
+                      siblings: images,
                       dearchivingStateType: tileStateFor(image),
                       isSelectionMode: s.isSelectionMode,
                       isSelected: _selectedPaths.contains(

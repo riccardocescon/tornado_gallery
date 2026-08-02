@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,9 @@ late SharedPreferences prefs;
 Future<void> initializeGlobals() async {
   packageInfo = await PackageInfo.fromPlatform();
   appLogger = AppLogger();
+  // Mirror plain logs to the console in debug runs; release keeps them in the
+  // in-app Logger page only.
+  appLogger.showPrints = kDebugMode;
   upgrader = Upgrader();
   prefs = await SharedPreferences.getInstance();
 }
