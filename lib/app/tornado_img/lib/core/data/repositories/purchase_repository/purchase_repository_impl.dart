@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tornado_img_app/core/data/datasources/purchase_datasource.dart';
@@ -20,6 +22,12 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
 
   static const String _planKey = 'pro_plan';
   static const String _verifiedKey = 'pro_last_verified';
+
+  /// Debug builds preview Pro without a store (the suffixed debug appId gets zero
+  /// products from Play). Under `flutter test` this must be OFF, otherwise the
+  /// entitlement logic — the thing the premium gates depend on — is untestable.
+  static final bool _debugPreview =
+      kDebugMode && !Platform.environment.containsKey('FLUTTER_TEST');
 
   final PurchaseDatasource _store;
   final SharedPreferences _prefs;
@@ -73,6 +81,10 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
 
   @override
   Future<Either<PurchaseFailure, List<ProProduct>>> loadProducts() async {
+    // ponytail: debug builds get zero products from the store (suffixed appId),
+    // so fake two to preview the paywall. Remove when testing on a Play track.
+    if (_debugPreview) return Right(_mockProducts());
+
     try {
       final products = await _store.queryProducts(Constants.proProductIds);
       if (products.isEmpty) return Left(PurchaseFailure.productsUnavailable());
@@ -185,6 +197,10 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   }
 
   ProEntitlement _readCached() {
+    // ponytail: debug-only — pretend the user is on the monthly plan so the
+    // upgrade-to-lifetime UI is reachable without a store. Remove for release.
+    if (_debugPreview) return ProEntitlement.active(plan: ProPlan.lifetime);
+
     final plan = _planOfName(_prefs.getString(_planKey));
     final verifiedMs = _prefs.getInt(_verifiedKey);
     if (plan == null || verifiedMs == null) return const ProEntitlement.free();
@@ -199,6 +215,23 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   }
 
   // ── Mapping ─────────────────────────────────────────────────────────────────
+
+  List<ProProduct> _mockProducts() => const [
+    ProProduct(
+      id: Constants.proMonthlyId,
+      title: 'Tornado Gallery Pro (Monthly)',
+      description: 'Unlimited images and archives, billed monthly.',
+      price: '1,99 €',
+      plan: ProPlan.monthly,
+    ),
+    ProProduct(
+      id: Constants.proLifetimeId,
+      title: 'Tornado Gallery Pro (Lifetime)',
+      description: 'Unlimited images and archives, one-time purchase.',
+      price: '19,99 €',
+      plan: ProPlan.lifetime,
+    ),
+  ];
 
   ProProduct _toProProduct(ProductDetails details) {
     return ProProduct(

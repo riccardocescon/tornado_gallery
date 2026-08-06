@@ -1,9 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tornado_img_app/app_style.dart';
+import 'package:tornado_img_app/core/utils/constants.dart';
 import 'package:tornado_img_app/core/utils/routes.dart';
 import 'package:tornado_img_app/extentions.dart';
 import 'package:tornado_img_app/theme/theme.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// Deep-links to the store's manage-subscription page. The plugin exposes no
+/// manage API, so both the settings row and the post-upgrade prompt open it.
+Future<void> openManageSubscription() => launchUrl(
+  Uri.parse(
+    Platform.isIOS
+        ? Constants.manageSubscriptionIos
+        : Constants.manageSubscriptionAndroid,
+  ),
+  mode: LaunchMode.externalApplication,
+);
 
 /// Shared Pro surfaces: the purple gradient, the glow, the tinted icon chip and
 /// the two upsell entry points (settings + archive card). Everything visual
@@ -24,10 +39,13 @@ LinearGradient proGradient(BuildContext context) => LinearGradient(
 /// here, because the glow is what marks a surface as premium.
 List<BoxShadow> proGlow() => [
   BoxShadow(
-    color: AppColors.proGlow.withValues(alpha: 0.45),
-    blurRadius: 34,
-    spreadRadius: -14,
-    offset: const Offset(0, 16),
+    color: AppColors.proGlow.withValues(alpha: 1),
+    blurRadius: 14,
+    // Deflated so the glow hugs the widget, then pushed down far enough that the
+    // blur clears the top edge — so it reads only along the bottom curve, never
+    // as a halo above and below. offset.dy >= blurRadius + spreadRadius.
+    spreadRadius: -3,
+    offset: const Offset(0, 8),
   ),
 ];
 
@@ -65,14 +83,27 @@ class ProIconChip extends StatelessWidget {
   }
 }
 
-/// The gradient "Upgrade to Pro" card (Settings).
+/// The gradient "Upgrade to Pro" card (Settings). Reused for the monthly →
+/// lifetime upsell by overriding [title] / [subtitle] / [onTap].
 class ProUpgradeCard extends StatelessWidget {
-  const ProUpgradeCard({super.key});
+  const ProUpgradeCard({
+    super.key,
+    this.title = "Upgrade to Pro",
+    this.subtitle = "Unlimited images and archives",
+    this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+
+  /// Defaults to opening the paywall; the monthly card overrides it to open the
+  /// store's manage-subscription page.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.pushNamed(Routes.pro),
+      onTap: onTap ?? () => context.pushNamed(Routes.pro),
       borderRadius: AppStyle.proCardBorderRadius,
       child: Container(
         padding: const EdgeInsets.all(18),
@@ -102,14 +133,14 @@ class ProUpgradeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Upgrade to Pro",
+                    title,
                     style: context.textTheme.titleMedium?.copyWith(
                       color: context.appColors.onPro,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   Text(
-                    "Unlimited images and archives",
+                    subtitle,
                     style: context.textTheme.labelMedium?.copyWith(
                       color: context.appColors.onPro.withValues(alpha: 0.78),
                     ),
@@ -147,7 +178,6 @@ class ProStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.colorScheme.surface,
           borderRadius: AppStyle.proCardBorderRadius,
-          border: Border.all(color: context.colorScheme.outlineVariant),
         ),
         child: Row(
           spacing: 14,
@@ -165,8 +195,8 @@ class ProStatusCard extends StatelessWidget {
                   ),
                   Text(
                     onManage == null
-                        ? "Thanks for the support — no limits"
-                        : "Thanks for the support — tap to manage",
+                        ? "Thanks for the support - no limits"
+                        : "Thanks for the support - tap to manage",
                     style: context.textTheme.labelMedium,
                   ),
                 ],

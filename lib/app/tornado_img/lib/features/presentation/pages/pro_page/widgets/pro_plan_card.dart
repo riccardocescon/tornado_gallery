@@ -23,7 +23,9 @@ class ProPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor =
-        selected ? context.appColors.pro : context.colorScheme.outlineVariant;
+        selected
+            ? context.appColors.pro
+            : context.colorScheme.outlineVariant.withValues(alpha: 0.1);
 
     return Stack(
       clipBehavior: Clip.none,
@@ -60,6 +62,13 @@ class ProPlanCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Text(
+                      _originalPrice,
+                      style: context.textTheme.labelMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
                     Text(
                       product.price,
                       style: context.textTheme.titleMedium?.copyWith(
@@ -137,5 +146,11 @@ class ProPlanCard extends StatelessWidget {
   String get _period => switch (product.plan) {
     ProPlan.monthly => "/ month",
     ProPlan.lifetime => "one-off",
+  };
+
+  // Marketing "list price", struck through to show the current price as a deal.
+  String get _originalPrice => switch (product.plan) {
+    ProPlan.monthly => "2,99 €",
+    ProPlan.lifetime => "29,99 €",
   };
 }

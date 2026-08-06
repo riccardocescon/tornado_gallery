@@ -26,7 +26,7 @@ class Constants {
 
   // Legal links required on the paywall (App Store guideline 3.1.2).
   static const String termsUrl =
-      'https://github.com/riccardocescon/tornado_gallery/blob/main/TERMS.md';
+      'https://github.com/riccardocescon/tornado_gallery/blob/subscription_plan/TERMS.md';
   static const String privacyUrl =
-      'https://github.com/riccardocescon/tornado_gallery/blob/main/PRIVACY.md';
+      'https://github.com/riccardocescon/tornado_gallery/blob/subscription_plan/PRIVACY.md';
 }

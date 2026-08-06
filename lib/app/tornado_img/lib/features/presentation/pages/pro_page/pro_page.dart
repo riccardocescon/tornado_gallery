@@ -11,6 +11,14 @@ import 'package:tornado_img_app/features/presentation/pages/pro_page/widgets/pro
 import 'package:tornado_img_app/features/presentation/widgets/pro_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+part 'widgets/pro_header.dart';
+part 'widgets/pro_hero.dart';
+part 'widgets/pro_benefits.dart';
+part 'widgets/pro_launch_promo.dart';
+part 'widgets/pro_plans.dart';
+part 'widgets/pro_footer.dart';
+part 'widgets/pro_action_bar.dart';
+
 /// The paywall. Prices are always the store's own formatted strings — the app
 /// never renders a price it made up.
 class ProPage extends StatefulWidget {
@@ -28,9 +36,15 @@ class _ProPageState extends State<ProPage> {
   bool _busy = false;
   bool _welcoming = false;
 
+  /// The plan the user already owned when they opened the paywall (null when
+  /// free). A monthly subscriber is here to upgrade to lifetime.
+  ProPlan? _entryPlan;
+  bool get _isUpgrade => _entryPlan == ProPlan.monthly;
+
   @override
   void initState() {
     super.initState();
+    _entryPlan = context.read<PurchaseBloc>().plan;
     context.read<PurchaseBloc>().add(const PurchaseEvent.loadProducts());
   }
 
@@ -49,21 +63,36 @@ class _ProPageState extends State<ProPage> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(18, 6, 18, 110),
                   children: [
-                    _header(context),
+                    const _Header(),
                     const SizedBox(height: 20),
-                    _hero(context),
+                    _Hero(isUpgrade: _isUpgrade),
                     const SizedBox(height: 22),
-                    _benefits(context),
+                    const _Benefits(),
                     const SizedBox(height: 22),
-                    ..._plans(context),
+                    const _LaunchPromo(),
+                    const SizedBox(height: 22),
+                    _Plans(
+                      products: _products,
+                      selected: _selected,
+                      busy: _busy,
+                      onSelect: (plan) => setState(() => _selected = plan),
+                    ),
                     const SizedBox(height: 4),
-                    _reassurance(context),
+                    const _Reassurance(),
                     const SizedBox(height: 18),
-                    _footerLinks(context),
+                    _FooterLinks(isUpgrade: _isUpgrade),
                   ],
                 ),
               ),
-              _actionBar(context),
+              _ActionBar(
+                product: _selectedProduct,
+                busy: _busy,
+                isUpgrade: _isUpgrade,
+                onBuy:
+                    (product) => context.read<PurchaseBloc>().add(
+                      PurchaseEvent.buy(product: product),
+                    ),
+              ),
               if (_welcoming) ProWelcomeOverlay(plan: _selected),
             ],
           ),
@@ -72,17 +101,23 @@ class _ProPageState extends State<ProPage> {
     );
   }
 
-  // ── State ───────────────────────────────────────────────────────────────────
 
   void _onState(BuildContext context, PurchaseState state) {
     state.maybeWhen(
       products:
           (products) => setState(() {
-            _products = products;
+            // A monthly subscriber already owns monthly — only lifetime is an
+            // upgrade, so don't offer them the plan they already have.
+            _products =
+                _isUpgrade
+                    ? products
+                        .where((p) => p.plan == ProPlan.lifetime)
+                        .toList()
+                    : products;
             _busy = false;
             // Never offer a plan the store didn't return.
-            if (_selectedProduct == null && products.isNotEmpty) {
-              _selected = products.last.plan;
+            if (_selectedProduct == null && _products.isNotEmpty) {
+              _selected = _products.last.plan;
             }
           }),
       loadingProducts: () => setState(() => _busy = true),
@@ -95,8 +130,15 @@ class _ProPageState extends State<ProPage> {
         }
       },
       entitlement: (entitlement) {
-        if (!entitlement.isPro || _welcoming) return;
-        // Bought or restored: celebrate, then get out of the way.
+        // Celebrate only when the plan advances past what we entered with, so a
+        // silent resume-restore (same plan) never pops a user mid-upgrade.
+        if (!entitlement.isPro ||
+            _welcoming ||
+            entitlement.plan == _entryPlan) {
+          return;
+        }
+        // Bought or upgraded: celebrate, then get out of the way.
+        final isUpgrade = _isUpgrade;
         setState(() {
           _busy = false;
           if (entitlement.plan != null) _selected = entitlement.plan!;
@@ -106,7 +148,13 @@ class _ProPageState extends State<ProPage> {
         final router = GoRouter.of(context);
         Future.delayed(const Duration(milliseconds: 1600), () {
           if (!mounted) return;
-          if (router.canPop()) router.pop();
+          // The lifetime unlock doesn't cancel the monthly subscription — nudge
+          // the user to cancel it so they aren't billed twice.
+          if (isUpgrade) {
+            _promptCancelMonthly(router);
+          } else if (router.canPop()) {
+            router.pop();
+          }
         });
       },
       failure: (message) {
@@ -117,312 +165,33 @@ class _ProPageState extends State<ProPage> {
     );
   }
 
-  // ── Sections ────────────────────────────────────────────────────────────────
-
-  Widget _header(BuildContext context) {
-    return Row(
-      spacing: 12,
-      children: [
-        InkWell(
-          onTap: () => context.pop(),
-          borderRadius: AppStyle.detailsBorderRadius,
-          child: Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: context.colorScheme.surface,
-              borderRadius: AppStyle.detailsBorderRadius,
-              border: Border.all(color: context.colorScheme.outlineVariant),
+  /// After a monthly → lifetime upgrade the subscription is still live (no store
+  /// auto-cancels it), so point the user at the store to cancel it.
+  Future<void> _promptCancelMonthly(GoRouter router) async {
+    await showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("You're Lifetime Pro now"),
+            content: const Text(
+              "Your monthly subscription is still active. Cancel it so you're "
+              "not billed again — your Lifetime unlock never expires.",
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Tornado Gallery Pro",
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Later"),
               ),
-              Text(
-                "No limits on your privacy",
-                style: context.textTheme.bodySmall,
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  openManageSubscription();
+                },
+                child: const Text("Cancel subscription"),
               ),
             ],
           ),
-        ),
-      ],
     );
+    if (mounted && router.canPop()) router.pop();
   }
-
-  Widget _hero(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 74,
-          height: 74,
-          decoration: BoxDecoration(
-            gradient: proGradient(context),
-            borderRadius: AppStyle.proCardBorderRadius,
-            boxShadow: proGlow(),
-          ),
-          child: Icon(
-            Icons.workspace_premium_rounded,
-            size: 34,
-            color: context.appColors.onPro,
-          ),
-        ),
-        const SizedBox(height: 14),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 280),
-          child: Text(
-            "Go Pro and remove every limit in Tornado Gallery.",
-            textAlign: TextAlign.center,
-            style: context.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _benefits(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        borderRadius: AppStyle.proCardBorderRadius,
-        border: Border.all(color: context.colorScheme.outlineVariant),
-      ),
-      child: Column(
-        children: [
-          _benefit(context, Icons.lock_rounded, "Unlimited image encryption"),
-          _divider(context),
-          _benefit(
-            context,
-            Icons.inventory_2_rounded,
-            "Unlimited archives to organise your files",
-          ),
-          _divider(context),
-          _benefit(
-            context,
-            Icons.verified_user_rounded,
-            "Every new feature included",
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _benefit(BuildContext context, IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Row(
-        spacing: 13,
-        children: [
-          ProIconChip(icon: icon),
-          Expanded(
-            child: Text(
-              label,
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _divider(BuildContext context) => Divider(
-    height: 1,
-    thickness: 1,
-    color: context.colorScheme.outlineVariant.withValues(alpha: 0.7),
-  );
-
-  List<Widget> _plans(BuildContext context) {
-    if (_products.isEmpty) {
-      return [
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child:
-                _busy
-                    ? const CircularProgressIndicator()
-                    : Text(
-                      "Pro is not available right now. Please try again later.",
-                      textAlign: TextAlign.center,
-                      style: context.textTheme.bodySmall,
-                    ),
-          ),
-        ),
-      ];
-    }
-
-    return [
-      for (final product in _products) ...[
-        ProPlanCard(
-          product: product,
-          selected: product.plan == _selected,
-          onTap: () => setState(() => _selected = product.plan),
-        ),
-        const SizedBox(height: 12),
-      ],
-    ];
-  }
-
-  Widget _reassurance(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: context.appColors.softBackground,
-        borderRadius: AppStyle.proButtonBorderRadius,
-        border: Border.all(color: context.colorScheme.outlineVariant),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 18,
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-          Expanded(
-            child: Text(
-              "Not sure? Try Pro with the monthly plan for a month or two — you "
-              "can switch to Lifetime whenever you want.",
-              style: context.textTheme.bodySmall,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _footerLinks(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 14,
-      children: [
-        _link(context, "Terms of Service", () => _open(Constants.termsUrl)),
-        _dot(context),
-        _link(context, "Privacy Policy", () => _open(Constants.privacyUrl)),
-        _dot(context),
-        _link(
-          context,
-          "Restore purchases",
-          () => context.read<PurchaseBloc>().add(const PurchaseEvent.restore()),
-        ),
-      ],
-    );
-  }
-
-  Widget _link(BuildContext context, String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Text(
-        label,
-        style: context.textTheme.labelMedium?.copyWith(fontSize: 12),
-      ),
-    );
-  }
-
-  Widget _dot(BuildContext context) => Text(
-    "·",
-    style: context.textTheme.labelMedium?.copyWith(
-      color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-    ),
-  );
-
-  // ── Action bar ──────────────────────────────────────────────────────────────
-
-  Widget _actionBar(BuildContext context) {
-    final product = _selectedProduct;
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          14,
-          18,
-          22 + MediaQuery.viewPaddingOf(context).bottom,
-        ),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [
-              context.appColors.scaffoldBackground,
-              context.appColors.scaffoldBackground.withValues(alpha: 0),
-            ],
-            stops: const [0.6, 1],
-          ),
-        ),
-        child: _cta(context, product),
-      ),
-    );
-  }
-
-  Widget _cta(BuildContext context, ProProduct? product) {
-    final enabled = product != null && !_busy;
-
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: InkWell(
-        onTap:
-            enabled
-                ? () => context.read<PurchaseBloc>().add(
-                  PurchaseEvent.buy(product: product),
-                )
-                : null,
-        borderRadius: AppStyle.proButtonBorderRadius,
-        child: Container(
-          height: 56,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: proGradient(context),
-            borderRadius: AppStyle.proButtonBorderRadius,
-            boxShadow: enabled ? proGlow() : null,
-          ),
-          child:
-              _busy
-                  ? SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: context.appColors.onPro,
-                    ),
-                  )
-                  : Text(
-                    _ctaLabel(product),
-                    style: context.textTheme.titleMedium?.copyWith(
-                      color: context.appColors.onPro,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-        ),
-      ),
-    );
-  }
-
-  String _ctaLabel(ProProduct? product) {
-    if (product == null) return "Unavailable";
-    return switch (product.plan) {
-      ProPlan.monthly => "Continue with Monthly · ${product.price}/month",
-      ProPlan.lifetime => "Continue with Lifetime · ${product.price}",
-    };
-  }
-
-  Future<void> _open(String url) =>
-      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
 }
