@@ -26,7 +26,7 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   /// Debug builds preview Pro without a store (the suffixed debug appId gets zero
   /// products from Play). Under `flutter test` this must be OFF, otherwise the
   /// entitlement logic — the thing the premium gates depend on — is untestable.
-  static final bool _debugPreview =
+  static final bool _debugPreview =false &&
       kDebugMode && !Platform.environment.containsKey('FLUTTER_TEST');
 
   final PurchaseDatasource _store;
