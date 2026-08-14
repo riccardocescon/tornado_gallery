@@ -51,8 +51,8 @@ class _ActionBar extends StatelessWidget {
         onTap: enabled ? () => onBuy(product!) : null,
         borderRadius: AppStyle.proButtonBorderRadius,
         child: Container(
-          height: 56,
           alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             gradient: proGradient(context),
             borderRadius: AppStyle.proButtonBorderRadius,
@@ -70,6 +70,7 @@ class _ActionBar extends StatelessWidget {
                   )
                   : Text(
                     _ctaLabel(),
+                    textAlign: TextAlign.center,
                     style: context.textTheme.titleMedium?.copyWith(
                       color: context.appColors.onPro,
                       fontWeight: FontWeight.w800,
