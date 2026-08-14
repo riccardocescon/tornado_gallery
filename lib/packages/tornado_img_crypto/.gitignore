@@ -1,6 +1,3 @@
-# C++ source (encryption core — kept private)
-src/
-
 # Build artifacts
 build_windows/
 build/

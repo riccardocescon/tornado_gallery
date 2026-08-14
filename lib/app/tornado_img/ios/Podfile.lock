@@ -34,6 +34,8 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
+  - flutter_quick_video_encoder (0.0.1):
+    - Flutter
   - gal (1.0.0):
     - Flutter
     - FlutterMacOS
@@ -67,6 +69,7 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
+  - flutter_quick_video_encoder (from `.symlinks/plugins/flutter_quick_video_encoder/ios`)
   - gal (from `.symlinks/plugins/gal/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -90,6 +93,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
+  flutter_quick_video_encoder:
+    :path: ".symlinks/plugins/flutter_quick_video_encoder/ios"
   gal:
     :path: ".symlinks/plugins/gal/darwin"
   package_info_plus:
@@ -116,6 +121,7 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_quick_video_encoder: d688064cc479baa081d923b3ad1e6580df52500b
   gal: 6a522c75909f1244732d4596d11d6a2f86ff37a5
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
