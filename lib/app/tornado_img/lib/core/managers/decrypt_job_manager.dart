@@ -176,7 +176,11 @@ class DecryptJobManager {
     await _videoCache.sweepOnce();
 
     final result = await _decryptVideoUseCase.call(
-      DecryptVideoParams(encryptedPath: path, password: password),
+      DecryptVideoParams(
+        encryptedPath: path,
+        password: password,
+        assetId: image.storagePath.assetId,
+      ),
     );
     return result.fold((failure) => failure.message, (file) {
       _videoCache.put(path, file);

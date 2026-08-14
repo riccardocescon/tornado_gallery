@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:tornado_img_app/core/data/video_crypto/video_box_codec.dart';
 import 'package:tornado_img_app/core/data/video_crypto/video_cipher.dart';
 import 'package:tornado_img_app/core/domain/usecases/usecase.dart';
@@ -15,7 +16,16 @@ class DecryptVideoUseCase extends EncryptionUseCase<File, DecryptVideoParams> {
   @override
   Future<Either<EncryptionFailure, File>> call(DecryptVideoParams params) {
     return guardEither('Error decrypting video', () async {
-      final srcFile = File(params.encryptedPath);
+      var srcFile = File(params.encryptedPath);
+      // A gallery-published video's stored path can be a virtual iOS album
+      // path (no real filesystem entry) rather than a real file — resolve
+      // the real asset file via PhotoKit instead, mirroring
+      // DecryptImageUseCase's assetId fallback for images.
+      if (!await srcFile.exists() && params.assetId != null) {
+        final asset = await AssetEntity.fromId(params.assetId!);
+        final resolved = await asset?.originFile ?? await asset?.file;
+        if (resolved != null) srcFile = resolved;
+      }
       final raf = await srcFile.open();
       final ParsedVideoBox? parsed;
       try {
@@ -48,7 +58,7 @@ class DecryptVideoUseCase extends EncryptionUseCase<File, DecryptVideoParams> {
 
       try {
         await processVideoPayload(
-          srcPath: params.encryptedPath,
+          srcPath: srcFile.path,
           srcOffset: parsed.ciphertextOffset,
           length: header.originalSize,
           dstPath: tempFile.path,
@@ -75,5 +85,13 @@ class DecryptVideoParams {
   final String encryptedPath;
   final String password;
 
-  DecryptVideoParams({required this.encryptedPath, required this.password});
+  /// PhotoKit asset id, used to resolve a real file when [encryptedPath] is
+  /// a virtual iOS gallery path (see [DecryptVideoUseCase.call]).
+  final String? assetId;
+
+  DecryptVideoParams({
+    required this.encryptedPath,
+    required this.password,
+    this.assetId,
+  });
 }

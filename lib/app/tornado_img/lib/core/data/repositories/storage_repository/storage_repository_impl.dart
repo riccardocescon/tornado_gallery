@@ -416,7 +416,15 @@ class StorageRepositoryImpl implements StorageRepository {
       final file = await asset.file;
       if (file == null) return null;
 
-      final bytes = await file.readAsBytes();
+      // Never read a gallery-visible encrypted video whole: it's mostly
+      // ciphertext and can run to gigabytes. Read the poster box only, same
+      // helper the private and Android-subfolder scans use.
+      final ext = FileNameUtils.extensionOf(file.path);
+      final bytes =
+          Constants.videoExtensions.contains(ext)
+              ? await readMediaPreviewBytes(file)
+              : await file.readAsBytes();
+      if (bytes == null) return null;
       final hash = ByteModeling.generateHash(bytes);
 
       final String storagePath;

@@ -64,6 +64,8 @@ class EncryptVideoUseCase
       final outputFile = File('$outputFolder/$fileName');
       await outputFile.parent.create(recursive: true);
 
+      String? assetId;
+
       try {
         final salt = _randomSalt();
 
@@ -104,11 +106,20 @@ class EncryptVideoUseCase
         ).done;
 
         if (rel != null) {
+          final albumName = GalleryPathProvider.getPublicAlbumName(rel);
           await storageRepo.saveVideo(
             filePath: outputFile.path,
-            album: GalleryPathProvider.getPublicAlbumName(rel),
+            album: albumName,
           );
           await outputFile.delete();
+          // Asset IDs only exist on iOS (PhotoKit album-per-folder model,
+          // mirrors EncryptImageUseCase). On Android the public video lives
+          // at a real filesystem path, so assetId stays null.
+          if (Platform.isIOS) {
+            assetId = await GalleryPathProvider.findMostRecentAssetId(
+              albumName: albumName,
+            );
+          }
         }
       } catch (e) {
         // A half-written file here is a corrupt .mp4 that a folder scan
@@ -120,23 +131,29 @@ class EncryptVideoUseCase
 
       // On a gallery save the file no longer lives at outputFile.path — it was
       // handed to the platform and the temp copy deleted. Record where the
-      // store put it, mirroring EncryptImageUseCase's public branch (the album
-      // name stands in when there is no real filesystem path).
+      // store put it, mirroring EncryptImageUseCase's public branch: on iOS
+      // there's no stable filesystem path for a PhotoKit subfolder album, so
+      // use the album name as a virtual path — getPublicFolderPath ignores
+      // `relative` on iOS (it always resolves the *root* album's real path),
+      // which previously showed a freshly encrypted video in the gallery
+      // root until the next folder scan replaced it with the correct path.
       //
       // ponytail: Gal appends a numeric suffix when the name is taken, so a
       // collision leaves this path one character off the real file. The folder
       // watcher's next scan replaces the entry with the real one.
       final storedPath =
-          rel != null
-              ? '${await GalleryPathProvider.getPublicFolderPath(relative: rel) ?? GalleryPathProvider.getPublicAlbumName(rel)}/$fileName'
-              : outputFile.path;
+          rel == null
+              ? outputFile.path
+              : Platform.isIOS
+              ? '${GalleryPathProvider.getPublicAlbumName(rel)}/$fileName'
+              : '${await GalleryPathProvider.getPublicFolderPath(relative: rel) ?? GalleryPathProvider.getPublicAlbumName(rel)}/$fileName';
 
       return Right(
         EncryptedImage(
           storagePath: StoragePath(
             path: storedPath,
             isPrivateFolder: rel == null,
-            assetId: null,
+            assetId: assetId,
           ),
           // The scrambled poster stands in for the "encrypted bytes" of an
           // image: it is what the UI renders, and it is small. Hashing the
