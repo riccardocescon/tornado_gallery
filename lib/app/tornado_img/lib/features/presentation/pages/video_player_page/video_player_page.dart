@@ -179,6 +179,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       DecryptVideoParams(
         encryptedPath: _image.storagePath.path,
         password: _password,
+        assetId: _image.storagePath.assetId,
       ),
     );
 

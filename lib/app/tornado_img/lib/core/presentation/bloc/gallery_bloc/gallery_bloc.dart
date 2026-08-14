@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
@@ -104,15 +103,11 @@ class GalleryBloc extends Bloc<GalleryEvent, GalleryState> {
               fileId: filename ?? image.id,
               posterBytes: posterBytes,
               destinationPath: event.settings.destinationPath,
-              // Gallery-visible videos go to the public album on Android only.
-              // iOS stays private for v1: its public paths are virtual, which
-              // playback can't open, and it is unverified whether PhotoKit
-              // preserves our custom `uuid` boxes when re-importing an mp4 —
-              // if it re-encodes, the ciphertext is gone. When galleryVisible
-              // is true destinationPath is null, which EncryptVideoUseCase
-              // already resolves to the private root.
+              // Gallery-visible videos go to the public album on both
+              // platforms — EncryptVideoUseCase resolves the real assetId
+              // for iOS so playback/decrypt can find the asset afterward.
               publicRelativeAlbum:
-                  event.settings.galleryVisible && Platform.isAndroid
+                  event.settings.galleryVisible
                       ? event.settings.publicRelativeAlbum
                       : null,
             ),
