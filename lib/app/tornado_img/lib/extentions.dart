@@ -31,9 +31,7 @@ extension BuildContextX on BuildContext {
       SnackBar(
         content: Text(
           text,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onError,
-          ),
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onError),
         ),
         backgroundColor: colorScheme.error,
         duration: duration,

@@ -98,12 +98,7 @@ class EncryptedImage with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [
-    storagePath,
-    date,
-    encryptedInfo,
-    decryptInfo,
-  ];
+  List<Object?> get props => [storagePath, date, encryptedInfo, decryptInfo];
 }
 
 class BytesInfo with EquatableMixin {

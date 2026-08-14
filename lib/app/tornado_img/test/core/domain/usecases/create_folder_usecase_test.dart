@@ -46,7 +46,11 @@ void main() {
     ).thenAnswer((_) async => true);
 
     await useCase.call(
-      CreateFolderParams(parentRelativePath: '', name: 'Docs', isPrivate: false),
+      CreateFolderParams(
+        parentRelativePath: '',
+        name: 'Docs',
+        isPrivate: false,
+      ),
     );
 
     verify(

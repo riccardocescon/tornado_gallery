@@ -1,8 +1,7 @@
 part of 'encrypted_image_page_bloc.dart';
 
 @Freezed(equal: false)
-abstract class EncryptedImagePageEvent
-    with _$EncryptedImagePageEvent {
+abstract class EncryptedImagePageEvent with _$EncryptedImagePageEvent {
   const EncryptedImagePageEvent._();
 
   const factory EncryptedImagePageEvent.setup({required String imagePath}) =

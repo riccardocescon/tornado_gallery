@@ -14,6 +14,14 @@ class AppColors {
   static const Color lightSurfaceAlt = Color(0xFFE7E9EC);
   static const Color lightBorder = Color(0xFFE2E7F0);
 
+  // M3 surface-container ladder (light): tone rises = more tinted, anchored on
+  // surface (white) → background → surfaceAlt.
+  static const Color lightSurfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color lightSurfaceContainerLow = Color(0xFFF7F9FC);
+  static const Color lightSurfaceContainer = Color(0xFFF1F4F9);
+  static const Color lightSurfaceContainerHigh = Color(0xFFEBEEF3);
+  static const Color lightSurfaceContainerHighest = Color(0xFFE7E9EC);
+
   static const Color lightTextPrimary = Color(0xFF162033);
   static const Color lightTextSecondary = Color(0xFF5C6877);
   static const Color lightIcon = Color(0xFF4D5A6D);
@@ -23,6 +31,14 @@ class AppColors {
   static const Color darkSurface = Color(0xFF141E32);
   static const Color darkSurfaceAlt = Color(0xFF1E2B45);
   static const Color darkBorder = Color(0xFF2B3B59);
+
+  // M3 surface-container ladder (dark): tone rises = lighter, anchored on
+  // background (darkest) → surface → surfaceAlt.
+  static const Color darkSurfaceContainerLowest = Color(0xFF0A111E);
+  static const Color darkSurfaceContainerLow = Color(0xFF101A2B);
+  static const Color darkSurfaceContainer = Color(0xFF141E32);
+  static const Color darkSurfaceContainerHigh = Color(0xFF18253D);
+  static const Color darkSurfaceContainerHighest = Color(0xFF1E2B45);
 
   static const Color darkTextPrimary = Color(0xFFF2F6FC);
   static const Color darkTextSecondary = Color(0xFF9DB0CC);
@@ -37,6 +53,15 @@ class AppColors {
   // Highlighted "hero" cards (e.g. Select Photo) — subtle navy gradient.
   static const Color darkHeroStart = Color(0xFF22427E);
   static const Color darkHeroEnd = Color(0xFF15243F);
+
+  // Tornado Gallery Pro — a purple family kept apart from the navy accent so
+  // premium surfaces never read as just another primary action. Same in both
+  // themes: it is a brand colour, not a surface.
+  static const Color pro = Color(0xFF8B6BFF);
+  static const Color proGradientStart = Color(0xFF8B6BFF);
+  static const Color proGradientEnd = Color(0xFF5B3FD6);
+  // Glow under the Pro CTAs — the one place the app uses a coloured shadow.
+  static const Color proGlow = Color(0xFF6D47D8);
 
   // Status
   static const Color success = Color(0xFF2E8B57);
@@ -64,6 +89,11 @@ class AppTheme {
       onError: Colors.white,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightTextPrimary,
+      surfaceContainerLowest: AppColors.lightSurfaceContainerLowest,
+      surfaceContainerLow: AppColors.lightSurfaceContainerLow,
+      surfaceContainer: AppColors.lightSurfaceContainer,
+      surfaceContainerHigh: AppColors.lightSurfaceContainerHigh,
+      surfaceContainerHighest: AppColors.lightSurfaceContainerHighest,
       tertiary: Colors.blue.shade700,
     );
 
@@ -367,6 +397,11 @@ class AppTheme {
           accentSubtle: AppColors.primary.withValues(alpha: 0.08),
           heroGradientStart: AppColors.primary,
           heroGradientEnd: AppColors.primaryDark,
+          pro: AppColors.pro,
+          onPro: Colors.white,
+          proSubtle: AppColors.pro.withValues(alpha: 0.16),
+          proGradientStart: AppColors.proGradientStart,
+          proGradientEnd: AppColors.proGradientEnd,
         ),
       ],
     );
@@ -388,7 +423,11 @@ class AppTheme {
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
       onSurfaceVariant: AppColors.darkTextSecondary,
-      surfaceContainerHighest: AppColors.darkSurfaceAlt,
+      surfaceContainerLowest: AppColors.darkSurfaceContainerLowest,
+      surfaceContainerLow: AppColors.darkSurfaceContainerLow,
+      surfaceContainer: AppColors.darkSurfaceContainer,
+      surfaceContainerHigh: AppColors.darkSurfaceContainerHigh,
+      surfaceContainerHighest: AppColors.darkSurfaceContainerHighest,
       outline: AppColors.darkBorder,
       tertiary: AppColors.darkAccent,
     );
@@ -516,10 +555,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: AppColors.darkAccent,
-            width: 1.4,
-          ),
+          borderSide: const BorderSide(color: AppColors.darkAccent, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
@@ -693,6 +729,11 @@ class AppTheme {
           accentSubtle: AppColors.darkAccent.withValues(alpha: 0.16),
           heroGradientStart: AppColors.darkHeroStart,
           heroGradientEnd: AppColors.darkHeroEnd,
+          pro: AppColors.pro,
+          onPro: Colors.white,
+          proSubtle: AppColors.pro.withValues(alpha: 0.16),
+          proGradientStart: AppColors.proGradientStart,
+          proGradientEnd: AppColors.proGradientEnd,
         ),
       ],
     );

@@ -12,6 +12,7 @@ import 'package:tornado_img_app/features/presentation/pages/encrypted_image_page
 import 'package:tornado_img_app/features/presentation/pages/encryption_page/encryption_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/archive/archive_page.dart';
 import 'package:tornado_img_app/features/presentation/pages/homepage/shell_homepage.dart';
+import 'package:tornado_img_app/features/presentation/pages/pro_page/pro_page.dart';
 import 'package:tornado_img_app/injection_container.dart';
 
 GoRouter routes = GoRouter(
@@ -25,13 +26,21 @@ GoRouter routes = GoRouter(
       },
     ),
     GoRoute(
+      path: r.Routes.proPath,
+      name: r.Routes.pro,
+      builder: (context, state) {
+        // PurchaseBloc is an app-wide singleton provided in main.dart; the page
+        // only needs the products loaded.
+        return const ProPage();
+      },
+    ),
+    GoRoute(
       path: r.Routes.homePath,
       name: r.Routes.home,
       builder: (context, state) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider.value(value: getIt<HomepageBloc>(),
-            ),
+            BlocProvider.value(value: getIt<HomepageBloc>()),
             BlocProvider(
               lazy: false,
               create:
@@ -40,7 +49,7 @@ GoRouter routes = GoRouter(
             ),
           ],
           child: const ShellHomepage(),
-        ); 
+        );
       },
       routes: [
         GoRoute(
@@ -63,10 +72,7 @@ GoRouter routes = GoRouter(
           name: r.Routes.archive,
           builder: (context, state) {
             final bloc = state.extra as ArchivePageBloc;
-            return BlocProvider.value(
-              value: bloc,
-              child: const ArchivePage(),
-            );
+            return BlocProvider.value(value: bloc, child: const ArchivePage());
           },
         ),
         GoRoute(

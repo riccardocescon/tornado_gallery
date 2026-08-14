@@ -33,12 +33,12 @@ abstract class HomepageState with _$HomepageState, EquatableMixin {
     galleryStatus:
         (imagesLoaded, folderLoaded, bytesLoaded, lastLoaded, archivingState) =>
             [
-          imagesLoaded,
-          folderLoaded,
-          bytesLoaded,
-          lastLoaded,
+              imagesLoaded,
+              folderLoaded,
+              bytesLoaded,
+              lastLoaded,
               archivingState,
-        ],
+            ],
     loaded: (images, encryptedImages) => [images, encryptedImages],
     homepageSet: (page) => [page],
     failure: (message) => [message],

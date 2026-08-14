@@ -1002,7 +1002,7 @@ extension ArchivePageStatePatterns on ArchivePageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Importing value)?  importing,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _Imported value)?  imported,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Importing value)?  importing,TResult Function( _Deleting value)?  deleting,TResult Function( _UI value)?  ui,TResult Function( _Imported value)?  imported,TResult Function( _LimitReached value)?  limitReached,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -1011,7 +1011,8 @@ return loading(_that);case _Importing() when importing != null:
 return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _Imported() when imported != null:
-return imported(_that);case _Failure() when failure != null:
+return imported(_that);case _LimitReached() when limitReached != null:
+return limitReached(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -1030,7 +1031,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Importing value)  importing,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _Imported value)  imported,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Importing value)  importing,required TResult Function( _Deleting value)  deleting,required TResult Function( _UI value)  ui,required TResult Function( _Imported value)  imported,required TResult Function( _LimitReached value)  limitReached,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -1039,7 +1040,8 @@ return loading(_that);case _Importing():
 return importing(_that);case _Deleting():
 return deleting(_that);case _UI():
 return ui(_that);case _Imported():
-return imported(_that);case _Failure():
+return imported(_that);case _LimitReached():
+return limitReached(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -1057,7 +1059,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Importing value)?  importing,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _Imported value)?  imported,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Importing value)?  importing,TResult? Function( _Deleting value)?  deleting,TResult? Function( _UI value)?  ui,TResult? Function( _Imported value)?  imported,TResult? Function( _LimitReached value)?  limitReached,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -1066,7 +1068,8 @@ return loading(_that);case _Importing() when importing != null:
 return importing(_that);case _Deleting() when deleting != null:
 return deleting(_that);case _UI() when ui != null:
 return ui(_that);case _Imported() when imported != null:
-return imported(_that);case _Failure() when failure != null:
+return imported(_that);case _LimitReached() when limitReached != null:
+return limitReached(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -1084,7 +1087,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  importing,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult Function()?  imported,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function()?  importing,TResult Function( List<String> paths)?  deleting,TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult Function()?  imported,TResult Function()?  limitReached,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -1092,7 +1095,8 @@ return loading();case _Importing() when importing != null:
 return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
 return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported() when imported != null:
-return imported();case _Failure() when failure != null:
+return imported();case _LimitReached() when limitReached != null:
+return limitReached();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -1111,7 +1115,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  importing,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)  ui,required TResult Function()  imported,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function()  importing,required TResult Function( List<String> paths)  deleting,required TResult Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)  ui,required TResult Function()  imported,required TResult Function()  limitReached,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -1119,7 +1123,8 @@ return loading();case _Importing():
 return importing();case _Deleting():
 return deleting(_that.paths);case _UI():
 return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported():
-return imported();case _Failure():
+return imported();case _LimitReached():
+return limitReached();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -1137,7 +1142,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  importing,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult? Function()?  imported,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function()?  importing,TResult? Function( List<String> paths)?  deleting,TResult? Function( List<EncryptedImage> images,  List<ArchiveFolderView> folders,  List<String> breadcrumb,  String currentPath,  bool? currentIsPrivate,  bool isSelectionMode,  DearchivingState? activeJob)?  ui,TResult? Function()?  imported,TResult? Function()?  limitReached,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -1145,7 +1150,8 @@ return loading();case _Importing() when importing != null:
 return importing();case _Deleting() when deleting != null:
 return deleting(_that.paths);case _UI() when ui != null:
 return ui(_that.images,_that.folders,_that.breadcrumb,_that.currentPath,_that.currentIsPrivate,_that.isSelectionMode,_that.activeJob);case _Imported() when imported != null:
-return imported();case _Failure() when failure != null:
+return imported();case _LimitReached() when limitReached != null:
+return limitReached();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -1368,6 +1374,27 @@ as DearchivingState?,
 
 class _Imported extends ArchivePageState {
   const _Imported(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _LimitReached extends ArchivePageState {
+  const _LimitReached(): super._();
   
 
 

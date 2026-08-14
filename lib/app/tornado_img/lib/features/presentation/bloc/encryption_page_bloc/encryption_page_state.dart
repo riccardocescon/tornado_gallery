@@ -19,6 +19,11 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
     required ArchivingState? archivingState,
   }) = _Encrypting;
   const factory EncryptionPageState.encrypted() = _Encrypted;
+
+  /// The free image cap would be exceeded. Not a [failure]: it is an offer, and
+  /// the UI answers it with the paywall rather than an error.
+  const factory EncryptionPageState.limitReached() = _LimitReached;
+
   const factory EncryptionPageState.failure({required String message}) =
       _Failure;
 
@@ -33,10 +38,10 @@ abstract class EncryptionPageState with _$EncryptionPageState, EquatableMixin {
           size,
           dateTime,
         ],
-    settingsUi:
-        (settings) => [settings],
+    settingsUi: (settings) => [settings],
     encrypting: (archivingState) => [archivingState],
     encrypted: () => [],
+    limitReached: () => [],
     failure: (message) => [message],
   );
 }

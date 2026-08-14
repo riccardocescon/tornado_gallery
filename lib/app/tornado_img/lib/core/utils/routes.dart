@@ -9,6 +9,7 @@ class Routes {
   // ── Route names (use with context.pushNamed / goNamed) ────────────────────
   static const String home = 'home';
   static const String logger = 'logger';
+  static const String pro = 'pro';
   static const String encryption = 'encryption';
   static const String archive = 'archive';
   static const String encryptedImagePage = 'encrypted_image_page';
@@ -16,6 +17,10 @@ class Routes {
   // ── Route paths (use in GoRoute path: definitions) ────────────────────────
   static const String homePath = '/';
   static const String loggerPath = '/logger';
+
+  /// Top-level: the paywall is pushed from the home shell *and* from the
+  /// encryption page, so it can't live under either.
+  static const String proPath = '/pro';
   static const String encryptionPath = 'encryption';
   static const String archivePath = 'archive';
   static const String encryptedImagePagePath = 'encrypted_image_page';

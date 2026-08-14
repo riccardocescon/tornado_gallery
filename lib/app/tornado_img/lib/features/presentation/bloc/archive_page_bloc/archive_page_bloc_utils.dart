@@ -60,17 +60,16 @@ class ArchiveTreeUtils {
     }).toList();
   }
 
-  /// Immediate subfolders at the navigation level identified by [isPrivate]
-  /// (null == root, both stores) and [currentPath].
-  static List<ArchiveFolderView> foldersAtLevel(
+  /// Every folder that exists in either store, at any depth — the ones implied
+  /// by an image's path plus the ones created in-session (which may be empty).
+  ///
+  /// Intermediate ancestors are included, so an image sitting only in `A/B/C`
+  /// still yields `A`, `A/B` and `A/B/C`. This is both the basis of the
+  /// navigable tree and the archive count the free-tier cap is checked against.
+  static Set<FolderKey> allFolderKeys(
     List<EncryptedImage> all,
-    Set<FolderKey> createdFolders, {
-    required bool? isPrivate,
-    required String currentPath,
-    DearchivingState? Function(bool isPrivate, String relativePath)? jobFor,
-  }) {
-    // Every folder path that exists, expanded to include intermediate
-    // ancestors so a deep-only image still surfaces its parent folders.
+    Set<FolderKey> createdFolders,
+  ) {
     final allDirs = <FolderKey>{};
 
     void addWithAncestors(bool priv, String rel) {
@@ -88,6 +87,20 @@ class ArchiveTreeUtils {
     for (final f in createdFolders) {
       addWithAncestors(f.isPrivate, f.relativePath);
     }
+
+    return allDirs;
+  }
+
+  /// Immediate subfolders at the navigation level identified by [isPrivate]
+  /// (null == root, both stores) and [currentPath].
+  static List<ArchiveFolderView> foldersAtLevel(
+    List<EncryptedImage> all,
+    Set<FolderKey> createdFolders, {
+    required bool? isPrivate,
+    required String currentPath,
+    DearchivingState? Function(bool isPrivate, String relativePath)? jobFor,
+  }) {
+    final allDirs = allFolderKeys(all, createdFolders);
 
     // Select the immediate children of the current level.
     final children = <String, FolderKey>{}; // dedup key -> child

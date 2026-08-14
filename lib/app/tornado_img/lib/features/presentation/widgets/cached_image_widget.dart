@@ -35,7 +35,7 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
             : (widget.index > end)
             ? widget.index - end
             : 0; // widget visibile
-            
+
     return distance <= maxKeepAliveDistance;
   }
 
@@ -73,7 +73,7 @@ class _CachedImageWidgetState extends State<CachedImageWidget>
           cacheHeight: 150,
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
             if (wasSynchronouslyLoaded) return child;
-            
+
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child:

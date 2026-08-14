@@ -90,6 +90,17 @@ class TapToSelectPickerDelegate
     required List<AssetEntity> currentAssets,
     required List<SpecialItemFinalized> specialItemsFinalized,
   }) {
+    // Trigger loading the next page as the user scrolls near the end. The base
+    // assetGridItemBuilder normally does this; since we override it, we must
+    // replicate the trigger or pagination stops after the first page.
+    if (provider.hasMoreToLoad) {
+      if ((provider.pageSize <= gridCount * 3 &&
+              index == currentAssets.length - 1) ||
+          index == currentAssets.length - gridCount * 3) {
+        provider.loadMoreAssets();
+      }
+    }
+
     final int prependCount =
         specialItemsFinalized
             .where((e) => e.position == SpecialItemPosition.prepend)

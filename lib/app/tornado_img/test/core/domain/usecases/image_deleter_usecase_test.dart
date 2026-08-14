@@ -35,9 +35,7 @@ void main() {
 
   group('ImageDeleterUseCase.call', () {
     test('returns Right(true) when storage deletes successfully', () async {
-      when(
-        () => mockStorageRepo.delete(any()),
-      ).thenAnswer((_) async => true);
+      when(() => mockStorageRepo.delete(any())).thenAnswer((_) async => true);
 
       final image = _makeImage('/path/image.png');
       final result = await useCase.call(ImageDeleterParams(images: [image]));
@@ -47,9 +45,7 @@ void main() {
     });
 
     test('returns Right(false) when storage reports file not found', () async {
-      when(
-        () => mockStorageRepo.delete(any()),
-      ).thenAnswer((_) async => false);
+      when(() => mockStorageRepo.delete(any())).thenAnswer((_) async => false);
 
       final image = _makeImage('/path/image.png');
       final result = await useCase.call(ImageDeleterParams(images: [image]));
@@ -58,37 +54,36 @@ void main() {
     });
 
     test('passes storagePath with assetId to storage when provided', () async {
-      when(
-        () => mockStorageRepo.delete(any()),
-      ).thenAnswer((_) async => true);
+      when(() => mockStorageRepo.delete(any())).thenAnswer((_) async => true);
 
       final image = _makeImage('/path/image.png', assetId: 'asset_123');
       await useCase.call(ImageDeleterParams(images: [image]));
 
-      verify(
-        () => mockStorageRepo.delete([image.storagePath]),
-      );
+      verify(() => mockStorageRepo.delete([image.storagePath]));
     });
 
-    test('passes all storagePaths in a single repo call for multi-image delete', () async {
-      when(
-        () => mockStorageRepo.delete(any()),
-      ).thenAnswer((_) async => true);
+    test(
+      'passes all storagePaths in a single repo call for multi-image delete',
+      () async {
+        when(() => mockStorageRepo.delete(any())).thenAnswer((_) async => true);
 
-      final image1 = _makeImage('/path/img1.png');
-      final image2 = _makeImage('/path/img2.png');
-      final image3 = _makeImage('/path/img3.png', assetId: 'asset_abc');
+        final image1 = _makeImage('/path/img1.png');
+        final image2 = _makeImage('/path/img2.png');
+        final image3 = _makeImage('/path/img3.png', assetId: 'asset_abc');
 
-      await useCase.call(ImageDeleterParams(images: [image1, image2, image3]));
+        await useCase.call(
+          ImageDeleterParams(images: [image1, image2, image3]),
+        );
 
-      verify(
-        () => mockStorageRepo.delete([
-          image1.storagePath,
-          image2.storagePath,
-          image3.storagePath,
-        ]),
-      ).called(1);
-    });
+        verify(
+          () => mockStorageRepo.delete([
+            image1.storagePath,
+            image2.storagePath,
+            image3.storagePath,
+          ]),
+        ).called(1);
+      },
+    );
 
     test('returns Left(encryptionError) when storage throws', () async {
       when(

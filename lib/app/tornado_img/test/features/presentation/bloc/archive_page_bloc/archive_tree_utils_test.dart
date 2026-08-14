@@ -51,10 +51,7 @@ void main() {
         isPrivate: null,
         currentPath: '',
       );
-      expect(
-        folders.map((f) => f.name).toSet(),
-        {'Vacanze', 'Gallery1'},
-      );
+      expect(folders.map((f) => f.name).toSet(), {'Vacanze', 'Gallery1'});
     });
 
     test('recursive image count includes nested images', () {
@@ -98,6 +95,42 @@ void main() {
         relativePath: 'Vacanze',
       );
       expect(result.map((i) => i.name).toSet(), {'a.png', 'b.png'});
+    });
+  });
+
+  // This is the count the free-tier archive cap is checked against, so an
+  // over- or under-count here is a billing bug.
+  group('allFolderKeys', () {
+    test('counts nested folders and their ancestors, each exactly once', () {
+      final keys = ArchiveTreeUtils.allFolderKeys(images, const {});
+
+      expect(keys, {
+        (isPrivate: true, relativePath: 'Vacanze'),
+        (isPrivate: true, relativePath: 'Vacanze/Mare'),
+        (isPrivate: false, relativePath: 'Gallery1'),
+      });
+      // Two images live under Vacanze — it must still be counted once.
+      expect(keys.length, 3);
+    });
+
+    test('includes in-session folders that hold no image yet', () {
+      final keys = ArchiveTreeUtils.allFolderKeys(images, {
+        (isPrivate: true, relativePath: 'Empty'),
+        // Already implied by an image: must not be double-counted.
+        (isPrivate: true, relativePath: 'Vacanze'),
+      });
+
+      expect(keys, contains((isPrivate: true, relativePath: 'Empty')));
+      expect(keys.length, 4);
+    });
+
+    test('the same folder name in each store counts as two archives', () {
+      final keys = ArchiveTreeUtils.allFolderKeys(const [], {
+        (isPrivate: true, relativePath: 'Shared'),
+        (isPrivate: false, relativePath: 'Shared'),
+      });
+
+      expect(keys.length, 2);
     });
   });
 }

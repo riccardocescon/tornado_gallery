@@ -12,11 +12,10 @@ Tornado IMG is a Flutter mobile app for local image encryption. Users select ima
 
 ## Commands
 
-> **Melos glob is stale.** `melos.yaml` declares `packages: packages/**`, but the
-> real packages live under `lib/` (`lib/app/tornado_img`, `lib/packages/*`).
-> So `melos exec` matches **zero packages** and silently no-ops (e.g. a
-> `melos exec -- dart analyze` prints SUCCESS without analyzing anything). Until
-> the glob is fixed, run tooling **per package** (`cd` into each):
+The melos glob matches the three real packages (`lib/app/*`, `lib/packages/*` —
+verify with `melos list`). `melos analyze` and `melos format` work workspace-wide.
+`melos test` does **not**: it invokes `dart test`, which fails in the two
+flutter_test packages (app, crypto) — for tests, run per package:
 
 ```bash
 # App package: analyze + tests (the app uses flutter_test, so use `flutter test`)
@@ -36,9 +35,8 @@ cd lib/packages/logger && dart test
 dart format .
 ```
 
-Melos scripts that DO work (they scope explicitly): `melos app:run`,
-`melos app:build:android`. The `melos crypto:test` script is broken (invokes
-`dart test`, which the package can't run).
+Scoped melos scripts: `melos app:run`, `melos app:build:android`,
+`melos crypto:test`.
 
 The crypto package native binary is compiled separately (see `lib/packages/tornado_img_crypto/CLAUDE.md` for full build prerequisites):
 - Windows: `lib/packages/tornado_img_crypto/scripts/build_windows.bat`
@@ -46,6 +44,60 @@ The crypto package native binary is compiled separately (see `lib/packages/torna
 - C++ engine test/deploy: `lib/cpp/scripts/build_test_deploy.ps1`
 
 The C++ source lives at `lib/cpp/src/` (shared across platforms). Per `README.md` it is excluded from the public repo, but is present in this working tree. Deep docs: `lib/cpp/CLAUDE.md`.
+
+## File map — look here first, don't search
+
+The app's Dart package is named **`tornado_img_app`** (imports are
+`package:tornado_img_app/...`, *not* `tornado_img`). All paths below are
+relative to `lib/app/tornado_img/lib/`.
+
+| You need | File |
+|---|---|
+| App entry, root `BlocProvider`s | `main.dart` |
+| DI wiring (`get_it`) | `injection_container.dart` |
+| GoRouter route table (builders, `state.extra` casts) | `routes.dart` |
+| Route name/path constants (`Routes.x` / `Routes.xPath`) | `core/utils/routes.dart` |
+| `Constants` (free caps, `imageExtensions`, `proGracePeriod`) | `core/utils/constants.dart` |
+| `appLogger` + `LogLayer` | `core/utils/globals.dart` |
+| `FileNameUtils` | `core/utils/file_name_utils.dart` |
+| Theme + `AppColorsExtension` tokens | `theme/theme.dart`, `theme/app_colors_ext.dart` |
+| `AppStyle` (radii etc.) | `app_style.dart` (package root, not `theme/`) |
+| Failure types (incl. `PurchaseFailure`) | `core/failures/failures.dart` |
+| Entities | `core/domain/entities/` — encrypted ones in `entities/encrypted/` (`encrypted_image.dart`, `encrypted_folder.dart`); Pro: `pro_entitlement.dart`, `pro_product.dart` |
+| Use case base classes + `guardEither` | `core/domain/usecases/usecase.dart`; use cases sit beside it |
+| Repository interfaces | `core/domain/repositories/` |
+| Repository impls | `core/data/repositories/<name>_repository/<name>_repository_impl.dart` |
+| Storage/gallery datasources (platform split) | `core/data/datasources/storage/` and `datasources/app/{private,public}/` |
+| IAP datasource (sole `in_app_purchase` importer) | `core/data/datasources/purchase_datasource.dart` |
+| Core blocs: `AppBloc`, `GalleryBloc`, `PurchaseBloc` | `core/presentation/bloc/<x>_bloc/` |
+| Feature blocs: Homepage, Archive, Encryption, EncryptedImage | `features/presentation/bloc/<x>_bloc/` |
+| `ArchiveTreeUtils` (folder-tree walks) | `features/presentation/bloc/archive_page_bloc/archive_page_bloc_utils.dart` |
+| Pages | `features/presentation/pages/<page>/` — sub-widgets in `<page>/widgets/` via `part of` (see the `clear-widgets` skill) |
+| Shared widgets (`AppCard`, `pro_widgets.dart`, `PageTitle`, …) | `features/presentation/widgets/` |
+| Folder watching / decrypt queue | `core/managers/stream_manager.dart`, `core/managers/decrypt_job_manager.dart` |
+| What's New popup | `core/presentation/widgets/whats_new_dialog.dart` + `core/data/whats_new_service.dart` |
+
+Each bloc folder holds `<x>_bloc.dart`, `<x>_event.dart`, `<x>_state.dart`
+joined by `part` directives, plus the generated `.freezed.dart`. Tests mirror
+source paths under `lib/app/tornado_img/test/` (e.g.
+`test/core/domain/usecases/encrypt_image_usecase_test.dart`).
+
+### Common task recipes (files to touch, nothing else)
+
+- **New page + route**: page under `features/presentation/pages/<page>/` →
+  constants pair in `core/utils/routes.dart` → `GoRoute` in `routes.dart` → if it
+  has a bloc, register a **factory** in `injection_container.dart`.
+- **New use case**: class in `core/domain/usecases/` extending
+  `EncryptionUseCase`/`StreamUseCase` with `guardEither` → register in
+  `injection_container.dart` → inject into the calling bloc.
+- **New bloc state/event**: edit the `@freezed` union → run build_runner (see
+  **Code Generation**) → handle the new case in the page's `BlocBuilder`/`BlocListener`.
+- **New Pro-gated feature**: read `PurchaseBloc.isPro` at the choke point → emit
+  `limitReached` (never `failure`) → UI responds with `context.pushNamed(Routes.pro)`.
+
+These recipes exist as invocable skills (`/add-page`, `/regen`, `/pro-gate`,
+`/release-check`, plus `/unit-test`, `/clear-widgets`, `/update-whats-new`) —
+catalog with details in `docs/skills.md`.
 
 ## Architecture
 
@@ -64,6 +116,7 @@ Implements the domain repositories. Key split:
 - `AppBloc` is the **in-memory canonical store** of `EncryptedImage` objects; all UI reads from it, not from disk.
 - `HomepageBloc` tracks `_runtimeUpserts` and `_runtimeRemovals` as pending changes before committing to `AppBloc`.
 - `StreamManager` watches private and public folders concurrently via `watcher`; folder change events flow into `HomepageBloc` for real-time UI refresh.
+- `PurchaseBloc` is the app-wide owner of the Pro entitlement; its `isPro` getter is the single source of truth for every paid gate (see **Monetization** below).
 - Feature BLoCs (`EncryptionPageBloc`, `ArchivePageBloc`) are registered as **factories** (not singletons) in `get_it` to allow multiple instances.
 
 ### Dependency Injection
@@ -77,7 +130,11 @@ are passed between routes via `state.extra` (cast to the concrete type in the
 route builder), not URL params.
 
 ### Key Patterns
-- **Either**: `dartz` `Either<Failure, T>` is the return type for all repository and use case calls.
+- **Either**: `dartz` `Either<Failure, T>` starts at the **use case** — repositories
+  (e.g. `AppRepository`, `StorageRepository`) return plain futures and let the use
+  case wrap them. The one deliberate exception is `PurchaseRepository`: purchases
+  have no use-case layer, so the repository *is* the outermost boundary and returns
+  `Either<PurchaseFailure, T>` itself.
 - **Freezed sealed classes**: `AppState`, `HomepageState`, etc. use `@freezed` union types. Always run `flutter pub run build_runner build` after modifying a `@freezed` class.
 - **Lazy decryption**: `EncryptedImage.decryptInfo` starts as `null`. Decrypted bytes are populated on-demand by `GalleryBloc._onDecryptImages` to avoid loading all images into memory at once.
 - **FFI encryption**: The `tornado_img_crypto` package exposes a Dart interface over a C++ AES-256-CTR engine compiled via CMake per platform.
@@ -95,6 +152,11 @@ route builder), not URL params.
   and `Constants.imageExtensions` — don't re-inline `split('.')` / `{png,jpg,jpeg}`.
 - **Shared UI**: reuse `AppCard` (`features/presentation/widgets/app_card.dart`) for the
   standard surface card instead of re-declaring the `Container`+`BoxDecoration`.
+- **Visual style**: read `DESIGN.md` before writing or changing any UI — palette, radii,
+  typography and the `AppColorsExtension` tokens all come from
+  `theme/theme.dart`. Never hardcode a colour, radius, or text style in a widget.
+- **Paid gates**: read `PurchaseBloc.isPro` — never re-derive entitlement from
+  `prefs` or the store. Never hardcode a price (see **Monetization**).
 
 ### Crypto encoding constraint (do NOT change)
 `encryptor_interface.dart` `_encodePhrase` uses `String.codeUnits` (UTF-16 code
@@ -103,6 +165,87 @@ encoding would break decryption of every image already encrypted with a non-ASCI
 password. Any migration is a separate task with a migration strategy. The
 `tornado_img_crypto` package is **gitignored** (excluded from the public repo) —
 edits there apply on disk but won't be committed.
+
+## Monetization (Tornado Gallery Pro)
+
+In-app purchases via `in_app_purchase` (Apple/Google only — **no RevenueCat, no
+backend**, which is what keeps the app fully offline). Two SKUs, one entitlement:
+a monthly subscription and a lifetime unlock both grant the same `isPro`, and
+nothing that reads it cares which one paid.
+
+Background: `docs/tornado-pro-premium-plan.md` (decisions) and
+`docs/store-setup.md` (Play Console / App Store Connect setup).
+
+### Free tier vs Pro
+| | Free | Pro |
+|---|---|---|
+| Encrypted images | `Constants.maxEncryptedImages` (20) | unlimited |
+| Archives (folders) | `Constants.maxArchives` (3) | unlimited |
+
+### Enforcement — two choke points, and only two
+Both were verified as the *sole* path to their action, so a cap check anywhere
+else is a bug (and a cap check that's missing from one of these is a revenue leak):
+
+- **Images** → `EncryptionPageBloc.exceedsFreeLimit`. `Routes.encryption` is the
+  only way into encryption, and `GalleryEvent.encryptImages` is dispatched only
+  from that bloc.
+- **Archives** → `ArchivePageBloc.exceedsFreeLimit`, checked in `_onCreateFolder`.
+  Counting uses `ArchiveTreeUtils.allFolderKeys` (shared with `foldersAtLevel` —
+  don't write a second tree walk).
+
+Hitting a cap emits a **`limitReached`** state, *not* `failure`. A limit is an
+offer, not an error: the UI answers it with the paywall, never an error toast.
+The Encrypt button is also *disabled* up front so the user never presses
+something that can only fail.
+
+### Layering
+- `core/data/datasources/purchase_datasource.dart` is the **only** file permitted
+  to import `in_app_purchase`. Keep it that way — it is what makes the entitlement
+  rules testable without a device or a store.
+- **No use cases** for purchases (they would be 1:1 pass-throughs), so
+  `PurchaseRepository` is the outermost boundary and returns `Either<PurchaseFailure, T>`.
+- `PurchaseBloc` is a **lazy singleton**, provided at the root in `main.dart` and
+  set up with `PurchaseEvent.setup()`. Paywall route: `Routes.pro` → `/pro`
+  (top-level, because it's pushed from both the home shell and the encryption page).
+
+### Entitlement rules (subtle — do not "simplify")
+- **One 7-day grace rule for both SKUs.** Pro holds only while the store has
+  confirmed it within `Constants.proGracePeriod`. Lifetime is *not* cached forever.
+- **Why:** `restorePurchases()` returns `void`; its results arrive asynchronously
+  on `purchaseStream` as `PurchaseStatus.restored`. The plugin gives you **no**
+  "the store returned nothing" signal, and the store only ever reports *active*
+  purchases — so a cancelled subscription or a refunded lifetime is detectable
+  only by **absence**. The 7-day clock *is* that detection: no confirmation ⇒ the
+  clock runs out ⇒ Pro drops. Deleting it silently makes cancellations unenforceable.
+- Persisted in `prefs`: `pro_plan`, `pro_last_verified`. A silent
+  `PurchaseEvent.restore(silent: true)` fires on every app resume to restamp it.
+- **`completePurchase()` must run for every `purchased` *and* `restored` event** —
+  Google Play auto-refunds anything left unacknowledged for 3 days.
+- **Never hardcode a price.** Always render `ProProduct.price`, which is
+  `ProductDetails.price` — store-formatted, localised, currency-correct. The
+  €1.99 / €19.99 figures exist only in the store consoles.
+
+### Pro visual tokens
+`AppColorsExtension`: `pro`, `onPro`, `proSubtle`, `proGradientStart/End`
+(a purple family, kept apart from the navy `accent` so premium reads as premium).
+Radii: `AppStyle.pro*BorderRadius`. Shared widgets: `features/presentation/widgets/pro_widgets.dart`.
+
+`proGlow()` is a **deliberate, documented exception** to DESIGN.md's "depth from
+1px borders, never shadows" — the coloured glow is what marks a Pro CTA. Don't
+"fix" it.
+
+### Platform setup (verified against the resolved plugins — don't cargo-cult)
+- **No `AndroidManifest.xml` change.** `com.android.vending.BILLING` merges in from
+  the Play Billing AAR; the plugin declares it nowhere. The "add the BILLING
+  permission" advice you'll find online is obsolete.
+- **No `enablePendingPurchases()`** — removed in `in_app_purchase_android` 0.5.0.
+- **No Xcode capability or entitlement** — StoreKit needs none, and StoreKit 2 is
+  already the plugin default.
+- ⚠️ **Debug builds are `com.flockit.tornadogallery.debug`**
+  (`applicationIdSuffix` in `android/app/build.gradle.kts`). Play knows nothing about
+  that id, so **billing returns zero products in any debug build** and the paywall
+  shows "Pro is not available right now." Android IAP must be tested on a
+  release build installed from a Play track.
 
 ## Code Generation
 

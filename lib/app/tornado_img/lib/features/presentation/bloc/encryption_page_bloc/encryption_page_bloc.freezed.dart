@@ -715,7 +715,7 @@ extension EncryptionPageStatePatterns on EncryptionPageState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _UI value)?  ui,TResult Function( _SettingsUI value)?  settingsUi,TResult Function( _Encrypting value)?  encrypting,TResult Function( _Encrypted value)?  encrypted,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _UI value)?  ui,TResult Function( _SettingsUI value)?  settingsUi,TResult Function( _Encrypting value)?  encrypting,TResult Function( _Encrypted value)?  encrypted,TResult Function( _LimitReached value)?  limitReached,TResult Function( _Failure value)?  failure,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -724,7 +724,8 @@ return loading(_that);case _UI() when ui != null:
 return ui(_that);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that);case _Encrypting() when encrypting != null:
 return encrypting(_that);case _Encrypted() when encrypted != null:
-return encrypted(_that);case _Failure() when failure != null:
+return encrypted(_that);case _LimitReached() when limitReached != null:
+return limitReached(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return orElse();
 
@@ -743,7 +744,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _UI value)  ui,required TResult Function( _SettingsUI value)  settingsUi,required TResult Function( _Encrypting value)  encrypting,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _Failure value)  failure,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _UI value)  ui,required TResult Function( _SettingsUI value)  settingsUi,required TResult Function( _Encrypting value)  encrypting,required TResult Function( _Encrypted value)  encrypted,required TResult Function( _LimitReached value)  limitReached,required TResult Function( _Failure value)  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial():
@@ -752,7 +753,8 @@ return loading(_that);case _UI():
 return ui(_that);case _SettingsUI():
 return settingsUi(_that);case _Encrypting():
 return encrypting(_that);case _Encrypted():
-return encrypted(_that);case _Failure():
+return encrypted(_that);case _LimitReached():
+return limitReached(_that);case _Failure():
 return failure(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -770,7 +772,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _UI value)?  ui,TResult? Function( _SettingsUI value)?  settingsUi,TResult? Function( _Encrypting value)?  encrypting,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _Failure value)?  failure,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _UI value)?  ui,TResult? Function( _SettingsUI value)?  settingsUi,TResult? Function( _Encrypting value)?  encrypting,TResult? Function( _Encrypted value)?  encrypted,TResult? Function( _LimitReached value)?  limitReached,TResult? Function( _Failure value)?  failure,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
@@ -779,7 +781,8 @@ return loading(_that);case _UI() when ui != null:
 return ui(_that);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that);case _Encrypting() when encrypting != null:
 return encrypting(_that);case _Encrypted() when encrypted != null:
-return encrypted(_that);case _Failure() when failure != null:
+return encrypted(_that);case _LimitReached() when limitReached != null:
+return limitReached(_that);case _Failure() when failure != null:
 return failure(_that);case _:
   return null;
 
@@ -797,7 +800,7 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult Function( EncryptionSettings settings)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult Function( EncryptionSettings settings)?  settingsUi,TResult Function( ArchivingState? archivingState)?  encrypting,TResult Function()?  encrypted,TResult Function()?  limitReached,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -805,7 +808,8 @@ return loading();case _UI() when ui != null:
 return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
-return encrypted();case _Failure() when failure != null:
+return encrypted();case _LimitReached() when limitReached != null:
+return limitReached();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -824,7 +828,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)  ui,required TResult Function( EncryptionSettings settings)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)  ui,required TResult Function( EncryptionSettings settings)  settingsUi,required TResult Function( ArchivingState? archivingState)  encrypting,required TResult Function()  encrypted,required TResult Function()  limitReached,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -832,7 +836,8 @@ return loading();case _UI():
 return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI():
 return settingsUi(_that.settings);case _Encrypting():
 return encrypting(_that.archivingState);case _Encrypted():
-return encrypted();case _Failure():
+return encrypted();case _LimitReached():
+return limitReached();case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -850,7 +855,7 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult? Function( EncryptionSettings settings)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<GalleryImage> images,  String fileName,  String size,  String dateTime)?  ui,TResult? Function( EncryptionSettings settings)?  settingsUi,TResult? Function( ArchivingState? archivingState)?  encrypting,TResult? Function()?  encrypted,TResult? Function()?  limitReached,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -858,7 +863,8 @@ return loading();case _UI() when ui != null:
 return ui(_that.images,_that.fileName,_that.size,_that.dateTime);case _SettingsUI() when settingsUi != null:
 return settingsUi(_that.settings);case _Encrypting() when encrypting != null:
 return encrypting(_that.archivingState);case _Encrypted() when encrypted != null:
-return encrypted();case _Failure() when failure != null:
+return encrypted();case _LimitReached() when limitReached != null:
+return limitReached();case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -1091,6 +1097,27 @@ as ArchivingState?,
 
 class _Encrypted extends EncryptionPageState {
   const _Encrypted(): super._();
+  
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _LimitReached extends EncryptionPageState {
+  const _LimitReached(): super._();
   
 
 

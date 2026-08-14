@@ -18,6 +18,26 @@ class EncryptionFailure extends Failure {
   }
 }
 
+class PurchaseFailure extends Failure {
+  const PurchaseFailure._({required super.message});
+
+  factory PurchaseFailure.storeUnavailable() {
+    return const PurchaseFailure._(
+      message: 'The store is not available on this device.',
+    );
+  }
+
+  factory PurchaseFailure.productsUnavailable() {
+    return const PurchaseFailure._(
+      message: 'Tornado Gallery Pro is not available right now.',
+    );
+  }
+
+  factory PurchaseFailure.purchaseError(String details) {
+    return PurchaseFailure._(message: 'Purchase error: $details');
+  }
+}
+
 class DecryptionFailure extends Failure {
   const DecryptionFailure._({required super.message});
 

@@ -23,9 +23,7 @@ class _MockImageSaverUsecase extends Mock implements ImageSaverUseCase {}
 class _MockImageRenamerUsecase extends Mock implements ImageRenamerUseCase {}
 
 EncryptedImage _makeImage(String path) => EncryptedImage(
-  storagePath: StoragePath(
-    path: path,
-    isPrivateFolder: true, assetId: null),
+  storagePath: StoragePath(path: path, isPrivateFolder: true, assetId: null),
   encryptedInfo: BytesInfo(bytes: Uint8List(0), hash: ''),
   date: DateTime(2024),
 );
@@ -97,18 +95,14 @@ void main() {
             imageSaverUseCase: mockImageSaverUsecase,
             imageRenamerUseCase: mockImageRenamerUsecase,
           ),
-      act:
-          (b) {
+      act: (b) {
         b.add(
           EncryptedImagePageEvent.setup(
             imagePath: tImage.storagePath.file.path,
           ),
         );
       },
-      expect:
-          () => [
-            EncryptedImagePageState.ui(image: tImage),
-          ],
+      expect: () => [EncryptedImagePageState.ui(image: tImage)],
       verify: (b) {
         expect(b.image, equals(tImage));
       },
@@ -164,7 +158,10 @@ void main() {
       expect:
           () => [
             isA<EncryptedImagePageState>().having(
-              (s) => s.maybeMap(ui: (u) => u.image.decryptInfo, orElse: () => 'not_ui'),
+              (s) => s.maybeMap(
+                ui: (u) => u.image.decryptInfo,
+                orElse: () => 'not_ui',
+              ),
               'decryptInfo cleared',
               isNull,
             ),
@@ -372,8 +369,7 @@ void main() {
       'emits [loading, failure] when renamer returns Left',
       build: () {
         when(() => mockImageRenamerUsecase.call(any())).thenAnswer(
-          (_) async =>
-              Left(EncryptionFailure.encryptionError('rename failed')),
+          (_) async => Left(EncryptionFailure.encryptionError('rename failed')),
         );
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,
@@ -401,8 +397,9 @@ void main() {
       'emits [loading, failure] when rename result success is false',
       build: () {
         when(() => mockImageRenamerUsecase.call(any())).thenAnswer(
-          (_) async =>
-              const Right(StorageRenameResult(success: false, newAssetId: null)),
+          (_) async => const Right(
+            StorageRenameResult(success: false, newAssetId: null),
+          ),
         );
         return EncryptedImagePageBloc(
           appBloc: mockAppBloc,

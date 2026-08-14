@@ -91,8 +91,7 @@ void main() {
       build: () {
         when(
           () => mockEncryptionUseCase.call(any()),
-        ).thenAnswer((_) async => Right(tEncryptedImage),
-        );
+        ).thenAnswer((_) async => Right(tEncryptedImage));
         return _makeBloc(
           encrypt: mockEncryptionUseCase,
           decrypt: mockDecryptUseCase,
@@ -333,8 +332,7 @@ void main() {
         );
         when(
           () => mockEncryptionUseCase.call(any()),
-        ).thenAnswer((_) async => Right(tEncryptedImage),
-        );
+        ).thenAnswer((_) async => Right(tEncryptedImage));
         return _makeBloc(
           encrypt: mockEncryptionUseCase,
           decrypt: mockDecryptUseCase,

@@ -41,8 +41,5 @@ class MoveImagesParams {
   /// Destination folder path relative to the store root ('' for root).
   final String targetRelativePath;
 
-  MoveImagesParams({
-    required this.images,
-    required this.targetRelativePath,
-  });
+  MoveImagesParams({required this.images, required this.targetRelativePath});
 }

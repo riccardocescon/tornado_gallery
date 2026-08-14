@@ -140,6 +140,7 @@ class _ArchiveState extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: _usageBar(context),
                       ),
+                      _proRow(context),
                     ],
                   );
                 },
@@ -422,14 +423,56 @@ class _ArchiveState extends StatelessWidget {
     );
   }
 
+  /// What the usage bar becomes for a Pro user: there is nothing to meter.
+  Widget _unlimitedUsage(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Storage usage",
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          "Unlimited",
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: context.appColors.pro,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The "Unlock Pro" entry point, appended to the card for free users only.
+  Widget _proRow(BuildContext context) {
+    return BlocBuilder<PurchaseBloc, PurchaseState>(
+      builder: (context, _) {
+        if (context.read<PurchaseBloc>().isPro) return const SizedBox.shrink();
+
+        return Column(
+          children: [
+            Divider(
+              height: 2,
+              color: context.colorScheme.onSurface.withValues(alpha: 0.2),
+            ),
+            const ProUnlockRow(),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _usageBar(BuildContext context) {
     return BlocBuilder<HomepageBloc, HomepageState>(
       buildWhen:
-          (previous, current) => current.maybeMap(
-            galleryStatus: (_) => true,
-            orElse: () => false,
-          ),
+          (previous, current) =>
+              current.maybeMap(galleryStatus: (_) => true, orElse: () => false),
       builder: (context, state) {
+        // Pro has no cap, so there is no bar to fill and no ratio to show.
+        if (getIt<PurchaseBloc>().isPro) return _unlimitedUsage(context);
 
         final totalImages = state.maybeMap(
           galleryStatus: (value) => value.imagesLoaded,
